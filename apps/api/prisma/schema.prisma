@@ -1,0 +1,482 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Reference data ──────────────────────────────────────────────────────
+
+model Currency {
+  code    String  @id @db.Char(3) // ISO 4217 or token symbol, e.g. USD, EUR, USDC
+  decimals Int
+  isFiat  Boolean @default(true)
+  name    String
+  // Populated from Yativo's GET /currencies/all — display-only, never used in ledger math.
+  symbol      String?
+  logoUrl     String?
+  countryCode String?
+  isActive    Boolean @default(true)
+  // Whether a customer may hold a wallet in this currency at all (self-service add, or
+  // auto-provisioned under PlatformSettings.walletCurrencyMode = ALL_AUTOMATIC).
+  isEnabledForCustomers Boolean @default(false)
+
+  accounts         Account[]
+  wallets          Wallet[]
+  entries          LedgerEntry[]
+  cards            Card[]
+  reports          ReconciliationReport[]
+  defaultForPlatform PlatformSettings[]
+
+  @@map("currencies")
+}
+
+// DEFAULT_ONLY: every customer gets exactly one wallet, in defaultCurrencyCode — no self-service add.
+// SELF_SERVICE: customers start with defaultCurrencyCode and may add any other isEnabledForCustomers currency themselves.
+// ALL_AUTOMATIC: every isEnabledForCustomers currency is provisioned for every customer automatically (at signup).
+enum WalletCurrencyMode {
+  DEFAULT_ONLY
+  SELF_SERVICE
+  ALL_AUTOMATIC
+}
+
+// Each value gates one customer-facing action behind requireKycApproved — admin can turn any
+// of these off if that action shouldn't require identity verification on this platform.
+enum KycRequiredService {
+  DEPOSIT
+  VIRTUAL_ACCOUNT
+  PAYOUT
+  CARD
+  BENEFICIARY
+  CRYPTO_WALLET
+}
+
+/// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
+model PlatformSettings {
+  id                   Int                @id @default(1)
+  walletCurrencyMode   WalletCurrencyMode @default(DEFAULT_ONLY)
+  defaultCurrencyCode  String             @db.Char(3)
+  defaultCurrency      Currency           @relation(fields: [defaultCurrencyCode], references: [code])
+  // Defaults to every service requiring KYC — matches this app's original hardcoded behavior,
+  // so a migration never silently relaxes a security check nobody asked to relax.
+  kycRequiredServices  KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET])
+  updatedAt            DateTime           @updatedAt
+
+  @@map("platform_settings")
+}
+
+// ── Chart of accounts / double-entry ledger ─────────────────────────────
+
+enum AccountType {
+  CUSTOMER_WALLET
+  PLATFORM_FEE_REVENUE
+  YATIVO_SETTLEMENT
+  YATIVO_CLEARING
+  SUSPENSE_PENDING
+  PLATFORM_RESERVE
+}
+
+model Account {
+  id           String      @id @default(cuid())
+  type         AccountType
+  currencyCode String      @db.Char(3)
+  currency     Currency    @relation(fields: [currencyCode], references: [code])
+  customerId   String?
+  customer     Customer?   @relation(fields: [customerId], references: [id])
+  name         String
+  createdAt    DateTime    @default(now())
+
+  entries LedgerEntry[]
+  wallet  Wallet?
+
+  @@unique([type, currencyCode, customerId])
+  @@index([customerId])
+  @@map("accounts")
+}
+
+enum LedgerTransactionType {
+  DEPOSIT
+  PAYOUT
+  SWAP
+  CARD_TOPUP
+  CARD_WITHDRAWAL
+  FEE
+  REFUND
+  CHARGEBACK
+  ADJUSTMENT
+  TRANSFER
+}
+
+enum LedgerTransactionStatus {
+  PENDING
+  POSTED
+  REVERSED
+}
+
+enum LedgerExternalSource {
+  YATIVO_WEBHOOK
+  MANUAL
+  SYSTEM
+}
+
+model LedgerTransaction {
+  id              String                   @id @default(cuid())
+  type            LedgerTransactionType
+  status          LedgerTransactionStatus  @default(PENDING)
+  idempotencyKey  String                   @unique
+  externalSource  LedgerExternalSource
+  externalRef     String?
+  description     String?
+  metadata        Json?
+  reversalOfId    String?                  @unique
+  reversalOf      LedgerTransaction?       @relation("Reversal", fields: [reversalOfId], references: [id])
+  reversedBy      LedgerTransaction?       @relation("Reversal")
+  createdAt       DateTime                 @default(now())
+  postedAt        DateTime?
+  reversedAt       DateTime?
+
+  entries LedgerEntry[]
+  payout  Payout?
+
+  @@index([externalRef])
+  @@index([status])
+  @@map("ledger_transactions")
+}
+
+enum EntryDirection {
+  DEBIT
+  CREDIT
+}
+
+// Immutable journal lines. Never updated after insert — corrections are new
+// offsetting transactions (see reverseTransaction / settlePendingTransaction).
+model LedgerEntry {
+  id            String                @id @default(cuid())
+  transactionId String
+  transaction   LedgerTransaction     @relation(fields: [transactionId], references: [id])
+  accountId     String
+  account       Account               @relation(fields: [accountId], references: [id])
+  direction     EntryDirection
+  amountMinor   BigInt
+  currencyCode  String                @db.Char(3)
+  currency      Currency              @relation(fields: [currencyCode], references: [code])
+  createdAt     DateTime              @default(now())
+
+  @@index([transactionId])
+  @@index([accountId, createdAt])
+  @@map("ledger_entries")
+}
+
+// Read-optimized cache of an account's balance. The ledger (above) remains
+// the source of truth; this is updated transactionally alongside it and
+// periodically re-derived by the reconciliation job to catch drift.
+model Wallet {
+  id                    String   @id @default(cuid())
+  customerId            String
+  customer              Customer @relation(fields: [customerId], references: [id])
+  currencyCode          String   @db.Char(3)
+  currency              Currency @relation(fields: [currencyCode], references: [code])
+  accountId             String   @unique
+  account               Account  @relation(fields: [accountId], references: [id])
+  cachedAvailableMinor  BigInt   @default(0)
+  cachedPendingMinor    BigInt   @default(0)
+  cacheUpdatedAt        DateTime @default(now())
+
+  @@unique([customerId, currencyCode])
+  @@map("wallets")
+}
+
+// ── Customers (end users of the reseller — portal auth) ─────────────────
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum CustomerStatus {
+  ACTIVE
+  FROZEN
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Customer {
+  id               String         @id @default(cuid())
+  type             CustomerType   @default(INDIVIDUAL)
+  fullName         String?
+  businessName     String?
+  email            String         @unique
+  passwordHash     String
+  emailVerifiedAt  DateTime?
+  lastLoginAt      DateTime?
+  status           CustomerStatus @default(ACTIVE)
+  kycStatus        KycStatus      @default(NOT_STARTED)
+  yativoCustomerId String?
+  phone            String?
+  /// ISO 3166-1 alpha-3, e.g. "USA" — collected at KYC submission time, required by Yativo's customer + KYC APIs.
+  countryCode      String?
+  kycSubmissionId  String?
+  kycSubmittedAt   DateTime?
+  /// Set once POST /customer/virtual/cards/activate has been called for this customer — the card
+  /// issuer requires that exactly once before their first card, and the guide doesn't document it
+  /// as safely repeatable, so this avoids calling it again on every card issuance.
+  cardsActivatedAt DateTime?
+  /// Base32 TOTP secret — only set once 2FA setup is confirmed (see /portal/2fa/enable). The
+  /// pending, unconfirmed secret from /portal/2fa/setup lives in Redis, not here, until confirmed.
+  twoFactorEnabled      Boolean  @default(false)
+  twoFactorSecret       String?
+  /// bcrypt hashes of one-time recovery codes — each is removed from the array once used.
+  twoFactorBackupCodeHashes String[] @default([])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  wallets       Wallet[]
+  accounts      Account[]
+  beneficiaries Beneficiary[]
+  cards         Card[]
+  refreshTokens CustomerRefreshToken[]
+  payouts       Payout[]
+
+  @@map("customers")
+}
+
+model CustomerRefreshToken {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([customerId])
+  @@map("customer_refresh_tokens")
+}
+
+// ── Staff (the reseller's own back-office team — admin auth) ────────────
+
+enum StaffRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+model StaffUser {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  role          StaffRole @default(STAFF)
+  // OWNER/ADMIN always retain full access regardless of this — it only narrows the STAFF tier.
+  // Null means "no custom role assigned yet", which falls back to a fixed, backward-compatible
+  // default permission set (see DEFAULT_STAFF_PERMISSIONS) rather than losing access outright.
+  customRoleId  String?
+  customRole    Role?      @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
+  isActive      Boolean   @default(true)
+  deactivatedAt DateTime?
+  invitedById   String?
+  invitedBy     StaffUser? @relation("Invites", fields: [invitedById], references: [id])
+  invited       StaffUser[] @relation("Invites")
+  createdAt     DateTime  @default(now())
+
+  refreshTokens RefreshToken[]
+  apiKeys       ApiKey[]
+
+  @@map("staff_users")
+}
+
+/// Optional fine-grained permission set for the STAFF tier (OWNER/ADMIN bypass this entirely —
+/// see requirePermission()). Admin-managed via /admin/roles; assigning one to a staff member
+/// narrows exactly what they can do beyond the default STAFF baseline.
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  // Keys validated against the fixed catalog in shared-types (STAFF_PERMISSIONS) at the service
+  // layer, not by a DB constraint — the catalog is code, so it can grow without a migration.
+  permissions String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  staff StaffUser[]
+
+  @@map("roles")
+}
+
+model RefreshToken {
+  id          String    @id @default(cuid())
+  staffUserId String
+  staffUser   StaffUser @relation(fields: [staffUserId], references: [id])
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([staffUserId])
+  @@map("staff_refresh_tokens")
+}
+
+// ── Payments infrastructure ──────────────────────────────────────────────
+
+model Beneficiary {
+  id                  String   @id @default(cuid())
+  customerId          String
+  customer            Customer @relation(fields: [customerId], references: [id])
+  name                String
+  type                String
+  yativoBeneficiaryId String?
+  details             Json
+  archivedAt          DateTime?
+  createdAt           DateTime @default(now())
+
+  payouts Payout[]
+
+  @@index([customerId])
+  @@map("beneficiaries")
+}
+
+model Payout {
+  id            String            @id @default(cuid())
+  customerId    String
+  customer      Customer          @relation(fields: [customerId], references: [id])
+  beneficiaryId String
+  beneficiary   Beneficiary       @relation(fields: [beneficiaryId], references: [id])
+  currencyCode  String            @db.Char(3)
+  amountMinor   BigInt
+  transactionId String            @unique
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
+  yativoPayoutId String?
+  createdAt     DateTime          @default(now())
+
+  @@index([customerId])
+  @@map("payouts")
+}
+
+enum CardStatusEnum {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum CardTypeEnum {
+  VIRTUAL
+  PHYSICAL
+}
+
+model Card {
+  id           String         @id @default(cuid())
+  customerId   String
+  customer     Customer       @relation(fields: [customerId], references: [id])
+  yativoCardId String?
+  network      String         @default("VISA")
+  last4        String
+  status       CardStatusEnum @default(ACTIVE)
+  type         CardTypeEnum   @default(VIRTUAL)
+  currencyCode String         @db.Char(3)
+  currency     Currency       @relation(fields: [currencyCode], references: [code])
+  createdAt    DateTime       @default(now())
+
+  @@index([customerId])
+  @@map("cards")
+}
+
+// ── Ops / platform ────────────────────────────────────────────────────────
+
+enum WebhookProcessingStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+model WebhookEvent {
+  id               String                   @id @default(cuid())
+  provider         String                   @default("YATIVO")
+  externalEventId  String                   @unique
+  eventType        String
+  payload          Json
+  signatureValid   Boolean
+  processingStatus WebhookProcessingStatus  @default(PENDING)
+  errorMessage     String?
+  receivedAt       DateTime                 @default(now())
+  processedAt      DateTime?
+
+  @@index([eventType])
+  @@index([processingStatus])
+  @@map("webhook_events")
+}
+
+enum ReconciliationStatus {
+  MATCH
+  MISMATCH
+}
+
+model ReconciliationReport {
+  id            String                @id @default(cuid())
+  currencyCode  String                @db.Char(3)
+  currency      Currency              @relation(fields: [currencyCode], references: [code])
+  accountType   AccountType
+  expectedMinor BigInt
+  actualMinor   BigInt
+  deltaMinor    BigInt
+  status        ReconciliationStatus
+  createdAt     DateTime              @default(now())
+
+  @@map("reconciliation_reports")
+}
+
+model ApiKey {
+  id          String     @id @default(cuid())
+  name        String
+  keyHash     String     @unique
+  last4       String
+  createdById String
+  createdBy   StaffUser  @relation(fields: [createdById], references: [id])
+  createdAt   DateTime   @default(now())
+  revokedAt   DateTime?
+
+  @@map("api_keys")
+}
+
+model BrandingConfig {
+  id             Int      @id @default(1)
+  productName    String   @default("White Label")
+  logoUrl        String?
+  faviconUrl     String?
+  templateId     String   @default("nova")
+  primaryColor   String   @default("#6366f1")
+  secondaryColor String   @default("#0ea5e9")
+  accentColor    String   @default("#22d3ee")
+  supportEmail   String?
+  updatedAt      DateTime @updatedAt
+
+  @@map("branding_config")
+}
+
+// SYSTEM: built-in pages (terms, privacy) — always exist, slug is fixed, content is editable but
+// the page itself can't be deleted. CUSTOM: arbitrary admin-authored pages, freely created/deleted.
+enum StaticPageKind {
+  SYSTEM
+  CUSTOM
+}
+
+model StaticPage {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  title        String
+  // Sanitized server-side on every write (see pages.service.ts) — safe to render as raw HTML.
+  contentHtml  String
+  kind         StaticPageKind @default(CUSTOM)
+  isPublished  Boolean        @default(true)
+  showInFooter Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("static_pages")
+}
