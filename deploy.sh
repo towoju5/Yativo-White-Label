@@ -252,12 +252,12 @@ log "Installing dependencies (pnpm install)…"
 pnpm install --frozen-lockfile
 
 log "Running Prisma migrations against production DB…"
-pnpm --filter api prisma generate
-pnpm --filter api prisma migrate deploy
+pnpm --filter api exec prisma generate
+pnpm --filter api exec prisma migrate deploy
 
 if [ "$RUN_SEED" -eq 1 ]; then
   warn "Seeding the database — this creates TEST users with known passwords. Only do this on a non-production/demo database."
-  pnpm --filter api prisma db seed
+  pnpm --filter api exec prisma db seed
 fi
 
 log "Building API…"

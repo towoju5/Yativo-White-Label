@@ -11,10 +11,10 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "db:migrate": "pnpm --filter api prisma migrate dev",
-    "db:generate": "pnpm --filter api prisma generate",
-    "db:seed": "pnpm --filter api prisma db seed",
-    "db:studio": "pnpm --filter api prisma studio"
+    "db:migrate": "pnpm --filter api exec prisma migrate dev",
+    "db:generate": "pnpm --filter api exec prisma generate",
+    "db:seed": "pnpm --filter api exec prisma db seed",
+    "db:studio": "pnpm --filter api exec prisma studio"
   },
   "devDependencies": {
     "turbo": "^2.3.0",
