@@ -7,38 +7,40 @@
 # the "update" subset of those steps (install, migrate, build, restart) every
 # time a push lands on the bare repo below.
 #
-# ── One-time server setup ───────────────────────────────────────────────────
+# ── One-time server setup (whitelabel-api.yativo.com / whitelabel.yativo.com) ─
 #
-#   1. Create a bare repo the whitelabel service user owns, separate from the
-#      working tree deploy.sh already built (WORK_TREE below):
-#        sudo -u whitelabel git init --bare /home/whitelabel/white-label.git
+# The codebase already lives at /opt/yativo-white-label — deploy.sh has run
+# there before (apps/ is owned by the whitelabel service user). This hook
+# reuses that directory as WORK_TREE; it does NOT clone anywhere new.
 #
-#   2. Install this file as its post-receive hook:
-#        sudo cp post-receive /home/whitelabel/white-label.git/hooks/post-receive
-#        sudo chown whitelabel:whitelabel /home/whitelabel/white-label.git/hooks/post-receive
-#        sudo chmod +x /home/whitelabel/white-label.git/hooks/post-receive
+#   1. If deploy.sh hasn't fully finished on this box yet (no whitelabel-api
+#      systemd service, no Nginx config for these two domains), run it once
+#      more from the existing directory — it's idempotent, safe to re-run:
+#        cd /opt/yativo-white-label
+#        ./deploy.sh whitelabel-api.yativo.com whitelabel.yativo.com emma@yativo.com
 #
-#   3. Edit WORK_TREE below to match REPO_ROOT from your deploy.sh run
-#      (the directory that already has apps/api/.env, apps/web/.env.production,
-#      and a working systemd service pointed at it).
+#   2. Create a bare repo to push to, separate from the working tree above:
+#        git init --bare /root/white-label.git
 #
-#   4. This hook restarts the systemd service and reloads Nginx, which normally
-#      needs root. Grant the whitelabel user just those two commands, nothing
-#      else, via visudo:
-#        whitelabel ALL=(root) NOPASSWD: /usr/bin/systemctl restart whitelabel-api, /usr/bin/systemctl reload nginx
-#      (Skip this if you push as root instead of the whitelabel user — not
-#      recommended, since that also owns your production database container.)
+#   3. Install this file as its post-receive hook:
+#        cp /opt/yativo-white-label/post-receive /root/white-label.git/hooks/post-receive
+#        chmod +x /root/white-label.git/hooks/post-receive
 #
-#   5. On your machine:
-#        git remote add production whitelabel@YOUR_SERVER:white-label.git
+#   4. On your machine:
+#        git remote add production root@whitelabel-api.yativo.com:/root/white-label.git
 #        git push production master
+#
+# Pushing as root (matching how deploy.sh itself must run) means no sudoers
+# setup is needed for the systemctl/nginx calls below. If you'd rather push as
+# a non-root deploy user, switch to that user, chown WORK_TREE to it, and add:
+#   <user> ALL=(root) NOPASSWD: /usr/bin/systemctl restart whitelabel-api, /usr/bin/systemctl reload nginx
 #
 # Every step below is the same idempotent pattern as deploy.sh, so a push that
 # fails partway through is safe to just fix and push again.
 
 set -euo pipefail
 
-WORK_TREE="/home/whitelabel/white-label"   # <-- must match REPO_ROOT in deploy.sh
+WORK_TREE="/opt/yativo-white-label"   # <-- the existing deployed codebase
 DEPLOY_BRANCH="master"
 SERVICE_NAME="whitelabel-api"
 LOG_FILE="$HOME/deploy.log"
