@@ -185,6 +185,7 @@ if [ ! -f apps/api/.env ]; then
   PORTAL_JWT_ACCESS_SECRET="$(gen_secret)"
   PORTAL_JWT_REFRESH_SECRET="$(gen_secret)"
   YATIVO_WEBHOOK_SECRET="$(gen_secret)"
+  CREDENTIAL_ENCRYPTION_KEY="$(gen_secret)" # encrypts provider credentials at rest — see apps/api/src/lib/credentialEncryption.ts
   DB_PASSWORD="postgres" # matches docker-compose.yml's POSTGRES_PASSWORD — change both together if you harden this later
 
   cat > apps/api/.env <<EOF
@@ -215,6 +216,8 @@ YATIVO_WEBHOOK_SECRET=${YATIVO_WEBHOOK_SECRET}
 APP_BASE_URL=https://${API_DOMAIN}
 WEB_APP_URL=https://${WEB_DOMAIN}
 LOG_LEVEL=info
+
+CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
 EOF
   chmod 600 apps/api/.env
 
@@ -232,6 +235,11 @@ EOF
   ok "apps/api/.env created. Secrets also written to $SECRETS_FILE — move them to a password manager and delete that file."
 else
   ok "apps/api/.env already exists — leaving it untouched (rerun-safe). Delete it first if you want fresh secrets."
+  if ! grep -q '^CREDENTIAL_ENCRYPTION_KEY=' apps/api/.env; then
+    log "apps/api/.env predates CREDENTIAL_ENCRYPTION_KEY — appending a fresh one (existing secrets untouched)…"
+    echo "CREDENTIAL_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> apps/api/.env
+    ok "CREDENTIAL_ENCRYPTION_KEY added."
+  fi
 fi
 
 if [ ! -f apps/web/.env.production ]; then
