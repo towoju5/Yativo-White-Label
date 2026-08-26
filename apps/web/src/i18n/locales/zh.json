@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "企业登录",
       "demoCard": "卡片",
       "demoDeposit": "充值",
       "demoSend": "转账",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "简单优雅的资金管理",
-      "businessLogin": "企业登录",
       "demoActionCard": "卡片",
       "demoActionDeposit": "充值",
       "demoActionSend": "转账",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} 为您的团队提供统一的钱包、付款、卡片与合规管理控制台，背后依托可信赖的账本系统。",
       "logIn": "登录",
       "openAccountCta": "开设账户",
-      "operatorLoginCta": "运营人员登录",
       "reconciledDesc": "每一笔已入账交易均采用复式记账、幂等处理，并自动与服务商记录核对。",
       "reconciledTitle": "默认自动对账",
       "signUp": "注册",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "金融科技基础设施，",
       "heroSubheadline": "{{productName}} 为您的企业提供基于真实复式记账账本的白标钱包、付款与卡片平台——部署、加上您的品牌，即可运营属于您自己的金融科技业务。",
       "openAccountCta": "开设账户",
-      "operatorConsole": "运营控制台",
       "signIn": "登录",
       "trustBadge": "账本已验证 · 每小时对账"
     },
     "prime": {
       "balance": "余额",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "仪表盘登录",
       "feature": {
         "cardIssuing": {
           "desc": "客户验证通过后立即为其发放虚拟卡。",

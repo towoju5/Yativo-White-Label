@@ -44,8 +44,17 @@ function refreshPathFor(audience: Exclude<AuthAudience, "none">) {
   return audience === "staff" ? "/auth/refresh" : "/portal/auth/refresh";
 }
 
+// Set once branding loads (see theme/branding.ts's fetchBranding) so a 401-triggered hard
+// redirect (outside React, can't use the router) lands on the admin's configured login path
+// instead of the hardcoded default.
+let staffLoginPath = "/admin/login";
+
+export function setStaffLoginPath(path: string) {
+  staffLoginPath = path;
+}
+
 export function loginRouteFor(audience: Exclude<AuthAudience, "none">) {
-  return audience === "staff" ? "/admin/login" : "/portal/login";
+  return audience === "staff" ? staffLoginPath : "/portal/login";
 }
 
 export class ApiError extends Error {

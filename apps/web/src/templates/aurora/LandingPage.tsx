@@ -64,9 +64,6 @@ export function AuroraLandingPage() {
                   {t("landing.aurora.openAccount", "Open your account")} <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full">
-                <Link to="/admin/login">{t("landing.aurora.businessLogin", "Business login")}</Link>
-              </Button>
             </div>
           </div>
 

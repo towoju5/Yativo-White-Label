@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "法人ログイン",
       "demoCard": "カード",
       "demoDeposit": "入金",
       "demoSend": "送金",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "驚くほどシンプルなお金の管理",
-      "businessLogin": "法人ログイン",
       "demoActionCard": "カード",
       "demoActionDeposit": "入金",
       "demoActionSend": "送金",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}}は、ウォレット・送金・カード・コンプライアンスをひとつのコンソールでチームに提供し、信頼できる台帳がその基盤を支えます。",
       "logIn": "ログイン",
       "openAccountCta": "口座を開設する",
-      "operatorLoginCta": "運営者ログイン",
       "reconciledDesc": "計上されるすべての取引は複式簿記かつ冪等であり、プロバイダーの記録と自動的に照合されます。",
       "reconciledTitle": "標準で照合済み",
       "signUp": "新規登録",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "フィンテック基盤を、",
       "heroSubheadline": "{{productName}}は、実際の複式簿記台帳の上に構築されたホワイトラベルのウォレット・送金・カードプラットフォームを貴社に提供します — デプロイし、ブランド化し、独自のフィンテック事業を運用できます。",
       "openAccountCta": "口座を開設する",
-      "operatorConsole": "運営者コンソール",
       "signIn": "サインイン",
       "trustBadge": "台帳で検証済み・1時間ごとに照合"
     },
     "prime": {
       "balance": "残高",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "ダッシュボードにログイン",
       "feature": {
         "cardIssuing": {
           "desc": "本人確認が完了したその瞬間に、顧客へバーチャルカードを発行できます。",

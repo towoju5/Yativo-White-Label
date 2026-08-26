@@ -104,9 +104,6 @@ export function NovaLandingPage() {
                   {t("landing.nova.openAccountCta", "Open an account")} <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/admin/login">{t("landing.nova.operatorConsole", "Operator console")}</Link>
-              </Button>
             </div>
           </div>
 

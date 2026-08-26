@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Acesso empresarial",
       "demoCard": "Cartão",
       "demoDeposit": "Depósito",
       "demoSend": "Enviar",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Dinheiro lindamente simples",
-      "businessLogin": "Acesso empresarial",
       "demoActionCard": "Cartão",
       "demoActionDeposit": "Depósito",
       "demoActionSend": "Enviar",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} dá à sua equipa uma única consola para carteiras, pagamentos, cartões e conformidade — apoiada por um livro-razão em que pode confiar.",
       "logIn": "Iniciar sessão",
       "openAccountCta": "Abrir uma conta",
-      "operatorLoginCta": "Acesso de operador",
       "reconciledDesc": "Cada transação registada é de dupla entrada, idempotente e cruzada automaticamente com os registos do fornecedor.",
       "reconciledTitle": "Reconciliado por predefinição",
       "signUp": "Registar",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Infraestrutura fintech,",
       "heroSubheadline": "{{productName}} dá à sua empresa uma carteira, pagamentos e plataforma de cartões com marca própria, sobre um verdadeiro livro-razão de dupla entrada — implemente-o, personalize-o com a sua marca, e gira o seu próprio negócio fintech.",
       "openAccountCta": "Abrir uma conta",
-      "operatorConsole": "Consola do operador",
       "signIn": "Iniciar sessão",
       "trustBadge": "Verificado por livro-razão · Reconciliado a cada hora"
     },
     "prime": {
       "balance": "Saldo",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Acesso ao painel",
       "feature": {
         "cardIssuing": {
           "desc": "Emita cartões virtuais para clientes assim que forem verificados.",

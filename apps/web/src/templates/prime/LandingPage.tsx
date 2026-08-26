@@ -71,9 +71,6 @@ export function PrimeLandingPage() {
                 {t("landing.prime.startNow", "Start now")} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/admin/login">{t("landing.prime.dashboardLogin", "Dashboard login")}</Link>
-            </Button>
           </div>
         </div>
 

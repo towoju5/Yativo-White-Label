@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Zakelijk inloggen",
       "demoCard": "Kaart",
       "demoDeposit": "Storten",
       "demoSend": "Versturen",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Verrassend eenvoudig geld beheren",
-      "businessLogin": "Zakelijk inloggen",
       "demoActionCard": "Kaart",
       "demoActionDeposit": "Storten",
       "demoActionSend": "Versturen",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} geeft uw team één console voor wallets, uitbetalingen, kaarten en compliance — ondersteund door een grootboek dat u kunt vertrouwen.",
       "logIn": "Inloggen",
       "openAccountCta": "Open een account",
-      "operatorLoginCta": "Operator-login",
       "reconciledDesc": "Elke geboekte transactie is double-entry, idempotent en wordt automatisch afgestemd op de gegevens van de provider.",
       "reconciledTitle": "Standaard gereconcilieerd",
       "signUp": "Registreren",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Fintech-infrastructuur,",
       "heroSubheadline": "{{productName}} geeft uw bedrijf een white-label wallet-, uitbetalings- en kaartplatform op een echt double-entry grootboek — implementeer het, brand het, en run uw eigen fintechbedrijf erop.",
       "openAccountCta": "Open een account",
-      "operatorConsole": "Operatorconsole",
       "signIn": "Inloggen",
       "trustBadge": "Grootboek-geverifieerd · Elk uur gereconcilieerd"
     },
     "prime": {
       "balance": "Saldo",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Dashboard-login",
       "feature": {
         "cardIssuing": {
           "desc": "Geef klanten een virtuele kaart uit zodra ze zijn geverifieerd.",

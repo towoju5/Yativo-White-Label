@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "비즈니스 로그인",
       "demoCard": "카드",
       "demoDeposit": "입금",
       "demoSend": "송금",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "아름답고 간편한 자금 관리",
-      "businessLogin": "비즈니스 로그인",
       "demoActionCard": "카드",
       "demoActionDeposit": "입금",
       "demoActionSend": "송금",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}}은(는) 지갑, 송금, 카드, 컴플라이언스를 위한 하나의 콘솔을 팀에 제공합니다 — 신뢰할 수 있는 원장이 그 뒤를 받쳐줍니다.",
       "logIn": "로그인",
       "openAccountCta": "계좌 개설하기",
-      "operatorLoginCta": "운영자 로그인",
       "reconciledDesc": "모든 등록된 거래는 복식부기 방식이며, 멱등성을 보장하고, 제공업체 기록과 자동으로 대조됩니다.",
       "reconciledTitle": "기본적으로 대조됨",
       "signUp": "회원가입",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "핀테크 인프라를,",
       "heroSubheadline": "{{productName}}은(는) 실제 복식부기 원장 기반의 화이트라벨 지갑, 송금, 카드 플랫폼을 제공합니다 — 배포하고, 브랜딩하고, 직접 핀테크 사업을 운영하세요.",
       "openAccountCta": "계좌 개설하기",
-      "operatorConsole": "운영자 콘솔",
       "signIn": "로그인",
       "trustBadge": "원장 검증 완료 · 매시간 대조"
     },
     "prime": {
       "balance": "잔액",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "대시보드 로그인",
       "feature": {
         "cardIssuing": {
           "desc": "고객이 인증되는 즉시 가상 카드를 발급하세요.",

@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Business login",
       "demoCard": "Card",
       "demoDeposit": "Deposit",
       "demoSend": "Send",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Beautifully simple money",
-      "businessLogin": "Business login",
       "demoActionCard": "Card",
       "demoActionDeposit": "Deposit",
       "demoActionSend": "Send",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} gives your team one console for wallets, payouts, cards, and compliance — backed by a ledger you can trust.",
       "logIn": "Log in",
       "openAccountCta": "Open an account",
-      "operatorLoginCta": "Operator login",
       "reconciledDesc": "Every posted transaction is double-entry, idempotent, and matched against provider records automatically.",
       "reconciledTitle": "Reconciled by default",
       "signUp": "Sign up",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Fintech infrastructure,",
       "heroSubheadline": "{{productName}} gives your business a white-labeled wallet, payouts, and card platform on a real double-entry ledger — deploy it, brand it, and run your own fintech business on it.",
       "openAccountCta": "Open an account",
-      "operatorConsole": "Operator console",
       "signIn": "Sign in",
       "trustBadge": "Ledger-verified · Reconciled hourly"
     },
     "prime": {
       "balance": "Balance",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Dashboard login",
       "feature": {
         "cardIssuing": {
           "desc": "Issue virtual cards to customers the moment they're verified.",

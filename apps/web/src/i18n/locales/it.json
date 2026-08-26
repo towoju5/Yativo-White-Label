@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Accesso aziende",
       "demoCard": "Carta",
       "demoDeposit": "Deposito",
       "demoSend": "Invia",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Denaro straordinariamente semplice",
-      "businessLogin": "Accesso aziende",
       "demoActionCard": "Carta",
       "demoActionDeposit": "Deposito",
       "demoActionSend": "Invia",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} offre al tuo team un'unica console per wallet, pagamenti, carte e compliance — supportata da un ledger di cui puoi fidarti.",
       "logIn": "Accedi",
       "openAccountCta": "Apri un conto",
-      "operatorLoginCta": "Accesso operatori",
       "reconciledDesc": "Ogni transazione registrata è in partita doppia, idempotente e verificata automaticamente rispetto ai dati dei fornitori.",
       "reconciledTitle": "Riconciliato per impostazione predefinita",
       "signUp": "Registrati",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Infrastruttura fintech,",
       "heroSubheadline": "{{productName}} offre alla tua azienda una piattaforma white-label di wallet, pagamenti e carte su un vero ledger in partita doppia — implementala, personalizzala con il tuo brand e gestisci la tua attività fintech.",
       "openAccountCta": "Apri un conto",
-      "operatorConsole": "Console operatore",
       "signIn": "Accedi",
       "trustBadge": "Verificato dal ledger · Riconciliato ogni ora"
     },
     "prime": {
       "balance": "Saldo",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Accesso alla dashboard",
       "feature": {
         "cardIssuing": {
           "desc": "Emetti carte virtuali ai clienti nel momento stesso in cui vengono verificati.",

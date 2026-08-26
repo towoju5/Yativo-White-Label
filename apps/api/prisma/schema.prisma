@@ -477,6 +477,7 @@ model BrandingConfig {
   secondaryColor String   @default("#0ea5e9")
   accentColor    String   @default("#22d3ee")
   supportEmail   String?
+  adminLoginPath String   @default("/admin/login")
   updatedAt      DateTime @updatedAt
 
   @@map("branding_config")

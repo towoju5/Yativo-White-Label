@@ -1,13 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { fetchBranding, applyBrandingToDocument } from "@/theme/branding";
+import { setStaffLoginPath } from "@/lib/api-client";
 import { TemplateProvider } from "@/templates/TemplateProvider";
 import { StaffAuthProvider } from "@/hooks/useStaffAuth";
 import { CustomerAuthProvider } from "@/hooks/useCustomerAuth";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { router } from "@/router";
+import { createRouter } from "@/router";
 
 function SplashScreen() {
   return (
@@ -21,8 +22,16 @@ export default function App() {
   const { data: branding, isLoading } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding });
 
   useEffect(() => {
-    if (branding) applyBrandingToDocument(branding);
+    if (branding) {
+      applyBrandingToDocument(branding);
+      setStaffLoginPath(branding.adminLoginPath);
+    }
   }, [branding]);
+
+  // Rebuilt only if the configured path actually changes — createBrowserRouter must not be
+  // re-invoked on every render, since it owns its own history instance.
+  const adminLoginPath = branding?.adminLoginPath ?? "/admin/login";
+  const router = useMemo(() => createRouter(adminLoginPath), [adminLoginPath]);
 
   if (isLoading) return <SplashScreen />;
 

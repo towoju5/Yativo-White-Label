@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { BrandingConfig } from "@white-label/shared-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { fetchBranding } from "@/theme/branding";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -96,18 +98,26 @@ function ProviderSection({ name, title, fields, config, onUpdate }: ProviderSect
 // -----------------------------------------------------------------------------
 export default function AuthenticationSettingsPage() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [config, setConfig] = useState<Config>(emptyConfig);
+  const [adminLoginPath, setAdminLoginPath] = useState("");
 
   const { data } = useQuery({
     queryKey: ["admin", "authentication-settings"],
     queryFn: () => staffApi.get<Config>("/admin/settings/authentication"),
   });
 
+  const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding });
+
   useEffect(() => {
     if (data) {
       setConfig(data);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (branding) setAdminLoginPath(branding.adminLoginPath);
+  }, [branding]);
 
   const saveMutation = useMutation({
     mutationFn: () => staffApi.put<Config>("/admin/settings/authentication", config),
@@ -119,6 +129,20 @@ export default function AuthenticationSettingsPage() {
       toast({
         variant: "destructive",
         title: "Couldn't save settings",
+        description: e instanceof ApiError ? e.message : undefined,
+      }),
+  });
+
+  const saveLoginPathMutation = useMutation({
+    mutationFn: () => staffApi.patch<BrandingConfig>("/admin/branding", { adminLoginPath }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["branding"], updated);
+      toast({ title: "Admin login URL saved", description: `Staff now sign in at ${updated.adminLoginPath}` });
+    },
+    onError: (e) =>
+      toast({
+        variant: "destructive",
+        title: "Couldn't save admin login URL",
         description: e instanceof ApiError ? e.message : undefined,
       }),
   });
@@ -142,6 +166,32 @@ export default function AuthenticationSettingsPage() {
           OAuth credentials are encrypted at rest. Secret values are never shown after saving.
         </p>
       </div>
+
+      {/* Admin login URL */}
+      <section className="space-y-3 rounded-lg border p-4">
+        <div>
+          <h2 className="font-medium">Admin login URL</h2>
+          <p className="text-xs text-muted-foreground">
+            The path staff use to sign in to this dashboard. Changing it immediately invalidates the old link —
+            share the new one with your team before saving.
+          </p>
+        </div>
+        <div className="max-w-sm space-y-1">
+          <Label htmlFor="adminLoginPath">Path</Label>
+          <Input
+            id="adminLoginPath"
+            value={adminLoginPath}
+            onChange={(e) => setAdminLoginPath(e.target.value)}
+            placeholder="/admin/login"
+          />
+        </div>
+        <Button
+          onClick={() => saveLoginPathMutation.mutate()}
+          disabled={saveLoginPathMutation.isPending || adminLoginPath === branding?.adminLoginPath}
+        >
+          {saveLoginPathMutation.isPending ? "Saving…" : "Save admin login URL"}
+        </Button>
+      </section>
 
       {/* Grid Layout: 1 column on mobile, 2 columns on large screens */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

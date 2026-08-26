@@ -10,6 +10,7 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   secondaryColor: "#0ea5e9",
   accentColor: "#22d3ee",
   supportEmail: null,
+  adminLoginPath: "/admin/login",
   updatedAt: new Date().toISOString(),
 };
 

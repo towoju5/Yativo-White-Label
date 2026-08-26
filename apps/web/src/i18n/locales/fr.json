@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Connexion entreprise",
       "demoCard": "Carte",
       "demoDeposit": "Dépôt",
       "demoSend": "Envoi",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "L'argent, magnifiquement simple",
-      "businessLogin": "Connexion entreprise",
       "demoActionCard": "Carte",
       "demoActionDeposit": "Dépôt",
       "demoActionSend": "Envoi",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} offre à votre équipe une seule console pour les portefeuilles, les paiements, les cartes et la conformité — soutenue par un grand livre en qui vous pouvez avoir confiance.",
       "logIn": "Se connecter",
       "openAccountCta": "Ouvrir un compte",
-      "operatorLoginCta": "Connexion opérateur",
       "reconciledDesc": "Chaque transaction enregistrée est en partie double, idempotente, et rapprochée automatiquement des relevés des fournisseurs.",
       "reconciledTitle": "Réconcilié par défaut",
       "signUp": "S'inscrire",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Une infrastructure fintech,",
       "heroSubheadline": "{{productName}} donne à votre entreprise un portefeuille, des paiements et une plateforme de cartes en marque blanche, reposant sur un véritable grand livre en partie double — déployez-le, personnalisez-le et exploitez votre propre entreprise fintech avec.",
       "openAccountCta": "Ouvrir un compte",
-      "operatorConsole": "Console opérateur",
       "signIn": "Se connecter",
       "trustBadge": "Vérifié par grand livre · Réconcilié toutes les heures"
     },
     "prime": {
       "balance": "Solde",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Connexion au tableau de bord",
       "feature": {
         "cardIssuing": {
           "desc": "Émettez des cartes virtuelles pour vos clients dès qu'ils sont vérifiés.",

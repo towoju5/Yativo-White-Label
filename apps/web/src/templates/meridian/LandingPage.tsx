@@ -87,9 +87,6 @@ export function MeridianLandingPage() {
                 {t("landing.meridian.openAccountCta", "Open an account")} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/admin/login">{t("landing.meridian.operatorLoginCta", "Operator login")}</Link>
-            </Button>
           </div>
 
           <div className="mt-10 grid grid-cols-3 gap-4 border-t border-border pt-6">

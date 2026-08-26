@@ -11,6 +11,7 @@ export function brandingToDto(config: BrandingConfig) {
     secondaryColor: config.secondaryColor,
     accentColor: config.accentColor,
     supportEmail: config.supportEmail,
+    adminLoginPath: config.adminLoginPath,
     updatedAt: config.updatedAt.toISOString(),
   };
 }

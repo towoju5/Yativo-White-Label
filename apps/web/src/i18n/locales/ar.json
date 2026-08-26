@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "دخول الشركات",
       "demoCard": "بطاقة",
       "demoDeposit": "إيداع",
       "demoSend": "إرسال",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "أموال بسيطة وأنيقة",
-      "businessLogin": "دخول الشركات",
       "demoActionCard": "بطاقة",
       "demoActionDeposit": "إيداع",
       "demoActionSend": "إرسال",
@@ -610,7 +608,6 @@
       "heroSubheadline": "يمنح {{productName}} فريقك وحدة تحكم واحدة للمحافظ والمدفوعات والبطاقات والامتثال — مدعومة بسجل محاسبي يمكنك الوثوق به.",
       "logIn": "تسجيل الدخول",
       "openAccountCta": "افتح حسابًا",
-      "operatorLoginCta": "دخول المشغِّل",
       "reconciledDesc": "كل معاملة مُرحَّلة تُسجَّل بالقيد المزدوج، بلا تكرار، وتُطابَق تلقائيًا مع سجلات مزوّد الخدمة.",
       "reconciledTitle": "مطابقة بشكل افتراضي",
       "signUp": "إنشاء حساب",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "بنية تحتية للتقنية المالية،",
       "heroSubheadline": "يمنح {{productName}} شركتك محفظة ومدفوعات ومنصة بطاقات بعلامة تجارية خاصة، مبنية على سجل محاسبي حقيقي بالقيد المزدوج — انشرها، اجعلها بعلامتك، وأدِر شركتك التقنية المالية الخاصة عليها.",
       "openAccountCta": "افتح حسابًا",
-      "operatorConsole": "وحدة تحكم المشغِّل",
       "signIn": "تسجيل الدخول",
       "trustBadge": "موثَّق بالسجل المحاسبي · تسوية كل ساعة"
     },
     "prime": {
       "balance": "الرصيد",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "دخول لوحة التحكم",
       "feature": {
         "cardIssuing": {
           "desc": "أصدر بطاقات افتراضية للعملاء فور توثيق هويتهم.",

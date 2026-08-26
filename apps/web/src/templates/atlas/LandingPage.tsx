@@ -66,9 +66,6 @@ export function AtlasLandingPage() {
                   {t("landing.atlas.openAccountCta", "Open your account")} <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full">
-                <Link to="/admin/login">{t("landing.atlas.businessLoginCta", "Business login")}</Link>
-              </Button>
             </div>
           </div>
 

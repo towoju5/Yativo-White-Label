@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Logowanie dla firm",
       "demoCard": "Karta",
       "demoDeposit": "Wpłata",
       "demoSend": "Wyślij",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Pięknie proste pieniądze",
-      "businessLogin": "Logowanie dla firm",
       "demoActionCard": "Karta",
       "demoActionDeposit": "Wpłata",
       "demoActionSend": "Wyślij",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} daje Twojemu zespołowi jedną konsolę do portfeli, wypłat, kart i zgodności — wspieraną przez księgę, której możesz zaufać.",
       "logIn": "Zaloguj się",
       "openAccountCta": "Otwórz konto",
-      "operatorLoginCta": "Logowanie operatora",
       "reconciledDesc": "Każda zaksięgowana transakcja jest podwójnie zapisana, idempotentna i automatycznie dopasowywana do rekordów dostawcy.",
       "reconciledTitle": "Domyślnie uzgadniane",
       "signUp": "Zarejestruj się",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Infrastruktura fintech,",
       "heroSubheadline": "{{productName}} daje Twojej firmie platformę portfeli, wypłat i kart pod własną marką, opartą na prawdziwej księdze podwójnego zapisu — wdróż ją, oznacz swoją marką i prowadź na niej własny biznes fintech.",
       "openAccountCta": "Otwórz konto",
-      "operatorConsole": "Konsola operatora",
       "signIn": "Zaloguj się",
       "trustBadge": "Zweryfikowane w księdze · Uzgadniane co godzinę"
     },
     "prime": {
       "balance": "Saldo",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Logowanie do panelu",
       "feature": {
         "cardIssuing": {
           "desc": "Wydawaj klientom wirtualne karty w chwili, gdy zostaną zweryfikowani.",

@@ -44,7 +44,8 @@ import WalletCurrenciesSettingsPage from "@/pages/admin/settings/WalletCurrencie
 import VerificationSettingsPage from "@/pages/admin/settings/VerificationSettingsPage";
 import AuthenticationSettingsPage from "@/pages/admin/settings/AuthenticationSettingsPage";
 
-export const router = createBrowserRouter([
+export function createRouter(adminLoginPath: string) {
+  return createBrowserRouter([
   {
     // Pathless root wrapper — global catch-all for catastrophic failures (e.g. routing itself
     // breaking). Every other route sits underneath so nothing escapes without at least this tier.
@@ -92,7 +93,7 @@ export const router = createBrowserRouter([
         ],
       },
 
-      { path: "/admin/login", element: <AdminLoginPage /> },
+      { path: adminLoginPath, element: <AdminLoginPage /> },
       {
         path: "/admin",
         element: (
@@ -137,4 +138,5 @@ export const router = createBrowserRouter([
       { path: "*", element: <LandingPage /> },
     ],
   },
-]);
+  ]);
+}

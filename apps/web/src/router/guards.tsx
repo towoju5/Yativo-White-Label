@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { fetchBranding } from "@/theme/branding";
 
 function FullScreenSpinner() {
   return (
@@ -23,9 +25,13 @@ export function RequireCustomerAuth({ children }: { children: ReactNode }) {
 export function RequireStaffAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useStaffAuth();
   const location = useLocation();
+  // Already cached by App.tsx's own fetch at boot — this just reads it, no extra request.
+  const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding });
 
   if (isLoading) return <FullScreenSpinner />;
-  if (!isAuthenticated) return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
+  if (!isAuthenticated) {
+    return <Navigate to={branding?.adminLoginPath ?? "/admin/login"} replace state={{ from: location.pathname }} />;
+  }
   return <>{children}</>;
 }
 

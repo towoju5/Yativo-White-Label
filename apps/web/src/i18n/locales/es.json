@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Acceso empresarial",
       "demoCard": "Tarjeta",
       "demoDeposit": "Depósito",
       "demoSend": "Enviar",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Dinero maravillosamente simple",
-      "businessLogin": "Acceso empresarial",
       "demoActionCard": "Tarjeta",
       "demoActionDeposit": "Depósito",
       "demoActionSend": "Enviar",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} le da a tu equipo una sola consola para billeteras, pagos, tarjetas y cumplimiento — respaldada por una contabilidad en la que puedes confiar.",
       "logIn": "Iniciar sesión",
       "openAccountCta": "Abrir una cuenta",
-      "operatorLoginCta": "Acceso de operador",
       "reconciledDesc": "Cada transacción registrada es de doble entrada, idempotente y se coteja automáticamente con los registros del proveedor.",
       "reconciledTitle": "Reconciliado por defecto",
       "signUp": "Registrarse",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Infraestructura fintech,",
       "heroSubheadline": "{{productName}} le da a tu empresa una billetera, pagos y plataforma de tarjetas de marca blanca sobre una contabilidad real de doble entrada — despliégala, márcala y gestiona tu propio negocio fintech con ella.",
       "openAccountCta": "Abre una cuenta",
-      "operatorConsole": "Consola de operador",
       "signIn": "Iniciar sesión",
       "trustBadge": "Verificado en libro contable · Reconciliado cada hora"
     },
     "prime": {
       "balance": "Saldo",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Acceso al panel",
       "feature": {
         "cardIssuing": {
           "desc": "Emite tarjetas virtuales a los clientes en cuanto estén verificados.",

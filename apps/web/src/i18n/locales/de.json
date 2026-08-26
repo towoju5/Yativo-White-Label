@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "Business-Login",
       "demoCard": "Karte",
       "demoDeposit": "Einzahlung",
       "demoSend": "Senden",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Wunderbar einfaches Geld",
-      "businessLogin": "Business-Login",
       "demoActionCard": "Karte",
       "demoActionDeposit": "Einzahlung",
       "demoActionSend": "Senden",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}} gibt Ihrem Team eine einzige Konsole für Wallets, Auszahlungen, Karten und Compliance — abgesichert durch ein Hauptbuch, dem Sie vertrauen können.",
       "logIn": "Anmelden",
       "openAccountCta": "Konto eröffnen",
-      "operatorLoginCta": "Operator-Login",
       "reconciledDesc": "Jede gebuchte Transaktion ist doppelt erfasst, idempotent und wird automatisch mit den Anbieterdaten abgeglichen.",
       "reconciledTitle": "Standardmäßig abgestimmt",
       "signUp": "Registrieren",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Fintech-Infrastruktur,",
       "heroSubheadline": "{{productName}} verschafft Ihrem Unternehmen ein White-Label-Wallet, eine Auszahlungs- und Kartenplattform auf einem echten Hauptbuch mit doppelter Buchführung — implementieren Sie es, branden Sie es und betreiben Sie Ihr eigenes Fintech-Geschäft damit.",
       "openAccountCta": "Konto eröffnen",
-      "operatorConsole": "Operator-Konsole",
       "signIn": "Anmelden",
       "trustBadge": "Ledger-verifiziert · Stündlich abgestimmt"
     },
     "prime": {
       "balance": "Saldo",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Dashboard-Login",
       "feature": {
         "cardIssuing": {
           "desc": "Stellen Sie Kunden virtuelle Karten aus, sobald sie verifiziert sind.",

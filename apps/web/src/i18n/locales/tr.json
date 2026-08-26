@@ -529,7 +529,6 @@
   },
   "landing": {
     "atlas": {
-      "businessLoginCta": "İşletme girişi",
       "demoCard": "Kart",
       "demoDeposit": "Para yatır",
       "demoSend": "Gönder",
@@ -568,7 +567,6 @@
     },
     "aurora": {
       "badge": "Güzel derecede basit para",
-      "businessLogin": "İşletme girişi",
       "demoActionCard": "Kart",
       "demoActionDeposit": "Para yatır",
       "demoActionSend": "Gönder",
@@ -610,7 +608,6 @@
       "heroSubheadline": "{{productName}}, ekibinize cüzdanlar, ödemeler, kartlar ve uyumluluk için tek bir konsol sunar — güvenebileceğiniz bir defterle desteklenir.",
       "logIn": "Giriş yap",
       "openAccountCta": "Hesap aç",
-      "operatorLoginCta": "Operatör girişi",
       "reconciledDesc": "Kaydedilen her işlem çift girişlidir, tekrarsızdır ve sağlayıcı kayıtlarıyla otomatik olarak eşleştirilir.",
       "reconciledTitle": "Varsayılan olarak mutabakatlı",
       "signUp": "Kaydol",
@@ -644,14 +641,12 @@
       "heroHeadlinePrefix": "Fintek altyapısı,",
       "heroSubheadline": "{{productName}}, işletmenize gerçek bir çift girişli defter üzerinde beyaz etiketli bir cüzdan, ödeme ve kart platformu sunar — dağıtın, markalayın ve kendi fintek işinizi bunun üzerinde yürütün.",
       "openAccountCta": "Hesap aç",
-      "operatorConsole": "Operatör konsolu",
       "signIn": "Giriş yap",
       "trustBadge": "Defter onaylı · Saatlik mutabakat"
     },
     "prime": {
       "balance": "Bakiye",
       "copyright": "© {{year}} {{productName}}",
-      "dashboardLogin": "Panel girişi",
       "feature": {
         "cardIssuing": {
           "desc": "Müşteriler doğrulandığı anda onlara sanal kart verin.",
