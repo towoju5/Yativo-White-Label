@@ -260,11 +260,8 @@ if [ "$RUN_SEED" -eq 1 ]; then
   pnpm --filter api exec prisma db seed
 fi
 
-log "Building API…"
-pnpm --filter api build
-
-log "Building web app…"
-pnpm --filter web build
+log "Building API and web app (turbo builds their workspace packages first)…"
+pnpm build
 
 ok "Build complete."
 

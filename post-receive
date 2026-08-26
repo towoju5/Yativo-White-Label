@@ -80,11 +80,8 @@ while read -r _oldrev newrev refname; do
   pnpm --filter api exec prisma generate
   pnpm --filter api exec prisma migrate deploy
 
-  echo "==> Building API"
-  pnpm --filter api build
-
-  echo "==> Building web app"
-  pnpm --filter web build
+  echo "==> Building API and web app (turbo builds their workspace packages first)"
+  pnpm build
 
   if systemctl list-unit-files "${SERVICE_NAME}.service" >/dev/null 2>&1; then
     echo "==> Restarting $SERVICE_NAME"
