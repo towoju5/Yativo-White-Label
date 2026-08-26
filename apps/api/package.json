@@ -10,7 +10,8 @@
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "reset-staff-password": "tsx scripts/resetStaffPassword.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
