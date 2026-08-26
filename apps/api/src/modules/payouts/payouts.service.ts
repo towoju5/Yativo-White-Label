@@ -11,6 +11,8 @@ import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js"
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
 import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.service.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
+import { formatMinorAmount } from "../../lib/formatMoney.js";
 
 type PayoutWithTransaction = Payout & { transaction: { status: "PENDING" | "POSTED" | "REVERSED" } };
 
@@ -112,6 +114,11 @@ export async function settlePayoutCompleted(
     });
   }
 
+  await sendNotificationEmail(prisma, "PAYOUT_COMPLETED", payout.customerId, {
+    amount: await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor),
+    currency: payout.currencyCode,
+  });
+
   return tx;
 }
 
@@ -190,6 +197,11 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   });
 
   await prisma.payout.update({ where: { id: payout.id }, data: { yativoPayoutId: yativoResult.yativoPayoutId } });
+
+  await sendNotificationEmail(prisma, "PAYOUT_CREATED", customerId, {
+    amount: await formatMinorAmount(prisma, input.currencyCode, amountMinor),
+    currency: input.currencyCode,
+  });
 
   if (env.YATIVO_MODE === "mock") {
     // Dev-only escape hatch: in mock mode there is no real Yativo webhook callback, so we

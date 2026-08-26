@@ -527,6 +527,52 @@ model BrandingConfig {
   @@map("branding_config")
 }
 
+// The fixed catalog of transactional emails a customer can receive — see shared-types'
+// EMAIL_NOTIFICATION_CATALOG for the label/description/available-variables shown in the admin UI.
+enum EmailNotificationType {
+  WELCOME
+  KYC_APPROVED
+  KYC_REJECTED
+  DEPOSIT_RECEIVED
+  PAYOUT_CREATED
+  PAYOUT_COMPLETED
+  PAYOUT_FAILED
+  CARD_ISSUED
+  CARD_FROZEN
+  CARD_UNFROZEN
+  CARD_TERMINATED
+  CARD_TRANSACTION
+  SWAP_COMPLETED
+  TWO_FACTOR_ENABLED
+  TWO_FACTOR_DISABLED
+  PASSKEY_ADDED
+  PASSKEY_REMOVED
+  BENEFICIARY_ADDED
+}
+
+/// Singleton (id=1) — which transactional emails customers receive. Default is everything enabled;
+/// an admin opts individual types out into disabledTypes rather than one column per type, so a new
+/// email type added later never needs a migration (mirrors PlatformSettings.kycRequiredServices).
+model NotificationSettings {
+  id            Int                     @id @default(1)
+  disabledTypes EmailNotificationType[] @default([])
+  updatedAt     DateTime                @updatedAt
+
+  @@map("notification_settings")
+}
+
+/// Admin-editable subject/body override per email type. A missing row for a type means "use the
+/// built-in default" (see notifications.service.ts's EMAIL_DEFAULTS) — rows are only created when
+/// an admin opens the template editor (lazily upserted with the built-in default at that point).
+model EmailTemplate {
+  type      EmailNotificationType @id
+  subject   String
+  bodyHtml  String
+  updatedAt DateTime              @updatedAt
+
+  @@map("email_templates")
+}
+
 // SYSTEM: built-in pages (terms, privacy) — always exist, slug is fixed, content is editable but
 // the page itself can't be deleted. CUSTOM: arbitrary admin-authored pages, freely created/deleted.
 enum StaticPageKind {

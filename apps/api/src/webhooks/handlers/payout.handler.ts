@@ -2,6 +2,8 @@ import type { PrismaClient } from "@prisma/client";
 import type { PayoutCompletedPayload, PayoutFailedPayload } from "@white-label/yativo-sdk";
 import { settlePayoutCompleted } from "../../modules/payouts/payouts.service.js";
 import { reverseTransaction } from "../../modules/ledger/reverseTransaction.js";
+import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
+import { formatMinorAmount } from "../../lib/formatMoney.js";
 import type { WebhookHandlerResult } from "./result.js";
 
 export async function handlePayoutCompleted(prisma: PrismaClient, payload: PayoutCompletedPayload): Promise<WebhookHandlerResult> {
@@ -25,5 +27,10 @@ export async function handlePayoutFailed(prisma: PrismaClient, payload: PayoutFa
   }
 
   await reverseTransaction(prisma, payout.transactionId, payload.reason);
+  await sendNotificationEmail(prisma, "PAYOUT_FAILED", payout.customerId, {
+    amount: await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor),
+    currency: payout.currencyCode,
+    reason: payload.reason,
+  });
   return { status: "PROCESSED" };
 }

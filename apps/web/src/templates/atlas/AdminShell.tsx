@@ -17,6 +17,8 @@ import {
   FileText,
   Lock,
   Fingerprint,
+  Bell,
+  Mail,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { AtlasTopbar, type NavItem } from "./Topbar";
@@ -37,6 +39,8 @@ const items: NavItem[] = [
   { to: "/admin/settings/branding", label: "Branding", icon: Palette },
   { to: "/admin/settings/api-keys", label: "API keys", icon: KeyRound },
   { to: "/admin/settings/authentication", label: "Authentication", icon: Fingerprint },
+  { to: "/admin/settings/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/settings/email-templates", label: "Email templates", icon: Mail },
   { to: "/admin/settings/wallet-currencies", label: "Wallet currencies", icon: Landmark },
   { to: "/admin/settings/verification", label: "Verification", icon: ShieldCheck },
 ];

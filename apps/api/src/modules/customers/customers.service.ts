@@ -3,6 +3,7 @@ import { AppError, NotFoundError } from "../../lib/errors.js";
 import { tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { listCustomerWallets } from "../wallets/wallets.service.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
 
 export function customerToDto(customer: {
   id: string;
@@ -95,16 +96,20 @@ export async function approveKyc(prisma: PrismaClient, customerId: string) {
   // blocks the approval itself. Re-fetched afterward since it writes yativoCustomerId in place —
   // `updated` above would otherwise report a stale (pre-registration) snapshot to the caller.
   await tryEnsureYativoCustomer(prisma, updated);
+  await sendNotificationEmail(prisma, "KYC_APPROVED", customerId, {});
   return prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
 }
 
-export async function rejectKyc(prisma: PrismaClient, customerId: string, _reason: string) {
+export async function rejectKyc(prisma: PrismaClient, customerId: string, reason: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
   // Scaffold: the rejection reason isn't persisted to a dedicated column (none exists on
   // Customer) — it's accepted and validated so the API contract is stable for the frontend,
-  // and would be wired to an audit/notes table in a real deployment.
-  return prisma.customer.update({ where: { id: customerId }, data: { kycStatus: "REJECTED" } });
+  // and would be wired to an audit/notes table in a real deployment. It does reach the customer
+  // via the KYC_REJECTED email below even though it isn't stored anywhere queryable afterward.
+  const updated = await prisma.customer.update({ where: { id: customerId }, data: { kycStatus: "REJECTED" } });
+  await sendNotificationEmail(prisma, "KYC_REJECTED", customerId, { reason });
+  return updated;
 }
 
 export async function freezeCustomer(prisma: PrismaClient, customerId: string) {

@@ -4,6 +4,7 @@ import qrcode from "qrcode";
 import { generateBase32Secret, buildOtpauthUrl, verifyTotp, generateBackupCodes } from "../../lib/totp.js";
 import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { getBranding } from "../branding/branding.service.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { AppError, UnauthorizedError } from "../../lib/errors.js";
 
 const PENDING_TTL_SECONDS = 600;
@@ -43,6 +44,7 @@ export async function confirmTwoFactorSetup(prisma: PrismaClient, redis: Redis, 
     data: { twoFactorEnabled: true, twoFactorSecret: pendingSecret, twoFactorBackupCodeHashes: backupCodeHashes },
   });
   await redis.del(pendingKey(customerId));
+  await sendNotificationEmail(prisma, "TWO_FACTOR_ENABLED", customerId, {});
 
   return { backupCodes };
 }
@@ -56,5 +58,6 @@ export async function disableTwoFactor(prisma: PrismaClient, customerId: string,
     where: { id: customerId },
     data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorBackupCodeHashes: [] },
   });
+  await sendNotificationEmail(prisma, "TWO_FACTOR_DISABLED", customerId, {});
   return { enabled: false };
 }

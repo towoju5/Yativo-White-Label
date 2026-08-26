@@ -7,6 +7,7 @@ import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { signPortalAccessToken, signPortal2faChallengeToken, verifyPortal2faChallengeToken } from "../../lib/jwt.js";
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { UnauthorizedError, ConflictError } from "../../lib/errors.js";
 import { ensureCustomerWalletAccount } from "../ledger/accounts.js";
 import { ensureYativoCustomer, tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
@@ -71,6 +72,7 @@ export async function signupCustomer(prisma: PrismaClient, input: CreateCustomer
   }
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
+  await sendNotificationEmail(prisma, "WELCOME", customer.id, {});
   return { customer, accessToken, refreshToken };
 }
 

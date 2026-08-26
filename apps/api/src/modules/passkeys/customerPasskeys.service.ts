@@ -8,6 +8,7 @@ import {
 } from "@simplewebauthn/server";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
 import { getBranding } from "../branding/branding.service.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 
 const REGISTRATION_TTL_SECONDS = 300;
@@ -85,6 +86,7 @@ export async function verifyCustomerPasskeyRegistration(
       name,
     },
   });
+  await sendNotificationEmail(prisma, "PASSKEY_ADDED", customerId, { passkeyName: name });
   return toDto(row);
 }
 
@@ -99,4 +101,5 @@ export async function deleteCustomerPasskey(prisma: PrismaClient, customerId: st
   const existing = await prisma.customerPasskey.findUnique({ where: { id: passkeyId } });
   if (!existing || existing.customerId !== customerId) throw new NotFoundError("Passkey");
   await prisma.customerPasskey.delete({ where: { id: passkeyId } });
+  await sendNotificationEmail(prisma, "PASSKEY_REMOVED", customerId, { passkeyName: existing.name });
 }

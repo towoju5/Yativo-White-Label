@@ -2,6 +2,8 @@ import type { PrismaClient } from "@prisma/client";
 import type { SwapCompletedPayload } from "@white-label/yativo-sdk";
 import { postTransaction } from "../../modules/ledger/postTransaction.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../../modules/ledger/accounts.js";
+import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
+import { formatMinorAmount } from "../../lib/formatMoney.js";
 import type { WebhookHandlerResult } from "./result.js";
 
 export async function handleSwapCompleted(
@@ -33,6 +35,13 @@ export async function handleSwapCompleted(
       { accountId: clearingTarget.id, direction: "DEBIT", amountMinor: BigInt(payload.targetAmountMinor), currencyCode: payload.targetCurrency },
       { accountId: targetWallet.id, direction: "CREDIT", amountMinor: BigInt(payload.targetAmountMinor), currencyCode: payload.targetCurrency },
     ],
+  });
+
+  await sendNotificationEmail(prisma, "SWAP_COMPLETED", customer.id, {
+    sourceAmount: await formatMinorAmount(prisma, payload.sourceCurrency, BigInt(payload.sourceAmountMinor)),
+    sourceCurrency: payload.sourceCurrency,
+    targetAmount: await formatMinorAmount(prisma, payload.targetCurrency, BigInt(payload.targetAmountMinor)),
+    targetCurrency: payload.targetCurrency,
   });
 
   return { status: "PROCESSED" };

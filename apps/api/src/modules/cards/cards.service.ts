@@ -9,6 +9,7 @@ import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js"
 import { reverseTransaction } from "../ledger/reverseTransaction.js";
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import logger from "../../lib/logger.js";
 
 const CARD_CURRENCY = "USD";
@@ -137,6 +138,7 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
       currencyCode: CARD_CURRENCY,
     },
   });
+  await sendNotificationEmail(prisma, "CARD_ISSUED", customerId, { last4: card.last4 });
   return cardToDto(card);
 }
 
@@ -283,6 +285,7 @@ async function setFrozen(prisma: PrismaClient, cardId: string, frozen: boolean, 
   }
 
   const updated = await prisma.card.update({ where: { id: cardId }, data: { status: frozen ? "FROZEN" : "ACTIVE" } });
+  await sendNotificationEmail(prisma, frozen ? "CARD_FROZEN" : "CARD_UNFROZEN", updated.customerId, { last4: updated.last4 });
   return cardToDto(updated);
 }
 
@@ -310,6 +313,7 @@ export async function terminateCard(prisma: PrismaClient, cardId: string, scopeC
   const card = await findOwnedCard(prisma, cardId, scopeCustomerId);
   await yativoClient.fiat.cards.terminate(card.yativoCardId!, randomUUID());
   const updated = await prisma.card.update({ where: { id: cardId }, data: { status: "CLOSED" } });
+  await sendNotificationEmail(prisma, "CARD_TERMINATED", updated.customerId, { last4: updated.last4 });
   return cardToDto(updated);
 }
 

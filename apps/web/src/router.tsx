@@ -43,6 +43,8 @@ import ApiKeysSettingsPage from "@/pages/admin/settings/ApiKeysSettingsPage";
 import WalletCurrenciesSettingsPage from "@/pages/admin/settings/WalletCurrenciesSettingsPage";
 import VerificationSettingsPage from "@/pages/admin/settings/VerificationSettingsPage";
 import AuthenticationSettingsPage from "@/pages/admin/settings/AuthenticationSettingsPage";
+import NotificationSettingsPage from "@/pages/admin/settings/NotificationSettingsPage";
+import EmailTemplatesSettingsPage from "@/pages/admin/settings/EmailTemplatesSettingsPage";
 
 export function createRouter(adminLoginPath: string) {
   return createBrowserRouter([
@@ -125,6 +127,8 @@ export function createRouter(adminLoginPath: string) {
               { path: "settings/wallet-currencies", element: <WalletCurrenciesSettingsPage /> },
               { path: "settings/verification", element: <VerificationSettingsPage /> },
               { path: "settings/authentication", element: <AuthenticationSettingsPage /> },
+              { path: "settings/notifications", element: <NotificationSettingsPage /> },
+              { path: "settings/email-templates", element: <EmailTemplatesSettingsPage /> },
             ],
           },
         ],

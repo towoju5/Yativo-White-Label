@@ -4,6 +4,7 @@ import type { CreateBeneficiaryInput, UpdateBeneficiaryInput } from "@white-labe
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { yativoClient } from "../../lib/yativoClient.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import logger from "../../lib/logger.js";
 
 /**
@@ -86,6 +87,7 @@ export async function createBeneficiary(prisma: PrismaClient, customerId: string
   });
 
   logger.info({ customerId, beneficiaryId, yativoBeneficiaryId: yativoResult.yativoBeneficiaryId }, "Created beneficiary");
+  await sendNotificationEmail(prisma, "BENEFICIARY_ADDED", customerId, { beneficiaryName: input.name });
   return beneficiaryToDto(beneficiary);
 }
 

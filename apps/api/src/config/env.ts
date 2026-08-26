@@ -37,6 +37,15 @@ const envSchema = z.object({
   APP_BASE_URL: z.string().url(),
   WEB_APP_URL: z.string().url(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+
+  // Transactional email — all optional. Unset SMTP_HOST means email sending no-ops (logged, not
+  // thrown), so an environment without mail configured never breaks the flows that trigger it.
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z.coerce.boolean().default(false),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  EMAIL_FROM_ADDRESS: z.string().email().default("no-reply@example.com"),
 });
 
 export const env = envSchema.parse(process.env);

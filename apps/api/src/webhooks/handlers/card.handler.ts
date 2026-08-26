@@ -2,6 +2,8 @@ import type { PrismaClient } from "@prisma/client";
 import type { CardTransactionCompletedPayload } from "@white-label/yativo-sdk";
 import { postTransaction } from "../../modules/ledger/postTransaction.js";
 import { ensurePlatformAccount } from "../../modules/ledger/accounts.js";
+import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
+import { formatMinorAmount } from "../../lib/formatMoney.js";
 import type { WebhookHandlerResult } from "./result.js";
 
 export async function handleCardTransactionCompleted(
@@ -33,6 +35,12 @@ export async function handleCardTransactionCompleted(
       { accountId: walletAccount.id, direction: "DEBIT", amountMinor: BigInt(payload.amountMinor), currencyCode: payload.currencyCode },
       { accountId: clearing.id, direction: "CREDIT", amountMinor: BigInt(payload.amountMinor), currencyCode: payload.currencyCode },
     ],
+  });
+
+  await sendNotificationEmail(prisma, "CARD_TRANSACTION", card.customerId, {
+    amount: await formatMinorAmount(prisma, payload.currencyCode, BigInt(payload.amountMinor)),
+    currency: payload.currencyCode,
+    merchant: payload.merchantName ?? "a merchant",
   });
 
   return { status: "PROCESSED" };
