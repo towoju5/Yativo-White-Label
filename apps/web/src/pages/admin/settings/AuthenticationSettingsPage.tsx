@@ -82,7 +82,7 @@ function ProviderSection({ name, title, fields, config, onUpdate }: ProviderSect
           </Label>
           <Input
             type={secret ? "password" : "text"}
-            value={(config as Record<string, string>)[field] ?? ""}
+            value={(config as unknown as Record<string, string>)[field] ?? ""}
             onChange={(e) => onUpdate(field, e.target.value)}
           />
         </div>
