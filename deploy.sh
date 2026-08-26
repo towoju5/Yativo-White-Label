@@ -162,6 +162,24 @@ ufw --force enable >/dev/null
 ok "ufw active — only SSH, HTTP, and HTTPS are reachable from the internet. The API ($API_PORT), Postgres ($DB_PORT), and Redis ($REDIS_PORT) stay loopback-only regardless of what they bind to."
 
 # ── 5. Postgres + Redis (the repo's own docker-compose.yml, unmodified) ────
+#
+# docker-compose.yml reads POSTGRES_PASSWORD/REDIS_PASSWORD from a root-level
+# .env file (docker compose loads this automatically) — generated once, here,
+# before the containers are first created, since Postgres only applies
+# POSTGRES_PASSWORD on an empty data directory. Never clobbered on rerun, same
+# rule as apps/api/.env below.
+
+if [ ! -f "$REPO_ROOT/.env" ]; then
+  log "Generating root .env with strong Postgres/Redis passwords…"
+  cat > "$REPO_ROOT/.env" <<EOF
+POSTGRES_PASSWORD=$(openssl rand -hex 24)
+REDIS_PASSWORD=$(openssl rand -hex 24)
+EOF
+  chmod 600 "$REPO_ROOT/.env"
+  ok "Root .env created — docker-compose.yml picks it up automatically."
+else
+  ok "Root .env already exists — leaving it untouched (rerun-safe)."
+fi
 
 log "Starting Postgres + Redis…"
 docker compose up -d
@@ -186,14 +204,15 @@ if [ ! -f apps/api/.env ]; then
   PORTAL_JWT_REFRESH_SECRET="$(gen_secret)"
   YATIVO_WEBHOOK_SECRET="$(gen_secret)"
   CREDENTIAL_ENCRYPTION_KEY="$(gen_secret)" # encrypts provider credentials at rest — see apps/api/src/lib/credentialEncryption.ts
-  DB_PASSWORD="postgres" # matches docker-compose.yml's POSTGRES_PASSWORD — change both together if you harden this later
+  DB_PASSWORD="$(grep '^POSTGRES_PASSWORD=' "$REPO_ROOT/.env" | cut -d= -f2-)" # generated above, shared with docker-compose.yml
+  REDIS_PASSWORD="$(grep '^REDIS_PASSWORD=' "$REPO_ROOT/.env" | cut -d= -f2-)"
 
   cat > apps/api/.env <<EOF
 NODE_ENV=production
 PORT=$API_PORT
 
 DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@localhost:${DB_PORT}/whitelabel
-REDIS_URL=redis://localhost:${REDIS_PORT}
+REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT}
 
 JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
 JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
@@ -239,6 +258,17 @@ else
     log "apps/api/.env predates CREDENTIAL_ENCRYPTION_KEY — appending a fresh one (existing secrets untouched)…"
     echo "CREDENTIAL_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> apps/api/.env
     ok "CREDENTIAL_ENCRYPTION_KEY added."
+  fi
+  # Sanity check: an existing apps/api/.env whose DATABASE_URL password doesn't match the
+  # Postgres container's actual password (root .env) fails every query at runtime with an
+  # opaque "Authentication failed" — this catches that mismatch instead of deploying broken.
+  ENV_DB_PASSWORD="$(grep -oP '(?<=postgresql://postgres:)[^@]*' apps/api/.env || true)"
+  COMPOSE_DB_PASSWORD="$(grep '^POSTGRES_PASSWORD=' "$REPO_ROOT/.env" 2>/dev/null | cut -d= -f2- || true)"
+  if [ -n "$COMPOSE_DB_PASSWORD" ] && [ "$ENV_DB_PASSWORD" != "$COMPOSE_DB_PASSWORD" ]; then
+    warn "apps/api/.env's DATABASE_URL password doesn't match the Postgres container's password (root .env)."
+    warn "Every DB query will fail with 'Authentication failed' until these agree. Fix by either:"
+    warn "  a) editing DATABASE_URL in apps/api/.env to use: $COMPOSE_DB_PASSWORD"
+    warn "  b) or: docker compose exec postgres psql -U postgres -c \"ALTER USER postgres WITH PASSWORD '$ENV_DB_PASSWORD'\""
   fi
 fi
 
