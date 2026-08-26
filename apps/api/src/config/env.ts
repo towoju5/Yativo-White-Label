@@ -21,6 +21,8 @@ const envSchema = z.object({
 
   PORTAL_JWT_ACCESS_SECRET: z.string().min(16),
   PORTAL_JWT_REFRESH_SECRET: z.string().min(16),
+  /** Root key for credentials stored encrypted in PostgreSQL. Never expose this in the admin UI. */
+  CREDENTIAL_ENCRYPTION_KEY: z.string().regex(/^[a-f0-9]{64}$/i, "CREDENTIAL_ENCRYPTION_KEY must be 64 hex characters"),
   PORTAL_JWT_ACCESS_TTL: z.string().default("15m"),
   PORTAL_JWT_REFRESH_TTL: z.string().default("30d"),
 

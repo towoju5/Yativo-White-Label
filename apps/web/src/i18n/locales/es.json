@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "Añadir un beneficiario",
+    "addBeneficiary": "Añadir beneficiario",
+    "addError": "No se pudo añadir el beneficiario",
+    "added": "Beneficiario añadido",
+    "back": "Atrás",
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "country": "País",
+    "detail": {
+      "added": "Añadido",
+      "currency": "Moneda",
+      "editHint": "Los datos de pago no se pueden editar aquí — elimina este beneficiario y añade uno nuevo si han cambiado.",
+      "editName": "Editar nombre",
+      "name": "Nombre",
+      "paymentDetails": "Datos de pago",
+      "removeBeneficiary": "Eliminar beneficiario",
+      "save": "Guardar",
+      "title": "Detalles del beneficiario",
+      "type": "Tipo"
+    },
+    "empty": "Aún no hay beneficiarios. Añade uno para empezar a enviar dinero.",
+    "fieldRequiredError": "{{field}} es obligatorio",
+    "maxCharsError": "Máximo {{max}} caracteres",
+    "methodDetailsHeading": "Detalles de {{method}}",
+    "minCharsError": "Mínimo {{min}} caracteres",
+    "nameAndCountryRequired": "Introduce un nombre y elige un país para continuar",
+    "noExtraDetailsNeeded": "Este método de pago no necesita detalles adicionales.",
+    "noPayoutMethods": "Aún no hay métodos de pago activos para este país.",
+    "payoutMethodQuestion": "¿Cómo debería cobrar {{name}} en {{country}}?",
+    "payoutMethodRequired": "Elige un método de pago para continuar",
+    "recipientName": "Nombre del destinatario",
+    "recipientNamePlaceholder": "Juan Pérez",
+    "remove": "Eliminar",
+    "removeDialogDescription": "Tendrás que añadirlo de nuevo para enviar dinero aquí en el futuro. Esto no afecta a pagos anteriores.",
+    "removeDialogTitle": "¿Eliminar a {{name}}?",
+    "removeError": "No se pudo eliminar el beneficiario",
+    "removed": "Beneficiario eliminado",
+    "selectCountryPlaceholder": "Selecciona un país",
+    "selectFieldPlaceholder": "Selecciona {{field}}",
+    "steps": {
+      "paymentDetails": "Datos de pago",
+      "payoutMethod": "Método de pago",
+      "recipient": "Destinatario"
+    },
+    "subtitle": "Personas y cuentas a las que envías dinero",
+    "table": {
+      "actions": "Acciones",
+      "added": "Añadido",
+      "currency": "Moneda",
+      "name": "Nombre"
+    },
+    "thisCountry": "este país",
+    "thisRecipient": "este destinatario",
+    "title": "Beneficiarios",
+    "transferRange": "{{min}}–{{max}} {{currency}} por transferencia",
+    "updateError": "No se pudo actualizar el beneficiario",
+    "updated": "Beneficiario actualizado",
+    "whoAreYouSendingTo": "¿A quién le estás enviando dinero?"
+  },
+  "cards": {
+    "addFunds": "Añadir fondos",
+    "addedThisMonth": "Añadido este mes",
+    "airlinePayments": "Pagos de aerolíneas",
+    "balance": "Saldo {{amount}}",
+    "billingAddress": "Dirección de facturación",
+    "cancel": "Cancelar",
+    "cardEndingIn": "Tarjeta terminada en {{last4}}",
+    "cardNumberLabel": "Número de tarjeta",
+    "cardholder": "Titular",
+    "confirmTerminate": "Vuelve a hacer clic para confirmar — esto no se puede deshacer",
+    "copyNumber": "Copiar número",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "Aún no hay tarjetas. Solicita una para empezar a gastar.",
+    "exp": "Vence {{expiry}}",
+    "feeAmount": "Comisión {{amount}}",
+    "freezeCard": "Congelar tarjeta",
+    "hidesAutomatically": "Se oculta automáticamente",
+    "initialFundingHelp": "Mínimo $3. Se debita de tu billetera USD junto con una comisión de creación y de recarga.",
+    "initialFundingLabel": "Fondos iniciales (USD)",
+    "manage": "Gestionar →",
+    "noTransactions": "Aún no hay transacciones.",
+    "program": "Programa",
+    "requestCard": "Solicitar tarjeta",
+    "requestDialogTitle": "Solicitar una tarjeta virtual",
+    "requesting": "Solicitando…",
+    "spentThisMonth": "Gastado este mes",
+    "subtitle": "Tarjetas virtuales Visa vinculadas a tu billetera USD",
+    "terminateCard": "Cancelar tarjeta",
+    "title": "Tarjetas",
+    "toast": {
+      "airlineDisabled": "Pagos de aerolíneas desactivados",
+      "airlineEnabled": "Pagos de aerolíneas activados",
+      "airlineError": "No se pudieron actualizar los pagos de aerolíneas",
+      "cardFrozen": "Tarjeta congelada",
+      "cardIssued": "Tarjeta emitida",
+      "cardTerminated": "Tarjeta cancelada",
+      "cardTerminatedDescription": "Cualquier saldo restante se reembolsa automáticamente a tu billetera.",
+      "cardToppedUp": "Tarjeta recargada",
+      "cardUnfrozen": "Tarjeta descongelada",
+      "copied": "{{label}} copiado",
+      "copyError": "No se pudo copiar",
+      "freezeError": "No se pudo actualizar el estado de congelación",
+      "issueCardError": "No se pudo emitir la tarjeta",
+      "revealCardError": "No se pudo mostrar la tarjeta",
+      "terminateError": "No se pudo cancelar la tarjeta",
+      "topupFailed": "Error en la recarga",
+      "withdrawalFailed": "Error en el retiro",
+      "withdrawalSubmitted": "Retiro enviado",
+      "withdrawalSubmittedDescription": "Se descuenta una comisión antes de que el importe neto vuelva a tu billetera."
+    },
+    "topUp": "Recargar",
+    "transactionFallback": "Transacción",
+    "transactions": "Transacciones",
+    "unfreezeCard": "Descongelar tarjeta",
+    "virtualUsd": "Virtual · USD",
+    "visaVirtualCardUsd": "Tarjeta virtual Visa · USD",
+    "withdraw": "Retirar",
+    "withdrawFeeNote": "Se descuenta una comisión de los retiros antes de que el importe neto llegue a tu billetera."
+  },
+  "common": {
+    "language": "Idioma"
+  },
+  "crypto": {
+    "addressCopied": "Dirección copiada",
+    "copyAddressError": "No se pudo copiar la dirección",
+    "depositAddressReady": "Dirección de depósito lista",
+    "generateAddress": "Generar dirección",
+    "generateAddressError": "No se pudo generar la dirección",
+    "generateDescription": "Genera una dirección de depósito para cualquier red compatible.",
+    "generating": "Generando…",
+    "noDepositsYet": "Aún no hay depósitos de cripto",
+    "noWalletsYet": "Aún no hay billeteras cripto — genera una dirección abajo para empezar.",
+    "selectAssetPlaceholder": "Selecciona un activo",
+    "sharedAddressWarning": "Esta dirección puede compartirse con otros usuarios para el mismo activo. Los depósitos se asocian a tu cuenta y son confirmados por nuestro equipo antes de que se actualice tu saldo.",
+    "subtitle": "Direcciones de depósito e historial de depósitos on-chain para los activos compatibles.",
+    "title": "Billeteras cripto",
+    "transactionsDescription": "Todos los depósitos on-chain asociados a tu cuenta.",
+    "transactionsTitle": "Transacciones cripto",
+    "viewOnExplorer": "Ver en el explorador de bloques",
+    "yourWallets": "Tus billeteras"
+  },
+  "dashboard": {
+    "activityTitle": "Actividad reciente",
+    "heroLabel": "Saldo total",
+    "stats": {
+      "available": "Disponible",
+      "pending": "Pendiente",
+      "recentActivity": "Actividad reciente",
+      "wallets": "Billeteras"
+    },
+    "subtitle": "Esto es lo que está pasando en tus cuentas",
+    "title": "Bienvenido de nuevo",
+    "walletLabel": "Billetera"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "Aún no hay billeteras",
+      "nothingHereYet": "Nada por aquí todavía",
+      "recentActivity": "Actividad reciente",
+      "totalBalance": "Saldo total",
+      "yourWallets": "Tus billeteras"
+    },
+    "aurora": {
+      "balance": "Saldo",
+      "noTrendData": "Aún no hay datos de tendencia",
+      "noWalletsYet": "Aún no hay billeteras",
+      "nothingHereYet": "Nada por aquí todavía",
+      "recentActivity": "Actividad reciente",
+      "trend": "Tendencia",
+      "wallets": "Billeteras"
+    },
+    "meridian": {
+      "balanceTrend": "Tendencia del saldo",
+      "noWalletsYet": "Aún no hay billeteras",
+      "nothingHereYet": "Nada por aquí todavía",
+      "overview": "Resumen",
+      "recentActivity": "Actividad reciente",
+      "wallets": "Billeteras"
+    },
+    "nova": {
+      "balanceTrend": "Tendencia del saldo",
+      "noActivityYet": "Aún no hay actividad",
+      "noWalletsYet": "Aún no hay billeteras",
+      "nothingHereYet": "Nada por aquí todavía",
+      "recentActivity": "Actividad reciente",
+      "wallets": "Billeteras"
+    },
+    "prime": {
+      "amount": "Importe",
+      "balanceTrend": "Tendencia del saldo",
+      "description": "Descripción",
+      "noWalletsYet": "Aún no hay billeteras",
+      "nothingHereYet": "Nada por aquí todavía",
+      "recentActivity": "Actividad reciente",
+      "status": "Estado",
+      "wallets": "Billeteras"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "Atrás",
+      "continue": "Continuar",
+      "startDeposit": "Iniciar depósito"
+    },
+    "cryptoCard": {
+      "description": "Las direcciones de depósito y el historial de depósitos on-chain ahora tienen su propia página.",
+      "goToWallets": "Ir a billeteras cripto",
+      "title": "O deposita cripto"
+    },
+    "dialog": {
+      "amountToPay": "Importe a pagar",
+      "copyLinkAriaLabel": "Copiar enlace",
+      "estimatedDelivery": "Entrega estimada",
+      "exchangeRate": "Tipo de cambio",
+      "fee": "Comisión",
+      "initiated": "Depósito iniciado",
+      "openLinkAriaLabel": "Abrir enlace",
+      "title": "Depositar fondos",
+      "youllReceive": "Recibirás"
+    },
+    "errors": {
+      "enterAmount": "Introduce un importe",
+      "fieldRequired": "{{field}} es obligatorio",
+      "pickWallet": "Elige qué billetera acreditar"
+    },
+    "localCard": {
+      "depositButton": "Depositar",
+      "description": "Elige tu país y paga mediante el método local — transferencia bancaria, CODI, DEBIN y más.",
+      "title": "O deposita con un método de pago local"
+    },
+    "step0": {
+      "countryLabel": "País",
+      "countryPlaceholder": "Selecciona un país",
+      "prompt": "¿Desde qué país estás pagando?"
+    },
+    "step1": {
+      "methodRange": "{{min}}–{{max}} {{currency}} por depósito",
+      "noMethods": "Aún no hay métodos de depósito activos para este país.",
+      "prompt": "¿Cómo quieres pagar desde {{country}}?",
+      "thisCountryFallback": "este país"
+    },
+    "step2": {
+      "amountLabel": "Importe ({{currency}})",
+      "prompt": "{{method}} — importe y detalles",
+      "selectFieldPlaceholder": "Selecciona {{field}}",
+      "walletLabel": "Billetera a acreditar",
+      "walletLoading": "Cargando…",
+      "walletPlaceholder": "Selecciona una billetera"
+    },
+    "steps": {
+      "amountDetails": "Importe y detalles",
+      "country": "País",
+      "method": "Método"
+    },
+    "subtitle": "Recarga tu billetera con un pago único mediante un método local, o cripto.",
+    "title": "Depósito",
+    "toast": {
+      "copied": "Copiado al portapapeles",
+      "copyFailed": "No se pudo copiar",
+      "pickCountry": "Elige un país para continuar",
+      "pickMethod": "Elige un método de pago para continuar",
+      "startFailed": "No se pudo iniciar el depósito"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "Continuar",
+      "submit": "Enviar para revisión"
+    },
+    "common": {
+      "select": "Seleccionar"
+    },
+    "header": {
+      "subtitle": "KYB empresarial — detalles sobre la empresa y sus propietarios.",
+      "title": "Verifica tu empresa"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "Propósito de la cuenta",
+        "complianceScreeningProgram": "Programa de verificación de cumplimiento",
+        "conductsMoneyServices": "Realiza servicios monetarios",
+        "conductsMoneyServicesHint": "Remesas, cambio de divisas u otra actividad de MSB regulada similar.",
+        "describeAccountPurpose": "Describe el propósito de la cuenta",
+        "describeMoneyServicesActivity": "Describe la actividad de servicios monetarios",
+        "estimatedAnnualRevenue": "Ingresos anuales estimados, USD (opcional)",
+        "estimatedAnnualRevenuePlaceholder": "p. ej. 1000000_to_5000000",
+        "eurdeCombined": "EURDE (combinado)",
+        "explainFlaggedActivity": "Explica la actividad marcada",
+        "extraFeeHint": "(puede generar una comisión adicional)",
+        "highRiskActivities": "Actividades de alto riesgo (selecciona las que apliquen)",
+        "notSpecified": "No especificado",
+        "pepStatus": "Persona políticamente expuesta (PEP)",
+        "pepStatusHint": "Algún propietario/director es una PEP o un asociado cercano de una.",
+        "prohibitedCountries": "Opera en países prohibidos (opcional)",
+        "selectPlaceholder": "Seleccionar",
+        "sourceOfFunds": "Origen de los fondos",
+        "thirdPartyMsbPayments": "Procesa pagos para MSB de terceros",
+        "virtualAccountsToProvision": "Cuentas virtuales a aprovisionar"
+      },
+      "addresses": {
+        "physicalAddressHeading": "Dirección física",
+        "physicalProofHint": "Contrato de alquiler, factura de servicios o similar — obligatorio si es diferente de la dirección registrada.",
+        "registeredAddressHeading": "Dirección registrada",
+        "sameAsRegistered": "Igual que la registrada",
+        "title": "Direcciones"
+      },
+      "businessDocument": {
+        "title": "Documento de la empresa"
+      },
+      "businessInfo": {
+        "businessType": "Tipo de empresa",
+        "description": "Descripción de la empresa",
+        "dialCode": "Código de marcación",
+        "dialCodePlaceholder": "+1",
+        "email": "Correo electrónico de la empresa",
+        "incorporationCountry": "País de constitución (opcional)",
+        "incorporationDate": "Fecha de constitución",
+        "industry": "Industria (opcional)",
+        "legalName": "Nombre legal de la empresa",
+        "phone": "Teléfono",
+        "registrationNumber": "Número de registro",
+        "requiredFieldsHint": "Completa los campos obligatorios de arriba.",
+        "taxId": "ID fiscal (opcional)",
+        "title": "Información de la empresa",
+        "tradeName": "Nombre comercial",
+        "website": "Sitio web (opcional)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "Se requiere un documento con propósito \"Registro de la empresa\" — el predeterminado de arriba lo cumple.",
+        "description": "Descripción",
+        "descriptionPlaceholder": "Certificado de constitución",
+        "documentPurpose": "Propósito del documento",
+        "fileLabel": "Archivo",
+        "selectPlaceholder": "Seleccionar"
+      },
+      "ownerIdDocuments": {
+        "title": "Documentos de identidad de los propietarios"
+      },
+      "ownersDirectors": {
+        "addAnother": "Añadir otro propietario / director",
+        "authorizedSigner": "Firmante autorizado",
+        "dateOfBirth": "Fecha de nacimiento",
+        "director": "Director",
+        "email": "Correo electrónico",
+        "firstName": "Nombre",
+        "hasControl": "Tiene control",
+        "hasOwnership": "Tiene participación",
+        "identityDocsRequired": "Se requieren ambos documentos de identidad para cada propietario/director.",
+        "lastName": "Apellido",
+        "nationality": "Nacionalidad",
+        "ownerHeading": "Propietario / director {{number}}",
+        "ownershipPercent": "% de participación",
+        "personFallbackName": "Propietario / director {{index}}",
+        "personTitle": "Cargo",
+        "phoneOptional": "Teléfono (opcional)",
+        "photoIdHeading": "2. Documento de identidad con foto",
+        "residentialAddressHeading": "Dirección residencial",
+        "taxId": "SSN / EIN / ITIN",
+        "taxIdHeading": "1. ID fiscal",
+        "title": "Propietarios y directores",
+        "titlePlaceholder": "CEO, socio gerente…"
+      },
+      "review": {
+        "accountPurpose": "Propósito de la cuenta",
+        "business": "Empresa",
+        "highRiskActivities": "Actividades de alto riesgo",
+        "none": "Ninguna",
+        "ownersDirectors": "Propietarios / directores",
+        "readyMessage": "Todo listo. Revisa y envía.",
+        "registeredAddress": "Dirección registrada",
+        "title": "Revisión",
+        "tradeName": "Nombre comercial",
+        "type": "Tipo"
+      },
+      "riskPurpose": {
+        "title": "Riesgo y propósito"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Aún faltan algunos campos obligatorios.",
+        "title": "Revisa los campos siguientes"
+      },
+      "submitFailed": {
+        "title": "Error al enviar"
+      },
+      "submitted": {
+        "description": "Revisaremos los datos de tu empresa en breve.",
+        "title": "Verificación enviada"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "Continuar",
+      "submit": "Enviar para revisión"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "Seleccionar"
+    },
+    "header": {
+      "subtitle": "Algunos datos para poder confirmar tu identidad.",
+      "title": "Verifica tu identidad"
+    },
+    "steps": {
+      "address": {
+        "title": "Dirección"
+      },
+      "financialProfile": {
+        "accountPurpose": "Propósito de la cuenta",
+        "actingAsIntermediary": "Actuando como intermediario",
+        "actingAsIntermediaryHint": "En nombre de otra persona, no para ti mismo.",
+        "chooseAccountsHint": "Elige USD y/o EUR, o EURDE por sí sola.",
+        "describeAccountPurpose": "Describe el propósito de la cuenta",
+        "employmentStatus": "Situación laboral",
+        "eurdeCombined": "EURDE (combinado)",
+        "expectedMonthlyPayments": "Pagos mensuales esperados (USD)",
+        "extraFeeNote": "puede generar una comisión adicional",
+        "occupation": "Ocupación",
+        "sourceOfFunds": "Origen de los fondos",
+        "title": "Perfil financiero",
+        "virtualAccounts": "Cuentas virtuales a aprovisionar"
+      },
+      "identityDocument": {
+        "govIdHeading": "Documento de identidad oficial",
+        "selfieHint": "Una foto clara de tu rostro.",
+        "selfiePhoto": "Foto selfie",
+        "title": "Documento de identidad"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11 dígitos",
+        "currentEmployer": "Empleador actual (opcional)",
+        "dateOfBirth": "Fecha de nacimiento",
+        "dialCode": "Código de marcación",
+        "dialCodePlaceholder": "+1",
+        "email": "Correo electrónico",
+        "firstName": "Nombre",
+        "gender": "Género",
+        "genderFemale": "Femenino",
+        "genderMale": "Masculino",
+        "immigrationStatus": "Estatus migratorio (opcional)",
+        "immigrationStatusPlaceholder": "No aplica",
+        "lastName": "Apellido",
+        "middleName": "Segundo nombre (opcional)",
+        "nationality": "Nacionalidad",
+        "nin": "NIN",
+        "ninPlaceholder": "11 dígitos",
+        "phone": "Teléfono",
+        "phoneHint": "Código de marcación como \"+1\", solo dígitos del teléfono (8-15 dígitos).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "ID fiscal",
+        "taxIdPlaceholder": "SSN / número fiscal nacional",
+        "title": "Información personal"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "Propósito de la cuenta",
+          "address": "Dirección",
+          "email": "Correo electrónico",
+          "idDocument": "Documento de identidad",
+          "name": "Nombre",
+          "nationality": "Nacionalidad",
+          "phone": "Teléfono"
+        },
+        "ready": "Todo listo. Revisa y envía.",
+        "title": "Revisión"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Aún faltan algunos campos obligatorios.",
+        "title": "Revisa los campos siguientes"
+      },
+      "submitFailed": {
+        "title": "Error al enviar"
+      },
+      "submitted": {
+        "description": "Revisaremos tus datos en breve.",
+        "title": "Verificación enviada"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "Atrás",
+    "chooseCountryFirstPlaceholder": "Elige primero un país",
+    "cityLabel": "Ciudad",
+    "clickToUpload": "Haz clic para subir",
+    "countryLabel": "País",
+    "dateIssuedLabel": "Fecha de emisión",
+    "documentBackOptionalLabel": "Documento — dorso (opcional)",
+    "documentFrontLabel": "Documento — frente",
+    "documentNumberLabel": "Número de documento",
+    "documentNumberPlaceholder": "p. ej. P00012345",
+    "documentTypeLabel": "Tipo de documento",
+    "expirationDateLabel": "Fecha de vencimiento",
+    "expirationDateOptionalLabel": "Fecha de vencimiento (opcional)",
+    "fixBeforeContinuing": "Corrige lo siguiente antes de continuar:",
+    "issuingCountryLabel": "País emisor",
+    "loadingEllipsis": "Cargando…",
+    "noMatches": "Sin coincidencias.",
+    "noPostalCodesText": "Este país no usa códigos postales.",
+    "postalCodeFormatError": "No coincide con el formato esperado.",
+    "postalCodeFormatErrorWithExample": "No coincide con el formato esperado (p. ej. {{example}}).",
+    "postalCodeLabel": "Código postal",
+    "proofOfAddressHint": "Factura de servicios, extracto bancario o contrato de alquiler.",
+    "proofOfAddressLabel": "Comprobante de domicilio",
+    "searchPlaceholder": "Buscar…",
+    "selectCountryPlaceholder": "Selecciona un país",
+    "selectOption": "Seleccionar",
+    "selectPlaceholder": "Seleccionar…",
+    "setNationalityFirstPlaceholder": "Indica primero la nacionalidad",
+    "stateProvinceLabel": "Estado / provincia",
+    "stepOf": "Paso {{current}} de {{total}}",
+    "streetAddress2Label": "Dirección línea 2 (opcional)",
+    "streetAddressLabel": "Dirección",
+    "streetAddressPlaceholder": "Calle Principal 123"
+  },
+  "kycWizard": {
+    "backToDashboard": "Volver al panel",
+    "pendingDescription": "Hemos recibido tus datos y los estamos revisando. Te avisaremos en cuanto se tome una decisión.",
+    "pendingHeading": "Verificación pendiente",
+    "verifiedDescription": "Tu identidad ha sido verificada. Tienes acceso completo a envíos, tarjetas y cuentas virtuales.",
+    "verifiedHeading": "Estás verificado"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "Acceso empresarial",
+      "demoCard": "Tarjeta",
+      "demoDeposit": "Depósito",
+      "demoSend": "Enviar",
+      "demoTotalBalance": "Saldo total",
+      "demoTransaction1": "Café y cía.",
+      "demoTransaction2": "Nómina",
+      "demoTransaction3": "Retención de diseño",
+      "feature1Desc": "Guarda y mueve fiat y cripto lado a lado, con un saldo en el que siempre puedes confiar.",
+      "feature1Title": "Un solo saldo, todas las monedas",
+      "feature2Desc": "Elige un contacto, obtén una cotización en vivo, confirma — el dinero se mueve sin papeleo.",
+      "feature2Title": "Envía en segundos",
+      "feature3Desc": "Crea una tarjeta virtual con un toque, congélala igual de rápido.",
+      "feature3Title": "Tarjetas bajo demanda",
+      "feature4Desc": "Cada transacción se escribe en un libro contable inmutable y reconciliado, tras bambalinas.",
+      "feature4Title": "Contabilidad de nivel bancario",
+      "featuresHeading": "Todo lo que tu dinero necesita",
+      "featuresSubheading": "Sin comisiones ocultas, sin menús confusos — solo banca que funciona.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "Dinero, hecho simple",
+      "heroHeadlineHighlight": "sin esfuerzo.",
+      "heroHeadlinePrefix": "Banca que se siente",
+      "heroSubheadline": "{{productName}} es una billetera moderna para enviar, guardar y gastar tu dinero — hermosamente simple, seriamente segura.",
+      "logIn": "Iniciar sesión",
+      "openAccountCta": "Abre tu cuenta",
+      "planBusinessBlurb": "Acceso multiusuario, límites más altos, soporte dedicado.",
+      "planBusinessCta": "Habla con nosotros",
+      "planBusinessName": "Empresa",
+      "planBusinessPrice": "Personalizado",
+      "planPersonalBlurb": "Gastos y envíos cotidianos para individuos.",
+      "planPersonalCta": "Empezar",
+      "planPersonalName": "Personal",
+      "planPersonalPrice": "Gratis",
+      "pricingHeading": "Precios simples",
+      "pricingSubheading": "Empieza gratis. Mejora solo cuando tu empresa necesite más.",
+      "signUpFree": "Regístrate gratis"
+    },
+    "aurora": {
+      "badge": "Dinero maravillosamente simple",
+      "businessLogin": "Acceso empresarial",
+      "demoActionCard": "Tarjeta",
+      "demoActionDeposit": "Depósito",
+      "demoActionSend": "Enviar",
+      "demoBalance": "$8,942.10",
+      "demoGrowth": "+12.4%",
+      "feature1Desc": "Cada billetera, cada moneda, siempre reconciliada.",
+      "feature1Title": "Un saldo hermoso",
+      "feature2Desc": "Cotizaciones en vivo, confirmación instantánea, cero papeleo.",
+      "feature2Title": "Envía en segundos",
+      "feature3Desc": "Emite una tarjeta virtual en cuanto estés verificado.",
+      "feature3Title": "Tarjetas bajo demanda",
+      "feature4Desc": "Cada transacción, reconciliada y auditable.",
+      "feature4Title": "Contabilidad de nivel bancario",
+      "featuresHeading": "Todo lo que tu dinero necesita",
+      "featuresSubheading": "Sin comisiones ocultas, sin menús confusos — solo banca que funciona.",
+      "heroHeadlineHighlight": "una sola vista hermosa.",
+      "heroHeadlinePrefix": "Cada cuenta,",
+      "heroSubheadline": "{{productName}} reúne billeteras, pagos y tarjetas en un panel que a la gente realmente le gusta abrir.",
+      "logIn": "Iniciar sesión",
+      "openAccount": "Abre tu cuenta",
+      "signUpFree": "Regístrate gratis",
+      "thisMonth": "Este mes",
+      "totalBalance": "Saldo total",
+      "vsLastMonth": "vs. mes anterior"
+    },
+    "meridian": {
+      "eyebrow": "Plataforma de operaciones",
+      "featureCardIssuingDesc": "Emite tarjetas virtuales a los clientes en cuanto estén verificados.",
+      "featureCardIssuingTitle": "Emisión de tarjetas",
+      "featureComplianceDesc": "KYC, endosos y registros de auditoría integrados desde el primer día.",
+      "featureComplianceTitle": "Cumplimiento integrado",
+      "featureLedgerDesc": "Cada billetera, cada moneda, reconciliada en una única fuente de verdad.",
+      "featureLedgerTitle": "Contabilidad unificada",
+      "featurePayoutsDesc": "Cotiza, confirma y liquida transferencias internacionales en pocos clics.",
+      "featurePayoutsTitle": "Pagos globales",
+      "featuresHeading": "Todo lo que las operaciones necesitan",
+      "featuresSubheading": "Una sola plataforma para toda la pila de movimiento de dinero.",
+      "heroHeadline": "Gestiona el movimiento de dinero como un operador, no como una hoja de cálculo.",
+      "heroSubheadline": "{{productName}} le da a tu equipo una sola consola para billeteras, pagos, tarjetas y cumplimiento — respaldada por una contabilidad en la que puedes confiar.",
+      "logIn": "Iniciar sesión",
+      "openAccountCta": "Abrir una cuenta",
+      "operatorLoginCta": "Acceso de operador",
+      "reconciledDesc": "Cada transacción registrada es de doble entrada, idempotente y se coteja automáticamente con los registros del proveedor.",
+      "reconciledTitle": "Reconciliado por defecto",
+      "signUp": "Registrarse",
+      "statCurrenciesLabel": "Monedas",
+      "statPayoutTimeLabel": "Tiempo prom. de pago",
+      "statUptimeLabel": "Disponibilidad",
+      "teamsDesc": "Acceso basado en roles para propietarios, administradores y operadores, con un registro de auditoría completo de cada acción.",
+      "teamsTitle": "Diseñado para equipos"
+    },
+    "nova": {
+      "createAccountCta": "Crea tu cuenta",
+      "ctaHeading": "¿Listo para gestionar tu propia infraestructura?",
+      "ctaSubheading": "Tus clientes, tu marca, tu contabilidad — impulsados por debajo por Yativo.",
+      "feature1Desc": "Cada centavo rastreado mediante asientos contables inmutables y auditables — nunca una columna de saldo ingenua.",
+      "feature1Title": "Contabilidad de doble entrada",
+      "feature2Desc": "El registro impulsado por webhooks mantiene los saldos de los clientes al día en el momento en que se mueve el dinero.",
+      "feature2Title": "Liquidación en tiempo real",
+      "feature3Desc": "Tareas programadas comparan tu contabilidad con la liquidación de origen y detectan desvíos al instante.",
+      "feature3Title": "Reconciliado automáticamente",
+      "feature4Desc": "Redes fiat y cripto bajo un solo plan de cuentas, listo para corredores de pago globales.",
+      "feature4Title": "Multi-moneda",
+      "feature5Desc": "Las sesiones de clientes y personal nunca se cruzan — tokens separados, radio de impacto separado.",
+      "feature5Title": "Dos dominios de autenticación aislados",
+      "feature6Desc": "Revisión de KYC, ajustes manuales, pagos, tarjetas y webhooks — una sola consola.",
+      "feature6Title": "Back office completo",
+      "featuresHeading": "Construido como infraestructura, no como una demo",
+      "featuresSubheading": "Todo lo que un revendedor necesita para gestionar dinero real de clientes, con seguridad.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "Empezar",
+      "heroHeadlineHighlight": "operando bajo tu propia marca.",
+      "heroHeadlinePrefix": "Infraestructura fintech,",
+      "heroSubheadline": "{{productName}} le da a tu empresa una billetera, pagos y plataforma de tarjetas de marca blanca sobre una contabilidad real de doble entrada — despliégala, márcala y gestiona tu propio negocio fintech con ella.",
+      "openAccountCta": "Abre una cuenta",
+      "operatorConsole": "Consola de operador",
+      "signIn": "Iniciar sesión",
+      "trustBadge": "Verificado en libro contable · Reconciliado cada hora"
+    },
+    "prime": {
+      "balance": "Saldo",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "Acceso al panel",
+      "feature": {
+        "cardIssuing": {
+          "desc": "Emite tarjetas virtuales a los clientes en cuanto estén verificados.",
+          "title": "Emisión de tarjetas"
+        },
+        "compliance": {
+          "desc": "KYC, endosos y registros de auditoría integrados desde el primer día.",
+          "title": "Cumplimiento integrado"
+        },
+        "ledger": {
+          "desc": "Cada billetera, cada moneda, reconciliada en una única fuente de verdad.",
+          "title": "Contabilidad unificada"
+        },
+        "payouts": {
+          "desc": "Cotiza, confirma y liquida transferencias internacionales en pocos clics.",
+          "title": "Pagos globales"
+        }
+      },
+      "featuresHeading": "Todo lo que las operaciones necesitan",
+      "heroHeadline": "Infraestructura de pagos para internet.",
+      "heroSubheadline": "{{productName}} te da una sola API y un solo panel para billeteras, pagos, tarjetas y cumplimiento.",
+      "logIn": "Iniciar sesión",
+      "signUp": "Registrarse",
+      "startNow": "Empezar ahora",
+      "stat": {
+        "deposits": "Depósitos",
+        "payouts": "Pagos",
+        "refunds": "Reembolsos"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← Volver al inicio",
+    "backToSignIn": "← Volver a iniciar sesión",
+    "createAccount": "Crear una cuenta",
+    "defaultProductName": "White Label",
+    "emailLabel": "Correo electrónico",
+    "genericError": "No se pudo iniciar sesión. Verifica tus credenciales.",
+    "invalidCodeError": "Código inválido. Inténtalo de nuevo.",
+    "newHere": "¿Eres nuevo aquí?",
+    "passwordLabel": "Contraseña",
+    "signIn": "Iniciar sesión",
+    "signInDescription": "Inicia sesión en tu cuenta",
+    "signingIn": "Iniciando sesión…",
+    "verificationCodeLabel": "Código de verificación",
+    "verify": "Verificar",
+    "verifyDescription": "Introduce el código de 6 dígitos de tu app de autenticación, o un código de respaldo.",
+    "verifyHeading": "Verifica que eres tú",
+    "verifying": "Verificando…",
+    "welcomeBack": "Bienvenido de nuevo"
+  },
+  "nav": {
+    "account": "Cuenta",
+    "atlas": {
+      "contacts": "Contactos",
+      "home": "Inicio",
+      "profile": "Perfil",
+      "send": "Enviar"
+    },
+    "beneficiaries": "Beneficiarios",
+    "cards": "Tarjetas",
+    "cryptoWallets": "Billeteras cripto",
+    "dashboard": "Panel",
+    "deposit": "Depósito",
+    "logout": "Cerrar sesión",
+    "portal": "Portal",
+    "profileKyc": "Perfil y KYC",
+    "section": {
+      "account": "Cuenta",
+      "manage": "Gestionar"
+    },
+    "sendMoney": "Enviar dinero",
+    "settings": "Configuración",
+    "virtualAccounts": "Cuentas virtuales",
+    "wallets": "Billeteras",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "Cuenta",
+    "emailLabel": "Correo electrónico",
+    "endorsementsDescription": "Verificación por servicio requerida para ciertas funciones, como transferencias bancarias locales o tarjetas virtuales.",
+    "endorsementsLoadError": "No se pudieron cargar los endosos.",
+    "endorsementsTitle": "Endosos",
+    "heading": "Perfil y verificación",
+    "identityVerificationTitle": "Verificación de identidad",
+    "restartVerification": "Reiniciar verificación",
+    "startVerification": "Iniciar verificación",
+    "statusApproved": "Estás verificado. Acceso completo a envíos, tarjetas y cuentas virtuales.",
+    "statusNotStarted": "Requerido antes de poder enviar dinero, tener una cuenta virtual u obtener una tarjeta.",
+    "statusPending": "Hemos recibido tus datos y los estamos revisando — te avisaremos en cuanto se decida.",
+    "statusRejected": "Tu último envío no fue aprobado — inicia uno nuevo abajo.",
+    "subheading": "Gestiona los datos de tu identidad",
+    "typeLabel": "Tipo"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "Importe a enviar ({{currency}})",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "Debitar de la billetera",
+      "prompt": "Importe a enviar",
+      "promptTo": "Importe a enviar a {{name}}",
+      "recipientFallback": "el destinatario",
+      "willReceive": "Te mostraremos exactamente cuánto recibe {{recipient}} antes de que confirmes.",
+      "willReceiveWithCurrency": "Te mostraremos exactamente cuánto recibe {{recipient}} en {{currency}} antes de que confirmes."
+    },
+    "buttons": {
+      "back": "Atrás",
+      "confirmAndSend": "Confirmar y enviar",
+      "continue": "Continuar",
+      "getQuote": "Obtener cotización",
+      "requote": "Volver a cotizar"
+    },
+    "errors": {
+      "enterAmount": "Introduce un importe",
+      "fieldRequired": "{{field}} es obligatorio",
+      "maxLength": "Máximo {{max}} caracteres",
+      "minLength": "Mínimo {{min}} caracteres"
+    },
+    "result": {
+      "payoutId": "ID de pago: {{id}}",
+      "payoutSubmitted": "Pago enviado",
+      "refreshing": "(actualizando…)",
+      "sendAnother": "Enviar otro",
+      "statusLabel": "Estado:",
+      "viewWallets": "Ver billeteras"
+    },
+    "review": {
+      "expired": "Esta cotización ha expirado — obtén una nueva para continuar.",
+      "expiresIn": "La cotización expira en {{seconds}}s.",
+      "rateLabel": "Tasa",
+      "recipientGetsLabel": "El destinatario recibe",
+      "toLabel": "Para",
+      "totalChargedLabel": "Total cobrado"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "Selecciona un beneficiario",
+      "prompt": "¿A quién le estás enviando dinero?"
+    },
+    "step0": {
+      "countryLabel": "País",
+      "countryPlaceholder": "Selecciona un país",
+      "prompt": "¿A quién le estás enviando dinero?",
+      "recipientNameLabel": "Nombre del destinatario",
+      "recipientNamePlaceholder": "Juan Pérez"
+    },
+    "step1": {
+      "countryFallback": "este país",
+      "methodRange": "{{min}}–{{max}} {{currency}} por transferencia",
+      "noMethods": "Aún no hay métodos de pago activos para este país.",
+      "prompt": "¿Cómo debería cobrar {{recipient}} en {{country}}?",
+      "recipientFallback": "este destinatario"
+    },
+    "step2": {
+      "noDetailsNeeded": "Este método de pago no necesita detalles adicionales.",
+      "prompt": "Detalles de {{method}}",
+      "selectFieldPlaceholder": "Selecciona {{field}}"
+    },
+    "steps": {
+      "amount": "Importe",
+      "beneficiary": "Beneficiario",
+      "details": "Detalles",
+      "method": "Método",
+      "recipient": "Destinatario",
+      "review": "Revisión"
+    },
+    "subtitle": "Elige un país y cómo cobrará, luego confirma el importe.",
+    "title": "Enviar dinero",
+    "toast": {
+      "enterNameAndCountry": "Introduce un nombre y elige un país para continuar",
+      "payoutFailed": "Error en el pago",
+      "payoutSubmitted": "Pago enviado",
+      "payoutSubmittedDescription": "Te avisaremos en cuanto se liquide.",
+      "pickBeneficiary": "Elige un beneficiario para continuar",
+      "pickMethod": "Elige un método de pago para continuar",
+      "quoteFailed": "No se pudo obtener una cotización",
+      "saveRecipientFailed": "No se pudo guardar el destinatario",
+      "tryAgain": "Inténtalo de nuevo."
+    },
+    "toggle": {
+      "newRecipient": "Nuevo destinatario",
+      "savedBeneficiary": "Beneficiario guardado"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "Confirmar nueva contraseña",
+      "currentPasswordLabel": "Contraseña actual",
+      "description": "Elige una contraseña segura que no uses en otro lugar.",
+      "newPasswordLabel": "Nueva contraseña",
+      "submit": "Actualizar contraseña",
+      "title": "Cambiar contraseña",
+      "toastDescription": "Los cambios de contraseña no están habilitados en esta versión.",
+      "toastTitle": "Aún no disponible"
+    },
+    "copiedToClipboard": "Copiado al portapapeles",
+    "copyError": "No se pudo copiar",
+    "subtitle": "Gestiona la seguridad de tu cuenta",
+    "title": "Configuración",
+    "twoFactor": {
+      "authenticatorApp": "App de autenticación",
+      "description": "Añade una capa extra de seguridad a tu cuenta.",
+      "disable": {
+        "description": "Confirma tu contraseña para desactivar la autenticación de dos factores.",
+        "error": "No se pudo desactivar la autenticación de dos factores.",
+        "passwordLabel": "Contraseña",
+        "submit": "Desactivar autenticación de dos factores",
+        "submitting": "Desactivando…",
+        "title": "Desactivar autenticación de dos factores"
+      },
+      "enabled": "Activada",
+      "loading": "Cargando…",
+      "notConfigured": "Aún no configurada",
+      "setup": {
+        "backupCodesDescription": "Guárdalos en un lugar seguro — cada uno se puede usar una vez para iniciar sesión si pierdes el acceso a tu app de autenticación. No se volverán a mostrar.",
+        "backupCodesTitle": "Guarda tus códigos de respaldo",
+        "codeLabel": "Código de 6 dígitos",
+        "continueButton": "Continuar",
+        "copyAll": "Copiar todos",
+        "done": "Listo",
+        "enableButton": "Activar autenticación de dos factores",
+        "enterCodeTitle": "Introduce el código",
+        "manualKeyLabel": "¿No puedes escanear? Introduce esta clave manualmente",
+        "qrAlt": "Código QR de configuración 2FA",
+        "scanTitle": "Escanea con tu app de autenticación",
+        "verifyError": "No se pudo verificar ese código.",
+        "verifying": "Verificando…"
+      },
+      "title": "Autenticación de dos factores",
+      "toast": {
+        "disabled": "Autenticación de dos factores desactivada",
+        "setupError": "No se pudo iniciar la configuración"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "Tipo de cuenta",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "business": "Empresa",
+    "businessNameLabel": "Nombre de la empresa",
+    "callingCodeAriaLabel": "Código de país",
+    "countryLabel": "País",
+    "createAccount": "Crear cuenta",
+    "createYourAccount": "Crea tu cuenta",
+    "creatingAccount": "Creando cuenta…",
+    "defaultProductName": "White Label",
+    "emailLabel": "Correo electrónico",
+    "fullNameLabel": "Nombre completo",
+    "genericError": "No se pudo crear tu cuenta.",
+    "individual": "Individual",
+    "passwordLabel": "Contraseña",
+    "phoneNumberLabel": "Número de teléfono",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "Selecciona tu país",
+    "signIn": "Iniciar sesión",
+    "startSendingDescription": "Empieza a enviar, guardar y gastar en minutos"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "Ver perfil"
+    },
+    "prime": {
+      "notifications": "Notificaciones",
+      "switchToDarkMode": "Cambiar a modo oscuro",
+      "switchToLightMode": "Cambiar a modo claro"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "Cuenta virtual lista",
+    "addCurrency": "Añadir una moneda",
+    "allCurrenciesAdded": "Ya tienes una cuenta para cada moneda disponible.",
+    "copiedToClipboard": "Copiado al portapapeles",
+    "copyError": "No se pudo copiar",
+    "copyField": "Copiar {{field}}",
+    "createAccount": "Crear cuenta",
+    "createAccountError": "No se pudo crear la cuenta",
+    "creating": "Creando…",
+    "noAccountsYet": "Aún no hay cuentas virtuales — aprovisiona una para una moneda abajo.",
+    "noCurrenciesAvailable": "Aún no hay monedas disponibles para cuentas virtuales.",
+    "noVerificationNeeded": "No se necesita verificación",
+    "requiresVerification": "Requiere verificación de {{endorsement}} — contacta a soporte para empezar.",
+    "shareDetails": "Comparte estos datos con quien te esté enviando fondos.",
+    "startVerification": "Iniciar verificación",
+    "subtitle": "Datos bancarios dedicados que puedes reutilizar para cada transferencia entrante, uno por moneda.",
+    "title": "Cuentas virtuales",
+    "verificationNote": "Algunas redes necesitan una verificación única antes de poder emitir una cuenta.",
+    "verified": "Verificado",
+    "yourAccounts": "Tus cuentas"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} pendiente",
+    "wallet": "Billetera"
+  },
+  "walletDetail": {
+    "allWallets": "Todas las billeteras",
+    "available": "Disponible",
+    "balanceOverTime": "Saldo a lo largo del tiempo",
+    "cancel": "Cancelar",
+    "noActivity": "Aún no hay actividad",
+    "pageOf": "Página {{page}} / {{totalPages}}",
+    "pending": "Pendiente",
+    "removeDialogDescription": "Está vacía, así que es seguro — puedes volver a añadir {{currencyCode}} más tarde si sigue disponible.",
+    "removeDialogTitle": "¿Eliminar tu billetera {{currencyCode}}?",
+    "removeWallet": "Eliminar billetera",
+    "removeWalletError": "No se pudo eliminar la billetera",
+    "removing": "Eliminando…",
+    "statement": "Estado de cuenta",
+    "walletRemoved": "Billetera eliminada",
+    "walletTitle": "Billetera {{currencyCode}}"
+  },
+  "wallets": {
+    "add": "Añadir",
+    "addCurrencyPlaceholder": "Añadir moneda",
+    "addWalletError": "No se pudo añadir la billetera",
+    "empty": "Aún no hay billeteras. Aparecerán aquí en cuanto tengas saldo.",
+    "subtitle": "Tus saldos en todas las monedas",
+    "title": "Billeteras",
+    "walletAdded": "Billetera añadida",
+    "walletLabel": "Billetera"
+  }
+}

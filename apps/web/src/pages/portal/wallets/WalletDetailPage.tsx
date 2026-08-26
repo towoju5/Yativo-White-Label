@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { StatementLine, WalletBalance } from "@white-label/shared-types";
 import { formatCurrencyAmount } from "@white-label/shared-types";
 import { ArrowLeft, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ import { WalletStatementTable } from "@/components/wallet/WalletStatementTable";
 const PAGE_SIZE = 15;
 
 export default function PortalWalletDetailPage() {
+  const { t } = useTranslation();
   const { walletId } = useParams<{ walletId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -35,13 +37,13 @@ export default function PortalWalletDetailPage() {
   const removeMutation = useMutation({
     mutationFn: () => portalApi.del(`/portal/wallets/${walletId}`),
     onSuccess: () => {
-      toast({ title: "Wallet removed" });
+      toast({ title: t("walletDetail.walletRemoved", "Wallet removed") });
       queryClient.invalidateQueries({ queryKey: ["portal", "wallets"] });
       queryClient.invalidateQueries({ queryKey: ["portal", "wallets", "currencies"] });
       navigate("/portal/wallets", { replace: true });
     },
     onError: (e) => {
-      toast({ variant: "destructive", title: "Couldn't remove wallet", description: e instanceof ApiError ? e.message : undefined });
+      toast({ variant: "destructive", title: t("walletDetail.removeWalletError", "Couldn't remove wallet"), description: e instanceof ApiError ? e.message : undefined });
       setConfirmOpen(false);
     },
   });
@@ -67,7 +69,7 @@ export default function PortalWalletDetailPage() {
   return (
     <div className="space-y-6">
       <Link to="/portal/wallets" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-3.5 w-3.5" /> All wallets
+        <ArrowLeft className="h-3.5 w-3.5" /> {t("walletDetail.allWallets", "All wallets")}
       </Link>
 
       {!wallet ? (
@@ -75,14 +77,14 @@ export default function PortalWalletDetailPage() {
       ) : (
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="font-heading text-2xl font-semibold tracking-tight">{wallet.currencyCode} wallet</h1>
+            <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("walletDetail.walletTitle", "{{currencyCode}} wallet", { currencyCode: wallet.currencyCode })}</h1>
             <div className="mt-3 flex flex-wrap gap-6">
               <div>
-                <p className="text-xs text-muted-foreground">Available</p>
+                <p className="text-xs text-muted-foreground">{t("walletDetail.available", "Available")}</p>
                 <p className="font-heading text-2xl font-semibold">{formatCurrencyAmount(wallet.availableMinor, decimals, wallet.symbol, wallet.currencyCode)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-xs text-muted-foreground">{t("walletDetail.pending", "Pending")}</p>
                 <p className="font-heading text-2xl font-semibold text-warning">{formatCurrencyAmount(wallet.pendingMinor, decimals, wallet.symbol, wallet.currencyCode)}</p>
               </div>
             </div>
@@ -91,22 +93,22 @@ export default function PortalWalletDetailPage() {
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4" /> Remove wallet
+                  <Trash2 className="h-4 w-4" /> {t("walletDetail.removeWallet", "Remove wallet")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Remove your {wallet.currencyCode} wallet?</DialogTitle>
+                  <DialogTitle>{t("walletDetail.removeDialogTitle", "Remove your {{currencyCode}} wallet?", { currencyCode: wallet.currencyCode })}</DialogTitle>
                   <DialogDescription>
-                    It's empty, so this is safe — you can add {wallet.currencyCode} back later if it's still offered.
+                    {t("walletDetail.removeDialogDescription", "It's empty, so this is safe — you can add {{currencyCode}} back later if it's still offered.", { currencyCode: wallet.currencyCode })}
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setConfirmOpen(false)}>
-                    Cancel
+                    {t("walletDetail.cancel", "Cancel")}
                   </Button>
                   <Button variant="destructive" disabled={removeMutation.isPending} onClick={() => removeMutation.mutate()}>
-                    {removeMutation.isPending ? "Removing…" : "Remove wallet"}
+                    {removeMutation.isPending ? t("walletDetail.removing", "Removing…") : t("walletDetail.removeWallet", "Remove wallet")}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -117,7 +119,7 @@ export default function PortalWalletDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Balance over time</CardTitle>
+          <CardTitle className="text-sm">{t("walletDetail.balanceOverTime", "Balance over time")}</CardTitle>
         </CardHeader>
         <CardContent>
           {statementQuery.isLoading ? (
@@ -125,20 +127,20 @@ export default function PortalWalletDetailPage() {
           ) : chartData.length > 0 ? (
             <BalanceChart data={chartData} showAxes />
           ) : (
-            <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">No activity yet</div>
+            <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">{t("walletDetail.noActivity", "No activity yet")}</div>
           )}
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-sm">Statement</CardTitle>
+          <CardTitle className="text-sm">{t("walletDetail.statement", "Statement")}</CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-xs text-muted-foreground">
-              Page {page} / {totalPages}
+              {t("walletDetail.pageOf", "Page {{page}} / {{totalPages}}", { page, totalPages })}
             </span>
             <Button variant="outline" size="icon" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
               <ChevronRight className="h-4 w-4" />

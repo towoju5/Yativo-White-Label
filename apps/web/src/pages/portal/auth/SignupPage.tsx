@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { createCustomerSchema, type Country, type CreateCustomerInput } from "@white-label/shared-types";
 import { fetchBranding } from "@/theme/branding";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
@@ -12,8 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ApiError, publicApi } from "@/lib/api-client";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function PortalSignupPage() {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading, signup } = useCustomerAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const navigate = useNavigate();
@@ -48,30 +51,33 @@ export default function PortalSignupPage() {
       await signup(values);
       navigate("/portal", { replace: true });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Unable to create your account.");
+      setError(e instanceof ApiError ? e.message : t("signup.genericError", "Unable to create your account."));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-10">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
             {(branding?.productName ?? "W").slice(0, 1)}
           </div>
-          <span className="font-heading text-lg font-semibold">{branding?.productName ?? "White Label"}</span>
+          <span className="font-heading text-lg font-semibold">{branding?.productName ?? t("signup.defaultProductName", "White Label")}</span>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Create your account</CardTitle>
-            <CardDescription>Start sending, holding and spending in minutes</CardDescription>
+            <CardTitle>{t("signup.createYourAccount", "Create your account")}</CardTitle>
+            <CardDescription>{t("signup.startSendingDescription", "Start sending, holding and spending in minutes")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Account type</Label>
+                <Label>{t("signup.accountTypeLabel", "Account type")}</Label>
                 <Select
                   value={type}
                   onValueChange={(v) => {
@@ -87,31 +93,31 @@ export default function PortalSignupPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="INDIVIDUAL">Individual</SelectItem>
-                    <SelectItem value="BUSINESS">Business</SelectItem>
+                    <SelectItem value="INDIVIDUAL">{t("signup.individual", "Individual")}</SelectItem>
+                    <SelectItem value="BUSINESS">{t("signup.business", "Business")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {type === "BUSINESS" ? (
                 <div className="space-y-1.5">
-                  <Label htmlFor="businessName">Business name</Label>
+                  <Label htmlFor="businessName">{t("signup.businessNameLabel", "Business name")}</Label>
                   <Input id="businessName" {...register("businessName")} />
                   {errors.businessName && <p className="text-xs text-destructive">{errors.businessName.message}</p>}
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullName">Full name</Label>
+                  <Label htmlFor="fullName">{t("signup.fullNameLabel", "Full name")}</Label>
                   <Input id="fullName" {...register("fullName")} />
                   {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
                 </div>
               )}
               <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("signup.emailLabel", "Email")}</Label>
                 <Input id="email" type="email" autoComplete="email" {...register("email")} />
                 {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Country</Label>
+                <Label>{t("signup.countryLabel", "Country")}</Label>
                 <Select
                   value={countryCode}
                   onValueChange={(iso3) => {
@@ -125,7 +131,7 @@ export default function PortalSignupPage() {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your country" />
+                    <SelectValue placeholder={t("signup.selectCountryPlaceholder", "Select your country")} />
                   </SelectTrigger>
                   <SelectContent>
                     {countries?.map((c) => (
@@ -138,35 +144,42 @@ export default function PortalSignupPage() {
                 {errors.countryCode && <p className="text-xs text-destructive">{errors.countryCode.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="phone">Phone number</Label>
+                <Label htmlFor="phone">{t("signup.phoneNumberLabel", "Phone number")}</Label>
                 <div className="flex gap-2">
                   <Input
                     className="w-16 shrink-0 text-center"
                     value={watch("callingCode") ?? ""}
                     readOnly
                     tabIndex={-1}
-                    aria-label="Calling code"
+                    aria-label={t("signup.callingCodeAriaLabel", "Calling code")}
                   />
-                  <Input id="phone" type="tel" autoComplete="tel-national" placeholder="5551234567" {...register("phone")} className="flex-1" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    autoComplete="tel-national"
+                    placeholder={t("signup.phonePlaceholder", "5551234567")}
+                    {...register("phone")}
+                    className="flex-1"
+                  />
                 </div>
                 {(errors.callingCode || errors.phone) && (
                   <p className="text-xs text-destructive">{errors.phone?.message ?? errors.callingCode?.message}</p>
                 )}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("signup.passwordLabel", "Password")}</Label>
                 <Input id="password" type="password" autoComplete="new-password" {...register("password")} />
                 {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? "Creating account…" : "Create account"}
+                {submitting ? t("signup.creatingAccount", "Creating account…") : t("signup.createAccount", "Create account")}
               </Button>
             </form>
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
+              {t("signup.alreadyHaveAccount", "Already have an account?")}{" "}
               <Link to="/portal/login" className="font-medium text-primary hover:underline">
-                Sign in
+                {t("signup.signIn", "Sign in")}
               </Link>
             </p>
           </CardContent>

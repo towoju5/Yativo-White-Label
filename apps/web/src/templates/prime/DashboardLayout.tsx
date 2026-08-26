@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { formatMinorAmount } from "@white-label/shared-types";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
@@ -34,10 +35,12 @@ export function PrimeDashboardLayout({
   stats,
   wallets,
   activity,
-  activityTitle = "Recent activity",
+  activityTitle,
   actions,
   isLoading,
 }: DashboardLayoutProps) {
+  const { t } = useTranslation();
+  const resolvedActivityTitle = activityTitle ?? t("dashboardLayout.prime.recentActivity", "Recent activity");
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -64,7 +67,7 @@ export function PrimeDashboardLayout({
 
       {(isLoading || (chartData && chartData.length > 0)) && (
         <div className="rounded-lg border border-border bg-card p-5">
-          <p className="mb-4 text-sm font-medium">Balance trend</p>
+          <p className="mb-4 text-sm font-medium">{t("dashboardLayout.prime.balanceTrend", "Balance trend")}</p>
           {isLoading ? <Skeleton className="h-[200px] w-full" /> : <BalanceChart data={chartData!} height={200} showAxes />}
         </div>
       )}
@@ -73,7 +76,7 @@ export function PrimeDashboardLayout({
         {wallets && (
           <div className="rounded-lg border border-border bg-card lg:col-span-1">
             <div className="border-b border-border px-4 py-3">
-              <p className="text-sm font-medium">Wallets</p>
+              <p className="text-sm font-medium">{t("dashboardLayout.prime.wallets", "Wallets")}</p>
             </div>
             {isLoading ? (
               <div className="space-y-2 p-4">
@@ -87,14 +90,14 @@ export function PrimeDashboardLayout({
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center text-sm text-muted-foreground">No wallets yet</div>
+              <div className="p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.prime.noWalletsYet", "No wallets yet")}</div>
             )}
           </div>
         )}
 
         <div className={cn("rounded-lg border border-border bg-card", wallets ? "lg:col-span-2" : "lg:col-span-3")}>
           <div className="border-b border-border px-4 py-3">
-            <p className="text-sm font-medium">{activityTitle}</p>
+            <p className="text-sm font-medium">{resolvedActivityTitle}</p>
           </div>
           {isLoading ? (
             <div className="space-y-2 p-4">
@@ -103,15 +106,15 @@ export function PrimeDashboardLayout({
               ))}
             </div>
           ) : activity.length === 0 ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">Nothing here yet</div>
+            <div className="p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.prime.nothingHereYet", "Nothing here yet")}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[34rem] table-fixed text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Description</th>
-                    <th className="w-28 px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Status</th>
-                    <th className="w-44 px-4 py-2 text-right text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Amount</th>
+                    <th className="px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.description", "Description")}</th>
+                    <th className="w-28 px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.status", "Status")}</th>
+                    <th className="w-44 px-4 py-2 text-right text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.amount", "Amount")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import type { LucideIcon } from "lucide-react";
 import { Menu, LogOut, ChevronDown } from "lucide-react";
 import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,8 +33,9 @@ interface TopbarProps {
 
 export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: TopbarProps) {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const productName = branding?.productName ?? "White Label";
+  const productName = branding?.productName ?? t("nav.whiteLabel", "White Label");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-lg">
@@ -68,6 +71,10 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
         </nav>
 
         <div className="flex items-center gap-2">
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger className="hidden items-center gap-2 rounded-full border border-border bg-card px-2 py-1.5 pr-3 text-sm shadow-soft md:flex">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold uppercase text-primary">
@@ -80,7 +87,7 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
               <DropdownMenuLabel className="truncate">{userSubLabel}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onLogout} className="text-destructive">
-                <LogOut className="mr-2 h-4 w-4" /> Log out
+                <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout", "Log out")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -90,6 +97,9 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
               <Menu className="h-5 w-5" />
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
+              <div className="mt-4">
+                <LanguageSwitcher />
+              </div>
               <nav className="mt-4 space-y-1">
                 {items.map((item) => (
                   <NavLink
@@ -112,7 +122,7 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
                   onClick={onLogout}
                   className="mt-3 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10"
                 >
-                  <LogOut className="h-4 w-4" /> Log out
+                  <LogOut className="h-4 w-4" /> {t("nav.logout", "Log out")}
                 </button>
               </nav>
             </SheetContent>

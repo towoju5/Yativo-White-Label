@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { formatCurrencyAmount, formatMinorAmount } from "@white-label/shared-types";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,10 +20,12 @@ export function AtlasDashboardLayout({
   stats,
   wallets,
   activity,
-  activityTitle = "Recent activity",
+  activityTitle,
   actions,
   isLoading,
 }: DashboardLayoutProps) {
+  const { t } = useTranslation();
+  const resolvedActivityTitle = activityTitle ?? t("dashboardLayout.atlas.recentActivity", "Recent activity");
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -39,7 +42,7 @@ export function AtlasDashboardLayout({
           <div className="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-medium opacity-80">{heroLabel ?? "Total balance"}</p>
+              <p className="text-sm font-medium opacity-80">{heroLabel ?? t("dashboardLayout.atlas.totalBalance", "Total balance")}</p>
               {isLoading ? (
                 <Skeleton className="mt-2 h-10 w-48 bg-white/20" />
               ) : (
@@ -80,7 +83,7 @@ export function AtlasDashboardLayout({
 
       {wallets && (
         <div>
-          <p className="mb-3 font-heading text-sm font-semibold">Your wallets</p>
+          <p className="mb-3 font-heading text-sm font-semibold">{t("dashboardLayout.atlas.yourWallets", "Your wallets")}</p>
           {isLoading ? (
             <div className="flex gap-4">
               <Skeleton className="h-36 w-56 rounded-2xl" />
@@ -93,20 +96,20 @@ export function AtlasDashboardLayout({
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No wallets yet</div>
+            <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.atlas.noWalletsYet", "No wallets yet")}</div>
           )}
         </div>
       )}
 
       <div>
-        <p className="mb-3 font-heading text-sm font-semibold">{activityTitle}</p>
+        <p className="mb-3 font-heading text-sm font-semibold">{resolvedActivityTitle}</p>
         {isLoading ? (
           <div className="flex gap-4">
             <Skeleton className="h-24 w-64 rounded-2xl" />
             <Skeleton className="h-24 w-64 rounded-2xl" />
           </div>
         ) : activity.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nothing here yet</div>
+          <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.atlas.nothingHereYet", "Nothing here yet")}</div>
         ) : (
           <div className="scrollbar-thin flex snap-x gap-4 overflow-x-auto pb-2">
             {activity.map((item) => (

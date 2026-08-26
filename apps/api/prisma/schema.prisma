@@ -291,6 +291,29 @@ model StaffUser {
   @@map("staff_users")
 }
 
+/// Encrypted, admin-managed integration configuration. The encryption root key stays outside
+/// PostgreSQL in CREDENTIAL_ENCRYPTION_KEY, so a database export alone cannot reveal secrets.
+model SecureSetting {
+  key            String   @id
+  encryptedValue String
+  updatedById    String
+  updatedAt      DateTime @updatedAt
+
+  @@map("secure_settings")
+}
+
+/// Append-only record of sensitive integration-setting changes. Values/secrets are never logged.
+model AdminAuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  target    String
+  createdAt DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@map("admin_audit_logs")
+}
+
 /// Optional fine-grained permission set for the STAFF tier (OWNER/ADMIN bypass this entirely —
 /// see requirePermission()). Admin-managed via /admin/roles; assigning one to a staff member
 /// narrows exactly what they can do beyond the default STAFF baseline.

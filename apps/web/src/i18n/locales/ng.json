@@ -1,0 +1,974 @@
+{
+    "beneficiaries ": {
+        "addABeneficiary ": "Add person wey you dey send money go ",
+        "addBeneficiary ": "Add beneficiary ",
+        "addError ": "Wahala dey, we no fit add beneficiary ",
+        "added ": "We don add beneficiary ",
+        "back ": "Go back ",
+        "cancel ": "Cancel ",
+        "continue ": "Continue ",
+        "country ": "Country ",
+        "detail ": {
+            "added ": "We don add am ",
+            "currency ": "Currency ",
+            "editHint ": "You no fit change payment details here — comot this beneficiary, add new one if e don change. ",
+            "editName ": "Change name ",
+            "name ": "Name ",
+            "paymentDetails ": "Payment details ",
+            "removeBeneficiary ": "Comot beneficiary ",
+            "save ": "Save ",
+            "title ": "Beneficiary details ",
+            "type ": "Type "
+        },
+        "empty ": "You never add any person yet. Add one make you fit start send money. ",
+        "fieldRequiredError ": "You must fill {{field}} ",
+        "maxCharsError ": "Make e no pass {{max}} characters ",
+        "methodDetailsHeading ": "{{method}} details ",
+        "minCharsError ": "Make e be at least {{min}} characters ",
+        "nameAndCountryRequired ": "Enter name and pick country make you continue ",
+        "noExtraDetailsNeeded ": "This payout method no need any extra details. ",
+        "noPayoutMethods ": "No active payout methods for this country yet. ",
+        "payoutMethodQuestion ": "How {{name}} for {{country}} suppose collect am? ",
+        "payoutMethodRequired ": "Pick payout method make you continue ",
+        "recipientName ": "Recipient name ",
+        "recipientNamePlaceholder ": "Jane Doe ",
+        "remove ": "Comot ",
+        "removeDialogDescription ": "You go need add dem again if you wan send money go here later. E no go affect any money wey you don send before. ",
+        "removeDialogTitle ": "Comot {{name}}? ",
+        "removeError ": "We no fit comot beneficiary ",
+        "removed ": "We don comot beneficiary ",
+        "selectCountryPlaceholder ": "Select country ",
+        "selectFieldPlaceholder ": "Select {{field}} ",
+        "steps ": {
+            "paymentDetails ": "Payment details ",
+            "payoutMethod ": "Payout method ",
+            "recipient ": "Recipient "
+        },
+        "subtitle ": "People and accounts wey you dey send money go ",
+        "table ": {
+            "actions ": "Actions ",
+            "added ": "Date wey we add am ",
+            "currency ": "Currency ",
+            "name ": "Name "
+        },
+        "thisCountry ": "this country ",
+        "thisRecipient ": "this recipient ",
+        "title ": "Beneficiaries ",
+        "transferRange ": "{{min}}–{{max}} {{currency}} for each transfer ",
+        "updateError ": "We no fit update beneficiary ",
+        "updated ": "We don update beneficiary ",
+        "whoAreYouSendingTo ": "You dey send money go who? "
+    },
+    "cards ": {
+        "addFunds ": "Put money inside ",
+        "addedThisMonth ": "Money wey we add this month ",
+        "airlinePayments ": "Airline payments ",
+        "balance ": "Balance {{amount}} ",
+        "billingAddress ": "Billing address ",
+        "cancel ": "Cancel ",
+        "cardEndingIn ": "Card wey end in {{last4}} ",
+        "cardNumberLabel ": "Card number ",
+        "cardholder ": "Cardholder ",
+        "confirmTerminate ": "Click again make e confirm — you no fit undo am ",
+        "copyNumber ": "Copy number ",
+        "cvv ": "CVV {{cvv}} ",
+        "emptyState ": "You never get any card yet. Request one make you fit start spend. ",
+        "exp ": "Exp {{expiry}} ",
+        "feeAmount ": "Charge {{amount}} ",
+        "freezeCard ": "Freeze card ",
+        "hidesAutomatically ": "E go hide by itself ",
+        "initialFundingHelp ": "Minimum $3. We go deduct am from your USD wallet plus creation fee and top-up fee. ",
+        "initialFundingLabel ": "First money wey you put inside (USD) ",
+        "manage ": "Manage → ",
+        "noTransactions ": "No transactions yet. ",
+        "program ": "Program ",
+        "requestCard ": "Request card ",
+        "requestDialogTitle ": "Request virtual card ",
+        "requesting ": "We dey request am… ",
+        "spentThisMonth ": "Money wey you spend this month ",
+        "subtitle ": "Visa virtual cards wey link to your USD wallet ",
+        "terminateCard ": "Close card ",
+        "title ": "Cards ",
+        "toast ": {
+            "airlineDisabled ": "We don disable airline payments ",
+            "airlineEnabled ": "We don enable airline payments ",
+            "airlineError ": "We no fit update airline payments ",
+            "cardFrozen ": "Card don freeze ",
+            "cardIssued ": "Card don issue ",
+            "cardTerminated ": "Card don close ",
+            "cardTerminatedDescription ": "Any money wey remain go refund to your wallet automatically. ",
+            "cardToppedUp ": "We don top up card ",
+            "cardUnfrozen ": "Card don unfreeze ",
+            "copied ": "We don copy {{label}} ",
+            "copyError ": "We no fit copy am ",
+            "freezeError ": "We no fit update freeze state ",
+            "issueCardError ": "We no fit issue card ",
+            "revealCardError ": "We no fit reveal card ",
+            "terminateError ": "We no fit close card ",
+            "topupFailed ": "Top-up fail ",
+            "withdrawalFailed ": "Withdrawal fail ",
+            "withdrawalSubmitted ": "We don submit withdrawal ",
+            "withdrawalSubmittedDescription ": "We go deduct fee before the net amount reach your wallet. "
+        },
+        "topUp ": "Top up ",
+        "transactionFallback ": "Transaction ",
+        "transactions ": "Transactions ",
+        "unfreezeCard ": "Unfreeze card ",
+        "virtualUsd ": "Virtual · USD ",
+        "visaVirtualCardUsd ": "Visa virtual card · USD ",
+        "withdraw ": "Collect money ",
+        "withdrawFeeNote ": "We dey deduct fee from withdrawals before the net amount reach your wallet. "
+    },
+    "common ": {
+        "language ": "Pidgin"
+    },
+    "crypto ": {
+        "addressCopied ": "We don copy address ",
+        "copyAddressError ": "We no fit copy address ",
+        "depositAddressReady ": "Deposit address don ready ",
+        "generateAddress ": "Generate address ",
+        "generateAddressError ": "We no fit generate address ",
+        "generateDescription ": "Generate deposit address for any chain wey we support. ",
+        "generating ": "We dey generate am… ",
+        "noDepositsYet ": "You never deposit any crypto yet ",
+        "noWalletsYet ": "You never get any crypto wallet yet — generate address below make you start. ",
+        "selectAssetPlaceholder ": "Select asset ",
+        "sharedAddressWarning ": "Other people fit use this address for the same asset. We go match deposit to your account, our team go confirm am before your balance update. ",
+        "subtitle ": "Deposit addresses and on-chain deposit history for assets wey we support. ",
+        "title ": "Crypto wallets ",
+        "transactionsDescription ": "Every on-chain deposit wey match your account. ",
+        "transactionsTitle ": "Crypto transactions ",
+        "viewOnExplorer ": "Check am for block explorer ",
+        "yourWallets ": "Your wallets "
+    },
+    "dashboard ": {
+        "activityTitle ": "Recent activity ",
+        "heroLabel ": "Total money wey dey ",
+        "stats ": {
+            "available ": "Money wey you fit use ",
+            "pending ": "E dey come ",
+            "recentActivity ": "Recent activity ",
+            "wallets ": "Wallets "
+        },
+        "subtitle ": "See wetin dey happen across your accounts ",
+        "title ": "Welcome back ",
+        "walletLabel ": "Wallet "
+    },
+    "dashboardLayout ": {
+        "atlas ": {
+            "noWalletsYet ": "No wallets yet ",
+            "nothingHereYet ": "Nothing dey here yet ",
+            "recentActivity ": "Recent activity ",
+            "totalBalance ": "Total balance ",
+            "yourWallets ": "Your wallets "
+        },
+        "aurora ": {
+            "balance ": "Balance ",
+            "noTrendData ": "No trend data yet ",
+            "noWalletsYet ": "No wallets yet ",
+            "nothingHereYet ": "Nothing dey here yet ",
+            "recentActivity ": "Recent activity ",
+            "trend ": "Trend ",
+            "wallets ": "Wallets "
+        },
+        "meridian ": {
+            "balanceTrend ": "Balance trend ",
+            "noWalletsYet ": "No wallets yet ",
+            "nothingHereYet ": "Nothing dey here yet ",
+            "overview ": "Overview ",
+            "recentActivity ": "Recent activity ",
+            "wallets ": "Wallets "
+        },
+        "nova ": {
+            "balanceTrend ": "Balance trend ",
+            "noActivityYet ": "No activity yet ",
+            "noWalletsYet ": "No wallets yet ",
+            "nothingHereYet ": "Nothing dey here yet ",
+            "recentActivity ": "Recent activity ",
+            "wallets ": "Wallets "
+        },
+        "prime ": {
+            "amount ": "Amount ",
+            "balanceTrend ": "Balance trend ",
+            "description ": "Description ",
+            "noWalletsYet ": "No wallets yet ",
+            "nothingHereYet ": "Nothing dey here yet ",
+            "recentActivity ": "Recent activity ",
+            "status ": "Status ",
+            "wallets ": "Wallets "
+        }
+    },
+    "deposit ": {
+        "buttons ": {
+            "back ": "Go back ",
+            "continue ": "Continue ",
+            "startDeposit ": "Start deposit "
+        },
+        "cryptoCard ": {
+            "description ": "Deposit addresses and on-chain deposit history don move go their own page. ",
+            "goToWallets ": "Go crypto wallets ",
+            "title ": "Or deposit crypto "
+        },
+        "dialog ": {
+            "amountToPay ": "Amount wey you go pay ",
+            "copyLinkAriaLabel ": "Copy link ",
+            "estimatedDelivery ": "Estimated delivery ",
+            "exchangeRate ": "Exchange rate ",
+            "fee ": "Charge ",
+            "initiated ": "Deposit don start ",
+            "openLinkAriaLabel ": "Open link ",
+            "title ": "Deposit funds ",
+            "youllReceive ": "You go collect "
+        },
+        "errors ": {
+            "enterAmount ": "Enter amount ",
+            "fieldRequired ": "You must fill {{field}} ",
+            "pickWallet ": "Pick the wallet wey you wan put am "
+        },
+        "localCard ": {
+            "depositButton ": "Deposit ",
+            "description ": "Pick your country and pay through local way — bank transfer, CODI, DEBIN and more. ",
+            "title ": "Or deposit with local payment method "
+        },
+        "step0 ": {
+            "countryLabel ": "Country ",
+            "countryPlaceholder ": "Select country ",
+            "prompt ": "Which country you dey pay from? "
+        },
+        "step1 ": {
+            "methodRange ": "{{min}}–{{max}} {{currency}} for each deposit ",
+            "noMethods ": "No active deposit methods for this country yet. ",
+            "prompt ": "How you wan pay from {{country}}? ",
+            "thisCountryFallback ": "this country "
+        },
+        "step2 ": {
+            "amountLabel ": "Amount ({{currency}}) ",
+            "prompt ": "{{method}} — amount & details ",
+            "selectFieldPlaceholder ": "Select {{field}} ",
+            "walletLabel ": "Wallet wey you wan put am ",
+            "walletLoading ": "E dey load… ",
+            "walletPlaceholder ": "Select wallet "
+        },
+        "steps ": {
+            "amountDetails ": "Amount & details ",
+            "country ": "Country ",
+            "method ": "Method "
+        },
+        "subtitle ": "Put money inside your wallet one time through local way, or use crypto. ",
+        "title ": "Deposit ",
+        "toast ": {
+            "copied ": "We don copy am ",
+            "copyFailed ": "We no fit copy am ",
+            "pickCountry ": "Pick country make you continue ",
+            "pickMethod ": "Pick payment method make you continue ",
+            "startFailed ": "We no fit start deposit "
+        }
+    },
+    "kycBusiness ": {
+        "actions ": {
+            "continue ": "Continue ",
+            "submit ": "Submit make we check am "
+        },
+        "common ": {
+            "select ": "Select "
+        },
+        "header ": {
+            "subtitle ": "Business KYB — details about the company and the owners. ",
+            "title ": "Verify your business "
+        },
+        "steps ": {
+            "accountInfo ": {
+                "accountPurpose ": "Why you open this account ",
+                "complianceScreeningProgram ": "Compliance screening program ",
+                "conductsMoneyServices ": "You dey do money services ",
+                "conductsMoneyServicesHint ": "Remittance, currency exchange, or similar regulated MSB work. ",
+                "describeAccountPurpose ": "Tell us why you open this account ",
+                "describeMoneyServicesActivity ": "Describe the money services work ",
+                "estimatedAnnualRevenue ": "Estimated annual revenue, USD (optional) ",
+                "estimatedAnnualRevenuePlaceholder ": "e.g. 1000000_to_5000000 ",
+                "eurdeCombined ": "EURDE (combined) ",
+                "explainFlaggedActivity ": "Explain the flagged activity ",
+                "extraFeeHint ": "(e fit get extra charge) ",
+                "highRiskActivities ": "High-risk activities (select any wey apply) ",
+                "notSpecified ": "You no specify am ",
+                "pepStatus ": "Politically exposed person (PEP) ",
+                "pepStatusHint ": "Any owner/director na PEP or close associate of one. ",
+                "prohibitedCountries ": "You dey operate for prohibited countries (optional) ",
+                "selectPlaceholder ": "Select ",
+                "sourceOfFunds ": "Where the money dey come from ",
+                "thirdPartyMsbPayments ": "You dey process payments for third-party MSBs ",
+                "virtualAccountsToProvision ": "Virtual accounts wey you wan provision "
+            },
+            "addresses ": {
+                "physicalAddressHeading ": "Physical address ",
+                "physicalProofHint ": "Lease, utility bill, or similar — we need am if e different from registered address. ",
+                "registeredAddressHeading ": "Registered address ",
+                "sameAsRegistered ": "E be like registered ",
+                "title ": "Addresses "
+            },
+            "businessDocument ": {
+                "title ": "Business document "
+            },
+            "businessInfo ": {
+                "businessType ": "Business type ",
+                "description ": "Business description ",
+                "dialCode ": "Dial code ",
+                "dialCodePlaceholder ": "+1 ",
+                "email ": "Business email ",
+                "incorporationCountry ": "Incorporation country (optional) ",
+                "incorporationDate ": "Incorporation date ",
+                "industry ": "Industry (optional) ",
+                "legalName ": "Legal business name ",
+                "phone ": "Phone ",
+                "registrationNumber ": "Registration number ",
+                "requiredFieldsHint ": "Fill the required fields above. ",
+                "taxId ": "Tax ID (optional) ",
+                "title ": "Business info ",
+                "tradeName ": "Trade name ",
+                "website ": "Website (optional) ",
+                "websitePlaceholder ": "https:// "
+            },
+            "documents ": {
+                "businessRegistrationRequiredHint ": "We need document with purpose \"Business registration\" — the default above satisfy am. ",
+                "description ": "Description ",
+                "descriptionPlaceholder ": "Certificate of Incorporation ",
+                "documentPurpose ": "Document purpose ",
+                "fileLabel ": "File ",
+                "selectPlaceholder ": "Select "
+            },
+            "ownerIdDocuments ": {
+                "title ": "Owner ID documents "
+            },
+            "ownersDirectors ": {
+                "addAnother ": "Add another owner / director ",
+                "authorizedSigner ": "Authorized signer ",
+                "dateOfBirth ": "Date of birth ",
+                "director ": "Director ",
+                "email ": "Email ",
+                "firstName ": "First name ",
+                "hasControl ": "E get control ",
+                "hasOwnership ": "E get ownership ",
+                "identityDocsRequired ": "We need both identity documents for every owner/director. ",
+                "lastName ": "Last name ",
+                "nationality ": "Nationality ",
+                "ownerHeading ": "Owner / director {{number}} ",
+                "ownershipPercent ": "Ownership % ",
+                "personFallbackName ": "Owner / director {{index}} ",
+                "personTitle ": "Title ",
+                "phoneOptional ": "Phone (optional) ",
+                "photoIdHeading ": "2. Government photo ID ",
+                "residentialAddressHeading ": "Residential address ",
+                "taxId ": "SSN / EIN / ITIN ",
+                "taxIdHeading ": "1. Tax ID ",
+                "title ": "Owners & directors ",
+                "titlePlaceholder ": "CEO, Managing Member… "
+            },
+            "review ": {
+                "accountPurpose ": "Why you open this account ",
+                "business ": "Business ",
+                "highRiskActivities ": "High-risk activities ",
+                "none ": "None ",
+                "ownersDirectors ": "Owners / directors ",
+                "readyMessage ": "Everything don ready. Check am, then submit. ",
+                "registeredAddress ": "Registered address ",
+                "title ": "Review ",
+                "tradeName ": "Trade name ",
+                "type ": "Type "
+            },
+            "riskPurpose ": {
+                "title ": "Risk & purpose "
+            }
+        },
+        "toast ": {
+            "checkFields ": {
+                "description ": "Some required fields still dey wait for your input. ",
+                "title ": "Check the fields below "
+            },
+            "submitFailed ": {
+                "title ": "Submission fail "
+            },
+            "submitted ": {
+                "description ": "We go check your business details soon. ",
+                "title ": "Verification don submit "
+            }
+        }
+    },
+    "kycIndividual ": {
+        "actions ": {
+            "continue ": "Continue ",
+            "submit ": "Submit make we check am "
+        },
+        "common ": {
+            "emptyValue ": "— ",
+            "select ": "Select "
+        },
+        "header ": {
+            "subtitle ": "Small details so we fit confirm who you be. ",
+            "title ": "Verify who you be "
+        },
+        "steps ": {
+            "address ": {
+                "title ": "Address "
+            },
+            "financialProfile ": {
+                "accountPurpose ": "Why you open this account ",
+                "actingAsIntermediary ": "You dey act as intermediary ",
+                "actingAsIntermediaryHint ": "For another person, no be for yourself. ",
+                "chooseAccountsHint ": "Choose USD and/or EUR, or EURDE alone. ",
+                "describeAccountPurpose ": "Tell us why you open this account ",
+                "employmentStatus ": "Employment status ",
+                "eurdeCombined ": "EURDE (combined) ",
+                "expectedMonthlyPayments ": "Expected monthly payments (USD) ",
+                "extraFeeNote ": "e fit get extra charge ",
+                "occupation ": "Occupation ",
+                "sourceOfFunds ": "Where the money dey come from ",
+                "title ": "Financial profile ",
+                "virtualAccounts ": "Virtual accounts wey you wan provision "
+            },
+            "identityDocument ": {
+                "govIdHeading ": "Government-issued ID ",
+                "selfieHint ": "Clear photo of your face. ",
+                "selfiePhoto ": "Selfie photo ",
+                "title ": "Identity document "
+            },
+            "personalInfo ": {
+                "bvn ": "BVN ",
+                "bvnPlaceholder ": "11 digits ",
+                "currentEmployer ": "Current employer (optional) ",
+                "dateOfBirth ": "Date of birth ",
+                "dialCode ": "Dial code ",
+                "dialCodePlaceholder ": "+1 ",
+                "email ": "Email ",
+                "firstName ": "First name ",
+                "gender ": "Gender ",
+                "genderFemale ": "Female ",
+                "genderMale ": "Male ",
+                "immigrationStatus ": "Immigration status (optional) ",
+                "immigrationStatusPlaceholder ": "No apply ",
+                "lastName ": "Last name ",
+                "middleName ": "Middle name (optional) ",
+                "nationality ": "Nationality ",
+                "nin ": "NIN ",
+                "ninPlaceholder ": "11 digits ",
+                "phone ": "Phone ",
+                "phoneHint ": "Dial code like \"+1\", phone digits only (8-15 digits). ",
+                "phonePlaceholder ": "5551234567 ",
+                "taxId ": "Tax ID ",
+                "taxIdPlaceholder ": "SSN / national tax number ",
+                "title ": "Personal info "
+            },
+            "review ": {
+                "labels ": {
+                    "accountPurpose ": "Why you open this account ",
+                    "address ": "Address ",
+                    "email ": "Email ",
+                    "idDocument ": "ID document ",
+                    "name ": "Name ",
+                    "nationality ": "Nationality ",
+                    "phone ": "Phone "
+                },
+                "ready ": "Everything don ready. Check am, then submit. ",
+                "title ": "Review "
+            }
+        },
+        "toast ": {
+            "checkFields ": {
+                "description ": "Some required fields still dey wait for your input. ",
+                "title ": "Check the fields below "
+            },
+            "submitFailed ": {
+                "title ": "Submission fail "
+            },
+            "submitted ": {
+                "description ": "We go check your details soon. ",
+                "title ": "Verification don submit "
+            }
+        }
+    },
+    "kycShared ": {
+        "backButton ": "Go back ",
+        "chooseCountryFirstPlaceholder ": "Choose country first ",
+        "cityLabel ": "City ",
+        "clickToUpload ": "Click make you upload ",
+        "countryLabel ": "Country ",
+        "dateIssuedLabel ": "Date wey dem issue am ",
+        "documentBackOptionalLabel ": "Document — back (optional) ",
+        "documentFrontLabel ": "Document — front ",
+        "documentNumberLabel ": "Document number ",
+        "documentNumberPlaceholder ": "e.g. P00012345 ",
+        "documentTypeLabel ": "Document type ",
+        "expirationDateLabel ": "Expiration date ",
+        "expirationDateOptionalLabel ": "Expiration date (optional) ",
+        "fixBeforeContinuing ": "Abeg fix these ones before you continue: ",
+        "issuingCountryLabel ": "Issuing country ",
+        "loadingEllipsis ": "E dey load… ",
+        "noMatches ": "No matches. ",
+        "noPostalCodesText ": "This country no dey use postal codes. ",
+        "postalCodeFormatError ": "E no match the format wey we expect. ",
+        "postalCodeFormatErrorWithExample ": "E no match the format wey we expect (e.g. {{example}}). ",
+        "postalCodeLabel ": "Postal code ",
+        "proofOfAddressHint ": "Utility bill, bank statement, or lease. ",
+        "proofOfAddressLabel ": "Proof of address ",
+        "searchPlaceholder ": "Search… ",
+        "selectCountryPlaceholder ": "Select country ",
+        "selectOption ": "Select ",
+        "selectPlaceholder ": "Select… ",
+        "setNationalityFirstPlaceholder ": "Set nationality first ",
+        "stateProvinceLabel ": "State / province ",
+        "stepOf ": "Step {{current}} of {{total}} ",
+        "streetAddress2Label ": "Street address 2 (optional) ",
+        "streetAddressLabel ": "Street address ",
+        "streetAddressPlaceholder ": "123 Main St "
+    },
+    "kycWizard ": {
+        "backToDashboard ": "Go back dashboard ",
+        "pendingDescription ": "We don receive your details, we dey check am. We go notify you once we don decide. ",
+        "pendingHeading ": "Verification dey pending ",
+        "verifiedDescription ": "We don verify who you be. You fit now send money, use card, and get virtual account. ",
+        "verifiedHeading ": "We don verify you "
+    },
+    "landing ": {
+        "atlas ": {
+            "businessLoginCta ": "Business login ",
+            "demoCard ": "Card ",
+            "demoDeposit ": "Deposit ",
+            "demoSend ": "Send ",
+            "demoTotalBalance ": "Total balance ",
+            "demoTransaction1 ": "Coffee & co. ",
+            "demoTransaction2 ": "Payroll ",
+            "demoTransaction3 ": "Design retainer ",
+            "feature1Desc ": "Keep and move fiat and crypto side by side, with balance wey you fit always trust. ",
+            "feature1Title ": "One balance, every currency ",
+            "feature2Desc ": "Pick contact, get live quote, confirm — money go move without wahala. ",
+            "feature2Title ": "Send money for seconds ",
+            "feature3Desc ": "Create virtual card for one tap, freeze am quick quick. ",
+            "feature3Title ": "Cards on demand ",
+            "feature4Desc ": "We dey write every transaction for immutable ledger behind the scene. ",
+            "feature4Title ": "Bank-grade ledger ",
+            "featuresHeading ": "Everything wey your money need ",
+            "featuresSubheading ": "No hidden charge, no confusing menu — just banking wey dey work. ",
+            "footerCopyright ": "© {{year}} {{productName}} ",
+            "heroBadge ": "Money, e don simple ",
+            "heroHeadlineHighlight ": "no stress. ",
+            "heroHeadlinePrefix ": "Banking wey no dey ",
+            "heroSubheadline ": "{{productName}} na modern wallet for sending, holding, and spending your money — e simple, e secure well well. ",
+            "logIn ": "Enter ",
+            "openAccountCta ": "Open your account ",
+            "planBusinessBlurb ": "Multi-user access, higher limits, dedicated support. ",
+            "planBusinessCta ": "Talk to us ",
+            "planBusinessName ": "Business ",
+            "planBusinessPrice ": "Custom ",
+            "planPersonalBlurb ": "Everyday spending & sending for individuals. ",
+            "planPersonalCta ": "Start ",
+            "planPersonalName ": "Personal ",
+            "planPersonalPrice ": "Free ",
+            "pricingHeading ": "Simple pricing ",
+            "pricingSubheading ": "Start free. Upgrade only when your business need more. ",
+            "signUpFree ": "Sign up free "
+        },
+        "aurora ": {
+            "badge ": "Beautifully simple money ",
+            "businessLogin ": "Business login ",
+            "demoActionCard ": "Card ",
+            "demoActionDeposit ": "Deposit ",
+            "demoActionSend ": "Send ",
+            "demoBalance ": "$8,942.10 ",
+            "demoGrowth ": "+12.4% ",
+            "feature1Desc ": "Every wallet, every currency, always reconciled. ",
+            "feature1Title ": "One beautiful balance ",
+            "feature2Desc ": "Live quotes, instant confirmation, zero paperwork. ",
+            "feature2Title ": "Send money for seconds ",
+            "feature3Desc ": "Issue virtual card the moment we verify you. ",
+            "feature3Title ": "Cards on demand ",
+            "feature4Desc ": "Every transaction, reconciled and auditable. ",
+            "feature4Title ": "Bank-grade ledger ",
+            "featuresHeading ": "Everything wey your money need ",
+            "featuresSubheading ": "No hidden charge, no confusing menu — just banking wey dey work. ",
+            "heroHeadlineHighlight ": "one beautiful view. ",
+            "heroHeadlinePrefix ": "Every account, ",
+            "heroSubheadline ": "{{productName}} dey bring wallets, payouts, and cards together for dashboard wey people like to open. ",
+            "logIn ": "Enter ",
+            "openAccount ": "Open your account ",
+            "signUpFree ": "Sign up free ",
+            "thisMonth ": "This month ",
+            "totalBalance ": "Total balance ",
+            "vsLastMonth ": "vs. last month "
+        },
+        "meridian ": {
+            "eyebrow ": "Operations platform ",
+            "featureCardIssuingDesc ": "Issue virtual cards to customers the moment we verify dem. ",
+            "featureCardIssuingTitle ": "Card issuing ",
+            "featureComplianceDesc ": "KYC, endorsements, and audit trails don wire in from day one. ",
+            "featureComplianceTitle ": "Built-in compliance ",
+            "featureLedgerDesc ": "Every wallet, every currency, reconciled to single source of truth. ",
+            "featureLedgerTitle ": "Unified ledger ",
+            "featurePayoutsDesc ": "Quote, confirm, and settle cross-border transfers for few clicks. ",
+            "featurePayoutsTitle ": "Global payouts ",
+            "featuresHeading ": "Everything wey operations need ",
+            "featuresSubheading ": "Single platform for the whole money-movement stack. ",
+            "heroHeadline ": "Run money movement like pro, no be like spreadsheet. ",
+            "heroSubheadline ": "{{productName}} dey give your team one console for wallets, payouts, cards, and compliance — backed by ledger wey you fit trust. ",
+            "logIn ": "Enter ",
+            "openAccountCta ": "Open account ",
+            "operatorLoginCta ": "Operator login ",
+            "reconciledDesc ": "Every posted transaction na double-entry, idempotent, and matched against provider records automatically. ",
+            "reconciledTitle ": "Reconciled by default ",
+            "signUp ": "Sign up ",
+            "statCurrenciesLabel ": "Currencies ",
+            "statPayoutTimeLabel ": "Avg. payout time ",
+            "statUptimeLabel ": "Uptime ",
+            "teamsDesc ": "Role-based access for owners, admins, and operators, with full audit trail on every action. ",
+            "teamsTitle ": "Built for teams "
+        },
+        "nova ": {
+            "createAccountCta ": "Create your account ",
+            "ctaHeading ": "You ready to run your own rails? ",
+            "ctaSubheading ": "Your customers, your brand, your ledger — powered underneath by Yativo. ",
+            "feature1Desc ": "Every cent traced through immutable, auditable journal entries — never naive balance column. ",
+            "feature1Title ": "Double-entry ledger ",
+            "feature2Desc ": "Webhook-driven posting dey keep customer balances current the moment funds move. ",
+            "feature2Title ": "Real-time settlement ",
+            "feature3Desc ": "Scheduled jobs diff your ledger against upstream settlement and flag drift instantly. ",
+            "feature3Title ": "Reconciled automatically ",
+            "feature4Desc ": "Fiat and crypto rails under one chart of accounts, ready for global payout corridors. ",
+            "feature4Title ": "Multi-currency ",
+            "feature5Desc ": "Customer and staff sessions never cross — separate tokens, separate blast radius. ",
+            "feature5Title ": "Two isolated auth domains ",
+            "feature6Desc ": "KYC review, manual adjustments, payouts, cards and webhooks — one console. ",
+            "feature6Title ": "Full back office ",
+            "featuresHeading ": "Built like infrastructure, no be like demo ",
+            "featuresSubheading ": "Everything wey reseller need to run real customer money, safely. ",
+            "footerCopyright ": "© {{year}} {{productName}} ",
+            "getStarted ": "Start ",
+            "heroHeadlineHighlight ": "run am for your own brand. ",
+            "heroHeadlinePrefix ": "Fintech infrastructure, ",
+            "heroSubheadline ": "{{productName}} dey give your business white-labeled wallet, payouts, and card platform on real double-entry ledger — deploy am, brand am, and run your own fintech business on am. ",
+            "openAccountCta ": "Open account ",
+            "operatorConsole ": "Operator console ",
+            "signIn ": "Sign in ",
+            "trustBadge ": "Ledger-verified · Reconciled hourly "
+        },
+        "prime ": {
+            "balance ": "Balance ",
+            "copyright ": "© {{year}} {{productName}} ",
+            "dashboardLogin ": "Dashboard login ",
+            "feature ": {
+                "cardIssuing ": {
+                    "desc ": "Issue virtual cards to customers the moment we verify dem. ",
+                    "title ": "Card issuing "
+                },
+                "compliance ": {
+                    "desc ": "KYC, endorsements, and audit trails don wire in from day one. ",
+                    "title ": "Built-in compliance "
+                },
+                "ledger ": {
+                    "desc ": "Every wallet, every currency, reconciled to single source of truth. ",
+                    "title ": "Unified ledger "
+                },
+                "payouts ": {
+                    "desc ": "Quote, confirm, and settle cross-border transfers for few clicks. ",
+                    "title ": "Global payouts "
+                }
+            },
+            "featuresHeading ": "Everything wey operations need ",
+            "heroHeadline ": "Payments infrastructure for the internet. ",
+            "heroSubheadline ": "{{productName}} dey give you one API and one dashboard for wallets, payouts, cards, and compliance. ",
+            "logIn ": "Enter ",
+            "signUp ": "Sign up ",
+            "startNow ": "Start now ",
+            "stat ": {
+                "deposits ": "Deposits ",
+                "payouts ": "Payouts ",
+                "refunds ": "Refunds "
+            }
+        }
+    },
+    "login ": {
+        "backToHome ": "← Go back home ",
+        "backToSignIn ": "← Go back sign in ",
+        "createAccount ": "Open account ",
+        "defaultProductName ": "White Label ",
+        "emailLabel ": "Email ",
+        "genericError ": "We no fit sign you in. Check your credentials. ",
+        "invalidCodeError ": "Code no correct. Abeg try again. ",
+        "newHere ": "You new here? ",
+        "passwordLabel ": "Password ",
+        "signIn ": "Sign in ",
+        "signInDescription ": "Sign in to your account ",
+        "signingIn ": "We dey sign you in… ",
+        "verificationCodeLabel ": "Verification code ",
+        "verify ": "Verify ",
+        "verifyDescription ": "Enter the 6-digit code from your authenticator app, or backup code. ",
+        "verifyHeading ": "Verify say na you ",
+        "verifying ": "We dey verify… ",
+        "welcomeBack ": "Welcome back "
+    },
+    "nav ": {
+        "account ": "Account ",
+        "atlas ": {
+            "contacts ": "Contacts ",
+            "home ": "Home ",
+            "profile ": "Profile ",
+            "send ": "Send "
+        },
+        "beneficiaries ": "Beneficiaries ",
+        "cards ": "Cards ",
+        "cryptoWallets ": "Crypto wallets ",
+        "dashboard ": "Dashboard ",
+        "deposit ": "Deposit ",
+        "logout ": "Comot ",
+        "portal ": "Portal ",
+        "profileKyc ": "Profile & KYC ",
+        "section ": {
+            "account ": "Account ",
+            "manage ": "Manage "
+        },
+        "sendMoney ": "Send money ",
+        "settings ": "Settings ",
+        "virtualAccounts ": "Virtual accounts ",
+        "wallets ": "Wallets ",
+        "whiteLabel ": "White Label "
+    },
+    "profile ": {
+        "accountTitle ": "Account ",
+        "emailLabel ": "Email ",
+        "endorsementsDescription ": "Per-service verification dey required for some features, like local bank transfers or virtual cards. ",
+        "endorsementsLoadError ": "We no fit load endorsements. ",
+        "endorsementsTitle ": "Endorsements ",
+        "heading ": "Profile & verification ",
+        "identityVerificationTitle ": "Identity verification ",
+        "restartVerification ": "Restart verification ",
+        "startVerification ": "Start verification ",
+        "statusApproved ": "We don verify you. You get full access to send money, use cards, and virtual accounts. ",
+        "statusNotStarted ": "We need am before you fit send money, hold virtual account, or get card. ",
+        "statusPending ": "We don receive your details, we dey check am — we go notify you once we don decide. ",
+        "statusRejected ": "We no approve your last submission — start new one below. ",
+        "subheading ": "Manage your identity details ",
+        "typeLabel ": "Type "
+    },
+    "send ": {
+        "amountStep ": {
+            "amountLabel ": "Amount wey you wan send ({{currency}}) ",
+            "amountPlaceholder ": "100.00 ",
+            "debitWalletLabel ": "Deduct from wallet ",
+            "prompt ": "Amount wey you wan send ",
+            "promptTo ": "Amount wey you wan send go {{name}} ",
+            "recipientFallback ": "the recipient ",
+            "willReceive ": "We go show you exactly how much {{recipient}} go collect before you confirm. ",
+            "willReceiveWithCurrency ": "We go show you exactly how much {{recipient}} go collect for {{currency}} before you confirm. "
+        },
+        "buttons ": {
+            "back ": "Go back ",
+            "confirmAndSend ": "Confirm & send ",
+            "continue ": "Continue ",
+            "getQuote ": "Get quote ",
+            "requote ": "Re-quote "
+        },
+        "errors ": {
+            "enterAmount ": "Enter amount ",
+            "fieldRequired ": "You must fill {{field}} ",
+            "maxLength ": "Make e no pass {{max}} characters ",
+            "minLength ": "Make e be at least {{min}} characters "
+        },
+        "result ": {
+            "payoutId ": "Payout ID: {{id}} ",
+            "payoutSubmitted ": "We don submit payout ",
+            "refreshing ": "(we dey refresh…) ",
+            "sendAnother ": "Send another one ",
+            "statusLabel ": "Status: ",
+            "viewWallets ": "Check wallets "
+        },
+        "review ": {
+            "expired ": "This quote don expire — get fresh one make you continue. ",
+            "expiresIn ": "Quote go expire for {{seconds}}s. ",
+            "rateLabel ": "Rate ",
+            "recipientGetsLabel ": "Recipient go collect ",
+            "toLabel ": "To ",
+            "totalChargedLabel ": "Total wey we charge "
+        },
+        "savedStep0 ": {
+            "beneficiaryPlaceholder ": "Select beneficiary ",
+            "prompt ": "You dey send money go who? "
+        },
+        "step0 ": {
+            "countryLabel ": "Country ",
+            "countryPlaceholder ": "Select country ",
+            "prompt ": "You dey send money go who? ",
+            "recipientNameLabel ": "Recipient name ",
+            "recipientNamePlaceholder ": "Jane Doe "
+        },
+        "step1 ": {
+            "countryFallback ": "this country ",
+            "methodRange ": "{{min}}–{{max}} {{currency}} for each transfer ",
+            "noMethods ": "No active payout methods for this country yet. ",
+            "prompt ": "How {{recipient}} for {{country}} suppose collect am? ",
+            "recipientFallback ": "this recipient "
+        },
+        "step2 ": {
+            "noDetailsNeeded ": "This payout method no need any extra details. ",
+            "prompt ": "{{method}} details ",
+            "selectFieldPlaceholder ": "Select {{field}} "
+        },
+        "steps ": {
+            "amount ": "Amount ",
+            "beneficiary ": "Beneficiary ",
+            "details ": "Details ",
+            "method ": "Method ",
+            "recipient ": "Recipient ",
+            "review ": "Review "
+        },
+        "subtitle ": "Pick country and how dem wan collect am, then confirm the amount. ",
+        "title ": "Send money ",
+        "toast ": {
+            "enterNameAndCountry ": "Enter name and pick country make you continue ",
+            "payoutFailed ": "Payout fail ",
+            "payoutSubmitted ": "We don submit payout ",
+            "payoutSubmittedDescription ": "We go notify you once e settle. ",
+            "pickBeneficiary ": "Pick beneficiary make you continue ",
+            "pickMethod ": "Pick payout method make you continue ",
+            "quoteFailed ": "We no fit get quote ",
+            "saveRecipientFailed ": "We no fit save recipient ",
+            "tryAgain ": "Try again. "
+        },
+        "toggle ": {
+            "newRecipient ": "New recipient ",
+            "savedBeneficiary ": "Saved beneficiary "
+        }
+    },
+    "settings ": {
+        "changePassword ": {
+            "confirmPasswordLabel ": "Confirm new password ",
+            "currentPasswordLabel ": "Current password ",
+            "description ": "Choose strong password wey you no dey use for other place. ",
+            "newPasswordLabel ": "New password ",
+            "submit ": "Update password ",
+            "title ": "Change password ",
+            "toastDescription ": "Password changes no dey work for this build yet. ",
+            "toastTitle ": "E no dey available yet "
+        },
+        "copiedToClipboard ": "We don copy am ",
+        "copyError ": "We no fit copy am ",
+        "subtitle ": "Manage your account security ",
+        "title ": "Settings ",
+        "twoFactor ": {
+            "authenticatorApp ": "Authenticator app ",
+            "description ": "Add extra security for your account. ",
+            "disable ": {
+                "description ": "Confirm your password make we turn off two-factor authentication. ",
+                "error ": "We no fit disable two-factor authentication. ",
+                "passwordLabel ": "Password ",
+                "submit ": "Disable two-factor authentication ",
+                "submitting ": "We dey disable am… ",
+                "title ": "Disable two-factor authentication "
+            },
+            "enabled ": "E don enable ",
+            "loading ": "E dey load… ",
+            "notConfigured ": "You never configure am ",
+            "setup ": {
+                "backupCodesDescription ": "Keep dem for safe place — you fit use each one time to sign in if you lose your authenticator app. We no go show dem again. ",
+                "backupCodesTitle ": "Save your backup codes ",
+                "codeLabel ": "6-digit code ",
+                "continueButton ": "Continue ",
+                "copyAll ": "Copy all ",
+                "done ": "E don done ",
+                "enableButton ": "Enable two-factor authentication ",
+                "enterCodeTitle ": "Enter the code ",
+                "manualKeyLabel ": "You no fit scan? Enter this key manually ",
+                "qrAlt ": "2FA setup QR code ",
+                "scanTitle ": "Scan with your authenticator app ",
+                "verifyError ": "We no fit verify that code. ",
+                "verifying ": "We dey verify… "
+            },
+            "title ": "Two-factor authentication ",
+            "toast ": {
+                "disabled ": "We don disable two-factor authentication ",
+                "setupError ": "We no fit start setup "
+            }
+        }
+    },
+    "signup ": {
+        "accountTypeLabel ": "Account type ",
+        "alreadyHaveAccount ": "You get account already? ",
+        "business ": "Business ",
+        "businessNameLabel ": "Business name ",
+        "callingCodeAriaLabel ": "Calling code ",
+        "countryLabel ": "Country ",
+        "createAccount ": "Open account ",
+        "createYourAccount ": "Open your account ",
+        "creatingAccount ": "We dey open account… ",
+        "defaultProductName ": "White Label ",
+        "emailLabel ": "Email ",
+        "fullNameLabel ": "Full name ",
+        "genericError ": "We no fit open your account. ",
+        "individual ": "Individual ",
+        "passwordLabel ": "Password ",
+        "phoneNumberLabel ": "Phone number ",
+        "phonePlaceholder ": "5551234567 ",
+        "selectCountryPlaceholder ": "Select your country ",
+        "signIn ": "Sign in ",
+        "startSendingDescription ": "Start send, hold and spend for minutes "
+    },
+    "topbar ": {
+        "aurora ": {
+            "viewProfile ": "Check profile "
+        },
+        "prime ": {
+            "notifications ": "Notifications ",
+            "switchToDarkMode ": "Change to dark mode ",
+            "switchToLightMode ": "Change to light mode "
+        }
+    },
+    "virtualAccounts ": {
+        "accountReady ": "Virtual account don ready ",
+        "addCurrency ": "Add currency ",
+        "allCurrenciesAdded ": "You don get account for every currency wey dey available. ",
+        "copiedToClipboard ": "We don copy am ",
+        "copyError ": "We no fit copy am ",
+        "copyField ": "Copy {{field}} ",
+        "createAccount ": "Create account ",
+        "createAccountError ": "We no fit create account ",
+        "creating ": "We dey create am… ",
+        "noAccountsYet ": "No virtual accounts yet — provision one for currency below. ",
+        "noCurrenciesAvailable ": "No virtual account currencies dey available yet. ",
+        "noVerificationNeeded ": "No verification needed ",
+        "requiresVerification ": "E need {{endorsement}} verification — contact support make you start. ",
+        "shareDetails ": "Share these details with anybody wey dey send money come. ",
+        "startVerification ": "Start verification ",
+        "subtitle ": "Dedicated bank details wey you fit reuse for every incoming transfer, once per currency. ",
+        "title ": "Virtual accounts ",
+        "verificationNote ": "Some rails need one-time verification before we fit issue account. ",
+        "verified ": "We don verify am ",
+        "yourAccounts ": "Your accounts "
+    },
+    "walletBalanceCard ": {
+        "pending ": "+{{amount}} dey come ",
+        "wallet ": "Wallet "
+    },
+    "walletDetail ": {
+        "allWallets ": "All wallets ",
+        "available ": "Money wey you fit use ",
+        "balanceOverTime ": "Balance over time ",
+        "cancel ": "Cancel ",
+        "noActivity ": "No activity yet ",
+        "pageOf ": "Page {{page}} / {{totalPages}} ",
+        "pending ": "E dey come ",
+        "removeDialogDescription ": "E empty, so e safe — you fit add {{currencyCode}} back later if dem still dey offer am. ",
+        "removeDialogTitle ": "Comot your {{currencyCode}} wallet? ",
+        "removeWallet ": "Comot wallet ",
+        "removeWalletError ": "We no fit comot wallet ",
+        "removing ": "We dey comot am… ",
+        "statement ": "Statement ",
+        "walletRemoved ": "We don comot wallet ",
+        "walletTitle ": "{{currencyCode}} wallet "
+    },
+    "wallets ": {
+        "add ": "Add ",
+        "addCurrencyPlaceholder ": "Add currency ",
+        "addWalletError ": "We no fit add wallet ",
+        "empty ": "No wallets yet. Dem go appear here once you get balance. ",
+        "subtitle ": "Your money for all currency ",
+        "title ": "Wallets ",
+        "walletAdded ": "We don add wallet ",
+        "walletLabel ": "Wallet "
+    }
+}

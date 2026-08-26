@@ -1,9 +1,11 @@
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import type { LucideIcon } from "lucide-react";
 import { ChevronRight, LogOut } from "lucide-react";
 import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export interface NavItem {
   to: string;
@@ -28,6 +30,7 @@ interface SidebarProps {
 
 export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, profileTo }: SidebarProps) {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
+  const { t } = useTranslation();
 
   const userRowContent = (
     <>
@@ -42,7 +45,7 @@ export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, pro
   );
 
   return (
-    <aside className="hidden w-72 shrink-0 flex-col gap-5 bg-muted/30 p-4 lg:flex">
+    <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col gap-5 bg-muted/30 p-4 lg:flex">
       <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-elevated">
         {branding?.logoUrl ? (
           <img src={branding.logoUrl} alt="" className="h-8 w-8 rounded-xl object-cover" />
@@ -51,7 +54,7 @@ export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, pro
             {(branding?.productName ?? "W").slice(0, 1)}
           </div>
         )}
-        <span className="truncate font-heading text-sm font-semibold tracking-tight">{branding?.productName ?? "White Label"}</span>
+        <span className="truncate font-heading text-sm font-semibold tracking-tight">{branding?.productName ?? t("nav.whiteLabel", "White Label")}</span>
       </div>
 
       <nav className="scrollbar-thin flex-1 space-y-4 overflow-y-auto">
@@ -82,6 +85,10 @@ export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, pro
         ))}
       </nav>
 
+      <div className="rounded-2xl border border-border bg-card px-3.5 py-3 shadow-elevated">
+        <LanguageSwitcher />
+      </div>
+
       <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-card px-2 py-2 pl-3.5 shadow-elevated">
         {profileTo ? (
           <NavLink to={profileTo} className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-xl py-1 transition-opacity hover:opacity-80">
@@ -94,8 +101,8 @@ export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, pro
         <button
           onClick={onLogout}
           className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label="Log out"
-          title="Log out"
+          aria-label={t("nav.logout", "Log out")}
+          title={t("nav.logout", "Log out")}
         >
           <LogOut className="h-4 w-4" />
         </button>

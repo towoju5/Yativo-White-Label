@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "إضافة مستفيد",
+    "addBeneficiary": "إضافة مستفيد",
+    "addError": "تعذّرت إضافة المستفيد",
+    "added": "تمت إضافة المستفيد",
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "continue": "متابعة",
+    "country": "الدولة",
+    "detail": {
+      "added": "تمت الإضافة",
+      "currency": "العملة",
+      "editHint": "لا يمكن تعديل تفاصيل الدفع هنا — احذف هذا المستفيد وأضِف مستفيدًا جديدًا في حال تغيّرت بياناته.",
+      "editName": "تعديل الاسم",
+      "name": "الاسم",
+      "paymentDetails": "تفاصيل الدفع",
+      "removeBeneficiary": "إزالة المستفيد",
+      "save": "حفظ",
+      "title": "تفاصيل المستفيد",
+      "type": "النوع"
+    },
+    "empty": "لا يوجد مستفيدون بعد. أضِف مستفيدًا لبدء إرسال الأموال.",
+    "fieldRequiredError": "حقل {{field}} مطلوب",
+    "maxCharsError": "بحد أقصى {{max}} حرفًا",
+    "methodDetailsHeading": "تفاصيل {{method}}",
+    "minCharsError": "{{min}} حرفًا على الأقل",
+    "nameAndCountryRequired": "أدخل الاسم واختر الدولة للمتابعة",
+    "noExtraDetailsNeeded": "طريقة الدفع هذه لا تحتاج إلى أي تفاصيل إضافية.",
+    "noPayoutMethods": "لا توجد طرق دفع نشطة لهذه الدولة حاليًا.",
+    "payoutMethodQuestion": "كيف تريد أن يتم الدفع لـ {{name}} في {{country}}؟",
+    "payoutMethodRequired": "اختر طريقة دفع للمتابعة",
+    "recipientName": "اسم المستلم",
+    "recipientNamePlaceholder": "جين دو",
+    "remove": "إزالة",
+    "removeDialogDescription": "ستحتاج إلى إضافته مرة أخرى لإرسال الأموال هنا مستقبلًا. هذا لا يؤثر على أي عمليات دفع سابقة.",
+    "removeDialogTitle": "هل تريد إزالة {{name}}؟",
+    "removeError": "تعذّرت إزالة المستفيد",
+    "removed": "تمت إزالة المستفيد",
+    "selectCountryPlaceholder": "اختر دولة",
+    "selectFieldPlaceholder": "اختر {{field}}",
+    "steps": {
+      "paymentDetails": "تفاصيل الدفع",
+      "payoutMethod": "طريقة الدفع",
+      "recipient": "المستلم"
+    },
+    "subtitle": "الأشخاص والحسابات التي ترسل إليها الأموال",
+    "table": {
+      "actions": "الإجراءات",
+      "added": "تمت الإضافة",
+      "currency": "العملة",
+      "name": "الاسم"
+    },
+    "thisCountry": "هذه الدولة",
+    "thisRecipient": "هذا المستلم",
+    "title": "المستفيدون",
+    "transferRange": "{{min}}–{{max}} {{currency}} لكل تحويل",
+    "updateError": "تعذّر تحديث المستفيد",
+    "updated": "تم تحديث المستفيد",
+    "whoAreYouSendingTo": "إلى من تريد الإرسال؟"
+  },
+  "cards": {
+    "addFunds": "إضافة رصيد",
+    "addedThisMonth": "أُضيف هذا الشهر",
+    "airlinePayments": "مدفوعات شركات الطيران",
+    "balance": "الرصيد {{amount}}",
+    "billingAddress": "عنوان الفوترة",
+    "cancel": "إلغاء",
+    "cardEndingIn": "البطاقة المنتهية بـ {{last4}}",
+    "cardNumberLabel": "رقم البطاقة",
+    "cardholder": "حامل البطاقة",
+    "confirmTerminate": "اضغط مرة أخرى للتأكيد — لا يمكن التراجع عن هذا الإجراء",
+    "copyNumber": "نسخ الرقم",
+    "cvv": "رمز التحقق CVV {{cvv}}",
+    "emptyState": "لا توجد بطاقات بعد. اطلب بطاقة لبدء الإنفاق.",
+    "exp": "تاريخ الانتهاء {{expiry}}",
+    "feeAmount": "الرسوم {{amount}}",
+    "freezeCard": "تجميد البطاقة",
+    "hidesAutomatically": "يُخفى تلقائيًا",
+    "initialFundingHelp": "الحد الأدنى 3 دولارات. يُخصم من محفظة الدولار الأمريكي الخاصة بك مع رسوم الإصدار ورسوم الشحن.",
+    "initialFundingLabel": "التمويل الأولي (بالدولار الأمريكي)",
+    "manage": "إدارة ←",
+    "noTransactions": "لا توجد معاملات بعد.",
+    "program": "البرنامج",
+    "requestCard": "طلب بطاقة",
+    "requestDialogTitle": "طلب بطاقة افتراضية",
+    "requesting": "جارٍ الطلب…",
+    "spentThisMonth": "المُنفق هذا الشهر",
+    "subtitle": "بطاقات فيزا الافتراضية المرتبطة بمحفظة الدولار الأمريكي الخاصة بك",
+    "terminateCard": "إنهاء البطاقة",
+    "title": "البطاقات",
+    "toast": {
+      "airlineDisabled": "تم تعطيل مدفوعات شركات الطيران",
+      "airlineEnabled": "تم تفعيل مدفوعات شركات الطيران",
+      "airlineError": "تعذّر تحديث مدفوعات شركات الطيران",
+      "cardFrozen": "تم تجميد البطاقة",
+      "cardIssued": "تم إصدار البطاقة",
+      "cardTerminated": "تم إنهاء البطاقة",
+      "cardTerminatedDescription": "يُرد أي رصيد متبقٍ إلى محفظتك تلقائيًا.",
+      "cardToppedUp": "تم شحن البطاقة",
+      "cardUnfrozen": "تم إلغاء تجميد البطاقة",
+      "copied": "تم نسخ {{label}}",
+      "copyError": "تعذّر النسخ",
+      "freezeError": "تعذّر تحديث حالة التجميد",
+      "issueCardError": "تعذّر إصدار البطاقة",
+      "revealCardError": "تعذّر إظهار بيانات البطاقة",
+      "terminateError": "تعذّر إنهاء البطاقة",
+      "topupFailed": "فشلت عملية الشحن",
+      "withdrawalFailed": "فشلت عملية السحب",
+      "withdrawalSubmitted": "تم إرسال طلب السحب",
+      "withdrawalSubmittedDescription": "تُخصم رسوم قبل إعادة المبلغ الصافي إلى محفظتك."
+    },
+    "topUp": "شحن الرصيد",
+    "transactionFallback": "معاملة",
+    "transactions": "المعاملات",
+    "unfreezeCard": "إلغاء تجميد البطاقة",
+    "virtualUsd": "افتراضية · دولار أمريكي",
+    "visaVirtualCardUsd": "بطاقة فيزا افتراضية · دولار أمريكي",
+    "withdraw": "سحب",
+    "withdrawFeeNote": "تُخصم رسوم من عمليات السحب قبل وصول المبلغ الصافي إلى محفظتك."
+  },
+  "common": {
+    "language": "اللغة"
+  },
+  "crypto": {
+    "addressCopied": "تم نسخ العنوان",
+    "copyAddressError": "تعذّر نسخ العنوان",
+    "depositAddressReady": "عنوان الإيداع جاهز",
+    "generateAddress": "إنشاء عنوان",
+    "generateAddressError": "تعذّر إنشاء العنوان",
+    "generateDescription": "أنشئ عنوان إيداع لأي شبكة مدعومة.",
+    "generating": "جارٍ الإنشاء…",
+    "noDepositsYet": "لا توجد إيداعات عملات رقمية بعد",
+    "noWalletsYet": "لا توجد محافظ عملات رقمية بعد — أنشئ عنوانًا أدناه للبدء.",
+    "selectAssetPlaceholder": "اختر أصلًا",
+    "sharedAddressWarning": "قد يُشارَك هذا العنوان مع مستخدمين آخرين لنفس الأصل. تُطابَق الإيداعات مع حسابك ويؤكدها فريقنا قبل تحديث رصيدك.",
+    "subtitle": "عناوين الإيداع وسجل الإيداعات على السلسلة للأصول المدعومة.",
+    "title": "محافظ العملات الرقمية",
+    "transactionsDescription": "كل إيداع على السلسلة مطابق لحسابك.",
+    "transactionsTitle": "معاملات العملات الرقمية",
+    "viewOnExplorer": "عرض في مستكشف السلسلة",
+    "yourWallets": "محافظك"
+  },
+  "dashboard": {
+    "activityTitle": "النشاط الأخير",
+    "heroLabel": "الرصيد الإجمالي",
+    "stats": {
+      "available": "المتاح",
+      "pending": "قيد الانتظار",
+      "recentActivity": "النشاط الأخير",
+      "wallets": "المحافظ"
+    },
+    "subtitle": "إليك ما يحدث في حساباتك",
+    "title": "مرحبًا بعودتك",
+    "walletLabel": "المحفظة"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "لا توجد محافظ بعد",
+      "nothingHereYet": "لا يوجد شيء هنا بعد",
+      "recentActivity": "النشاط الأخير",
+      "totalBalance": "الرصيد الإجمالي",
+      "yourWallets": "محافظك"
+    },
+    "aurora": {
+      "balance": "الرصيد",
+      "noTrendData": "لا توجد بيانات اتجاه بعد",
+      "noWalletsYet": "لا توجد محافظ بعد",
+      "nothingHereYet": "لا يوجد شيء هنا بعد",
+      "recentActivity": "النشاط الأخير",
+      "trend": "الاتجاه",
+      "wallets": "المحافظ"
+    },
+    "meridian": {
+      "balanceTrend": "اتجاه الرصيد",
+      "noWalletsYet": "لا توجد محافظ بعد",
+      "nothingHereYet": "لا يوجد شيء هنا بعد",
+      "overview": "نظرة عامة",
+      "recentActivity": "النشاط الأخير",
+      "wallets": "المحافظ"
+    },
+    "nova": {
+      "balanceTrend": "اتجاه الرصيد",
+      "noActivityYet": "لا يوجد نشاط بعد",
+      "noWalletsYet": "لا توجد محافظ بعد",
+      "nothingHereYet": "لا يوجد شيء هنا بعد",
+      "recentActivity": "النشاط الأخير",
+      "wallets": "المحافظ"
+    },
+    "prime": {
+      "amount": "المبلغ",
+      "balanceTrend": "اتجاه الرصيد",
+      "description": "الوصف",
+      "noWalletsYet": "لا توجد محافظ بعد",
+      "nothingHereYet": "لا يوجد شيء هنا بعد",
+      "recentActivity": "النشاط الأخير",
+      "status": "الحالة",
+      "wallets": "المحافظ"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "رجوع",
+      "continue": "متابعة",
+      "startDeposit": "بدء الإيداع"
+    },
+    "cryptoCard": {
+      "description": "أصبحت عناوين الإيداع وسجل الإيداعات على السلسلة الآن في صفحتها الخاصة.",
+      "goToWallets": "الانتقال إلى محافظ العملات الرقمية",
+      "title": "أو أودِع عملات رقمية"
+    },
+    "dialog": {
+      "amountToPay": "المبلغ المطلوب دفعه",
+      "copyLinkAriaLabel": "نسخ الرابط",
+      "estimatedDelivery": "الوصول المتوقع",
+      "exchangeRate": "سعر الصرف",
+      "fee": "الرسوم",
+      "initiated": "تم بدء الإيداع",
+      "openLinkAriaLabel": "فتح الرابط",
+      "title": "إيداع الأموال",
+      "youllReceive": "ستستلم"
+    },
+    "errors": {
+      "enterAmount": "أدخل مبلغًا",
+      "fieldRequired": "حقل {{field}} مطلوب",
+      "pickWallet": "اختر المحفظة المراد إيداع الرصيد فيها"
+    },
+    "localCard": {
+      "depositButton": "إيداع",
+      "description": "اختر دولتك وادفع عبر القناة المحلية — تحويل مصرفي، CODI، DEBIN وغيرها.",
+      "title": "أو أودِع بطريقة دفع محلية"
+    },
+    "step0": {
+      "countryLabel": "الدولة",
+      "countryPlaceholder": "اختر دولة",
+      "prompt": "من أي دولة تدفع؟"
+    },
+    "step1": {
+      "methodRange": "{{min}}–{{max}} {{currency}} لكل إيداع",
+      "noMethods": "لا توجد طرق إيداع نشطة لهذه الدولة حاليًا.",
+      "prompt": "كيف تريد الدفع من {{country}}؟",
+      "thisCountryFallback": "هذه الدولة"
+    },
+    "step2": {
+      "amountLabel": "المبلغ ({{currency}})",
+      "prompt": "{{method}} — المبلغ والتفاصيل",
+      "selectFieldPlaceholder": "اختر {{field}}",
+      "walletLabel": "المحفظة المراد إيداع الرصيد فيها",
+      "walletLoading": "جارٍ التحميل…",
+      "walletPlaceholder": "اختر محفظة"
+    },
+    "steps": {
+      "amountDetails": "المبلغ والتفاصيل",
+      "country": "الدولة",
+      "method": "الطريقة"
+    },
+    "subtitle": "مِوّل محفظتك بدفعة واحدة عبر قناة محلية، أو بالعملات الرقمية.",
+    "title": "إيداع",
+    "toast": {
+      "copied": "تم النسخ إلى الحافظة",
+      "copyFailed": "تعذّر النسخ",
+      "pickCountry": "اختر دولة للمتابعة",
+      "pickMethod": "اختر طريقة دفع للمتابعة",
+      "startFailed": "تعذّر بدء الإيداع"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "متابعة",
+      "submit": "إرسال للمراجعة"
+    },
+    "common": {
+      "select": "اختر"
+    },
+    "header": {
+      "subtitle": "التحقق من الشركات (KYB) — تفاصيل عن الشركة وملّاكها.",
+      "title": "توثيق شركتك"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "الغرض من الحساب",
+        "complianceScreeningProgram": "برنامج فحص الامتثال",
+        "conductsMoneyServices": "تمارس خدمات مالية",
+        "conductsMoneyServicesHint": "التحويلات المالية أو الصرافة أو أي نشاط منظم مماثل لمقدمي خدمات الأموال (MSB).",
+        "describeAccountPurpose": "صِف الغرض من الحساب",
+        "describeMoneyServicesActivity": "صِف نشاط الخدمات المالية",
+        "estimatedAnnualRevenue": "الإيرادات السنوية المقدّرة، بالدولار الأمريكي (اختياري)",
+        "estimatedAnnualRevenuePlaceholder": "مثال: 1000000_to_5000000",
+        "eurdeCombined": "EURDE (مجمّع)",
+        "explainFlaggedActivity": "اشرح النشاط المُعلَّم",
+        "extraFeeHint": "(قد يترتب عليه رسوم إضافية)",
+        "highRiskActivities": "الأنشطة عالية المخاطر (اختر ما ينطبق)",
+        "notSpecified": "غير محدد",
+        "pepStatus": "شخص سياسي معرَّض للمخاطر (PEP)",
+        "pepStatusHint": "أي مالك/مدير هو شخص سياسي معرَّض للمخاطر أو مقرَّب منه.",
+        "prohibitedCountries": "يعمل في دول محظورة (اختياري)",
+        "selectPlaceholder": "اختر",
+        "sourceOfFunds": "مصدر الأموال",
+        "thirdPartyMsbPayments": "يعالج مدفوعات لمقدمي خدمات مالية من طرف ثالث",
+        "virtualAccountsToProvision": "الحسابات الافتراضية المطلوب تفعيلها"
+      },
+      "addresses": {
+        "physicalAddressHeading": "العنوان الفعلي",
+        "physicalProofHint": "عقد إيجار أو فاتورة مرافق أو ما شابه — مطلوب إذا كان مختلفًا عن العنوان المسجَّل.",
+        "registeredAddressHeading": "العنوان المسجَّل",
+        "sameAsRegistered": "نفس العنوان المسجَّل",
+        "title": "العناوين"
+      },
+      "businessDocument": {
+        "title": "وثيقة الشركة"
+      },
+      "businessInfo": {
+        "businessType": "نوع النشاط التجاري",
+        "description": "وصف النشاط التجاري",
+        "dialCode": "رمز الاتصال الدولي",
+        "dialCodePlaceholder": "+1",
+        "email": "البريد الإلكتروني للشركة",
+        "incorporationCountry": "دولة التأسيس (اختياري)",
+        "incorporationDate": "تاريخ التأسيس",
+        "industry": "القطاع (اختياري)",
+        "legalName": "الاسم القانوني للشركة",
+        "phone": "الهاتف",
+        "registrationNumber": "رقم السجل التجاري",
+        "requiredFieldsHint": "املأ الحقول المطلوبة أعلاه.",
+        "taxId": "الرقم الضريبي (اختياري)",
+        "title": "بيانات الشركة",
+        "tradeName": "الاسم التجاري",
+        "website": "الموقع الإلكتروني (اختياري)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "وثيقة بغرض \"السجل التجاري\" مطلوبة — الوثيقة الافتراضية أعلاه تفي بهذا الشرط.",
+        "description": "الوصف",
+        "descriptionPlaceholder": "شهادة التأسيس",
+        "documentPurpose": "الغرض من الوثيقة",
+        "fileLabel": "الملف",
+        "selectPlaceholder": "اختر"
+      },
+      "ownerIdDocuments": {
+        "title": "وثائق هوية الملّاك"
+      },
+      "ownersDirectors": {
+        "addAnother": "إضافة مالك / مدير آخر",
+        "authorizedSigner": "مفوَّض بالتوقيع",
+        "dateOfBirth": "تاريخ الميلاد",
+        "director": "مدير",
+        "email": "البريد الإلكتروني",
+        "firstName": "الاسم الأول",
+        "hasControl": "له سيطرة على الشركة",
+        "hasOwnership": "له ملكية في الشركة",
+        "identityDocsRequired": "وثيقتا الهوية مطلوبتان لكل مالك/مدير.",
+        "lastName": "اسم العائلة",
+        "nationality": "الجنسية",
+        "ownerHeading": "المالك / المدير {{number}}",
+        "ownershipPercent": "نسبة الملكية %",
+        "personFallbackName": "المالك / المدير {{index}}",
+        "personTitle": "المنصب",
+        "phoneOptional": "الهاتف (اختياري)",
+        "photoIdHeading": "2. صورة الهوية الرسمية",
+        "residentialAddressHeading": "عنوان السكن",
+        "taxId": "الرقم الضريبي / رقم الضمان الاجتماعي",
+        "taxIdHeading": "1. الرقم الضريبي",
+        "title": "الملّاك والمديرون",
+        "titlePlaceholder": "الرئيس التنفيذي، عضو مدير…"
+      },
+      "review": {
+        "accountPurpose": "الغرض من الحساب",
+        "business": "الشركة",
+        "highRiskActivities": "الأنشطة عالية المخاطر",
+        "none": "لا شيء",
+        "ownersDirectors": "الملّاك / المديرون",
+        "readyMessage": "كل شيء جاهز. راجع البيانات ثم أرسلها.",
+        "registeredAddress": "العنوان المسجَّل",
+        "title": "مراجعة",
+        "tradeName": "الاسم التجاري",
+        "type": "النوع"
+      },
+      "riskPurpose": {
+        "title": "المخاطر والغرض"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "لا تزال بعض الحقول المطلوبة بحاجة إلى إدخال بياناتها.",
+        "title": "تحقق من الحقول أدناه"
+      },
+      "submitFailed": {
+        "title": "فشل الإرسال"
+      },
+      "submitted": {
+        "description": "سنراجع بيانات شركتك قريبًا.",
+        "title": "تم إرسال طلب التوثيق"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "متابعة",
+      "submit": "إرسال للمراجعة"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "اختر"
+    },
+    "header": {
+      "subtitle": "بعض التفاصيل لنتمكن من التحقق من هويتك.",
+      "title": "توثيق هويتك"
+    },
+    "steps": {
+      "address": {
+        "title": "العنوان"
+      },
+      "financialProfile": {
+        "accountPurpose": "الغرض من الحساب",
+        "actingAsIntermediary": "التصرف كوسيط",
+        "actingAsIntermediaryHint": "نيابة عن شخص آخر، وليس لحسابك الخاص.",
+        "chooseAccountsHint": "اختر الدولار الأمريكي و/أو اليورو، أو EURDE فقط.",
+        "describeAccountPurpose": "صِف الغرض من الحساب",
+        "employmentStatus": "الحالة الوظيفية",
+        "eurdeCombined": "EURDE (مجمّع)",
+        "expectedMonthlyPayments": "المدفوعات الشهرية المتوقعة (بالدولار الأمريكي)",
+        "extraFeeNote": "قد يترتب عليه رسوم إضافية",
+        "occupation": "المهنة",
+        "sourceOfFunds": "مصدر الأموال",
+        "title": "الملف المالي",
+        "virtualAccounts": "الحسابات الافتراضية المطلوب تفعيلها"
+      },
+      "identityDocument": {
+        "govIdHeading": "هوية صادرة عن جهة حكومية",
+        "selfieHint": "صورة واضحة لوجهك.",
+        "selfiePhoto": "صورة سيلفي",
+        "title": "وثيقة الهوية"
+      },
+      "personalInfo": {
+        "bvn": "رقم التحقق المصرفي (BVN)",
+        "bvnPlaceholder": "11 رقمًا",
+        "currentEmployer": "جهة العمل الحالية (اختياري)",
+        "dateOfBirth": "تاريخ الميلاد",
+        "dialCode": "رمز الاتصال الدولي",
+        "dialCodePlaceholder": "+1",
+        "email": "البريد الإلكتروني",
+        "firstName": "الاسم الأول",
+        "gender": "الجنس",
+        "genderFemale": "أنثى",
+        "genderMale": "ذكر",
+        "immigrationStatus": "حالة الهجرة (اختياري)",
+        "immigrationStatusPlaceholder": "لا ينطبق",
+        "lastName": "اسم العائلة",
+        "middleName": "الاسم الأوسط (اختياري)",
+        "nationality": "الجنسية",
+        "nin": "الرقم الوطني للهوية (NIN)",
+        "ninPlaceholder": "11 رقمًا",
+        "phone": "الهاتف",
+        "phoneHint": "رمز الاتصال الدولي مثل \"+1\"، وأرقام الهاتف فقط (8-15 رقمًا).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "الرقم الضريبي",
+        "taxIdPlaceholder": "رقم الضمان الاجتماعي / الرقم الضريبي الوطني",
+        "title": "المعلومات الشخصية"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "الغرض من الحساب",
+          "address": "العنوان",
+          "email": "البريد الإلكتروني",
+          "idDocument": "وثيقة الهوية",
+          "name": "الاسم",
+          "nationality": "الجنسية",
+          "phone": "الهاتف"
+        },
+        "ready": "كل شيء جاهز. راجع البيانات ثم أرسلها.",
+        "title": "مراجعة"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "لا تزال بعض الحقول المطلوبة بحاجة إلى إدخال بياناتها.",
+        "title": "تحقق من الحقول أدناه"
+      },
+      "submitFailed": {
+        "title": "فشل الإرسال"
+      },
+      "submitted": {
+        "description": "سنراجع بياناتك قريبًا.",
+        "title": "تم إرسال طلب التوثيق"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "رجوع",
+    "chooseCountryFirstPlaceholder": "اختر دولة أولًا",
+    "cityLabel": "المدينة",
+    "clickToUpload": "انقر للرفع",
+    "countryLabel": "الدولة",
+    "dateIssuedLabel": "تاريخ الإصدار",
+    "documentBackOptionalLabel": "الوثيقة — الوجه الخلفي (اختياري)",
+    "documentFrontLabel": "الوثيقة — الوجه الأمامي",
+    "documentNumberLabel": "رقم الوثيقة",
+    "documentNumberPlaceholder": "مثال: P00012345",
+    "documentTypeLabel": "نوع الوثيقة",
+    "expirationDateLabel": "تاريخ الانتهاء",
+    "expirationDateOptionalLabel": "تاريخ الانتهاء (اختياري)",
+    "fixBeforeContinuing": "يُرجى تصحيح ما يلي قبل المتابعة:",
+    "issuingCountryLabel": "دولة الإصدار",
+    "loadingEllipsis": "جارٍ التحميل…",
+    "noMatches": "لا توجد نتائج مطابقة.",
+    "noPostalCodesText": "هذه الدولة لا تستخدم الرموز البريدية.",
+    "postalCodeFormatError": "لا يطابق الصيغة المتوقعة.",
+    "postalCodeFormatErrorWithExample": "لا يطابق الصيغة المتوقعة (مثال: {{example}}).",
+    "postalCodeLabel": "الرمز البريدي",
+    "proofOfAddressHint": "فاتورة مرافق، كشف حساب بنكي، أو عقد إيجار.",
+    "proofOfAddressLabel": "إثبات العنوان",
+    "searchPlaceholder": "بحث…",
+    "selectCountryPlaceholder": "اختر دولة",
+    "selectOption": "اختر",
+    "selectPlaceholder": "اختر…",
+    "setNationalityFirstPlaceholder": "حدد الجنسية أولًا",
+    "stateProvinceLabel": "الولاية / المقاطعة",
+    "stepOf": "الخطوة {{current}} من {{total}}",
+    "streetAddress2Label": "العنوان (السطر الثاني) (اختياري)",
+    "streetAddressLabel": "عنوان الشارع",
+    "streetAddressPlaceholder": "123 Main St"
+  },
+  "kycWizard": {
+    "backToDashboard": "العودة إلى لوحة التحكم",
+    "pendingDescription": "استلمنا بياناتك ونحن بصدد مراجعتها. سنُبلغك فور اتخاذ القرار.",
+    "pendingHeading": "التوثيق قيد المراجعة",
+    "verifiedDescription": "تم توثيق هويتك. لديك وصول كامل إلى الإرسال والبطاقات والحسابات الافتراضية.",
+    "verifiedHeading": "تم توثيق هويتك"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "دخول الشركات",
+      "demoCard": "بطاقة",
+      "demoDeposit": "إيداع",
+      "demoSend": "إرسال",
+      "demoTotalBalance": "الرصيد الإجمالي",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "كشف الرواتب",
+      "demoTransaction3": "أتعاب تصميم",
+      "feature1Desc": "احتفظ بالعملات التقليدية والرقمية وحوّلها جنبًا إلى جنب، برصيد يمكنك الوثوق به دائمًا.",
+      "feature1Title": "رصيد واحد، لكل العملات",
+      "feature2Desc": "اختر جهة اتصال، احصل على عرض سعر فوري، ثم أكِّد — تنتقل الأموال دون أي أوراق.",
+      "feature2Title": "أرسل في ثوانٍ",
+      "feature3Desc": "أصدر بطاقة افتراضية بلمسة واحدة، وجمِّدها بالسرعة نفسها.",
+      "feature3Title": "بطاقات عند الطلب",
+      "feature4Desc": "تُسجَّل كل معاملة في سجل محاسبي غير قابل للتعديل ومطابَق تلقائيًا خلف الكواليس.",
+      "feature4Title": "سجل محاسبي بمعايير مصرفية",
+      "featuresHeading": "كل ما تحتاجه أموالك",
+      "featuresSubheading": "بلا رسوم خفية ولا قوائم معقدة — خدمات مصرفية تعمل كما ينبغي.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "المال، ببساطة",
+      "heroHeadlineHighlight": "سهلة.",
+      "heroHeadlinePrefix": "خدمات مصرفية",
+      "heroSubheadline": "{{productName}} محفظة حديثة لإرسال أموالك وحفظها وإنفاقها — بسيطة بشكل جميل، وآمنة بجدية.",
+      "logIn": "تسجيل الدخول",
+      "openAccountCta": "افتح حسابك",
+      "planBusinessBlurb": "وصول متعدد المستخدمين، حدود أعلى، ودعم مخصص.",
+      "planBusinessCta": "تواصل معنا",
+      "planBusinessName": "الأعمال",
+      "planBusinessPrice": "مخصص",
+      "planPersonalBlurb": "إنفاق وإرسال يومي للأفراد.",
+      "planPersonalCta": "ابدأ الآن",
+      "planPersonalName": "شخصي",
+      "planPersonalPrice": "مجاني",
+      "pricingHeading": "أسعار بسيطة",
+      "pricingSubheading": "ابدأ مجانًا. رقِّ فقط عندما تحتاج شركتك إلى المزيد.",
+      "signUpFree": "سجِّل مجانًا"
+    },
+    "aurora": {
+      "badge": "أموال بسيطة وأنيقة",
+      "businessLogin": "دخول الشركات",
+      "demoActionCard": "بطاقة",
+      "demoActionDeposit": "إيداع",
+      "demoActionSend": "إرسال",
+      "demoBalance": "8,942.10 دولار",
+      "demoGrowth": "+12.4%",
+      "feature1Desc": "كل محفظة، كل عملة، مطابقة دائمًا.",
+      "feature1Title": "رصيد واحد أنيق",
+      "feature2Desc": "عروض أسعار فورية، تأكيد لحظي، بلا أي أوراق.",
+      "feature2Title": "أرسل في ثوانٍ",
+      "feature3Desc": "أصدر بطاقة افتراضية فور توثيق هويتك.",
+      "feature3Title": "بطاقات عند الطلب",
+      "feature4Desc": "كل معاملة، مطابَقة وقابلة للتدقيق.",
+      "feature4Title": "سجل محاسبي بمعايير مصرفية",
+      "featuresHeading": "كل ما تحتاجه أموالك",
+      "featuresSubheading": "بلا رسوم خفية ولا قوائم معقدة — خدمات مصرفية تعمل كما ينبغي.",
+      "heroHeadlineHighlight": "رؤية واحدة رائعة.",
+      "heroHeadlinePrefix": "كل حساب، في",
+      "heroSubheadline": "يجمع {{productName}} المحافظ والمدفوعات والبطاقات في لوحة تحكم يستمتع الناس فعلًا بفتحها.",
+      "logIn": "تسجيل الدخول",
+      "openAccount": "افتح حسابك",
+      "signUpFree": "سجِّل مجانًا",
+      "thisMonth": "هذا الشهر",
+      "totalBalance": "الرصيد الإجمالي",
+      "vsLastMonth": "مقارنةً بالشهر الماضي"
+    },
+    "meridian": {
+      "eyebrow": "منصة العمليات",
+      "featureCardIssuingDesc": "أصدر بطاقات افتراضية للعملاء فور توثيق هويتهم.",
+      "featureCardIssuingTitle": "إصدار البطاقات",
+      "featureComplianceDesc": "إجراءات التحقق من الهوية والاعتمادات وسجلات التدقيق مدمجة منذ اليوم الأول.",
+      "featureComplianceTitle": "امتثال مدمج",
+      "featureLedgerDesc": "كل محفظة، كل عملة، مطابَقة في مصدر واحد موثوق للبيانات.",
+      "featureLedgerTitle": "سجل محاسبي موحّد",
+      "featurePayoutsDesc": "احصل على عرض سعر، أكِّد، وسوِّ التحويلات عبر الحدود في نقرات قليلة.",
+      "featurePayoutsTitle": "مدفوعات عالمية",
+      "featuresHeading": "كل ما تحتاجه العمليات",
+      "featuresSubheading": "منصة واحدة لكامل منظومة حركة الأموال.",
+      "heroHeadline": "أدِر حركة الأموال كمشغِّل محترف، لا كجدول بيانات.",
+      "heroSubheadline": "يمنح {{productName}} فريقك وحدة تحكم واحدة للمحافظ والمدفوعات والبطاقات والامتثال — مدعومة بسجل محاسبي يمكنك الوثوق به.",
+      "logIn": "تسجيل الدخول",
+      "openAccountCta": "افتح حسابًا",
+      "operatorLoginCta": "دخول المشغِّل",
+      "reconciledDesc": "كل معاملة مُرحَّلة تُسجَّل بالقيد المزدوج، بلا تكرار، وتُطابَق تلقائيًا مع سجلات مزوّد الخدمة.",
+      "reconciledTitle": "مطابقة بشكل افتراضي",
+      "signUp": "إنشاء حساب",
+      "statCurrenciesLabel": "العملات",
+      "statPayoutTimeLabel": "متوسط وقت الدفع",
+      "statUptimeLabel": "نسبة التشغيل",
+      "teamsDesc": "وصول قائم على الأدوار للملّاك والمشرفين والمشغِّلين، مع سجل تدقيق كامل لكل إجراء.",
+      "teamsTitle": "مصمَّم للفرق"
+    },
+    "nova": {
+      "createAccountCta": "أنشئ حسابك",
+      "ctaHeading": "جاهز لتشغيل قنواتك الخاصة؟",
+      "ctaSubheading": "عملاؤك، علامتك التجارية، سجلك المحاسبي — مدعوم من الخلف بواسطة Yativo.",
+      "feature1Desc": "كل سنت يُتتبَّع عبر قيود يومية غير قابلة للتعديل وقابلة للتدقيق — وليس مجرد عمود رصيد بسيط.",
+      "feature1Title": "سجل محاسبي بالقيد المزدوج",
+      "feature2Desc": "الترحيل المدفوع بالـ webhook يبقي أرصدة العملاء محدَّثة لحظة انتقال الأموال.",
+      "feature2Title": "تسوية فورية",
+      "feature3Desc": "تقارن المهام المجدولة سجلك المحاسبي بالتسوية لدى مزوّد الخدمة العلوي وترصد أي انحراف فورًا.",
+      "feature3Title": "مطابقة تلقائية",
+      "feature4Desc": "قنوات العملات التقليدية والرقمية ضمن دليل حسابات واحد، جاهزة لممرات الدفع العالمية.",
+      "feature4Title": "متعددة العملات",
+      "feature5Desc": "جلسات العملاء والموظفين لا تتقاطع أبدًا — رموز منفصلة، ونطاق تأثير منفصل.",
+      "feature5Title": "نطاقا مصادقة معزولان",
+      "feature6Desc": "مراجعة التحقق من الهوية، التعديلات اليدوية، المدفوعات، البطاقات وWebhooks — كل ذلك في وحدة تحكم واحدة.",
+      "feature6Title": "مكتب خلفي متكامل",
+      "featuresHeading": "مبني كبنية تحتية، لا كنموذج تجريبي",
+      "featuresSubheading": "كل ما يحتاجه معيد البيع لإدارة أموال عملاء حقيقية، بأمان.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "ابدأ الآن",
+      "heroHeadlineHighlight": "تعمل تحت علامتك التجارية الخاصة.",
+      "heroHeadlinePrefix": "بنية تحتية للتقنية المالية،",
+      "heroSubheadline": "يمنح {{productName}} شركتك محفظة ومدفوعات ومنصة بطاقات بعلامة تجارية خاصة، مبنية على سجل محاسبي حقيقي بالقيد المزدوج — انشرها، اجعلها بعلامتك، وأدِر شركتك التقنية المالية الخاصة عليها.",
+      "openAccountCta": "افتح حسابًا",
+      "operatorConsole": "وحدة تحكم المشغِّل",
+      "signIn": "تسجيل الدخول",
+      "trustBadge": "موثَّق بالسجل المحاسبي · تسوية كل ساعة"
+    },
+    "prime": {
+      "balance": "الرصيد",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "دخول لوحة التحكم",
+      "feature": {
+        "cardIssuing": {
+          "desc": "أصدر بطاقات افتراضية للعملاء فور توثيق هويتهم.",
+          "title": "إصدار البطاقات"
+        },
+        "compliance": {
+          "desc": "إجراءات التحقق من الهوية والاعتمادات وسجلات التدقيق مدمجة منذ اليوم الأول.",
+          "title": "امتثال مدمج"
+        },
+        "ledger": {
+          "desc": "كل محفظة، كل عملة، مطابَقة في مصدر واحد موثوق للبيانات.",
+          "title": "سجل محاسبي موحّد"
+        },
+        "payouts": {
+          "desc": "احصل على عرض سعر، أكِّد، وسوِّ التحويلات عبر الحدود في نقرات قليلة.",
+          "title": "مدفوعات عالمية"
+        }
+      },
+      "featuresHeading": "كل ما تحتاجه العمليات",
+      "heroHeadline": "بنية تحتية للمدفوعات عبر الإنترنت.",
+      "heroSubheadline": "يمنحك {{productName}} واجهة برمجة تطبيقات واحدة ولوحة تحكم واحدة للمحافظ والمدفوعات والبطاقات والامتثال.",
+      "logIn": "تسجيل الدخول",
+      "signUp": "إنشاء حساب",
+      "startNow": "ابدأ الآن",
+      "stat": {
+        "deposits": "الإيداعات",
+        "payouts": "المدفوعات",
+        "refunds": "المبالغ المستردة"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← العودة إلى الصفحة الرئيسية",
+    "backToSignIn": "← العودة إلى تسجيل الدخول",
+    "createAccount": "إنشاء حساب",
+    "defaultProductName": "White Label",
+    "emailLabel": "البريد الإلكتروني",
+    "genericError": "تعذّر تسجيل الدخول. تحقق من بيانات الاعتماد الخاصة بك.",
+    "invalidCodeError": "رمز غير صحيح. يُرجى المحاولة مرة أخرى.",
+    "newHere": "مستخدم جديد؟",
+    "passwordLabel": "كلمة المرور",
+    "signIn": "تسجيل الدخول",
+    "signInDescription": "سجِّل الدخول إلى حسابك",
+    "signingIn": "جارٍ تسجيل الدخول…",
+    "verificationCodeLabel": "رمز التحقق",
+    "verify": "تحقق",
+    "verifyDescription": "أدخل الرمز المكوَّن من 6 أرقام من تطبيق المصادقة الخاص بك، أو رمز احتياطي.",
+    "verifyHeading": "تحقق من هويتك",
+    "verifying": "جارٍ التحقق…",
+    "welcomeBack": "مرحبًا بعودتك"
+  },
+  "nav": {
+    "account": "الحساب",
+    "atlas": {
+      "contacts": "جهات الاتصال",
+      "home": "الرئيسية",
+      "profile": "الملف الشخصي",
+      "send": "إرسال"
+    },
+    "beneficiaries": "المستفيدون",
+    "cards": "البطاقات",
+    "cryptoWallets": "محافظ العملات الرقمية",
+    "dashboard": "لوحة التحكم",
+    "deposit": "إيداع",
+    "logout": "تسجيل الخروج",
+    "portal": "البوابة",
+    "profileKyc": "الملف الشخصي والتوثيق",
+    "section": {
+      "account": "الحساب",
+      "manage": "الإدارة"
+    },
+    "sendMoney": "إرسال الأموال",
+    "settings": "الإعدادات",
+    "virtualAccounts": "الحسابات الافتراضية",
+    "wallets": "المحافظ",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "الحساب",
+    "emailLabel": "البريد الإلكتروني",
+    "endorsementsDescription": "توثيق خاص لكل خدمة مطلوب لبعض الميزات، مثل التحويلات المصرفية المحلية أو البطاقات الافتراضية.",
+    "endorsementsLoadError": "تعذّر تحميل الاعتمادات.",
+    "endorsementsTitle": "الاعتمادات",
+    "heading": "الملف الشخصي والتوثيق",
+    "identityVerificationTitle": "توثيق الهوية",
+    "restartVerification": "إعادة بدء التوثيق",
+    "startVerification": "بدء التوثيق",
+    "statusApproved": "تم توثيق هويتك. لديك وصول كامل إلى الإرسال والبطاقات والحسابات الافتراضية.",
+    "statusNotStarted": "مطلوب قبل أن تتمكن من إرسال الأموال، أو الاحتفاظ بحساب افتراضي، أو الحصول على بطاقة.",
+    "statusPending": "استلمنا بياناتك ونحن بصدد مراجعتها — سنُبلغك فور اتخاذ القرار.",
+    "statusRejected": "لم تتم الموافقة على طلبك الأخير — ابدأ طلبًا جديدًا أدناه.",
+    "subheading": "إدارة بيانات هويتك",
+    "typeLabel": "النوع"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "المبلغ المراد إرساله ({{currency}})",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "الخصم من المحفظة",
+      "prompt": "المبلغ المراد إرساله",
+      "promptTo": "المبلغ المراد إرساله إلى {{name}}",
+      "recipientFallback": "المستلم",
+      "willReceive": "سنُظهر لك بالضبط المبلغ الذي سيستلمه {{recipient}} قبل أن تؤكد.",
+      "willReceiveWithCurrency": "سنُظهر لك بالضبط المبلغ الذي سيستلمه {{recipient}} بعملة {{currency}} قبل أن تؤكد."
+    },
+    "buttons": {
+      "back": "رجوع",
+      "confirmAndSend": "تأكيد وإرسال",
+      "continue": "متابعة",
+      "getQuote": "الحصول على عرض سعر",
+      "requote": "تحديث عرض السعر"
+    },
+    "errors": {
+      "enterAmount": "أدخل مبلغًا",
+      "fieldRequired": "حقل {{field}} مطلوب",
+      "maxLength": "بحد أقصى {{max}} حرفًا",
+      "minLength": "{{min}} حرفًا على الأقل"
+    },
+    "result": {
+      "payoutId": "معرّف الدفعة: {{id}}",
+      "payoutSubmitted": "تم إرسال الدفعة",
+      "refreshing": "(جارٍ التحديث…)",
+      "sendAnother": "إرسال دفعة أخرى",
+      "statusLabel": "الحالة:",
+      "viewWallets": "عرض المحافظ"
+    },
+    "review": {
+      "expired": "انتهت صلاحية عرض السعر هذا — احصل على عرض جديد للمتابعة.",
+      "expiresIn": "تنتهي صلاحية عرض السعر خلال {{seconds}} ثانية.",
+      "rateLabel": "سعر الصرف",
+      "recipientGetsLabel": "المبلغ الذي يستلمه المستلم",
+      "toLabel": "إلى",
+      "totalChargedLabel": "إجمالي المبلغ المحصَّل"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "اختر مستفيدًا",
+      "prompt": "إلى من تريد الإرسال؟"
+    },
+    "step0": {
+      "countryLabel": "الدولة",
+      "countryPlaceholder": "اختر دولة",
+      "prompt": "إلى من تريد الإرسال؟",
+      "recipientNameLabel": "اسم المستلم",
+      "recipientNamePlaceholder": "جين دو"
+    },
+    "step1": {
+      "countryFallback": "هذه الدولة",
+      "methodRange": "{{min}}–{{max}} {{currency}} لكل تحويل",
+      "noMethods": "لا توجد طرق دفع نشطة لهذه الدولة حاليًا.",
+      "prompt": "كيف تريد أن يتم الدفع لـ {{recipient}} في {{country}}؟",
+      "recipientFallback": "هذا المستلم"
+    },
+    "step2": {
+      "noDetailsNeeded": "طريقة الدفع هذه لا تحتاج إلى أي تفاصيل إضافية.",
+      "prompt": "تفاصيل {{method}}",
+      "selectFieldPlaceholder": "اختر {{field}}"
+    },
+    "steps": {
+      "amount": "المبلغ",
+      "beneficiary": "المستفيد",
+      "details": "التفاصيل",
+      "method": "الطريقة",
+      "recipient": "المستلم",
+      "review": "مراجعة"
+    },
+    "subtitle": "اختر دولة وطريقة الدفع، ثم أكِّد المبلغ.",
+    "title": "إرسال الأموال",
+    "toast": {
+      "enterNameAndCountry": "أدخل الاسم واختر الدولة للمتابعة",
+      "payoutFailed": "فشلت عملية الدفع",
+      "payoutSubmitted": "تم إرسال الدفعة",
+      "payoutSubmittedDescription": "سنُبلغك فور تسويتها.",
+      "pickBeneficiary": "اختر مستفيدًا للمتابعة",
+      "pickMethod": "اختر طريقة دفع للمتابعة",
+      "quoteFailed": "تعذّر الحصول على عرض سعر",
+      "saveRecipientFailed": "تعذّر حفظ المستلم",
+      "tryAgain": "حاول مرة أخرى."
+    },
+    "toggle": {
+      "newRecipient": "مستلم جديد",
+      "savedBeneficiary": "مستفيد محفوظ"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "تأكيد كلمة المرور الجديدة",
+      "currentPasswordLabel": "كلمة المرور الحالية",
+      "description": "اختر كلمة مرور قوية لا تستخدمها في أي مكان آخر.",
+      "newPasswordLabel": "كلمة المرور الجديدة",
+      "submit": "تحديث كلمة المرور",
+      "title": "تغيير كلمة المرور",
+      "toastDescription": "تغيير كلمة المرور غير مفعَّل في هذا الإصدار.",
+      "toastTitle": "غير متاح بعد"
+    },
+    "copiedToClipboard": "تم النسخ إلى الحافظة",
+    "copyError": "تعذّر النسخ",
+    "subtitle": "إدارة أمان حسابك",
+    "title": "الإعدادات",
+    "twoFactor": {
+      "authenticatorApp": "تطبيق المصادقة",
+      "description": "أضِف طبقة إضافية من الأمان إلى حسابك.",
+      "disable": {
+        "description": "أكِّد كلمة المرور لإيقاف المصادقة الثنائية.",
+        "error": "تعذّر إيقاف المصادقة الثنائية.",
+        "passwordLabel": "كلمة المرور",
+        "submit": "إيقاف المصادقة الثنائية",
+        "submitting": "جارٍ الإيقاف…",
+        "title": "إيقاف المصادقة الثنائية"
+      },
+      "enabled": "مفعَّلة",
+      "loading": "جارٍ التحميل…",
+      "notConfigured": "لم يتم الإعداد بعد",
+      "setup": {
+        "backupCodesDescription": "احتفظ بها في مكان آمن — يمكن استخدام كل رمز مرة واحدة لتسجيل الدخول في حال فقدت الوصول إلى تطبيق المصادقة. لن تُعرض مرة أخرى.",
+        "backupCodesTitle": "احفظ رموزك الاحتياطية",
+        "codeLabel": "رمز مكوَّن من 6 أرقام",
+        "continueButton": "متابعة",
+        "copyAll": "نسخ الكل",
+        "done": "تم",
+        "enableButton": "تفعيل المصادقة الثنائية",
+        "enterCodeTitle": "أدخل الرمز",
+        "manualKeyLabel": "تتعذر المسح؟ أدخل هذا المفتاح يدويًا",
+        "qrAlt": "رمز QR لإعداد المصادقة الثنائية",
+        "scanTitle": "امسح باستخدام تطبيق المصادقة الخاص بك",
+        "verifyError": "تعذّر التحقق من هذا الرمز.",
+        "verifying": "جارٍ التحقق…"
+      },
+      "title": "المصادقة الثنائية",
+      "toast": {
+        "disabled": "تم إيقاف المصادقة الثنائية",
+        "setupError": "تعذّر بدء الإعداد"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "نوع الحساب",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "business": "شركة",
+    "businessNameLabel": "اسم الشركة",
+    "callingCodeAriaLabel": "رمز الاتصال",
+    "countryLabel": "الدولة",
+    "createAccount": "إنشاء حساب",
+    "createYourAccount": "أنشئ حسابك",
+    "creatingAccount": "جارٍ إنشاء الحساب…",
+    "defaultProductName": "White Label",
+    "emailLabel": "البريد الإلكتروني",
+    "fullNameLabel": "الاسم الكامل",
+    "genericError": "تعذّر إنشاء حسابك.",
+    "individual": "فرد",
+    "passwordLabel": "كلمة المرور",
+    "phoneNumberLabel": "رقم الهاتف",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "اختر دولتك",
+    "signIn": "تسجيل الدخول",
+    "startSendingDescription": "ابدأ الإرسال والاحتفاظ بالأموال وإنفاقها في دقائق"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "عرض الملف الشخصي"
+    },
+    "prime": {
+      "notifications": "الإشعارات",
+      "switchToDarkMode": "التبديل إلى الوضع الداكن",
+      "switchToLightMode": "التبديل إلى الوضع الفاتح"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "الحساب الافتراضي جاهز",
+    "addCurrency": "إضافة عملة",
+    "allCurrenciesAdded": "لديك بالفعل حساب لكل عملة متاحة.",
+    "copiedToClipboard": "تم النسخ إلى الحافظة",
+    "copyError": "تعذّر النسخ",
+    "copyField": "نسخ {{field}}",
+    "createAccount": "إنشاء حساب",
+    "createAccountError": "تعذّر إنشاء الحساب",
+    "creating": "جارٍ الإنشاء…",
+    "noAccountsYet": "لا توجد حسابات افتراضية بعد — فعِّل حسابًا لعملة أدناه.",
+    "noCurrenciesAvailable": "لا توجد عملات حسابات افتراضية متاحة بعد.",
+    "noVerificationNeeded": "لا حاجة إلى توثيق",
+    "requiresVerification": "يتطلب توثيق {{endorsement}} — تواصل مع الدعم للبدء.",
+    "shareDetails": "شارك هذه التفاصيل مع من يرسل لك الأموال.",
+    "startVerification": "بدء التوثيق",
+    "subtitle": "بيانات مصرفية مخصصة يمكنك إعادة استخدامها لكل تحويل وارد، مرة واحدة لكل عملة.",
+    "title": "الحسابات الافتراضية",
+    "verificationNote": "تحتاج بعض القنوات إلى توثيق لمرة واحدة قبل إمكانية إصدار حساب.",
+    "verified": "موثَّق",
+    "yourAccounts": "حساباتك"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} قيد الانتظار",
+    "wallet": "المحفظة"
+  },
+  "walletDetail": {
+    "allWallets": "كل المحافظ",
+    "available": "المتاح",
+    "balanceOverTime": "الرصيد عبر الزمن",
+    "cancel": "إلغاء",
+    "noActivity": "لا يوجد نشاط بعد",
+    "pageOf": "الصفحة {{page}} / {{totalPages}}",
+    "pending": "قيد الانتظار",
+    "removeDialogDescription": "المحفظة فارغة، لذا هذا آمن — يمكنك إضافة {{currencyCode}} مرة أخرى لاحقًا إذا كانت لا تزال متاحة.",
+    "removeDialogTitle": "هل تريد إزالة محفظة {{currencyCode}}؟",
+    "removeWallet": "إزالة المحفظة",
+    "removeWalletError": "تعذّرت إزالة المحفظة",
+    "removing": "جارٍ الإزالة…",
+    "statement": "كشف الحساب",
+    "walletRemoved": "تمت إزالة المحفظة",
+    "walletTitle": "محفظة {{currencyCode}}"
+  },
+  "wallets": {
+    "add": "إضافة",
+    "addCurrencyPlaceholder": "إضافة عملة",
+    "addWalletError": "تعذّرت إضافة المحفظة",
+    "empty": "لا توجد محافظ بعد. ستظهر هنا فور توفر رصيد.",
+    "subtitle": "أرصدتك عبر جميع العملات",
+    "title": "المحافظ",
+    "walletAdded": "تمت إضافة المحفظة",
+    "walletLabel": "المحفظة"
+  }
+}

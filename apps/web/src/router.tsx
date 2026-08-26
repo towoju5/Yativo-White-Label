@@ -42,6 +42,7 @@ import BrandingSettingsPage from "@/pages/admin/settings/BrandingSettingsPage";
 import ApiKeysSettingsPage from "@/pages/admin/settings/ApiKeysSettingsPage";
 import WalletCurrenciesSettingsPage from "@/pages/admin/settings/WalletCurrenciesSettingsPage";
 import VerificationSettingsPage from "@/pages/admin/settings/VerificationSettingsPage";
+import AuthenticationSettingsPage from "@/pages/admin/settings/AuthenticationSettingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -122,6 +123,7 @@ export const router = createBrowserRouter([
               { path: "settings/api-keys", element: <ApiKeysSettingsPage /> },
               { path: "settings/wallet-currencies", element: <WalletCurrenciesSettingsPage /> },
               { path: "settings/verification", element: <VerificationSettingsPage /> },
+              { path: "settings/authentication", element: <AuthenticationSettingsPage /> },
             ],
           },
         ],

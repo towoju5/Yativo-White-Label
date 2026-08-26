@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AlertCircle, Check, ChevronsUpDown, Loader2, Upload, X } from "lucide-react";
 import { FILE_ACCEPT, type KycCountry } from "@white-label/shared-types";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ function collectFieldErrors(errNode: unknown, path: string[]): CollectedFieldErr
  * confirmed live for Tax ID specifically, but the same gap applies broadly across both wizards.
  */
 export function StepErrorSummary({ errors, fields }: { errors: Record<string, unknown>; fields: string[] }) {
+  const { t } = useTranslation();
   const seen = new Set<string>();
   const entries: CollectedFieldError[] = [];
   for (const field of fields) {
@@ -65,7 +67,7 @@ export function StepErrorSummary({ errors, fields }: { errors: Record<string, un
     <div className="mb-4 flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
       <div>
-        <p className="font-medium">Please fix the following before continuing:</p>
+        <p className="font-medium">{t("kycShared.fixBeforeContinuing", "Please fix the following before continuing:")}</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-4">
           {entries.map((entry) => (
             <li key={`${entry.path}:${entry.message}`}>
@@ -137,7 +139,7 @@ export function SearchableSelect({
   value,
   onChange,
   options,
-  placeholder = "Select…",
+  placeholder,
   isLoading,
 }: {
   value: string;
@@ -146,10 +148,12 @@ export function SearchableSelect({
   placeholder?: string;
   isLoading?: boolean;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const selected = options.find((o) => o.value === value);
   const filtered = query.trim() ? options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase())).slice(0, 200) : options.slice(0, 200);
+  const effectivePlaceholder = placeholder ?? t("kycShared.selectPlaceholder", "Select…");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -160,16 +164,16 @@ export function SearchableSelect({
           className={cn("w-full justify-between font-normal", !selected && "text-muted-foreground")}
           disabled={isLoading}
         >
-          <span className="truncate">{isLoading ? "Loading…" : (selected?.label ?? placeholder)}</span>
+          <span className="truncate">{isLoading ? t("kycShared.loadingEllipsis", "Loading…") : (selected?.label ?? effectivePlaceholder)}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <div className="border-b border-border p-2">
-          <Input autoFocus placeholder="Search…" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <Input autoFocus placeholder={t("kycShared.searchPlaceholder", "Search…")} value={query} onChange={(e) => setQuery(e.target.value)} />
         </div>
         <div className="max-h-60 overflow-y-auto p-1">
-          {filtered.length === 0 && <p className="p-3 text-center text-sm text-muted-foreground">No matches.</p>}
+          {filtered.length === 0 && <p className="p-3 text-center text-sm text-muted-foreground">{t("kycShared.noMatches", "No matches.")}</p>}
           {filtered.map((o) => (
             <button
               key={o.value}
@@ -195,12 +199,13 @@ export function SearchableSelect({
 }
 
 export function CountryField({ form, name, countries, isLoading }: { form: AnyForm; name: string; countries: KycCountry[]; isLoading?: boolean }) {
+  const { t } = useTranslation();
   return (
     <SearchableSelect
       value={form.watch(name) ?? ""}
       onChange={(v) => form.setValue(name, v, { shouldValidate: true })}
       options={countries.map((c) => ({ value: c.code, label: `${c.name} (${c.code})` }))}
-      placeholder="Select a country"
+      placeholder={t("kycShared.selectCountryPlaceholder", "Select a country")}
       isLoading={isLoading}
     />
   );
@@ -227,6 +232,7 @@ export function FileField({
    */
   encoding?: "binary" | "base64";
 }) {
+  const { t } = useTranslation();
   const files = useContext(FileRegistryContext);
   const [state, setState] = useState<{ name: string; size: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -278,7 +284,7 @@ export function FileField({
               <span className="text-foreground">{state.name}</span> · {formatBytes(state.size)}
             </>
           ) : (
-            "Click to upload"
+            t("kycShared.clickToUpload", "Click to upload")
           )}
         </span>
         {value && (
@@ -317,6 +323,7 @@ export function AddressFields({
   proofField?: string;
   proofHint?: string;
 }) {
+  const { t } = useTranslation();
   const country = form.watch(`${prefix}.country`) as string | undefined;
   const subdivisions = useKycSubdivisions(country);
   const postalRule = useKycPostalCodeRule(country);
@@ -325,51 +332,63 @@ export function AddressFields({
   const regex = parseServerRegex(postalRule.data?.ruleRegex ?? null);
   const postalError =
     postalValue && regex && postalRule.data?.usesPostalCodes && !regex.test(postalValue)
-      ? `Doesn't match the expected format${postalRule.data.ruleSamples[0] ? ` (e.g. ${postalRule.data.ruleSamples[0]})` : ""}.`
+      ? postalRule.data.ruleSamples[0]
+        ? t("kycShared.postalCodeFormatErrorWithExample", "Doesn't match the expected format (e.g. {{example}}).", {
+            example: postalRule.data.ruleSamples[0],
+          })
+        : t("kycShared.postalCodeFormatError", "Doesn't match the expected format.")
       : null;
 
   const hasSubdivisions = (subdivisions.data?.length ?? 0) > 0;
+  const stateProvinceLabel = t("kycShared.stateProvinceLabel", "State / province");
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-1.5 sm:col-span-2">
-        <Label>Country</Label>
+        <Label>{t("kycShared.countryLabel", "Country")}</Label>
         <CountryField form={form} name={`${prefix}.country`} countries={countries} isLoading={countriesLoading} />
       </div>
       <div className="space-y-1.5 sm:col-span-2">
-        <Label>Street address</Label>
-        <Input {...form.register(`${prefix}.streetLine1`)} placeholder="123 Main St" />
+        <Label>{t("kycShared.streetAddressLabel", "Street address")}</Label>
+        <Input {...form.register(`${prefix}.streetLine1`)} placeholder={t("kycShared.streetAddressPlaceholder", "123 Main St")} />
       </div>
       <div className="space-y-1.5 sm:col-span-2">
-        <Label>Street address 2 (optional)</Label>
+        <Label>{t("kycShared.streetAddress2Label", "Street address 2 (optional)")}</Label>
         <Input {...form.register(`${prefix}.streetLine2`)} />
       </div>
       <div className="space-y-1.5">
-        <Label>City</Label>
+        <Label>{t("kycShared.cityLabel", "City")}</Label>
         <Input {...form.register(`${prefix}.city`)} />
       </div>
       <div className="space-y-1.5">
-        <Label>State / province</Label>
+        <Label>{stateProvinceLabel}</Label>
         {hasSubdivisions ? (
           <SearchableSelect
             value={form.watch(`${prefix}.state`) ?? ""}
             onChange={(v) => form.setValue(`${prefix}.state`, v, { shouldValidate: true })}
             options={(subdivisions.data ?? []).map((s) => ({ value: s.code, label: `${humanize(s.name)} (${s.code})` }))}
-            placeholder="Select"
+            placeholder={t("kycShared.selectOption", "Select")}
           />
         ) : (
-          <Input {...form.register(`${prefix}.state`)} placeholder={subdivisions.isFetching ? "Loading…" : "State / province"} />
+          <Input {...form.register(`${prefix}.state`)} placeholder={subdivisions.isFetching ? t("kycShared.loadingEllipsis", "Loading…") : stateProvinceLabel} />
         )}
       </div>
       <div className="space-y-1.5">
-        <Label>Postal code</Label>
+        <Label>{t("kycShared.postalCodeLabel", "Postal code")}</Label>
         <Input {...form.register(`${prefix}.postalCode`)} disabled={postalRule.data?.usesPostalCodes === false} />
         {postalError && <p className="text-xs text-destructive">{postalError}</p>}
-        {postalRule.data?.usesPostalCodes === false && <p className="text-xs text-muted-foreground">This country doesn't use postal codes.</p>}
+        {postalRule.data?.usesPostalCodes === false && (
+          <p className="text-xs text-muted-foreground">{t("kycShared.noPostalCodesText", "This country doesn't use postal codes.")}</p>
+        )}
       </div>
       {proofField && (
         <div className="sm:col-span-2">
-          <FileField form={form} name={proofField} label="Proof of address" hint={proofHint ?? "Utility bill, bank statement, or lease."} />
+          <FileField
+            form={form}
+            name={proofField}
+            label={t("kycShared.proofOfAddressLabel", "Proof of address")}
+            hint={proofHint ?? t("kycShared.proofOfAddressHint", "Utility bill, bank statement, or lease.")}
+          />
         </div>
       )}
     </div>
@@ -378,42 +397,43 @@ export function AddressFields({
 
 /** Individual KYC's identifying_information[] entry — country-scoped document type, front/back images. */
 export function IndividualIdDocFields({ form, prefix, countries, countriesLoading }: { form: AnyForm; prefix: string; countries: KycCountry[]; countriesLoading?: boolean }) {
+  const { t } = useTranslation();
   const issuingCountry = form.watch(`${prefix}.issuingCountry`) as string | undefined;
   const idTypes = useKycIdentificationTypes(issuingCountry);
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-1.5">
-        <Label>Issuing country</Label>
+        <Label>{t("kycShared.issuingCountryLabel", "Issuing country")}</Label>
         <CountryField form={form} name={`${prefix}.issuingCountry`} countries={countries} isLoading={countriesLoading} />
       </div>
       <div className="space-y-1.5">
-        <Label>Document type</Label>
+        <Label>{t("kycShared.documentTypeLabel", "Document type")}</Label>
         <SearchableSelect
           value={form.watch(`${prefix}.type`) ?? ""}
           onChange={(v) => form.setValue(`${prefix}.type`, v, { shouldValidate: true })}
-          options={(idTypes.data ?? []).map((t) => ({ value: t.type, label: t.description }))}
-          placeholder={issuingCountry ? "Select" : "Choose a country first"}
+          options={(idTypes.data ?? []).map((it) => ({ value: it.type, label: it.description }))}
+          placeholder={issuingCountry ? t("kycShared.selectOption", "Select") : t("kycShared.chooseCountryFirstPlaceholder", "Choose a country first")}
           isLoading={idTypes.isFetching}
         />
       </div>
       <div className="space-y-1.5 sm:col-span-2">
-        <Label>Document number</Label>
-        <Input {...form.register(`${prefix}.number`)} placeholder="e.g. P00012345" />
+        <Label>{t("kycShared.documentNumberLabel", "Document number")}</Label>
+        <Input {...form.register(`${prefix}.number`)} placeholder={t("kycShared.documentNumberPlaceholder", "e.g. P00012345")} />
       </div>
       <div className="space-y-1.5">
-        <Label>Date issued</Label>
+        <Label>{t("kycShared.dateIssuedLabel", "Date issued")}</Label>
         <Input type="date" {...form.register(`${prefix}.dateIssued`)} />
       </div>
       <div className="space-y-1.5">
-        <Label>Expiration date</Label>
+        <Label>{t("kycShared.expirationDateLabel", "Expiration date")}</Label>
         <Input type="date" {...form.register(`${prefix}.expirationDate`)} />
       </div>
       <div className="sm:col-span-2">
-        <FileField form={form} name={`${prefix}.imageFront`} label="Document — front" />
+        <FileField form={form} name={`${prefix}.imageFront`} label={t("kycShared.documentFrontLabel", "Document — front")} />
       </div>
       <div className="sm:col-span-2">
-        <FileField form={form} name={`${prefix}.imageBack`} label="Document — back (optional)" />
+        <FileField form={form} name={`${prefix}.imageBack`} label={t("kycShared.documentBackOptionalLabel", "Document — back (optional)")} />
       </div>
     </div>
   );
@@ -434,33 +454,34 @@ export function BusinessPhotoIdFields({
   countries: KycCountry[];
   countriesLoading?: boolean;
 }) {
+  const { t } = useTranslation();
   const idTypes = useKycIdentificationTypes(country);
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-1.5">
-        <Label>Document type</Label>
+        <Label>{t("kycShared.documentTypeLabel", "Document type")}</Label>
         <SearchableSelect
           value={form.watch(`${prefix}.type`) ?? ""}
           onChange={(v) => form.setValue(`${prefix}.type`, v, { shouldValidate: true })}
-          options={(idTypes.data ?? []).filter((t) => t.type !== "tax_id").map((t) => ({ value: t.type, label: t.description }))}
-          placeholder={country ? "Select" : "Set nationality first"}
+          options={(idTypes.data ?? []).filter((it) => it.type !== "tax_id").map((it) => ({ value: it.type, label: it.description }))}
+          placeholder={country ? t("kycShared.selectOption", "Select") : t("kycShared.setNationalityFirstPlaceholder", "Set nationality first")}
           isLoading={idTypes.isFetching}
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Document number</Label>
+        <Label>{t("kycShared.documentNumberLabel", "Document number")}</Label>
         <Input {...form.register(`${prefix}.number`)} />
       </div>
       <div className="space-y-1.5">
-        <Label>Expiration date (optional)</Label>
+        <Label>{t("kycShared.expirationDateOptionalLabel", "Expiration date (optional)")}</Label>
         <Input type="date" {...form.register(`${prefix}.expiration`)} />
       </div>
       <div className="hidden sm:block" />
       <div className="sm:col-span-2">
-        <FileField form={form} name={`${prefix}.imageFront`} label="Document — front" />
+        <FileField form={form} name={`${prefix}.imageFront`} label={t("kycShared.documentFrontLabel", "Document — front")} />
       </div>
       <div className="sm:col-span-2">
-        <FileField form={form} name={`${prefix}.imageBack`} label="Document — back (optional)" />
+        <FileField form={form} name={`${prefix}.imageBack`} label={t("kycShared.documentBackOptionalLabel", "Document — back (optional)")} />
       </div>
       {countriesLoading /* keep countries prop referenced without an unused-var lint even though this variant doesn't render a country field */ && null}
       {countries.length === 0 && null}
@@ -471,12 +492,13 @@ export function BusinessPhotoIdFields({
 // --- wizard chrome -----------------------------------------------------------
 
 export function Stepper({ steps, current }: { steps: string[]; current: number }) {
+  const { t } = useTranslation();
   const pct = ((current + 1) / steps.length) * 100;
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs">
         <span className="font-medium text-foreground">
-          Step {current + 1} of {steps.length}
+          {t("kycShared.stepOf", "Step {{current}} of {{total}}", { current: current + 1, total: steps.length })}
         </span>
         <span className="text-muted-foreground">{steps[current]}</span>
       </div>
@@ -508,6 +530,7 @@ export function WizardShell({
   isSubmitting?: boolean;
   backDisabled?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-screen items-start justify-center bg-muted/30 px-4 py-10 sm:py-16">
       <div className="w-full max-w-2xl">
@@ -522,7 +545,7 @@ export function WizardShell({
           <div className="px-6 py-6 sm:px-8 sm:py-8">{children}</div>
           <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4 sm:px-8">
             <Button type="button" variant="ghost" onClick={onBack} disabled={backDisabled || isSubmitting}>
-              Back
+              {t("kycShared.backButton", "Back")}
             </Button>
             <Button type="button" onClick={onNext} disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : nextLabel}

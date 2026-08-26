@@ -164,6 +164,7 @@ export async function apiFetch<T = unknown>(path: string, options: ApiFetchOptio
 export const staffApi = {
   get: <T>(path: string, query?: ApiFetchOptions["query"]) => apiFetch<T>(path, { auth: "staff", query }),
   post: <T>(path: string, body?: unknown) => apiFetch<T>(path, { auth: "staff", method: "POST", body }),
+  put: <T>(path: string, body?: unknown) => apiFetch<T>(path, { auth: "staff", method: "PUT", body }),
   patch: <T>(path: string, body?: unknown) => apiFetch<T>(path, { auth: "staff", method: "PATCH", body }),
   del: <T>(path: string) => apiFetch<T>(path, { auth: "staff", method: "DELETE" }),
 };

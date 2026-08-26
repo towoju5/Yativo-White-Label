@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Beneficiary, BeneficiaryFormField, CreateBeneficiaryInput, PayoutCountry, PayoutMethod } from "@white-label/shared-types";
 import { ArrowLeft, ArrowRight, Banknote, Check, Landmark, Loader2, Pencil, Plus, Trash2, User, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -17,9 +18,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
 import { humanize } from "@/pages/portal/kyc/kycUtils";
 
-const STEPS = ["Recipient", "Payout method", "Payment details"];
-
 export default function BeneficiariesPage() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -31,6 +31,12 @@ export default function BeneficiariesPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<Beneficiary | null>(null);
   const [removing, setRemoving] = useState<Beneficiary | null>(null);
+
+  const STEPS = [
+    t("beneficiaries.steps.recipient", "Recipient"),
+    t("beneficiaries.steps.payoutMethod", "Payout method"),
+    t("beneficiaries.steps.paymentDetails", "Payment details"),
+  ];
 
   const { data, isLoading } = useQuery({
     queryKey: ["portal", "beneficiaries"],
@@ -90,39 +96,42 @@ export default function BeneficiariesPage() {
   const createMutation = useMutation({
     mutationFn: (input: CreateBeneficiaryInput) => portalApi.post<Beneficiary>("/portal/beneficiaries", input),
     onSuccess: () => {
-      toast({ title: "Beneficiary added" });
+      toast({ title: t("beneficiaries.added", "Beneficiary added") });
       queryClient.invalidateQueries({ queryKey: ["portal", "beneficiaries"] });
       resetWizard();
       setOpen(false);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't add beneficiary", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) =>
+      toast({ variant: "destructive", title: t("beneficiaries.addError", "Couldn't add beneficiary"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => portalApi.del(`/portal/beneficiaries/${id}`),
     onSuccess: () => {
-      toast({ title: "Beneficiary removed" });
+      toast({ title: t("beneficiaries.removed", "Beneficiary removed") });
       queryClient.invalidateQueries({ queryKey: ["portal", "beneficiaries"] });
       setRemoving(null);
       setSelected(null);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't remove beneficiary", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) =>
+      toast({ variant: "destructive", title: t("beneficiaries.removeError", "Couldn't remove beneficiary"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, name: newName }: { id: string; name: string }) => portalApi.patch<Beneficiary>(`/portal/beneficiaries/${id}`, { name: newName }),
     onSuccess: (updated) => {
-      toast({ title: "Beneficiary updated" });
+      toast({ title: t("beneficiaries.updated", "Beneficiary updated") });
       queryClient.invalidateQueries({ queryKey: ["portal", "beneficiaries"] });
       setSelected(updated);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't update beneficiary", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) =>
+      toast({ variant: "destructive", title: t("beneficiaries.updateError", "Couldn't update beneficiary"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const goNext = () => {
     if (step === 0) {
       if (!name.trim() || !countryIso3) {
-        toast({ variant: "destructive", title: "Enter a name and pick a country to continue" });
+        toast({ variant: "destructive", title: t("beneficiaries.nameAndCountryRequired", "Enter a name and pick a country to continue") });
         return;
       }
       setStep(1);
@@ -130,7 +139,7 @@ export default function BeneficiariesPage() {
     }
     if (step === 1) {
       if (!selectedMethod) {
-        toast({ variant: "destructive", title: "Pick a payout method to continue" });
+        toast({ variant: "destructive", title: t("beneficiaries.payoutMethodRequired", "Pick a payout method to continue") });
         return;
       }
       setStep(2);
@@ -148,11 +157,11 @@ export default function BeneficiariesPage() {
     for (const f of visibleFields) {
       const value = paymentData[f.key]?.trim() ?? "";
       if (isFieldRequired(f) && !value) {
-        errors[f.key] = `${f.name} is required`;
+        errors[f.key] = t("beneficiaries.fieldRequiredError", "{{field}} is required", { field: f.name });
       } else if (value && f.min !== undefined && value.length < f.min) {
-        errors[f.key] = `At least ${f.min} characters`;
+        errors[f.key] = t("beneficiaries.minCharsError", "At least {{min}} characters", { min: f.min });
       } else if (value && f.max !== undefined && value.length > f.max) {
-        errors[f.key] = `At most ${f.max} characters`;
+        errors[f.key] = t("beneficiaries.maxCharsError", "At most {{max}} characters", { max: f.max });
       }
     }
     setFieldErrors(errors);
@@ -172,8 +181,8 @@ export default function BeneficiariesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">Beneficiaries</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">People and accounts you send money to</p>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("beneficiaries.title", "Beneficiaries")}</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">{t("beneficiaries.subtitle", "People and accounts you send money to")}</p>
         </div>
         <Dialog
           open={open}
@@ -183,12 +192,12 @@ export default function BeneficiariesPage() {
           }}
         >
           <Button size="sm" onClick={() => setOpen(true)}>
-            <Plus className="h-4 w-4" /> Add beneficiary
+            <Plus className="h-4 w-4" /> {t("beneficiaries.addBeneficiary", "Add beneficiary")}
           </Button>
 
           <DialogContent className="max-w-lg overflow-hidden p-0 sm:max-w-2xl">
             <DialogHeader className="border-b border-border px-6 py-5">
-              <DialogTitle className="font-heading text-xl">Add a beneficiary</DialogTitle>
+              <DialogTitle className="font-heading text-xl">{t("beneficiaries.addABeneficiary", "Add a beneficiary")}</DialogTitle>
               <div className="pt-2">
                 <Stepper steps={STEPS} current={step} />
               </div>
@@ -198,14 +207,20 @@ export default function BeneficiariesPage() {
               {step === 0 && (
                 <div className="space-y-5">
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <User className="h-4 w-4" /> Who are you sending to?
+                    <User className="h-4 w-4" /> {t("beneficiaries.whoAreYouSendingTo", "Who are you sending to?")}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="name">Recipient name</Label>
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" autoFocus />
+                    <Label htmlFor="name">{t("beneficiaries.recipientName", "Recipient name")}</Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={t("beneficiaries.recipientNamePlaceholder", "Jane Doe")}
+                      autoFocus
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Country</Label>
+                    <Label>{t("beneficiaries.country", "Country")}</Label>
                     <SearchableSelect
                       value={countryIso3}
                       onChange={(v) => {
@@ -214,7 +229,7 @@ export default function BeneficiariesPage() {
                         setPaymentData({});
                       }}
                       options={(countriesQuery.data ?? []).map((c) => ({ value: c.iso3, label: c.name }))}
-                      placeholder="Select a country"
+                      placeholder={t("beneficiaries.selectCountryPlaceholder", "Select a country")}
                       isLoading={countriesQuery.isLoading}
                     />
                   </div>
@@ -224,7 +239,11 @@ export default function BeneficiariesPage() {
               {step === 1 && (
                 <div className="space-y-5">
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <Landmark className="h-4 w-4" /> How should {name || "this recipient"} in {selectedCountry?.name ?? "this country"} get paid?
+                    <Landmark className="h-4 w-4" />
+                    {t("beneficiaries.payoutMethodQuestion", "How should {{name}} in {{country}} get paid?", {
+                      name: name || t("beneficiaries.thisRecipient", "this recipient"),
+                      country: selectedCountry?.name ?? t("beneficiaries.thisCountry", "this country"),
+                    })}
                   </div>
 
                   {payoutMethodsQuery.isLoading ? (
@@ -235,7 +254,7 @@ export default function BeneficiariesPage() {
                     </div>
                   ) : (payoutMethodsQuery.data ?? []).length === 0 ? (
                     <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                      No active payout methods for this country yet.
+                      {t("beneficiaries.noPayoutMethods", "No active payout methods for this country yet.")}
                     </p>
                   ) : (
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -269,7 +288,11 @@ export default function BeneficiariesPage() {
                             </div>
                             {(m.minimumWithdrawal || m.maximumWithdrawal) && (
                               <p className="text-xs text-muted-foreground">
-                                {m.minimumWithdrawal ?? "0"}–{m.maximumWithdrawal ?? "∞"} {m.currency} per transfer
+                                {t("beneficiaries.transferRange", "{{min}}–{{max}} {{currency}} per transfer", {
+                                  min: m.minimumWithdrawal ?? "0",
+                                  max: m.maximumWithdrawal ?? "∞",
+                                  currency: m.currency,
+                                })}
                               </p>
                             )}
                           </button>
@@ -283,7 +306,8 @@ export default function BeneficiariesPage() {
               {step === 2 && (
                 <div className="space-y-5">
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <Landmark className="h-4 w-4" /> {selectedMethod?.methodName} details
+                    <Landmark className="h-4 w-4" />
+                    {t("beneficiaries.methodDetailsHeading", "{{method}} details", { method: selectedMethod?.methodName })}
                   </div>
 
                   {formQuery.isLoading ? (
@@ -294,7 +318,7 @@ export default function BeneficiariesPage() {
                     </div>
                   ) : renderableFields.length === 0 ? (
                     <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                      This payout method doesn't need any extra details.
+                      {t("beneficiaries.noExtraDetailsNeeded", "This payout method doesn't need any extra details.")}
                     </p>
                   ) : (
                     <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
@@ -313,7 +337,7 @@ export default function BeneficiariesPage() {
                               }}
                             >
                               <SelectTrigger className={fieldErrors[f.key] ? "border-destructive" : undefined}>
-                                <SelectValue placeholder={`Select ${f.name.toLowerCase()}`} />
+                                <SelectValue placeholder={t("beneficiaries.selectFieldPlaceholder", "Select {{field}}", { field: f.name.toLowerCase() })} />
                               </SelectTrigger>
                               <SelectContent>
                                 {(f.options ?? []).map((o) => (
@@ -345,16 +369,16 @@ export default function BeneficiariesPage() {
 
             <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
               <Button type="button" variant="ghost" onClick={goBack} disabled={step === 0 || createMutation.isPending}>
-                <ArrowLeft className="h-4 w-4" /> Back
+                <ArrowLeft className="h-4 w-4" /> {t("beneficiaries.back", "Back")}
               </Button>
               <Button type="button" onClick={goNext} disabled={createMutation.isPending}>
                 {createMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : step === 2 ? (
-                  "Add beneficiary"
+                  t("beneficiaries.addBeneficiary", "Add beneficiary")
                 ) : (
                   <>
-                    Continue <ArrowRight className="h-4 w-4" />
+                    {t("beneficiaries.continue", "Continue")} <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </Button>
@@ -372,16 +396,16 @@ export default function BeneficiariesPage() {
       ) : !data || data.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center">
           <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No beneficiaries yet. Add one to start sending money.</p>
+          <p className="text-sm text-muted-foreground">{t("beneficiaries.empty", "No beneficiaries yet. Add one to start sending money.")}</p>
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Currency</TableHead>
-              <TableHead>Added</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("beneficiaries.table.name", "Name")}</TableHead>
+              <TableHead>{t("beneficiaries.table.currency", "Currency")}</TableHead>
+              <TableHead>{t("beneficiaries.table.added", "Added")}</TableHead>
+              <TableHead className="text-right">{t("beneficiaries.table.actions", "Actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -421,17 +445,17 @@ export default function BeneficiariesPage() {
       <Dialog open={!!removing} onOpenChange={(v) => !v && setRemoving(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove {removing?.name}?</DialogTitle>
+            <DialogTitle>{t("beneficiaries.removeDialogTitle", "Remove {{name}}?", { name: removing?.name })}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            You'll need to add them again to send money here in future. This doesn't affect any past payouts.
+            {t("beneficiaries.removeDialogDescription", "You'll need to add them again to send money here in future. This doesn't affect any past payouts.")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRemoving(null)}>
-              Cancel
+              {t("beneficiaries.cancel", "Cancel")}
             </Button>
             <Button variant="destructive" disabled={removeMutation.isPending} onClick={() => removing && removeMutation.mutate(removing.id)}>
-              Remove
+              {t("beneficiaries.remove", "Remove")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -453,6 +477,7 @@ function BeneficiaryDetailSheet({
   onRemove: () => void;
   isSaving: boolean;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
 
@@ -473,22 +498,22 @@ function BeneficiaryDetailSheet({
     <Sheet open={!!beneficiary} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full space-y-6 overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Beneficiary details</SheetTitle>
+          <SheetTitle>{t("beneficiaries.detail.title", "Beneficiary details")}</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-1.5">
-          <Label>Name</Label>
+          <Label>{t("beneficiaries.detail.name", "Name")}</Label>
           {editing ? (
             <div className="flex gap-2">
               <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
               <Button size="sm" disabled={!name.trim() || isSaving} onClick={() => onSave(name.trim())}>
-                Save
+                {t("beneficiaries.detail.save", "Save")}
               </Button>
             </div>
           ) : (
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
               <span className="text-sm font-medium">{beneficiary.name}</span>
-              <Button variant="ghost" size="icon" onClick={() => setEditing(true)} aria-label="Edit name">
+              <Button variant="ghost" size="icon" onClick={() => setEditing(true)} aria-label={t("beneficiaries.detail.editName", "Edit name")}>
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -496,20 +521,20 @@ function BeneficiaryDetailSheet({
         </div>
 
         <div className="space-y-1.5">
-          <Label>Type</Label>
+          <Label>{t("beneficiaries.detail.type", "Type")}</Label>
           <p className="text-sm">{beneficiary.type.replace("_", " ")}</p>
         </div>
 
         {typeof currency === "string" && (
           <div className="space-y-1.5">
-            <Label>Currency</Label>
+            <Label>{t("beneficiaries.detail.currency", "Currency")}</Label>
             <p className="text-sm">{currency}</p>
           </div>
         )}
 
         {detailRows.length > 0 && (
           <div className="space-y-1.5">
-            <Label>Payment details</Label>
+            <Label>{t("beneficiaries.detail.paymentDetails", "Payment details")}</Label>
             <dl className="divide-y divide-border rounded-lg border border-border text-sm">
               {detailRows.map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between gap-3 px-3 py-2">
@@ -519,18 +544,18 @@ function BeneficiaryDetailSheet({
               ))}
             </dl>
             <p className="text-xs text-muted-foreground">
-              Payment details can't be edited here — remove this beneficiary and add a new one if they've changed.
+              {t("beneficiaries.detail.editHint", "Payment details can't be edited here — remove this beneficiary and add a new one if they've changed.")}
             </p>
           </div>
         )}
 
         <div className="space-y-1.5">
-          <Label>Added</Label>
+          <Label>{t("beneficiaries.detail.added", "Added")}</Label>
           <p className="text-sm text-muted-foreground">{new Date(beneficiary.createdAt).toLocaleString()}</p>
         </div>
 
         <Button variant="outline" className="w-full text-destructive" onClick={onRemove}>
-          <Trash2 className="h-4 w-4" /> Remove beneficiary
+          <Trash2 className="h-4 w-4" /> {t("beneficiaries.detail.removeBeneficiary", "Remove beneficiary")}
         </Button>
       </SheetContent>
     </Sheet>

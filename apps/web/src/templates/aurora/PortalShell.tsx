@@ -1,43 +1,45 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings } from "lucide-react";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { AuroraSidebar, type NavSection } from "./Sidebar";
 import { AuroraTopbar } from "./Topbar";
 
-const sections: NavSection[] = [
-  {
-    heading: "Account",
-    items: [
-      { to: "/portal", label: "Dashboard", icon: LayoutDashboard, end: true },
-      { to: "/portal/wallets", label: "Wallets", icon: Wallet },
-      { to: "/portal/send", label: "Send money", icon: Send },
-      { to: "/portal/deposit", label: "Deposit", icon: ArrowDownToLine },
-      { to: "/portal/crypto", label: "Crypto wallets", icon: Coins },
-      { to: "/portal/virtual-accounts", label: "Virtual accounts", icon: Landmark },
-    ],
-  },
-  {
-    heading: "Manage",
-    items: [
-      { to: "/portal/beneficiaries", label: "Beneficiaries", icon: Users },
-      { to: "/portal/cards", label: "Cards", icon: CreditCard },
-      { to: "/portal/profile", label: "Profile & KYC", icon: UserCheck },
-      { to: "/portal/settings", label: "Settings", icon: Settings },
-    ],
-  },
-];
-
 const PROFILE_PATH = "/portal/profile";
 
 export function AuroraPortalShell({ children }: { children: ReactNode }) {
   const { user, logout } = useCustomerAuth();
-  const name = user?.fullName ?? user?.businessName ?? user?.email ?? "Account";
+  const { t } = useTranslation();
+  const name = user?.fullName ?? user?.businessName ?? user?.email ?? t("nav.account", "Account");
+
+  const sections: NavSection[] = [
+    {
+      heading: t("nav.section.account", "Account"),
+      items: [
+        { to: "/portal", label: t("nav.dashboard", "Dashboard"), icon: LayoutDashboard, end: true },
+        { to: "/portal/wallets", label: t("nav.wallets", "Wallets"), icon: Wallet },
+        { to: "/portal/send", label: t("nav.sendMoney", "Send money"), icon: Send },
+        { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
+        { to: "/portal/crypto", label: t("nav.cryptoWallets", "Crypto wallets"), icon: Coins },
+        { to: "/portal/virtual-accounts", label: t("nav.virtualAccounts", "Virtual accounts"), icon: Landmark },
+      ],
+    },
+    {
+      heading: t("nav.section.manage", "Manage"),
+      items: [
+        { to: "/portal/beneficiaries", label: t("nav.beneficiaries", "Beneficiaries"), icon: Users },
+        { to: "/portal/cards", label: t("nav.cards", "Cards"), icon: CreditCard },
+        { to: "/portal/profile", label: t("nav.profileKyc", "Profile & KYC"), icon: UserCheck },
+        { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
+      ],
+    },
+  ];
 
   return (
     <div className="flex min-h-screen bg-background">
       <AuroraSidebar sections={sections} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} profileTo={PROFILE_PATH} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AuroraTopbar sections={sections} productName="Portal" userLabel={name} onLogout={logout} profileTo={PROFILE_PATH} />
+        <AuroraTopbar sections={sections} productName={t("nav.portal", "Portal")} userLabel={name} onLogout={logout} profileTo={PROFILE_PATH} />
         <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">{children}</main>
       </div>
     </div>

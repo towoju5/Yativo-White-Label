@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CryptoWallet, CryptoDeposit } from "@white-label/shared-types";
 import { AlertTriangle, Coins, Copy, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +45,7 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
 };
 
 export default function CryptoWalletsPage() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currency, setCurrency] = useState("");
@@ -66,19 +68,19 @@ export default function CryptoWalletsPage() {
   const generateMutation = useMutation({
     mutationFn: () => portalApi.post<CryptoWallet>("/portal/crypto/wallets", { currency }),
     onSuccess: () => {
-      toast({ title: "Deposit address ready" });
+      toast({ title: t("crypto.depositAddressReady", "Deposit address ready") });
       queryClient.invalidateQueries({ queryKey: ["portal", "crypto", "wallets"] });
       setCurrency("");
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't generate address", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("crypto.generateAddressError", "Couldn't generate address"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const copy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast({ title: "Address copied" });
+      toast({ title: t("crypto.addressCopied", "Address copied") });
     } catch {
-      toast({ variant: "destructive", title: "Couldn't copy address" });
+      toast({ variant: "destructive", title: t("crypto.copyAddressError", "Couldn't copy address") });
     }
   };
 
@@ -89,22 +91,22 @@ export default function CryptoWalletsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">Crypto wallets</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Deposit addresses and on-chain deposit history for supported assets.</p>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("crypto.title", "Crypto wallets")}</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t("crypto.subtitle", "Deposit addresses and on-chain deposit history for supported assets.")}</p>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Coins className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base">Your wallets</CardTitle>
+            <CardTitle className="text-base">{t("crypto.yourWallets", "Your wallets")}</CardTitle>
           </div>
-          <CardDescription>Generate a deposit address for any supported chain.</CardDescription>
+          <CardDescription>{t("crypto.generateDescription", "Generate a deposit address for any supported chain.")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs text-foreground">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
-            <p>This address may be shared with other users for the same asset. Deposits are matched to your account and confirmed by our team before your balance updates.</p>
+            <p>{t("crypto.sharedAddressWarning", "This address may be shared with other users for the same asset. Deposits are matched to your account and confirmed by our team before your balance updates.")}</p>
           </div>
 
           {walletsQuery.isLoading ? (
@@ -114,7 +116,7 @@ export default function CryptoWalletsPage() {
             </div>
           ) : wallets.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-              No crypto wallets yet — generate an address below to get started.
+              {t("crypto.noWalletsYet", "No crypto wallets yet — generate an address below to get started.")}
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -141,7 +143,7 @@ export default function CryptoWalletsPage() {
               <div className="min-w-[12rem] flex-1">
                 <Select value={currency} onValueChange={setCurrency}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an asset" />
+                    <SelectValue placeholder={t("crypto.selectAssetPlaceholder", "Select an asset")} />
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
                     {availableCurrencies.map((c) => (
@@ -153,7 +155,7 @@ export default function CryptoWalletsPage() {
                 </Select>
               </div>
               <Button onClick={() => generateMutation.mutate()} disabled={!currency || generateMutation.isPending}>
-                {generateMutation.isPending ? "Generating…" : "Generate address"}
+                {generateMutation.isPending ? t("crypto.generating", "Generating…") : t("crypto.generateAddress", "Generate address")}
               </Button>
             </div>
           )}
@@ -162,8 +164,8 @@ export default function CryptoWalletsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Crypto transactions</CardTitle>
-          <CardDescription>Every on-chain deposit matched to your account.</CardDescription>
+          <CardTitle className="text-base">{t("crypto.transactionsTitle", "Crypto transactions")}</CardTitle>
+          <CardDescription>{t("crypto.transactionsDescription", "Every on-chain deposit matched to your account.")}</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {depositsQuery.isLoading ? (
@@ -173,7 +175,7 @@ export default function CryptoWalletsPage() {
               ))}
             </div>
           ) : deposits.length === 0 ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">No crypto deposits yet</div>
+            <div className="p-8 text-center text-sm text-muted-foreground">{t("crypto.noDepositsYet", "No crypto deposits yet")}</div>
           ) : (
             <div className="divide-y divide-border">
               {deposits.map((d) => (
@@ -208,7 +210,7 @@ export default function CryptoWalletsPage() {
                           target="_blank"
                           rel="noreferrer"
                           className="shrink-0 text-muted-foreground hover:text-primary"
-                          title="View on block explorer"
+                          title={t("crypto.viewOnExplorer", "View on block explorer")}
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>

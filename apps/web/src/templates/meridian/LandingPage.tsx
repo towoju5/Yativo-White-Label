@@ -1,27 +1,46 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Send, CreditCard, ShieldCheck, Wallet, Activity, Users } from "lucide-react";
 import { fetchBranding, fetchFooterPages } from "@/theme/branding";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const stats = [
-  { label: "Uptime", value: "99.98%" },
-  { label: "Currencies", value: "40+" },
-  { label: "Avg. payout time", value: "< 2 min" },
-];
-
-const features = [
-  { icon: Wallet, title: "Unified ledger", desc: "Every wallet, every currency, reconciled to a single source of truth." },
-  { icon: Send, title: "Global payouts", desc: "Quote, confirm, and settle cross-border transfers in a few clicks." },
-  { icon: CreditCard, title: "Card issuing", desc: "Issue virtual cards to customers the moment they're verified." },
-  { icon: ShieldCheck, title: "Built-in compliance", desc: "KYC, endorsements, and audit trails wired in from day one." },
-];
 
 export function MeridianLandingPage() {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { data: footerPages } = useQuery({ queryKey: ["pages", "footer"], queryFn: fetchFooterPages, staleTime: Infinity });
-  const productName = branding?.productName ?? "White Label";
+  const { t } = useTranslation();
+  const productName = branding?.productName ?? t("nav.whiteLabel", "White Label");
+
+  const stats = [
+    { label: t("landing.meridian.statUptimeLabel", "Uptime"), value: "99.98%" },
+    { label: t("landing.meridian.statCurrenciesLabel", "Currencies"), value: "40+" },
+    { label: t("landing.meridian.statPayoutTimeLabel", "Avg. payout time"), value: "< 2 min" },
+  ];
+
+  const features = [
+    {
+      icon: Wallet,
+      title: t("landing.meridian.featureLedgerTitle", "Unified ledger"),
+      desc: t("landing.meridian.featureLedgerDesc", "Every wallet, every currency, reconciled to a single source of truth."),
+    },
+    {
+      icon: Send,
+      title: t("landing.meridian.featurePayoutsTitle", "Global payouts"),
+      desc: t("landing.meridian.featurePayoutsDesc", "Quote, confirm, and settle cross-border transfers in a few clicks."),
+    },
+    {
+      icon: CreditCard,
+      title: t("landing.meridian.featureCardIssuingTitle", "Card issuing"),
+      desc: t("landing.meridian.featureCardIssuingDesc", "Issue virtual cards to customers the moment they're verified."),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("landing.meridian.featureComplianceTitle", "Built-in compliance"),
+      desc: t("landing.meridian.featureComplianceDesc", "KYC, endorsements, and audit trails wired in from day one."),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -38,11 +57,12 @@ export function MeridianLandingPage() {
             <span className="font-heading text-base font-semibold tracking-tight">{productName}</span>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Link to="/portal/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-              Log in
+              {t("landing.meridian.logIn", "Log in")}
             </Link>
             <Button asChild size="sm">
-              <Link to="/portal/signup">Sign up</Link>
+              <Link to="/portal/signup">{t("landing.meridian.signUp", "Sign up")}</Link>
             </Button>
           </div>
         </div>
@@ -50,21 +70,25 @@ export function MeridianLandingPage() {
 
       <section className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
         <div className="rounded-2xl border border-border bg-gradient-to-r from-card to-muted/50 p-8 shadow-soft sm:p-12">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Operations platform</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">{t("landing.meridian.eyebrow", "Operations platform")}</p>
           <h1 className="mt-3 max-w-2xl font-heading text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-            Run money movement like an operator, not a spreadsheet.
+            {t("landing.meridian.heroHeadline", "Run money movement like an operator, not a spreadsheet.")}
           </h1>
           <p className="mt-4 max-w-xl text-base text-muted-foreground">
-            {productName} gives your team one console for wallets, payouts, cards, and compliance — backed by a ledger you can trust.
+            {t(
+              "landing.meridian.heroSubheadline",
+              "{{productName}} gives your team one console for wallets, payouts, cards, and compliance — backed by a ledger you can trust.",
+              { productName },
+            )}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg">
               <Link to="/portal/signup">
-                Open an account <ArrowRight className="h-4 w-4" />
+                {t("landing.meridian.openAccountCta", "Open an account")} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/admin/login">Operator login</Link>
+              <Link to="/admin/login">{t("landing.meridian.operatorLoginCta", "Operator login")}</Link>
             </Button>
           </div>
 
@@ -81,8 +105,10 @@ export function MeridianLandingPage() {
 
       <section className="mx-auto max-w-7xl px-6 pb-20">
         <div className="mb-8">
-          <h2 className="font-heading text-2xl font-bold tracking-tight">Everything operations needs</h2>
-          <p className="mt-2 text-sm text-muted-foreground">A single platform for the whole money-movement stack.</p>
+          <h2 className="font-heading text-2xl font-bold tracking-tight">{t("landing.meridian.featuresHeading", "Everything operations needs")}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("landing.meridian.featuresSubheading", "A single platform for the whole money-movement stack.")}
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
@@ -103,19 +129,25 @@ export function MeridianLandingPage() {
             <Card>
               <CardHeader>
                 <Activity className="h-5 w-5 text-primary" />
-                <CardTitle>Reconciled by default</CardTitle>
+                <CardTitle>{t("landing.meridian.reconciledTitle", "Reconciled by default")}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 text-sm text-muted-foreground">
-                Every posted transaction is double-entry, idempotent, and matched against provider records automatically.
+                {t(
+                  "landing.meridian.reconciledDesc",
+                  "Every posted transaction is double-entry, idempotent, and matched against provider records automatically.",
+                )}
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
                 <Users className="h-5 w-5 text-primary" />
-                <CardTitle>Built for teams</CardTitle>
+                <CardTitle>{t("landing.meridian.teamsTitle", "Built for teams")}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 text-sm text-muted-foreground">
-                Role-based access for owners, admins, and operators, with a full audit trail on every action.
+                {t(
+                  "landing.meridian.teamsDesc",
+                  "Role-based access for owners, admins, and operators, with a full audit trail on every action.",
+                )}
               </CardContent>
             </Card>
           </div>

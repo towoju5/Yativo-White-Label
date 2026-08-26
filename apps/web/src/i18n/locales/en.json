@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "Add a beneficiary",
+    "addBeneficiary": "Add beneficiary",
+    "addError": "Couldn't add beneficiary",
+    "added": "Beneficiary added",
+    "back": "Back",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "country": "Country",
+    "detail": {
+      "added": "Added",
+      "currency": "Currency",
+      "editHint": "Payment details can't be edited here — remove this beneficiary and add a new one if they've changed.",
+      "editName": "Edit name",
+      "name": "Name",
+      "paymentDetails": "Payment details",
+      "removeBeneficiary": "Remove beneficiary",
+      "save": "Save",
+      "title": "Beneficiary details",
+      "type": "Type"
+    },
+    "empty": "No beneficiaries yet. Add one to start sending money.",
+    "fieldRequiredError": "{{field}} is required",
+    "maxCharsError": "At most {{max}} characters",
+    "methodDetailsHeading": "{{method}} details",
+    "minCharsError": "At least {{min}} characters",
+    "nameAndCountryRequired": "Enter a name and pick a country to continue",
+    "noExtraDetailsNeeded": "This payout method doesn't need any extra details.",
+    "noPayoutMethods": "No active payout methods for this country yet.",
+    "payoutMethodQuestion": "How should {{name}} in {{country}} get paid?",
+    "payoutMethodRequired": "Pick a payout method to continue",
+    "recipientName": "Recipient name",
+    "recipientNamePlaceholder": "Jane Doe",
+    "remove": "Remove",
+    "removeDialogDescription": "You'll need to add them again to send money here in future. This doesn't affect any past payouts.",
+    "removeDialogTitle": "Remove {{name}}?",
+    "removeError": "Couldn't remove beneficiary",
+    "removed": "Beneficiary removed",
+    "selectCountryPlaceholder": "Select a country",
+    "selectFieldPlaceholder": "Select {{field}}",
+    "steps": {
+      "paymentDetails": "Payment details",
+      "payoutMethod": "Payout method",
+      "recipient": "Recipient"
+    },
+    "subtitle": "People and accounts you send money to",
+    "table": {
+      "actions": "Actions",
+      "added": "Added",
+      "currency": "Currency",
+      "name": "Name"
+    },
+    "thisCountry": "this country",
+    "thisRecipient": "this recipient",
+    "title": "Beneficiaries",
+    "transferRange": "{{min}}–{{max}} {{currency}} per transfer",
+    "updateError": "Couldn't update beneficiary",
+    "updated": "Beneficiary updated",
+    "whoAreYouSendingTo": "Who are you sending to?"
+  },
+  "cards": {
+    "addFunds": "Add funds",
+    "addedThisMonth": "Added this month",
+    "airlinePayments": "Airline payments",
+    "balance": "Bal {{amount}}",
+    "billingAddress": "Billing address",
+    "cancel": "Cancel",
+    "cardEndingIn": "Card ending in {{last4}}",
+    "cardNumberLabel": "Card number",
+    "cardholder": "Cardholder",
+    "confirmTerminate": "Click again to confirm — this can't be undone",
+    "copyNumber": "Copy number",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "No cards yet. Request one to start spending.",
+    "exp": "Exp {{expiry}}",
+    "feeAmount": "Fee {{amount}}",
+    "freezeCard": "Freeze card",
+    "hidesAutomatically": "Hides automatically",
+    "initialFundingHelp": "Minimum $3. Debited from your USD wallet along with a creation fee and top-up fee.",
+    "initialFundingLabel": "Initial funding (USD)",
+    "manage": "Manage →",
+    "noTransactions": "No transactions yet.",
+    "program": "Program",
+    "requestCard": "Request card",
+    "requestDialogTitle": "Request a virtual card",
+    "requesting": "Requesting…",
+    "spentThisMonth": "Spent this month",
+    "subtitle": "Visa virtual cards linked to your USD wallet",
+    "terminateCard": "Terminate card",
+    "title": "Cards",
+    "toast": {
+      "airlineDisabled": "Airline payments disabled",
+      "airlineEnabled": "Airline payments enabled",
+      "airlineError": "Couldn't update airline payments",
+      "cardFrozen": "Card frozen",
+      "cardIssued": "Card issued",
+      "cardTerminated": "Card terminated",
+      "cardTerminatedDescription": "Any remaining balance is refunded to your wallet automatically.",
+      "cardToppedUp": "Card topped up",
+      "cardUnfrozen": "Card unfrozen",
+      "copied": "{{label}} copied",
+      "copyError": "Couldn't copy",
+      "freezeError": "Couldn't update freeze state",
+      "issueCardError": "Couldn't issue card",
+      "revealCardError": "Couldn't reveal card",
+      "terminateError": "Couldn't terminate card",
+      "topupFailed": "Top-up failed",
+      "withdrawalFailed": "Withdrawal failed",
+      "withdrawalSubmitted": "Withdrawal submitted",
+      "withdrawalSubmittedDescription": "A fee is deducted before the net amount lands back in your wallet."
+    },
+    "topUp": "Top up",
+    "transactionFallback": "Transaction",
+    "transactions": "Transactions",
+    "unfreezeCard": "Unfreeze card",
+    "virtualUsd": "Virtual · USD",
+    "visaVirtualCardUsd": "Visa virtual card · USD",
+    "withdraw": "Withdraw",
+    "withdrawFeeNote": "A fee is deducted from withdrawals before the net amount reaches your wallet."
+  },
+  "common": {
+    "language": "Language"
+  },
+  "crypto": {
+    "addressCopied": "Address copied",
+    "copyAddressError": "Couldn't copy address",
+    "depositAddressReady": "Deposit address ready",
+    "generateAddress": "Generate address",
+    "generateAddressError": "Couldn't generate address",
+    "generateDescription": "Generate a deposit address for any supported chain.",
+    "generating": "Generating…",
+    "noDepositsYet": "No crypto deposits yet",
+    "noWalletsYet": "No crypto wallets yet — generate an address below to get started.",
+    "selectAssetPlaceholder": "Select an asset",
+    "sharedAddressWarning": "This address may be shared with other users for the same asset. Deposits are matched to your account and confirmed by our team before your balance updates.",
+    "subtitle": "Deposit addresses and on-chain deposit history for supported assets.",
+    "title": "Crypto wallets",
+    "transactionsDescription": "Every on-chain deposit matched to your account.",
+    "transactionsTitle": "Crypto transactions",
+    "viewOnExplorer": "View on block explorer",
+    "yourWallets": "Your wallets"
+  },
+  "dashboard": {
+    "activityTitle": "Recent activity",
+    "heroLabel": "Total balance",
+    "stats": {
+      "available": "Available",
+      "pending": "Pending",
+      "recentActivity": "Recent activity",
+      "wallets": "Wallets"
+    },
+    "subtitle": "Here's what's happening across your accounts",
+    "title": "Welcome back",
+    "walletLabel": "Wallet"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "No wallets yet",
+      "nothingHereYet": "Nothing here yet",
+      "recentActivity": "Recent activity",
+      "totalBalance": "Total balance",
+      "yourWallets": "Your wallets"
+    },
+    "aurora": {
+      "balance": "Balance",
+      "noTrendData": "No trend data yet",
+      "noWalletsYet": "No wallets yet",
+      "nothingHereYet": "Nothing here yet",
+      "recentActivity": "Recent activity",
+      "trend": "Trend",
+      "wallets": "Wallets"
+    },
+    "meridian": {
+      "balanceTrend": "Balance trend",
+      "noWalletsYet": "No wallets yet",
+      "nothingHereYet": "Nothing here yet",
+      "overview": "Overview",
+      "recentActivity": "Recent activity",
+      "wallets": "Wallets"
+    },
+    "nova": {
+      "balanceTrend": "Balance trend",
+      "noActivityYet": "No activity yet",
+      "noWalletsYet": "No wallets yet",
+      "nothingHereYet": "Nothing here yet",
+      "recentActivity": "Recent activity",
+      "wallets": "Wallets"
+    },
+    "prime": {
+      "amount": "Amount",
+      "balanceTrend": "Balance trend",
+      "description": "Description",
+      "noWalletsYet": "No wallets yet",
+      "nothingHereYet": "Nothing here yet",
+      "recentActivity": "Recent activity",
+      "status": "Status",
+      "wallets": "Wallets"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "Back",
+      "continue": "Continue",
+      "startDeposit": "Start deposit"
+    },
+    "cryptoCard": {
+      "description": "Deposit addresses and on-chain deposit history now live on their own page.",
+      "goToWallets": "Go to crypto wallets",
+      "title": "Or deposit crypto"
+    },
+    "dialog": {
+      "amountToPay": "Amount to pay",
+      "copyLinkAriaLabel": "Copy link",
+      "estimatedDelivery": "Estimated delivery",
+      "exchangeRate": "Exchange rate",
+      "fee": "Fee",
+      "initiated": "Deposit initiated",
+      "openLinkAriaLabel": "Open link",
+      "title": "Deposit funds",
+      "youllReceive": "You'll receive"
+    },
+    "errors": {
+      "enterAmount": "Enter an amount",
+      "fieldRequired": "{{field}} is required",
+      "pickWallet": "Pick which wallet to credit"
+    },
+    "localCard": {
+      "depositButton": "Deposit",
+      "description": "Pick your country and pay via the local rail — bank transfer, CODI, DEBIN and more.",
+      "title": "Or deposit with a local payment method"
+    },
+    "step0": {
+      "countryLabel": "Country",
+      "countryPlaceholder": "Select a country",
+      "prompt": "Which country are you paying from?"
+    },
+    "step1": {
+      "methodRange": "{{min}}–{{max}} {{currency}} per deposit",
+      "noMethods": "No active deposit methods for this country yet.",
+      "prompt": "How do you want to pay from {{country}}?",
+      "thisCountryFallback": "this country"
+    },
+    "step2": {
+      "amountLabel": "Amount ({{currency}})",
+      "prompt": "{{method}} — amount & details",
+      "selectFieldPlaceholder": "Select {{field}}",
+      "walletLabel": "Wallet to credit",
+      "walletLoading": "Loading…",
+      "walletPlaceholder": "Select a wallet"
+    },
+    "steps": {
+      "amountDetails": "Amount & details",
+      "country": "Country",
+      "method": "Method"
+    },
+    "subtitle": "Fund your wallet with a one-time payment via a local rail, or crypto.",
+    "title": "Deposit",
+    "toast": {
+      "copied": "Copied to clipboard",
+      "copyFailed": "Couldn't copy",
+      "pickCountry": "Pick a country to continue",
+      "pickMethod": "Pick a payment method to continue",
+      "startFailed": "Couldn't start deposit"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "Continue",
+      "submit": "Submit for review"
+    },
+    "common": {
+      "select": "Select"
+    },
+    "header": {
+      "subtitle": "Business KYB — details on the company and its owners.",
+      "title": "Verify your business"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "Account purpose",
+        "complianceScreeningProgram": "Compliance screening program",
+        "conductsMoneyServices": "Conducts money services",
+        "conductsMoneyServicesHint": "Remittance, currency exchange, or similar regulated MSB activity.",
+        "describeAccountPurpose": "Describe account purpose",
+        "describeMoneyServicesActivity": "Describe the money services activity",
+        "estimatedAnnualRevenue": "Estimated annual revenue, USD (optional)",
+        "estimatedAnnualRevenuePlaceholder": "e.g. 1000000_to_5000000",
+        "eurdeCombined": "EURDE (combined)",
+        "explainFlaggedActivity": "Explain the flagged activity",
+        "extraFeeHint": "(may incur an extra fee)",
+        "highRiskActivities": "High-risk activities (select any that apply)",
+        "notSpecified": "Not specified",
+        "pepStatus": "Politically exposed person (PEP)",
+        "pepStatusHint": "Any owner/director is a PEP or close associate of one.",
+        "prohibitedCountries": "Operates in prohibited countries (optional)",
+        "selectPlaceholder": "Select",
+        "sourceOfFunds": "Source of funds",
+        "thirdPartyMsbPayments": "Processes payments for third-party MSBs",
+        "virtualAccountsToProvision": "Virtual accounts to provision"
+      },
+      "addresses": {
+        "physicalAddressHeading": "Physical address",
+        "physicalProofHint": "Lease, utility bill, or similar — required if different from the registered address.",
+        "registeredAddressHeading": "Registered address",
+        "sameAsRegistered": "Same as registered",
+        "title": "Addresses"
+      },
+      "businessDocument": {
+        "title": "Business document"
+      },
+      "businessInfo": {
+        "businessType": "Business type",
+        "description": "Business description",
+        "dialCode": "Dial code",
+        "dialCodePlaceholder": "+1",
+        "email": "Business email",
+        "incorporationCountry": "Incorporation country (optional)",
+        "incorporationDate": "Incorporation date",
+        "industry": "Industry (optional)",
+        "legalName": "Legal business name",
+        "phone": "Phone",
+        "registrationNumber": "Registration number",
+        "requiredFieldsHint": "Fill in the required fields above.",
+        "taxId": "Tax ID (optional)",
+        "title": "Business info",
+        "tradeName": "Trade name",
+        "website": "Website (optional)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "A document with purpose \"Business registration\" is required — the default above satisfies that.",
+        "description": "Description",
+        "descriptionPlaceholder": "Certificate of Incorporation",
+        "documentPurpose": "Document purpose",
+        "fileLabel": "File",
+        "selectPlaceholder": "Select"
+      },
+      "ownerIdDocuments": {
+        "title": "Owner ID documents"
+      },
+      "ownersDirectors": {
+        "addAnother": "Add another owner / director",
+        "authorizedSigner": "Authorized signer",
+        "dateOfBirth": "Date of birth",
+        "director": "Director",
+        "email": "Email",
+        "firstName": "First name",
+        "hasControl": "Has control",
+        "hasOwnership": "Has ownership",
+        "identityDocsRequired": "Both identity documents are required for every owner/director.",
+        "lastName": "Last name",
+        "nationality": "Nationality",
+        "ownerHeading": "Owner / director {{number}}",
+        "ownershipPercent": "Ownership %",
+        "personFallbackName": "Owner / director {{index}}",
+        "personTitle": "Title",
+        "phoneOptional": "Phone (optional)",
+        "photoIdHeading": "2. Government photo ID",
+        "residentialAddressHeading": "Residential address",
+        "taxId": "SSN / EIN / ITIN",
+        "taxIdHeading": "1. Tax ID",
+        "title": "Owners & directors",
+        "titlePlaceholder": "CEO, Managing Member…"
+      },
+      "review": {
+        "accountPurpose": "Account purpose",
+        "business": "Business",
+        "highRiskActivities": "High-risk activities",
+        "none": "None",
+        "ownersDirectors": "Owners / directors",
+        "readyMessage": "Everything looks ready. Review, then submit.",
+        "registeredAddress": "Registered address",
+        "title": "Review",
+        "tradeName": "Trade name",
+        "type": "Type"
+      },
+      "riskPurpose": {
+        "title": "Risk & purpose"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "A few required fields still need your input.",
+        "title": "Check the fields below"
+      },
+      "submitFailed": {
+        "title": "Submission failed"
+      },
+      "submitted": {
+        "description": "We'll review your business details shortly.",
+        "title": "Verification submitted"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "Continue",
+      "submit": "Submit for review"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "Select"
+    },
+    "header": {
+      "subtitle": "A few details so we can confirm who you are.",
+      "title": "Verify your identity"
+    },
+    "steps": {
+      "address": {
+        "title": "Address"
+      },
+      "financialProfile": {
+        "accountPurpose": "Account purpose",
+        "actingAsIntermediary": "Acting as an intermediary",
+        "actingAsIntermediaryHint": "On behalf of someone else, not for yourself.",
+        "chooseAccountsHint": "Choose USD and/or EUR, or EURDE alone.",
+        "describeAccountPurpose": "Describe account purpose",
+        "employmentStatus": "Employment status",
+        "eurdeCombined": "EURDE (combined)",
+        "expectedMonthlyPayments": "Expected monthly payments (USD)",
+        "extraFeeNote": "may incur an extra fee",
+        "occupation": "Occupation",
+        "sourceOfFunds": "Source of funds",
+        "title": "Financial profile",
+        "virtualAccounts": "Virtual accounts to provision"
+      },
+      "identityDocument": {
+        "govIdHeading": "Government-issued ID",
+        "selfieHint": "A clear photo of your face.",
+        "selfiePhoto": "Selfie photo",
+        "title": "Identity document"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11 digits",
+        "currentEmployer": "Current employer (optional)",
+        "dateOfBirth": "Date of birth",
+        "dialCode": "Dial code",
+        "dialCodePlaceholder": "+1",
+        "email": "Email",
+        "firstName": "First name",
+        "gender": "Gender",
+        "genderFemale": "Female",
+        "genderMale": "Male",
+        "immigrationStatus": "Immigration status (optional)",
+        "immigrationStatusPlaceholder": "Not applicable",
+        "lastName": "Last name",
+        "middleName": "Middle name (optional)",
+        "nationality": "Nationality",
+        "nin": "NIN",
+        "ninPlaceholder": "11 digits",
+        "phone": "Phone",
+        "phoneHint": "Dial code like \"+1\", phone digits only (8-15 digits).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "Tax ID",
+        "taxIdPlaceholder": "SSN / national tax number",
+        "title": "Personal info"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "Account purpose",
+          "address": "Address",
+          "email": "Email",
+          "idDocument": "ID document",
+          "name": "Name",
+          "nationality": "Nationality",
+          "phone": "Phone"
+        },
+        "ready": "Everything looks ready. Review, then submit.",
+        "title": "Review"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "A few required fields still need your input.",
+        "title": "Check the fields below"
+      },
+      "submitFailed": {
+        "title": "Submission failed"
+      },
+      "submitted": {
+        "description": "We'll review your details shortly.",
+        "title": "Verification submitted"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "Back",
+    "chooseCountryFirstPlaceholder": "Choose a country first",
+    "cityLabel": "City",
+    "clickToUpload": "Click to upload",
+    "countryLabel": "Country",
+    "dateIssuedLabel": "Date issued",
+    "documentBackOptionalLabel": "Document — back (optional)",
+    "documentFrontLabel": "Document — front",
+    "documentNumberLabel": "Document number",
+    "documentNumberPlaceholder": "e.g. P00012345",
+    "documentTypeLabel": "Document type",
+    "expirationDateLabel": "Expiration date",
+    "expirationDateOptionalLabel": "Expiration date (optional)",
+    "fixBeforeContinuing": "Please fix the following before continuing:",
+    "issuingCountryLabel": "Issuing country",
+    "loadingEllipsis": "Loading…",
+    "noMatches": "No matches.",
+    "noPostalCodesText": "This country doesn't use postal codes.",
+    "postalCodeFormatError": "Doesn't match the expected format.",
+    "postalCodeFormatErrorWithExample": "Doesn't match the expected format (e.g. {{example}}).",
+    "postalCodeLabel": "Postal code",
+    "proofOfAddressHint": "Utility bill, bank statement, or lease.",
+    "proofOfAddressLabel": "Proof of address",
+    "searchPlaceholder": "Search…",
+    "selectCountryPlaceholder": "Select a country",
+    "selectOption": "Select",
+    "selectPlaceholder": "Select…",
+    "setNationalityFirstPlaceholder": "Set nationality first",
+    "stateProvinceLabel": "State / province",
+    "stepOf": "Step {{current}} of {{total}}",
+    "streetAddress2Label": "Street address 2 (optional)",
+    "streetAddressLabel": "Street address",
+    "streetAddressPlaceholder": "123 Main St"
+  },
+  "kycWizard": {
+    "backToDashboard": "Back to dashboard",
+    "pendingDescription": "We've received your details and are reviewing them. We'll notify you once a decision is made.",
+    "pendingHeading": "Verification pending",
+    "verifiedDescription": "Your identity has been verified. You have full access to sending, cards, and virtual accounts.",
+    "verifiedHeading": "You're verified"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "Business login",
+      "demoCard": "Card",
+      "demoDeposit": "Deposit",
+      "demoSend": "Send",
+      "demoTotalBalance": "Total balance",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "Payroll",
+      "demoTransaction3": "Design retainer",
+      "feature1Desc": "Hold and move fiat and crypto side by side, with a balance you can always trust.",
+      "feature1Title": "One balance, every currency",
+      "feature2Desc": "Pick a contact, get a live quote, confirm — money moves without the paperwork.",
+      "feature2Title": "Send in seconds",
+      "feature3Desc": "Spin up a virtual card in a tap, freeze it just as fast.",
+      "feature3Title": "Cards on demand",
+      "feature4Desc": "Every transaction is written to an immutable, reconciled ledger behind the scenes.",
+      "feature4Title": "Bank-grade ledger",
+      "featuresHeading": "Everything your money needs",
+      "featuresSubheading": "No hidden fees, no confusing menus — just banking that works.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "Money, made simple",
+      "heroHeadlineHighlight": "effortless.",
+      "heroHeadlinePrefix": "Banking that feels",
+      "heroSubheadline": "{{productName}} is a modern wallet for sending, holding, and spending your money — beautifully simple, seriously secure.",
+      "logIn": "Log in",
+      "openAccountCta": "Open your account",
+      "planBusinessBlurb": "Multi-user access, higher limits, dedicated support.",
+      "planBusinessCta": "Talk to us",
+      "planBusinessName": "Business",
+      "planBusinessPrice": "Custom",
+      "planPersonalBlurb": "Everyday spending & sending for individuals.",
+      "planPersonalCta": "Get started",
+      "planPersonalName": "Personal",
+      "planPersonalPrice": "Free",
+      "pricingHeading": "Simple pricing",
+      "pricingSubheading": "Start free. Upgrade only when your business needs more.",
+      "signUpFree": "Sign up free"
+    },
+    "aurora": {
+      "badge": "Beautifully simple money",
+      "businessLogin": "Business login",
+      "demoActionCard": "Card",
+      "demoActionDeposit": "Deposit",
+      "demoActionSend": "Send",
+      "demoBalance": "$8,942.10",
+      "demoGrowth": "+12.4%",
+      "feature1Desc": "Every wallet, every currency, always reconciled.",
+      "feature1Title": "One beautiful balance",
+      "feature2Desc": "Live quotes, instant confirmation, zero paperwork.",
+      "feature2Title": "Send in seconds",
+      "feature3Desc": "Issue a virtual card the moment you're verified.",
+      "feature3Title": "Cards on demand",
+      "feature4Desc": "Every transaction, reconciled and auditable.",
+      "feature4Title": "Bank-grade ledger",
+      "featuresHeading": "Everything your money needs",
+      "featuresSubheading": "No hidden fees, no confusing menus — just banking that works.",
+      "heroHeadlineHighlight": "one gorgeous view.",
+      "heroHeadlinePrefix": "Every account,",
+      "heroSubheadline": "{{productName}} brings wallets, payouts, and cards together in a dashboard people actually enjoy opening.",
+      "logIn": "Log in",
+      "openAccount": "Open your account",
+      "signUpFree": "Sign up free",
+      "thisMonth": "This month",
+      "totalBalance": "Total balance",
+      "vsLastMonth": "vs. last month"
+    },
+    "meridian": {
+      "eyebrow": "Operations platform",
+      "featureCardIssuingDesc": "Issue virtual cards to customers the moment they're verified.",
+      "featureCardIssuingTitle": "Card issuing",
+      "featureComplianceDesc": "KYC, endorsements, and audit trails wired in from day one.",
+      "featureComplianceTitle": "Built-in compliance",
+      "featureLedgerDesc": "Every wallet, every currency, reconciled to a single source of truth.",
+      "featureLedgerTitle": "Unified ledger",
+      "featurePayoutsDesc": "Quote, confirm, and settle cross-border transfers in a few clicks.",
+      "featurePayoutsTitle": "Global payouts",
+      "featuresHeading": "Everything operations needs",
+      "featuresSubheading": "A single platform for the whole money-movement stack.",
+      "heroHeadline": "Run money movement like an operator, not a spreadsheet.",
+      "heroSubheadline": "{{productName}} gives your team one console for wallets, payouts, cards, and compliance — backed by a ledger you can trust.",
+      "logIn": "Log in",
+      "openAccountCta": "Open an account",
+      "operatorLoginCta": "Operator login",
+      "reconciledDesc": "Every posted transaction is double-entry, idempotent, and matched against provider records automatically.",
+      "reconciledTitle": "Reconciled by default",
+      "signUp": "Sign up",
+      "statCurrenciesLabel": "Currencies",
+      "statPayoutTimeLabel": "Avg. payout time",
+      "statUptimeLabel": "Uptime",
+      "teamsDesc": "Role-based access for owners, admins, and operators, with a full audit trail on every action.",
+      "teamsTitle": "Built for teams"
+    },
+    "nova": {
+      "createAccountCta": "Create your account",
+      "ctaHeading": "Ready to run your own rails?",
+      "ctaSubheading": "Your customers, your brand, your ledger — powered underneath by Yativo.",
+      "feature1Desc": "Every cent traced through immutable, auditable journal entries — never a naive balance column.",
+      "feature1Title": "Double-entry ledger",
+      "feature2Desc": "Webhook-driven posting keeps customer balances current the moment funds move.",
+      "feature2Title": "Real-time settlement",
+      "feature3Desc": "Scheduled jobs diff your ledger against upstream settlement and flag drift instantly.",
+      "feature3Title": "Reconciled automatically",
+      "feature4Desc": "Fiat and crypto rails under one chart of accounts, ready for global payout corridors.",
+      "feature4Title": "Multi-currency",
+      "feature5Desc": "Customer and staff sessions never cross — separate tokens, separate blast radius.",
+      "feature5Title": "Two isolated auth domains",
+      "feature6Desc": "KYC review, manual adjustments, payouts, cards and webhooks — one console.",
+      "feature6Title": "Full back office",
+      "featuresHeading": "Built like infrastructure, not a demo",
+      "featuresSubheading": "Everything a reseller needs to run real customer money, safely.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "Get started",
+      "heroHeadlineHighlight": "run under your own brand.",
+      "heroHeadlinePrefix": "Fintech infrastructure,",
+      "heroSubheadline": "{{productName}} gives your business a white-labeled wallet, payouts, and card platform on a real double-entry ledger — deploy it, brand it, and run your own fintech business on it.",
+      "openAccountCta": "Open an account",
+      "operatorConsole": "Operator console",
+      "signIn": "Sign in",
+      "trustBadge": "Ledger-verified · Reconciled hourly"
+    },
+    "prime": {
+      "balance": "Balance",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "Dashboard login",
+      "feature": {
+        "cardIssuing": {
+          "desc": "Issue virtual cards to customers the moment they're verified.",
+          "title": "Card issuing"
+        },
+        "compliance": {
+          "desc": "KYC, endorsements, and audit trails wired in from day one.",
+          "title": "Built-in compliance"
+        },
+        "ledger": {
+          "desc": "Every wallet, every currency, reconciled to a single source of truth.",
+          "title": "Unified ledger"
+        },
+        "payouts": {
+          "desc": "Quote, confirm, and settle cross-border transfers in a few clicks.",
+          "title": "Global payouts"
+        }
+      },
+      "featuresHeading": "Everything operations needs",
+      "heroHeadline": "Payments infrastructure for the internet.",
+      "heroSubheadline": "{{productName}} gives you one API and one dashboard for wallets, payouts, cards, and compliance.",
+      "logIn": "Log in",
+      "signUp": "Sign up",
+      "startNow": "Start now",
+      "stat": {
+        "deposits": "Deposits",
+        "payouts": "Payouts",
+        "refunds": "Refunds"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← Back to home",
+    "backToSignIn": "← Back to sign in",
+    "createAccount": "Create an account",
+    "defaultProductName": "White Label",
+    "emailLabel": "Email",
+    "genericError": "Unable to sign in. Check your credentials.",
+    "invalidCodeError": "Invalid code. Please try again.",
+    "newHere": "New here?",
+    "passwordLabel": "Password",
+    "signIn": "Sign in",
+    "signInDescription": "Sign in to your account",
+    "signingIn": "Signing in…",
+    "verificationCodeLabel": "Verification code",
+    "verify": "Verify",
+    "verifyDescription": "Enter the 6-digit code from your authenticator app, or a backup code.",
+    "verifyHeading": "Verify it's you",
+    "verifying": "Verifying…",
+    "welcomeBack": "Welcome back"
+  },
+  "nav": {
+    "account": "Account",
+    "atlas": {
+      "contacts": "Contacts",
+      "home": "Home",
+      "profile": "Profile",
+      "send": "Send"
+    },
+    "beneficiaries": "Beneficiaries",
+    "cards": "Cards",
+    "cryptoWallets": "Crypto wallets",
+    "dashboard": "Dashboard",
+    "deposit": "Deposit",
+    "logout": "Log out",
+    "portal": "Portal",
+    "profileKyc": "Profile & KYC",
+    "section": {
+      "account": "Account",
+      "manage": "Manage"
+    },
+    "sendMoney": "Send money",
+    "settings": "Settings",
+    "virtualAccounts": "Virtual accounts",
+    "wallets": "Wallets",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "Account",
+    "emailLabel": "Email",
+    "endorsementsDescription": "Per-service verification required for certain features, like local bank transfers or virtual cards.",
+    "endorsementsLoadError": "Couldn't load endorsements.",
+    "endorsementsTitle": "Endorsements",
+    "heading": "Profile & verification",
+    "identityVerificationTitle": "Identity verification",
+    "restartVerification": "Restart verification",
+    "startVerification": "Start verification",
+    "statusApproved": "You're verified. Full access to sending, cards, and virtual accounts.",
+    "statusNotStarted": "Required before you can send money, hold a virtual account, or get a card.",
+    "statusPending": "We've received your details and are reviewing them — we'll notify you once it's decided.",
+    "statusRejected": "Your last submission wasn't approved — start a new one below.",
+    "subheading": "Manage your identity details",
+    "typeLabel": "Type"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "Amount to send ({{currency}})",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "Debit from wallet",
+      "prompt": "Amount to send",
+      "promptTo": "Amount to send to {{name}}",
+      "recipientFallback": "the recipient",
+      "willReceive": "We'll show exactly how much {{recipient}} receives before you confirm.",
+      "willReceiveWithCurrency": "We'll show exactly how much {{recipient}} receives in {{currency}} before you confirm."
+    },
+    "buttons": {
+      "back": "Back",
+      "confirmAndSend": "Confirm & send",
+      "continue": "Continue",
+      "getQuote": "Get quote",
+      "requote": "Re-quote"
+    },
+    "errors": {
+      "enterAmount": "Enter an amount",
+      "fieldRequired": "{{field}} is required",
+      "maxLength": "At most {{max}} characters",
+      "minLength": "At least {{min}} characters"
+    },
+    "result": {
+      "payoutId": "Payout ID: {{id}}",
+      "payoutSubmitted": "Payout submitted",
+      "refreshing": "(refreshing…)",
+      "sendAnother": "Send another",
+      "statusLabel": "Status:",
+      "viewWallets": "View wallets"
+    },
+    "review": {
+      "expired": "This quote has expired — get a fresh one to continue.",
+      "expiresIn": "Quote expires in {{seconds}}s.",
+      "rateLabel": "Rate",
+      "recipientGetsLabel": "Recipient gets",
+      "toLabel": "To",
+      "totalChargedLabel": "Total charged"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "Select a beneficiary",
+      "prompt": "Who are you sending to?"
+    },
+    "step0": {
+      "countryLabel": "Country",
+      "countryPlaceholder": "Select a country",
+      "prompt": "Who are you sending to?",
+      "recipientNameLabel": "Recipient name",
+      "recipientNamePlaceholder": "Jane Doe"
+    },
+    "step1": {
+      "countryFallback": "this country",
+      "methodRange": "{{min}}–{{max}} {{currency}} per transfer",
+      "noMethods": "No active payout methods for this country yet.",
+      "prompt": "How should {{recipient}} in {{country}} get paid?",
+      "recipientFallback": "this recipient"
+    },
+    "step2": {
+      "noDetailsNeeded": "This payout method doesn't need any extra details.",
+      "prompt": "{{method}} details",
+      "selectFieldPlaceholder": "Select {{field}}"
+    },
+    "steps": {
+      "amount": "Amount",
+      "beneficiary": "Beneficiary",
+      "details": "Details",
+      "method": "Method",
+      "recipient": "Recipient",
+      "review": "Review"
+    },
+    "subtitle": "Pick a country and how they get paid, then confirm the amount.",
+    "title": "Send money",
+    "toast": {
+      "enterNameAndCountry": "Enter a name and pick a country to continue",
+      "payoutFailed": "Payout failed",
+      "payoutSubmitted": "Payout submitted",
+      "payoutSubmittedDescription": "We'll notify you once it settles.",
+      "pickBeneficiary": "Pick a beneficiary to continue",
+      "pickMethod": "Pick a payout method to continue",
+      "quoteFailed": "Could not get a quote",
+      "saveRecipientFailed": "Couldn't save recipient",
+      "tryAgain": "Try again."
+    },
+    "toggle": {
+      "newRecipient": "New recipient",
+      "savedBeneficiary": "Saved beneficiary"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "Confirm new password",
+      "currentPasswordLabel": "Current password",
+      "description": "Choose a strong password you don't use elsewhere.",
+      "newPasswordLabel": "New password",
+      "submit": "Update password",
+      "title": "Change password",
+      "toastDescription": "Password changes aren't wired up in this build.",
+      "toastTitle": "Not available yet"
+    },
+    "copiedToClipboard": "Copied to clipboard",
+    "copyError": "Couldn't copy",
+    "subtitle": "Manage your account security",
+    "title": "Settings",
+    "twoFactor": {
+      "authenticatorApp": "Authenticator app",
+      "description": "Add an extra layer of security to your account.",
+      "disable": {
+        "description": "Confirm your password to turn off two-factor authentication.",
+        "error": "Couldn't disable two-factor authentication.",
+        "passwordLabel": "Password",
+        "submit": "Disable two-factor authentication",
+        "submitting": "Disabling…",
+        "title": "Disable two-factor authentication"
+      },
+      "enabled": "Enabled",
+      "loading": "Loading…",
+      "notConfigured": "Not yet configured",
+      "setup": {
+        "backupCodesDescription": "Store these somewhere safe — each one can be used once to sign in if you lose access to your authenticator app. They won't be shown again.",
+        "backupCodesTitle": "Save your backup codes",
+        "codeLabel": "6-digit code",
+        "continueButton": "Continue",
+        "copyAll": "Copy all",
+        "done": "Done",
+        "enableButton": "Enable two-factor authentication",
+        "enterCodeTitle": "Enter the code",
+        "manualKeyLabel": "Can't scan? Enter this key manually",
+        "qrAlt": "2FA setup QR code",
+        "scanTitle": "Scan with your authenticator app",
+        "verifyError": "Couldn't verify that code.",
+        "verifying": "Verifying…"
+      },
+      "title": "Two-factor authentication",
+      "toast": {
+        "disabled": "Two-factor authentication disabled",
+        "setupError": "Couldn't start setup"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "Account type",
+    "alreadyHaveAccount": "Already have an account?",
+    "business": "Business",
+    "businessNameLabel": "Business name",
+    "callingCodeAriaLabel": "Calling code",
+    "countryLabel": "Country",
+    "createAccount": "Create account",
+    "createYourAccount": "Create your account",
+    "creatingAccount": "Creating account…",
+    "defaultProductName": "White Label",
+    "emailLabel": "Email",
+    "fullNameLabel": "Full name",
+    "genericError": "Unable to create your account.",
+    "individual": "Individual",
+    "passwordLabel": "Password",
+    "phoneNumberLabel": "Phone number",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "Select your country",
+    "signIn": "Sign in",
+    "startSendingDescription": "Start sending, holding and spending in minutes"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "View profile"
+    },
+    "prime": {
+      "notifications": "Notifications",
+      "switchToDarkMode": "Switch to dark mode",
+      "switchToLightMode": "Switch to light mode"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "Virtual account ready",
+    "addCurrency": "Add a currency",
+    "allCurrenciesAdded": "You already have an account for every available currency.",
+    "copiedToClipboard": "Copied to clipboard",
+    "copyError": "Couldn't copy",
+    "copyField": "Copy {{field}}",
+    "createAccount": "Create account",
+    "createAccountError": "Couldn't create account",
+    "creating": "Creating…",
+    "noAccountsYet": "No virtual accounts yet — provision one for a currency below.",
+    "noCurrenciesAvailable": "No virtual account currencies are available yet.",
+    "noVerificationNeeded": "No verification needed",
+    "requiresVerification": "Requires {{endorsement}} verification — contact support to get started.",
+    "shareDetails": "Share these details with whoever is sending you funds.",
+    "startVerification": "Start verification",
+    "subtitle": "Dedicated bank details you can reuse for every incoming transfer, once per currency.",
+    "title": "Virtual accounts",
+    "verificationNote": "Some rails need a one-time verification before an account can be issued.",
+    "verified": "Verified",
+    "yourAccounts": "Your accounts"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} pending",
+    "wallet": "Wallet"
+  },
+  "walletDetail": {
+    "allWallets": "All wallets",
+    "available": "Available",
+    "balanceOverTime": "Balance over time",
+    "cancel": "Cancel",
+    "noActivity": "No activity yet",
+    "pageOf": "Page {{page}} / {{totalPages}}",
+    "pending": "Pending",
+    "removeDialogDescription": "It's empty, so this is safe — you can add {{currencyCode}} back later if it's still offered.",
+    "removeDialogTitle": "Remove your {{currencyCode}} wallet?",
+    "removeWallet": "Remove wallet",
+    "removeWalletError": "Couldn't remove wallet",
+    "removing": "Removing…",
+    "statement": "Statement",
+    "walletRemoved": "Wallet removed",
+    "walletTitle": "{{currencyCode}} wallet"
+  },
+  "wallets": {
+    "add": "Add",
+    "addCurrencyPlaceholder": "Add currency",
+    "addWalletError": "Couldn't add wallet",
+    "empty": "No wallets yet. They'll appear here once you have a balance.",
+    "subtitle": "Your balances across every currency",
+    "title": "Wallets",
+    "walletAdded": "Wallet added",
+    "walletLabel": "Wallet"
+  }
+}

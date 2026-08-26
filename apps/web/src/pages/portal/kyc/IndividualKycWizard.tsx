@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   individualKycSubmissionSchema,
   IMMIGRATION_STATUSES,
@@ -30,14 +31,21 @@ import {
 import { humanize, buildKycFormData } from "./kycUtils";
 import { useFileRegistry, useKycOccupations, useKycLabelMap } from "./kycHooks";
 
-const STEPS = ["Personal info", "Address", "Identity document", "Financial profile", "Review"];
-
 export default function IndividualKycWizard({ countries, countriesLoading }: { countries: KycCountry[]; countriesLoading?: boolean }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const files = useFileRegistry();
+
+  const STEPS = [
+    t("kycIndividual.steps.personalInfo.title", "Personal info"),
+    t("kycIndividual.steps.address.title", "Address"),
+    t("kycIndividual.steps.identityDocument.title", "Identity document"),
+    t("kycIndividual.steps.financialProfile.title", "Financial profile"),
+    t("kycIndividual.steps.review.title", "Review"),
+  ];
 
   const occupations = useKycOccupations();
   const accountPurposes = useKycLabelMap("individual/account-purposes");
@@ -65,11 +73,19 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
   const submitMutation = useMutation({
     mutationFn: (input: IndividualKycSubmissionInput) => portalApi.post("/portal/kyc/individual", buildKycFormData(input, files)),
     onSuccess: () => {
-      toast({ title: "Verification submitted", description: "We'll review your details shortly." });
+      toast({
+        title: t("kycIndividual.toast.submitted.title", "Verification submitted"),
+        description: t("kycIndividual.toast.submitted.description", "We'll review your details shortly."),
+      });
       queryClient.invalidateQueries({ queryKey: ["portal", "kyc"] });
       navigate("/portal/profile");
     },
-    onError: (e) => toast({ variant: "destructive", title: "Submission failed", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) =>
+      toast({
+        variant: "destructive",
+        title: t("kycIndividual.toast.submitFailed.title", "Submission failed"),
+        description: e instanceof ApiError ? e.message : undefined,
+      }),
   });
 
   const errors = form.formState.errors;
@@ -93,7 +109,12 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
     }
     const ok = await form.trigger(stepFields[step]);
     if (ok) setStep((s) => s + 1);
-    else toast({ variant: "destructive", title: "Check the fields below", description: "A few required fields still need your input." });
+    else
+      toast({
+        variant: "destructive",
+        title: t("kycIndividual.toast.checkFields.title", "Check the fields below"),
+        description: t("kycIndividual.toast.checkFields.description", "A few required fields still need your input."),
+      });
   };
   const goBack = () => {
     if (step === 0) navigate(-1);
@@ -105,85 +126,87 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
   return (
     <FileRegistryProvider registry={files}>
     <WizardShell
-      title="Verify your identity"
-      subtitle="A few details so we can confirm who you are."
+      title={t("kycIndividual.header.title", "Verify your identity")}
+      subtitle={t("kycIndividual.header.subtitle", "A few details so we can confirm who you are.")}
       steps={STEPS}
       current={step}
       onBack={goBack}
       onNext={goNext}
-      nextLabel={step === STEPS.length - 1 ? "Submit for review" : "Continue"}
+      nextLabel={step === STEPS.length - 1 ? t("kycIndividual.actions.submit", "Submit for review") : t("kycIndividual.actions.continue", "Continue")}
       isSubmitting={submitMutation.isPending}
     >
       {step < STEPS.length - 1 && <StepErrorSummary errors={errors} fields={stepFields[step] ?? []} />}
       {step === 0 && (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>First name</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.firstName", "First name")}</Label>
             <Input {...form.register("firstName")} />
             {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label>Middle name (optional)</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.middleName", "Middle name (optional)")}</Label>
             <Input {...form.register("middleName")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Last name</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.lastName", "Last name")}</Label>
             <Input {...form.register("lastName")} />
             {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label>Email</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.email", "Email")}</Label>
             <Input type="email" {...form.register("email")} />
             {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label>Gender</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.gender", "Gender")}</Label>
             <Select value={form.watch("gender")} onValueChange={(v) => form.setValue("gender", v as "male" | "female")}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="male">{t("kycIndividual.steps.personalInfo.genderMale", "Male")}</SelectItem>
+                <SelectItem value="female">{t("kycIndividual.steps.personalInfo.genderFemale", "Female")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Date of birth</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.dateOfBirth", "Date of birth")}</Label>
             <Input type="date" {...form.register("birthDate")} />
             {errors.birthDate && <p className="text-xs text-destructive">{errors.birthDate.message}</p>}
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
             <div className="space-y-1.5">
-              <Label>Dial code</Label>
-              <Input {...form.register("callingCode")} placeholder="+1" />
+              <Label>{t("kycIndividual.steps.personalInfo.dialCode", "Dial code")}</Label>
+              <Input {...form.register("callingCode")} placeholder={t("kycIndividual.steps.personalInfo.dialCodePlaceholder", "+1")} />
             </div>
             <div className="space-y-1.5">
-              <Label>Phone</Label>
-              <Input {...form.register("phone")} placeholder="5551234567" />
+              <Label>{t("kycIndividual.steps.personalInfo.phone", "Phone")}</Label>
+              <Input {...form.register("phone")} placeholder={t("kycIndividual.steps.personalInfo.phonePlaceholder", "5551234567")} />
             </div>
           </div>
           {(errors.callingCode || errors.phone) && (
-            <p className="text-xs text-destructive sm:col-span-2 sm:-mt-2">Dial code like "+1", phone digits only (8-15 digits).</p>
+            <p className="text-xs text-destructive sm:col-span-2 sm:-mt-2">
+              {t("kycIndividual.steps.personalInfo.phoneHint", 'Dial code like "+1", phone digits only (8-15 digits).')}
+            </p>
           )}
           <div className="space-y-1.5">
-            <Label>Nationality</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.nationality", "Nationality")}</Label>
             <CountryField form={form} name="nationality" countries={countries} isLoading={countriesLoading} />
           </div>
           <div className="space-y-1.5">
-            <Label>Tax ID</Label>
-            <Input {...form.register("taxId")} placeholder="SSN / national tax number" />
+            <Label>{t("kycIndividual.steps.personalInfo.taxId", "Tax ID")}</Label>
+            <Input {...form.register("taxId")} placeholder={t("kycIndividual.steps.personalInfo.taxIdPlaceholder", "SSN / national tax number")} />
             {errors.taxId && <p className="text-xs text-destructive">{errors.taxId.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label>Current employer (optional)</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.currentEmployer", "Current employer (optional)")}</Label>
             <Input {...form.register("currentEmployer")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Immigration status (optional)</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.immigrationStatus", "Immigration status (optional)")}</Label>
             <Select value={form.watch("immigrationStatus") ?? ""} onValueChange={(v) => form.setValue("immigrationStatus", v as IndividualKycSubmissionInput["immigrationStatus"])}>
               <SelectTrigger>
-                <SelectValue placeholder="Not applicable" />
+                <SelectValue placeholder={t("kycIndividual.steps.personalInfo.immigrationStatusPlaceholder", "Not applicable")} />
               </SelectTrigger>
               <SelectContent>
                 {IMMIGRATION_STATUSES.map((s) => (
@@ -197,12 +220,12 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
           {needsNigeriaFields && (
             <>
               <div className="space-y-1.5">
-                <Label>BVN</Label>
-                <Input {...form.register("bvn")} maxLength={11} placeholder="11 digits" />
+                <Label>{t("kycIndividual.steps.personalInfo.bvn", "BVN")}</Label>
+                <Input {...form.register("bvn")} maxLength={11} placeholder={t("kycIndividual.steps.personalInfo.bvnPlaceholder", "11 digits")} />
               </div>
               <div className="space-y-1.5">
-                <Label>NIN</Label>
-                <Input {...form.register("nin")} maxLength={11} placeholder="11 digits" />
+                <Label>{t("kycIndividual.steps.personalInfo.nin", "NIN")}</Label>
+                <Input {...form.register("nin")} maxLength={11} placeholder={t("kycIndividual.steps.personalInfo.ninPlaceholder", "11 digits")} />
               </div>
             </>
           )}
@@ -215,9 +238,15 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
 
       {step === 2 && (
         <div className="space-y-6">
-          <FileField form={form} name="selfieImage" label="Selfie photo" hint="A clear photo of your face." encoding="binary" />
+          <FileField
+            form={form}
+            name="selfieImage"
+            label={t("kycIndividual.steps.identityDocument.selfiePhoto", "Selfie photo")}
+            hint={t("kycIndividual.steps.identityDocument.selfieHint", "A clear photo of your face.")}
+            encoding="binary"
+          />
           <div>
-            <h3 className="mb-2 text-sm font-semibold">Government-issued ID</h3>
+            <h3 className="mb-2 text-sm font-semibold">{t("kycIndividual.steps.identityDocument.govIdHeading", "Government-issued ID")}</h3>
             <IndividualIdDocFields form={form} prefix="identifyingInformation.0" countries={countries} countriesLoading={countriesLoading} />
           </div>
         </div>
@@ -226,10 +255,10 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
       {step === 3 && (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>Employment status</Label>
+            <Label>{t("kycIndividual.steps.financialProfile.employmentStatus", "Employment status")}</Label>
             <Select value={form.watch("employmentStatus") ?? ""} onValueChange={(v) => form.setValue("employmentStatus", v, { shouldValidate: true })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select" />
+                <SelectValue placeholder={t("kycIndividual.common.select", "Select")} />
               </SelectTrigger>
               <SelectContent>
                 {["Employed", "Exempt", "Homemaker", "Retired", "SelfEmployed", "Student", "Unemployed"].map((s) => (
@@ -241,7 +270,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Occupation</Label>
+            <Label>{t("kycIndividual.steps.financialProfile.occupation", "Occupation")}</Label>
             <SearchableSelect
               value={form.watch("mostRecentOccupationCode") ?? ""}
               onChange={(v) => form.setValue("mostRecentOccupationCode", v, { shouldValidate: true })}
@@ -250,10 +279,10 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Expected monthly payments (USD)</Label>
+            <Label>{t("kycIndividual.steps.financialProfile.expectedMonthlyPayments", "Expected monthly payments (USD)")}</Label>
             <Select value={form.watch("expectedMonthlyPaymentsUsd") ?? ""} onValueChange={(v) => form.setValue("expectedMonthlyPaymentsUsd", v, { shouldValidate: true })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select" />
+                <SelectValue placeholder={t("kycIndividual.common.select", "Select")} />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(expectedMonthlyPayments.data ?? {}).map(([key, label]) => (
@@ -265,10 +294,10 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Source of funds</Label>
+            <Label>{t("kycIndividual.steps.financialProfile.sourceOfFunds", "Source of funds")}</Label>
             <Select value={form.watch("sourceOfFunds") ?? ""} onValueChange={(v) => form.setValue("sourceOfFunds", v, { shouldValidate: true })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select" />
+                <SelectValue placeholder={t("kycIndividual.common.select", "Select")} />
               </SelectTrigger>
               <SelectContent className="max-h-72">
                 {Object.entries(sourceOfFunds.data ?? {}).map(([key, label]) => (
@@ -280,10 +309,10 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             </Select>
           </div>
           <div className="space-y-1.5 sm:col-span-2">
-            <Label>Account purpose</Label>
+            <Label>{t("kycIndividual.steps.financialProfile.accountPurpose", "Account purpose")}</Label>
             <Select value={accountPurpose ?? ""} onValueChange={(v) => form.setValue("accountPurpose", v, { shouldValidate: true })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select" />
+                <SelectValue placeholder={t("kycIndividual.common.select", "Select")} />
               </SelectTrigger>
               <SelectContent className="max-h-72">
                 {Object.entries(accountPurposes.data ?? {}).map(([key, label]) => (
@@ -296,21 +325,23 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
           </div>
           {accountPurpose === "Other" && (
             <div className="space-y-1.5 sm:col-span-2">
-              <Label>Describe account purpose</Label>
+              <Label>{t("kycIndividual.steps.financialProfile.describeAccountPurpose", "Describe account purpose")}</Label>
               <Input {...form.register("accountPurposeOther")} />
             </div>
           )}
 
           <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:col-span-2">
             <div>
-              <p className="text-sm font-medium">Acting as an intermediary</p>
-              <p className="text-xs text-muted-foreground">On behalf of someone else, not for yourself.</p>
+              <p className="text-sm font-medium">{t("kycIndividual.steps.financialProfile.actingAsIntermediary", "Acting as an intermediary")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("kycIndividual.steps.financialProfile.actingAsIntermediaryHint", "On behalf of someone else, not for yourself.")}
+              </p>
             </div>
             <Switch checked={form.watch("actingAsIntermediary")} onCheckedChange={(v) => form.setValue("actingAsIntermediary", v)} />
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label>Virtual accounts to provision</Label>
+            <Label>{t("kycIndividual.steps.financialProfile.virtualAccounts", "Virtual accounts to provision")}</Label>
             <div className="grid gap-2 sm:grid-cols-2">
               {(
                 [
@@ -339,15 +370,15 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
                     }
                   }}
                 />
-                EURDE (combined)
+                {t("kycIndividual.steps.financialProfile.eurdeCombined", "EURDE (combined)")}
               </label>
               <label className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm">
                 <Checkbox checked={form.watch("gbpVirtualAccount")} onCheckedChange={(v) => form.setValue("gbpVirtualAccount", v === true)} />
-                GBP <span className="text-xs text-muted-foreground">(may incur an extra fee)</span>
+                GBP <span className="text-xs text-muted-foreground">({t("kycIndividual.steps.financialProfile.extraFeeNote", "may incur an extra fee")})</span>
               </label>
             </div>
             {(errors.usdVirtualAccount || errors.eurdeVirtualAccount) && (
-              <p className="text-xs text-destructive">Choose USD and/or EUR, or EURDE alone.</p>
+              <p className="text-xs text-destructive">{t("kycIndividual.steps.financialProfile.chooseAccountsHint", "Choose USD and/or EUR, or EURDE alone.")}</p>
             )}
           </div>
         </div>
@@ -357,21 +388,24 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
         <div className="space-y-4">
           <div className="flex items-center gap-2 rounded-lg bg-success/10 p-3 text-sm text-success">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
-            Everything looks ready. Review, then submit.
+            {t("kycIndividual.steps.review.ready", "Everything looks ready. Review, then submit.")}
           </div>
           <dl className="divide-y divide-border text-sm">
             {[
-              ["Name", `${values.firstName} ${values.middleName ? values.middleName + " " : ""}${values.lastName}`],
-              ["Email", values.email],
-              ["Phone", `${values.callingCode} ${values.phone}`],
-              ["Nationality", values.nationality],
-              ["Address", `${values.residentialAddress?.streetLine1}, ${values.residentialAddress?.city}, ${values.residentialAddress?.country}`],
-              ["ID document", humanize(values.identifyingInformation?.[0]?.type ?? "")],
-              ["Account purpose", values.accountPurpose ? humanize(values.accountPurpose) : ""],
+              [t("kycIndividual.steps.review.labels.name", "Name"), `${values.firstName} ${values.middleName ? values.middleName + " " : ""}${values.lastName}`],
+              [t("kycIndividual.steps.review.labels.email", "Email"), values.email],
+              [t("kycIndividual.steps.review.labels.phone", "Phone"), `${values.callingCode} ${values.phone}`],
+              [t("kycIndividual.steps.review.labels.nationality", "Nationality"), values.nationality],
+              [
+                t("kycIndividual.steps.review.labels.address", "Address"),
+                `${values.residentialAddress?.streetLine1}, ${values.residentialAddress?.city}, ${values.residentialAddress?.country}`,
+              ],
+              [t("kycIndividual.steps.review.labels.idDocument", "ID document"), humanize(values.identifyingInformation?.[0]?.type ?? "")],
+              [t("kycIndividual.steps.review.labels.accountPurpose", "Account purpose"), values.accountPurpose ? humanize(values.accountPurpose) : ""],
             ].map(([label, val]) => (
               <div key={label} className="flex justify-between gap-4 py-2">
                 <dt className="text-muted-foreground">{label}</dt>
-                <dd className="text-right font-medium">{val || "—"}</dd>
+                <dd className="text-right font-medium">{val || t("kycIndividual.common.emptyValue", "—")}</dd>
               </div>
             ))}
           </dl>

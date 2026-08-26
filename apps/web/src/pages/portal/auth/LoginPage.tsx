@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { portalLoginSchema, type PortalLoginInput } from "@white-label/shared-types";
 import { fetchBranding } from "@/theme/branding";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
@@ -11,8 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError } from "@/lib/api-client";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function PortalLoginPage() {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading, login, verifyTwoFactor } = useCustomerAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const navigate = useNavigate();
@@ -44,7 +47,7 @@ export default function PortalLoginPage() {
       }
       navigate("/portal", { replace: true });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Unable to sign in. Check your credentials.");
+      setError(e instanceof ApiError ? e.message : t("login.genericError", "Unable to sign in. Check your credentials."));
     } finally {
       setSubmitting(false);
     }
@@ -58,27 +61,32 @@ export default function PortalLoginPage() {
       await verifyTwoFactor(challengeToken, code);
       navigate("/portal", { replace: true });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Invalid code. Please try again.");
+      setError(e instanceof ApiError ? e.message : t("login.invalidCodeError", "Invalid code. Please try again."));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
             {(branding?.productName ?? "W").slice(0, 1)}
           </div>
-          <span className="font-heading text-lg font-semibold">{branding?.productName ?? "White Label"}</span>
+          <span className="font-heading text-lg font-semibold">{branding?.productName ?? t("login.defaultProductName", "White Label")}</span>
         </div>
         <Card>
           {challengeToken ? (
             <>
               <CardHeader>
-                <CardTitle>Verify it's you</CardTitle>
-                <CardDescription>Enter the 6-digit code from your authenticator app, or a backup code.</CardDescription>
+                <CardTitle>{t("login.verifyHeading", "Verify it's you")}</CardTitle>
+                <CardDescription>
+                  {t("login.verifyDescription", "Enter the 6-digit code from your authenticator app, or a backup code.")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <form
@@ -89,7 +97,7 @@ export default function PortalLoginPage() {
                   }}
                 >
                   <div className="space-y-1.5">
-                    <Label htmlFor="twoFactorCode">Verification code</Label>
+                    <Label htmlFor="twoFactorCode">{t("login.verificationCodeLabel", "Verification code")}</Label>
                     <Input
                       id="twoFactorCode"
                       inputMode="numeric"
@@ -101,7 +109,7 @@ export default function PortalLoginPage() {
                   </div>
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <Button type="submit" className="w-full" disabled={submitting || code.length < 6}>
-                    {submitting ? "Verifying…" : "Verify"}
+                    {submitting ? t("login.verifying", "Verifying…") : t("login.verify", "Verify")}
                   </Button>
                   <button
                     type="button"
@@ -112,7 +120,7 @@ export default function PortalLoginPage() {
                       setError(null);
                     }}
                   >
-                    &larr; Back to sign in
+                    {t("login.backToSignIn", "← Back to sign in")}
                   </button>
                 </form>
               </CardContent>
@@ -120,30 +128,30 @@ export default function PortalLoginPage() {
           ) : (
             <>
               <CardHeader>
-                <CardTitle>Welcome back</CardTitle>
-                <CardDescription>Sign in to your account</CardDescription>
+                <CardTitle>{t("login.welcomeBack", "Welcome back")}</CardTitle>
+                <CardDescription>{t("login.signInDescription", "Sign in to your account")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t("login.emailLabel", "Email")}</Label>
                     <Input id="email" type="email" autoComplete="email" {...register("email")} />
                     {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">{t("login.passwordLabel", "Password")}</Label>
                     <Input id="password" type="password" autoComplete="current-password" {...register("password")} />
                     {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                   </div>
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <Button type="submit" className="w-full" disabled={submitting}>
-                    {submitting ? "Signing in…" : "Sign in"}
+                    {submitting ? t("login.signingIn", "Signing in…") : t("login.signIn", "Sign in")}
                   </Button>
                 </form>
                 <p className="mt-4 text-center text-sm text-muted-foreground">
-                  New here?{" "}
+                  {t("login.newHere", "New here?")}{" "}
                   <Link to="/portal/signup" className="font-medium text-primary hover:underline">
-                    Create an account
+                    {t("login.createAccount", "Create an account")}
                   </Link>
                 </p>
               </CardContent>
@@ -152,7 +160,7 @@ export default function PortalLoginPage() {
         </Card>
         <p className="mt-6 text-center text-xs text-muted-foreground">
           <Link to="/" className="hover:underline">
-            &larr; Back to home
+            {t("login.backToHome", "← Back to home")}
           </Link>
         </p>
       </div>

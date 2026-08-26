@@ -16,6 +16,7 @@ import {
   BadgeCheck,
   FileText,
   Lock,
+  Fingerprint,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { AtlasTopbar, type NavItem } from "./Topbar";
@@ -35,6 +36,7 @@ const items: NavItem[] = [
   { to: "/admin/pages", label: "Pages", icon: FileText },
   { to: "/admin/settings/branding", label: "Branding", icon: Palette },
   { to: "/admin/settings/api-keys", label: "API keys", icon: KeyRound },
+  { to: "/admin/settings/authentication", label: "Authentication", icon: Fingerprint },
   { to: "/admin/settings/wallet-currencies", label: "Wallet currencies", icon: Landmark },
   { to: "/admin/settings/verification", label: "Verification", icon: ShieldCheck },
 ];

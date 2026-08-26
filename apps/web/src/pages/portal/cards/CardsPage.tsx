@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CardDto, CardDetailDto, CardReveal, CardTransaction } from "@white-label/shared-types";
 import {
@@ -66,6 +67,7 @@ const TRANSACTION_STATUS_VARIANT: Record<string, "success" | "warning" | "destru
 const CREDIT_TRANSACTION_TYPES = new Set(["funding", "topup", "refund", "credit"]);
 
 export default function PortalCardsPage() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [issueOpen, setIssueOpen] = useState(false);
@@ -80,38 +82,38 @@ export default function PortalCardsPage() {
   const issueMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>("/portal/cards", { amountMinor: Math.round(Number(amount) * 100).toString() }),
     onSuccess: () => {
-      toast({ title: "Card issued" });
+      toast({ title: t("cards.toast.cardIssued", "Card issued") });
       queryClient.invalidateQueries({ queryKey: ["portal", "cards"] });
       setIssueOpen(false);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't issue card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.issueCardError", "Couldn't issue card"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">Cards</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">Visa virtual cards linked to your USD wallet</p>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("cards.title", "Cards")}</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">{t("cards.subtitle", "Visa virtual cards linked to your USD wallet")}</p>
         </div>
         <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="h-4 w-4" /> Request card
+              <Plus className="h-4 w-4" /> {t("cards.requestCard", "Request card")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Request a virtual card</DialogTitle>
+              <DialogTitle>{t("cards.requestDialogTitle", "Request a virtual card")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-1.5">
-              <Label htmlFor="amount">Initial funding (USD)</Label>
+              <Label htmlFor="amount">{t("cards.initialFundingLabel", "Initial funding (USD)")}</Label>
               <Input id="amount" type="number" min="3" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
-              <p className="text-xs text-muted-foreground">Minimum $3. Debited from your USD wallet along with a creation fee and top-up fee.</p>
+              <p className="text-xs text-muted-foreground">{t("cards.initialFundingHelp", "Minimum $3. Debited from your USD wallet along with a creation fee and top-up fee.")}</p>
             </div>
             <DialogFooter>
               <Button onClick={() => issueMutation.mutate()} disabled={issueMutation.isPending}>
-                {issueMutation.isPending ? "Requesting…" : "Request card"}
+                {issueMutation.isPending ? t("cards.requesting", "Requesting…") : t("cards.requestCard", "Request card")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -127,7 +129,7 @@ export default function PortalCardsPage() {
       ) : !data || data.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center">
           <CreditCard className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No cards yet. Request one to start spending.</p>
+          <p className="text-sm text-muted-foreground">{t("cards.emptyState", "No cards yet. Request one to start spending.")}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -143,8 +145,8 @@ export default function PortalCardsPage() {
               </div>
               <p className="mt-6 font-mono text-lg tracking-widest">•••• •••• •••• {c.last4 ?? "----"}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Virtual · USD</span>
-                <span className="text-xs font-medium text-primary">Manage →</span>
+                <span className="text-xs text-muted-foreground">{t("cards.virtualUsd", "Virtual · USD")}</span>
+                <span className="text-xs font-medium text-primary">{t("cards.manage", "Manage →")}</span>
               </div>
             </button>
           ))}
@@ -157,6 +159,7 @@ export default function PortalCardsPage() {
 }
 
 function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () => void }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [revealed, setRevealed] = useState<CardReveal | null>(null);
@@ -195,63 +198,63 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
   const revealMutation = useMutation({
     mutationFn: () => portalApi.post<CardReveal>(`/portal/cards/${card!.id}/reveal`),
     onSuccess: setRevealed,
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't reveal card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.revealCardError", "Couldn't reveal card"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const freezeMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>(`/portal/cards/${card!.id}/${card!.status === "FROZEN" ? "unfreeze" : "freeze"}`),
     onSuccess: (updated) => {
-      toast({ title: updated.status === "FROZEN" ? "Card frozen" : "Card unfrozen" });
+      toast({ title: updated.status === "FROZEN" ? t("cards.toast.cardFrozen", "Card frozen") : t("cards.toast.cardUnfrozen", "Card unfrozen") });
       invalidateCards();
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't update freeze state", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.freezeError", "Couldn't update freeze state"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const topupMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>(`/portal/cards/${card!.id}/topup`, { amountMinor: Math.round(Number(topupAmount) * 100).toString() }),
     onSuccess: () => {
-      toast({ title: "Card topped up" });
+      toast({ title: t("cards.toast.cardToppedUp", "Card topped up") });
       invalidateCards();
       queryClient.invalidateQueries({ queryKey: ["portal", "wallets"] });
     },
-    onError: (e) => toast({ variant: "destructive", title: "Top-up failed", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.topupFailed", "Top-up failed"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const withdrawMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>(`/portal/cards/${card!.id}/withdraw`, { amountMinor: Math.round(Number(withdrawAmount) * 100).toString() }),
     onSuccess: () => {
-      toast({ title: "Withdrawal submitted", description: "A fee is deducted before the net amount lands back in your wallet." });
+      toast({ title: t("cards.toast.withdrawalSubmitted", "Withdrawal submitted"), description: t("cards.toast.withdrawalSubmittedDescription", "A fee is deducted before the net amount lands back in your wallet.") });
       invalidateCards();
       queryClient.invalidateQueries({ queryKey: ["portal", "wallets"] });
     },
-    onError: (e) => toast({ variant: "destructive", title: "Withdrawal failed", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.withdrawalFailed", "Withdrawal failed"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const airlineMutation = useMutation({
     mutationFn: (enabled: boolean) => portalApi.post<CardDto>(`/portal/cards/${card!.id}/airline-payments`, { enabled }),
     onSuccess: (_data, enabled) => {
       setAirlineEnabled(enabled);
-      toast({ title: enabled ? "Airline payments enabled" : "Airline payments disabled" });
+      toast({ title: enabled ? t("cards.toast.airlineEnabled", "Airline payments enabled") : t("cards.toast.airlineDisabled", "Airline payments disabled") });
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't update airline payments", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.airlineError", "Couldn't update airline payments"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const terminateMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>(`/portal/cards/${card!.id}/terminate`),
     onSuccess: () => {
-      toast({ title: "Card terminated", description: "Any remaining balance is refunded to your wallet automatically." });
+      toast({ title: t("cards.toast.cardTerminated", "Card terminated"), description: t("cards.toast.cardTerminatedDescription", "Any remaining balance is refunded to your wallet automatically.") });
       invalidateCards();
       onClose();
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't terminate card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.terminateError", "Couldn't terminate card"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const copy = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast({ title: `${label} copied` });
+      toast({ title: t("cards.toast.copied", "{{label}} copied", { label }) });
     } catch {
-      toast({ variant: "destructive", title: "Couldn't copy" });
+      toast({ variant: "destructive", title: t("cards.toast.copyError", "Couldn't copy") });
     }
   };
 
@@ -264,8 +267,8 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
         {card && (
           <>
             <SheetHeader>
-              <SheetTitle>Card ending in {card.last4 ?? "----"}</SheetTitle>
-              <SheetDescription>Visa virtual card · USD</SheetDescription>
+              <SheetTitle>{t("cards.cardEndingIn", "Card ending in {{last4}}", { last4: card.last4 ?? "----" })}</SheetTitle>
+              <SheetDescription>{t("cards.visaVirtualCardUsd", "Visa virtual card · USD")}</SheetDescription>
             </SheetHeader>
 
             <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-card to-card p-5 shadow-soft">
@@ -298,14 +301,14 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
               </div>
               {revealed && (
                 <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                  {revealed.expiry && <span>Exp {revealed.expiry}</span>}
-                  {revealed.cvv && <span>CVV {revealed.cvv}</span>}
+                  {revealed.expiry && <span>{t("cards.exp", "Exp {{expiry}}", { expiry: revealed.expiry })}</span>}
+                  {revealed.cvv && <span>{t("cards.cvv", "CVV {{cvv}}", { cvv: revealed.cvv })}</span>}
                   {revealed.cardNumber && (
-                    <button onClick={() => copy(revealed.cardNumber!.replace(/\s/g, ""), "Card number")} className="inline-flex items-center gap-1 hover:text-primary">
-                      <Copy className="h-3 w-3" /> Copy number
+                    <button onClick={() => copy(revealed.cardNumber!.replace(/\s/g, ""), t("cards.cardNumberLabel", "Card number"))} className="inline-flex items-center gap-1 hover:text-primary">
+                      <Copy className="h-3 w-3" /> {t("cards.copyNumber", "Copy number")}
                     </button>
                   )}
-                  <span className="ml-auto">Hides automatically</span>
+                  <span className="ml-auto">{t("cards.hidesAutomatically", "Hides automatically")}</span>
                 </div>
               )}
             </div>
@@ -317,19 +320,19 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <p className="text-xs text-muted-foreground">Cardholder</p>
+                      <p className="text-xs text-muted-foreground">{t("cards.cardholder", "Cardholder")}</p>
                       <p className="font-medium">{detail?.cardholderName ?? "—"}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Program</p>
+                      <p className="text-xs text-muted-foreground">{t("cards.program", "Program")}</p>
                       <p className="font-medium capitalize">{detail?.cardProgram ?? "—"}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Spent this month</p>
+                      <p className="text-xs text-muted-foreground">{t("cards.spentThisMonth", "Spent this month")}</p>
                       <p className="font-medium">{detail?.spentThisMonth ? formatUsd(detail.spentThisMonth) : "—"}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Added this month</p>
+                      <p className="text-xs text-muted-foreground">{t("cards.addedThisMonth", "Added this month")}</p>
                       <p className="font-medium">{detail?.toppedUpThisMonth ? formatUsd(detail.toppedUpThisMonth) : "—"}</p>
                     </div>
                   </div>
@@ -337,7 +340,7 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                   {address && (address.line1 || address.city) && (
                     <div className="border-t border-border pt-3">
                       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" /> Billing address
+                        <MapPin className="h-3.5 w-3.5" /> {t("cards.billingAddress", "Billing address")}
                       </p>
                       <p className="mt-1 font-medium">
                         {address.line1}
@@ -358,30 +361,30 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="topup" className="flex items-center gap-1.5 text-xs">
-                      <ArrowDownToLine className="h-3.5 w-3.5" /> Top up
+                      <ArrowDownToLine className="h-3.5 w-3.5" /> {t("cards.topUp", "Top up")}
                     </Label>
                     <Input id="topup" type="number" min="1" max="100000" step="0.01" value={topupAmount} onChange={(e) => setTopupAmount(e.target.value)} disabled={!isActive} />
                     <Button size="sm" className="w-full" onClick={() => topupMutation.mutate()} disabled={!isActive || topupMutation.isPending}>
-                      {topupMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Add funds"}
+                      {topupMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("cards.addFunds", "Add funds")}
                     </Button>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="withdraw" className="flex items-center gap-1.5 text-xs">
-                      <ArrowUpFromLine className="h-3.5 w-3.5" /> Withdraw
+                      <ArrowUpFromLine className="h-3.5 w-3.5" /> {t("cards.withdraw", "Withdraw")}
                     </Label>
                     <Input id="withdraw" type="number" min="1" step="0.01" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} disabled={!isActive} />
                     <Button size="sm" variant="outline" className="w-full" onClick={() => withdrawMutation.mutate()} disabled={!isActive || withdrawMutation.isPending}>
-                      {withdrawMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Withdraw"}
+                      {withdrawMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("cards.withdraw", "Withdraw")}
                     </Button>
                   </div>
                 </div>
-                <p className="-mt-3 text-xs text-muted-foreground">A fee is deducted from withdrawals before the net amount reaches your wallet.</p>
+                <p className="-mt-3 text-xs text-muted-foreground">{t("cards.withdrawFeeNote", "A fee is deducted from withdrawals before the net amount reaches your wallet.")}</p>
 
                 <Separator />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    <Plane className="h-4 w-4 text-muted-foreground" /> Airline payments
+                    <Plane className="h-4 w-4 text-muted-foreground" /> {t("cards.airlinePayments", "Airline payments")}
                   </div>
                   <Switch checked={airlineEnabled} onCheckedChange={(v) => airlineMutation.mutate(v)} disabled={!isActive || airlineMutation.isPending} />
                 </div>
@@ -391,11 +394,11 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : card.status === "FROZEN" ? (
                     <>
-                      <Sun className="h-4 w-4" /> Unfreeze card
+                      <Sun className="h-4 w-4" /> {t("cards.unfreezeCard", "Unfreeze card")}
                     </>
                   ) : (
                     <>
-                      <Snowflake className="h-4 w-4" /> Freeze card
+                      <Snowflake className="h-4 w-4" /> {t("cards.freezeCard", "Freeze card")}
                     </>
                   )}
                 </Button>
@@ -410,11 +413,11 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                     disabled={terminateMutation.isPending}
                   >
                     {terminateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-                    {terminateArmed ? "Click again to confirm — this can't be undone" : "Terminate card"}
+                    {terminateArmed ? t("cards.confirmTerminate", "Click again to confirm — this can't be undone") : t("cards.terminateCard", "Terminate card")}
                   </Button>
                   {terminateArmed && (
                     <button className="text-xs text-muted-foreground hover:underline" onClick={() => setTerminateArmed(false)}>
-                      Cancel
+                      {t("cards.cancel", "Cancel")}
                     </button>
                   )}
                 </div>
@@ -424,7 +427,7 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
             <Separator />
 
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">Transactions</h3>
+              <h3 className="text-sm font-medium">{t("cards.transactions", "Transactions")}</h3>
               {transactionsQuery.isLoading ? (
                 <div className="space-y-2">
                   {Array.from({ length: 3 }).map((_, i) => (
@@ -432,22 +435,22 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                   ))}
                 </div>
               ) : !transactionsQuery.data || transactionsQuery.data.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No transactions yet.</p>
+                <p className="text-sm text-muted-foreground">{t("cards.noTransactions", "No transactions yet.")}</p>
               ) : (
                 <div className="space-y-1.5">
-                  {transactionsQuery.data.map((t, i) => {
-                    const isCredit = t.type ? CREDIT_TRANSACTION_TYPES.has(t.type.toLowerCase()) : false;
-                    const merchant = typeof t.raw.merchant === "string" ? t.raw.merchant : undefined;
-                    const title = t.description ?? merchant ?? (t.type ? humanize(t.type) : "Transaction");
-                    const date = t.transactionDate ?? t.createdAt;
+                  {transactionsQuery.data.map((tx, i) => {
+                    const isCredit = tx.type ? CREDIT_TRANSACTION_TYPES.has(tx.type.toLowerCase()) : false;
+                    const merchant = typeof tx.raw.merchant === "string" ? tx.raw.merchant : undefined;
+                    const title = tx.description ?? merchant ?? (tx.type ? humanize(tx.type) : t("cards.transactionFallback", "Transaction"));
+                    const date = tx.transactionDate ?? tx.createdAt;
                     return (
-                      <div key={t.id ?? i} className="flex items-start gap-3 rounded-lg border border-border px-3 py-2.5 text-sm">
+                      <div key={tx.id ?? i} className="flex items-start gap-3 rounded-lg border border-border px-3 py-2.5 text-sm">
                         <div
                           className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
                             isCredit ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
                           }`}
                         >
-                          {t.type === "fee" ? (
+                          {tx.type === "fee" ? (
                             <Receipt className="h-3.5 w-3.5" />
                           ) : isCredit ? (
                             <ArrowDownLeft className="h-3.5 w-3.5" />
@@ -458,21 +461,21 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{title}</p>
                           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-                            {t.status && (
-                              <Badge variant={TRANSACTION_STATUS_VARIANT[t.status.toLowerCase()] ?? "secondary"} className="text-[10px] capitalize">
-                                {t.status}
+                            {tx.status && (
+                              <Badge variant={TRANSACTION_STATUS_VARIANT[tx.status.toLowerCase()] ?? "secondary"} className="text-[10px] capitalize">
+                                {tx.status}
                               </Badge>
                             )}
                             {date && <span>{new Date(date).toLocaleString()}</span>}
-                            {t.feeAmount && Number(t.feeAmount) > 0 && t.type !== "fee" && <span>Fee {formatUsd(t.feeAmount)}</span>}
+                            {tx.feeAmount && Number(tx.feeAmount) > 0 && tx.type !== "fee" && <span>{t("cards.feeAmount", "Fee {{amount}}", { amount: formatUsd(tx.feeAmount) })}</span>}
                           </div>
                         </div>
                         <div className="shrink-0 text-right">
                           <p className={`font-mono font-medium ${isCredit ? "text-success" : "text-foreground"}`}>
                             {isCredit ? "+" : "-"}
-                            {formatUsd(t.amount)}
+                            {formatUsd(tx.amount)}
                           </p>
-                          {t.balanceAfter && <p className="text-xs text-muted-foreground">Bal {formatUsd(t.balanceAfter)}</p>}
+                          {tx.balanceAfter && <p className="text-xs text-muted-foreground">{t("cards.balance", "Bal {{amount}}", { amount: formatUsd(tx.balanceAfter) })}</p>}
                         </div>
                       </div>
                     );

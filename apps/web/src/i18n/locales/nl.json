@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "Een begunstigde toevoegen",
+    "addBeneficiary": "Begunstigde toevoegen",
+    "addError": "Begunstigde kon niet worden toegevoegd",
+    "added": "Begunstigde toegevoegd",
+    "back": "Terug",
+    "cancel": "Annuleren",
+    "continue": "Doorgaan",
+    "country": "Land",
+    "detail": {
+      "added": "Toegevoegd",
+      "currency": "Valuta",
+      "editHint": "Betaalgegevens kunnen hier niet worden bewerkt — verwijder deze begunstigde en voeg een nieuwe toe als de gegevens zijn gewijzigd.",
+      "editName": "Naam bewerken",
+      "name": "Naam",
+      "paymentDetails": "Betaalgegevens",
+      "removeBeneficiary": "Begunstigde verwijderen",
+      "save": "Opslaan",
+      "title": "Gegevens begunstigde",
+      "type": "Type"
+    },
+    "empty": "Nog geen begunstigden. Voeg er een toe om geld te versturen.",
+    "fieldRequiredError": "{{field}} is verplicht",
+    "maxCharsError": "Maximaal {{max}} tekens",
+    "methodDetailsHeading": "Gegevens {{method}}",
+    "minCharsError": "Minimaal {{min}} tekens",
+    "nameAndCountryRequired": "Voer een naam in en kies een land om door te gaan",
+    "noExtraDetailsNeeded": "Voor deze uitbetaalmethode zijn geen extra gegevens nodig.",
+    "noPayoutMethods": "Nog geen actieve uitbetaalmethoden voor dit land.",
+    "payoutMethodQuestion": "Hoe wilt u {{name}} in {{country}} uitbetalen?",
+    "payoutMethodRequired": "Kies een uitbetaalmethode om door te gaan",
+    "recipientName": "Naam ontvanger",
+    "recipientNamePlaceholder": "Jane Doe",
+    "remove": "Verwijderen",
+    "removeDialogDescription": "U moet deze persoon opnieuw toevoegen om hier in de toekomst geld naartoe te sturen. Dit heeft geen invloed op eerdere uitbetalingen.",
+    "removeDialogTitle": "{{name}} verwijderen?",
+    "removeError": "Begunstigde kon niet worden verwijderd",
+    "removed": "Begunstigde verwijderd",
+    "selectCountryPlaceholder": "Selecteer een land",
+    "selectFieldPlaceholder": "Selecteer {{field}}",
+    "steps": {
+      "paymentDetails": "Betaalgegevens",
+      "payoutMethod": "Uitbetaalmethode",
+      "recipient": "Ontvanger"
+    },
+    "subtitle": "Personen en rekeningen waarnaar u geld verstuurt",
+    "table": {
+      "actions": "Acties",
+      "added": "Toegevoegd",
+      "currency": "Valuta",
+      "name": "Naam"
+    },
+    "thisCountry": "dit land",
+    "thisRecipient": "deze ontvanger",
+    "title": "Begunstigden",
+    "transferRange": "{{min}}–{{max}} {{currency}} per overboeking",
+    "updateError": "Begunstigde kon niet worden bijgewerkt",
+    "updated": "Begunstigde bijgewerkt",
+    "whoAreYouSendingTo": "Naar wie stuurt u geld?"
+  },
+  "cards": {
+    "addFunds": "Saldo toevoegen",
+    "addedThisMonth": "Toegevoegd deze maand",
+    "airlinePayments": "Betalingen bij luchtvaartmaatschappijen",
+    "balance": "Saldo {{amount}}",
+    "billingAddress": "Factuuradres",
+    "cancel": "Annuleren",
+    "cardEndingIn": "Kaart eindigend op {{last4}}",
+    "cardNumberLabel": "Kaartnummer",
+    "cardholder": "Kaarthouder",
+    "confirmTerminate": "Klik nogmaals om te bevestigen — dit kan niet ongedaan worden gemaakt",
+    "copyNumber": "Nummer kopiëren",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "Nog geen kaarten. Vraag er een aan om te beginnen met uitgeven.",
+    "exp": "Verloopt {{expiry}}",
+    "feeAmount": "Kosten {{amount}}",
+    "freezeCard": "Kaart blokkeren",
+    "hidesAutomatically": "Verbergt automatisch",
+    "initialFundingHelp": "Minimaal $3. Wordt samen met de aanmaakkosten en oplaadkosten van uw USD-wallet afgeschreven.",
+    "initialFundingLabel": "Initieel saldo (USD)",
+    "manage": "Beheren →",
+    "noTransactions": "Nog geen transacties.",
+    "program": "Programma",
+    "requestCard": "Kaart aanvragen",
+    "requestDialogTitle": "Een virtuele kaart aanvragen",
+    "requesting": "Aanvragen…",
+    "spentThisMonth": "Uitgegeven deze maand",
+    "subtitle": "Virtuele Visa-kaarten gekoppeld aan uw USD-wallet",
+    "terminateCard": "Kaart beëindigen",
+    "title": "Kaarten",
+    "toast": {
+      "airlineDisabled": "Betalingen bij luchtvaartmaatschappijen uitgeschakeld",
+      "airlineEnabled": "Betalingen bij luchtvaartmaatschappijen ingeschakeld",
+      "airlineError": "Betalingen bij luchtvaartmaatschappijen konden niet worden bijgewerkt",
+      "cardFrozen": "Kaart geblokkeerd",
+      "cardIssued": "Kaart uitgegeven",
+      "cardTerminated": "Kaart beëindigd",
+      "cardTerminatedDescription": "Een eventueel resterend saldo wordt automatisch terugbetaald naar uw wallet.",
+      "cardToppedUp": "Kaart opgewaardeerd",
+      "cardUnfrozen": "Blokkering kaart opgeheven",
+      "copied": "{{label}} gekopieerd",
+      "copyError": "Kopiëren mislukt",
+      "freezeError": "Blokkeringsstatus kon niet worden bijgewerkt",
+      "issueCardError": "Kaart kon niet worden uitgegeven",
+      "revealCardError": "Kaartgegevens konden niet worden getoond",
+      "terminateError": "Kaart kon niet worden beëindigd",
+      "topupFailed": "Opwaarderen mislukt",
+      "withdrawalFailed": "Opname mislukt",
+      "withdrawalSubmitted": "Opname ingediend",
+      "withdrawalSubmittedDescription": "Er worden kosten ingehouden voordat het nettobedrag terug in uw wallet komt."
+    },
+    "topUp": "Opwaarderen",
+    "transactionFallback": "Transactie",
+    "transactions": "Transacties",
+    "unfreezeCard": "Blokkering opheffen",
+    "virtualUsd": "Virtueel · USD",
+    "visaVirtualCardUsd": "Virtuele Visa-kaart · USD",
+    "withdraw": "Opnemen",
+    "withdrawFeeNote": "Er worden kosten ingehouden op opnames voordat het nettobedrag uw wallet bereikt."
+  },
+  "common": {
+    "language": "Taal"
+  },
+  "crypto": {
+    "addressCopied": "Adres gekopieerd",
+    "copyAddressError": "Adres kon niet worden gekopieerd",
+    "depositAddressReady": "Stortingsadres klaar",
+    "generateAddress": "Adres genereren",
+    "generateAddressError": "Adres kon niet worden gegenereerd",
+    "generateDescription": "Genereer een stortingsadres voor elke ondersteunde chain.",
+    "generating": "Genereren…",
+    "noDepositsYet": "Nog geen cryptostortingen",
+    "noWalletsYet": "Nog geen cryptowallets — genereer hieronder een adres om te beginnen.",
+    "selectAssetPlaceholder": "Selecteer een asset",
+    "sharedAddressWarning": "Dit adres kan worden gedeeld met andere gebruikers voor hetzelfde asset. Stortingen worden aan uw account gekoppeld en door ons team bevestigd voordat uw saldo wordt bijgewerkt.",
+    "subtitle": "Stortingsadressen en on-chain stortingsgeschiedenis voor ondersteunde assets.",
+    "title": "Cryptowallets",
+    "transactionsDescription": "Elke on-chain storting die aan uw account is gekoppeld.",
+    "transactionsTitle": "Cryptotransacties",
+    "viewOnExplorer": "Bekijken in block explorer",
+    "yourWallets": "Uw wallets"
+  },
+  "dashboard": {
+    "activityTitle": "Recente activiteit",
+    "heroLabel": "Totaalsaldo",
+    "stats": {
+      "available": "Beschikbaar",
+      "pending": "In behandeling",
+      "recentActivity": "Recente activiteit",
+      "wallets": "Wallets"
+    },
+    "subtitle": "Dit gebeurt er momenteel op uw accounts",
+    "title": "Welkom terug",
+    "walletLabel": "Wallet"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "Nog geen wallets",
+      "nothingHereYet": "Hier staat nog niets",
+      "recentActivity": "Recente activiteit",
+      "totalBalance": "Totaalsaldo",
+      "yourWallets": "Uw wallets"
+    },
+    "aurora": {
+      "balance": "Saldo",
+      "noTrendData": "Nog geen trendgegevens",
+      "noWalletsYet": "Nog geen wallets",
+      "nothingHereYet": "Hier staat nog niets",
+      "recentActivity": "Recente activiteit",
+      "trend": "Trend",
+      "wallets": "Wallets"
+    },
+    "meridian": {
+      "balanceTrend": "Saldotrend",
+      "noWalletsYet": "Nog geen wallets",
+      "nothingHereYet": "Hier staat nog niets",
+      "overview": "Overzicht",
+      "recentActivity": "Recente activiteit",
+      "wallets": "Wallets"
+    },
+    "nova": {
+      "balanceTrend": "Saldotrend",
+      "noActivityYet": "Nog geen activiteit",
+      "noWalletsYet": "Nog geen wallets",
+      "nothingHereYet": "Hier staat nog niets",
+      "recentActivity": "Recente activiteit",
+      "wallets": "Wallets"
+    },
+    "prime": {
+      "amount": "Bedrag",
+      "balanceTrend": "Saldotrend",
+      "description": "Omschrijving",
+      "noWalletsYet": "Nog geen wallets",
+      "nothingHereYet": "Hier staat nog niets",
+      "recentActivity": "Recente activiteit",
+      "status": "Status",
+      "wallets": "Wallets"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "Terug",
+      "continue": "Doorgaan",
+      "startDeposit": "Storting starten"
+    },
+    "cryptoCard": {
+      "description": "Stortingsadressen en on-chain stortingsgeschiedenis staan nu op hun eigen pagina.",
+      "goToWallets": "Naar cryptowallets",
+      "title": "Of stort crypto"
+    },
+    "dialog": {
+      "amountToPay": "Te betalen bedrag",
+      "copyLinkAriaLabel": "Link kopiëren",
+      "estimatedDelivery": "Geschatte levertijd",
+      "exchangeRate": "Wisselkoers",
+      "fee": "Kosten",
+      "initiated": "Storting gestart",
+      "openLinkAriaLabel": "Link openen",
+      "title": "Geld storten",
+      "youllReceive": "U ontvangt"
+    },
+    "errors": {
+      "enterAmount": "Voer een bedrag in",
+      "fieldRequired": "{{field}} is verplicht",
+      "pickWallet": "Kies welke wallet moet worden gecrediteerd"
+    },
+    "localCard": {
+      "depositButton": "Storten",
+      "description": "Kies uw land en betaal via de lokale betaalmethode — bankoverschrijving, CODI, DEBIN en meer.",
+      "title": "Of stort met een lokale betaalmethode"
+    },
+    "step0": {
+      "countryLabel": "Land",
+      "countryPlaceholder": "Selecteer een land",
+      "prompt": "Vanuit welk land betaalt u?"
+    },
+    "step1": {
+      "methodRange": "{{min}}–{{max}} {{currency}} per storting",
+      "noMethods": "Nog geen actieve stortingsmethoden voor dit land.",
+      "prompt": "Hoe wilt u vanuit {{country}} betalen?",
+      "thisCountryFallback": "dit land"
+    },
+    "step2": {
+      "amountLabel": "Bedrag ({{currency}})",
+      "prompt": "{{method}} — bedrag en gegevens",
+      "selectFieldPlaceholder": "Selecteer {{field}}",
+      "walletLabel": "Te crediteren wallet",
+      "walletLoading": "Laden…",
+      "walletPlaceholder": "Selecteer een wallet"
+    },
+    "steps": {
+      "amountDetails": "Bedrag en gegevens",
+      "country": "Land",
+      "method": "Methode"
+    },
+    "subtitle": "Stort geld op uw wallet met een eenmalige betaling via een lokale betaalmethode of crypto.",
+    "title": "Storten",
+    "toast": {
+      "copied": "Gekopieerd naar klembord",
+      "copyFailed": "Kopiëren mislukt",
+      "pickCountry": "Kies een land om door te gaan",
+      "pickMethod": "Kies een betaalmethode om door te gaan",
+      "startFailed": "Storting kon niet worden gestart"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "Doorgaan",
+      "submit": "Indienen ter beoordeling"
+    },
+    "common": {
+      "select": "Selecteren"
+    },
+    "header": {
+      "subtitle": "Zakelijke KYB — gegevens over het bedrijf en de eigenaren.",
+      "title": "Verifieer uw bedrijf"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "Doel van de rekening",
+        "complianceScreeningProgram": "Compliance-screeningprogramma",
+        "conductsMoneyServices": "Verleent geldtransferdiensten",
+        "conductsMoneyServicesHint": "Geldovermakingen, valutawissel of vergelijkbare gereguleerde MSB-activiteiten.",
+        "describeAccountPurpose": "Beschrijf het doel van de rekening",
+        "describeMoneyServicesActivity": "Beschrijf de geldtransferactiviteit",
+        "estimatedAnnualRevenue": "Geschatte jaaromzet, USD (optioneel)",
+        "estimatedAnnualRevenuePlaceholder": "bijv. 1000000_to_5000000",
+        "eurdeCombined": "EURDE (gecombineerd)",
+        "explainFlaggedActivity": "Licht de gemarkeerde activiteit toe",
+        "extraFeeHint": "(kan extra kosten met zich meebrengen)",
+        "highRiskActivities": "Hoogrisicoactiviteiten (selecteer alles wat van toepassing is)",
+        "notSpecified": "Niet opgegeven",
+        "pepStatus": "Politiek prominent persoon (PEP)",
+        "pepStatusHint": "Een eigenaar/directeur is een PEP of naaste medewerker van een PEP.",
+        "prohibitedCountries": "Actief in verboden landen (optioneel)",
+        "selectPlaceholder": "Selecteren",
+        "sourceOfFunds": "Herkomst van de middelen",
+        "thirdPartyMsbPayments": "Verwerkt betalingen voor MSB's van derden",
+        "virtualAccountsToProvision": "Aan te maken virtuele rekeningen"
+      },
+      "addresses": {
+        "physicalAddressHeading": "Fysiek adres",
+        "physicalProofHint": "Huurcontract, energierekening of vergelijkbaar — verplicht als dit afwijkt van het geregistreerde adres.",
+        "registeredAddressHeading": "Geregistreerd adres",
+        "sameAsRegistered": "Zelfde als geregistreerd adres",
+        "title": "Adressen"
+      },
+      "businessDocument": {
+        "title": "Bedrijfsdocument"
+      },
+      "businessInfo": {
+        "businessType": "Bedrijfstype",
+        "description": "Bedrijfsomschrijving",
+        "dialCode": "Landcode",
+        "dialCodePlaceholder": "+1",
+        "email": "Zakelijk e-mailadres",
+        "incorporationCountry": "Land van oprichting (optioneel)",
+        "incorporationDate": "Oprichtingsdatum",
+        "industry": "Branche (optioneel)",
+        "legalName": "Statutaire bedrijfsnaam",
+        "phone": "Telefoon",
+        "registrationNumber": "Registratienummer",
+        "requiredFieldsHint": "Vul de verplichte velden hierboven in.",
+        "taxId": "Fiscaal identificatienummer (optioneel)",
+        "title": "Bedrijfsgegevens",
+        "tradeName": "Handelsnaam",
+        "website": "Website (optioneel)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "Een document met als doel \"Bedrijfsregistratie\" is verplicht — het bovenstaande standaarddocument voldoet hieraan.",
+        "description": "Omschrijving",
+        "descriptionPlaceholder": "Oprichtingsakte",
+        "documentPurpose": "Doel van het document",
+        "fileLabel": "Bestand",
+        "selectPlaceholder": "Selecteren"
+      },
+      "ownerIdDocuments": {
+        "title": "ID-documenten van eigenaren"
+      },
+      "ownersDirectors": {
+        "addAnother": "Nog een eigenaar/directeur toevoegen",
+        "authorizedSigner": "Bevoegd ondertekenaar",
+        "dateOfBirth": "Geboortedatum",
+        "director": "Directeur",
+        "email": "E-mail",
+        "firstName": "Voornaam",
+        "hasControl": "Heeft zeggenschap",
+        "hasOwnership": "Heeft eigendom",
+        "identityDocsRequired": "Voor elke eigenaar/directeur zijn beide identiteitsdocumenten verplicht.",
+        "lastName": "Achternaam",
+        "nationality": "Nationaliteit",
+        "ownerHeading": "Eigenaar/directeur {{number}}",
+        "ownershipPercent": "Eigendomspercentage",
+        "personFallbackName": "Eigenaar/directeur {{index}}",
+        "personTitle": "Functie",
+        "phoneOptional": "Telefoon (optioneel)",
+        "photoIdHeading": "2. Overheids-ID met foto",
+        "residentialAddressHeading": "Woonadres",
+        "taxId": "BSN / EIN / ITIN",
+        "taxIdHeading": "1. Fiscaal identificatienummer",
+        "title": "Eigenaren en directeuren",
+        "titlePlaceholder": "CEO, Managing Member…"
+      },
+      "review": {
+        "accountPurpose": "Doel van de rekening",
+        "business": "Bedrijf",
+        "highRiskActivities": "Hoogrisicoactiviteiten",
+        "none": "Geen",
+        "ownersDirectors": "Eigenaren/directeuren",
+        "readyMessage": "Alles ziet er klaar uit. Controleer de gegevens en dien ze in.",
+        "registeredAddress": "Geregistreerd adres",
+        "title": "Controleren",
+        "tradeName": "Handelsnaam",
+        "type": "Type"
+      },
+      "riskPurpose": {
+        "title": "Risico en doel"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Enkele verplichte velden moeten nog worden ingevuld.",
+        "title": "Controleer onderstaande velden"
+      },
+      "submitFailed": {
+        "title": "Indienen mislukt"
+      },
+      "submitted": {
+        "description": "We beoordelen uw bedrijfsgegevens binnenkort.",
+        "title": "Verificatie ingediend"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "Doorgaan",
+      "submit": "Indienen ter beoordeling"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "Selecteren"
+    },
+    "header": {
+      "subtitle": "Enkele gegevens zodat we kunnen bevestigen wie u bent.",
+      "title": "Verifieer uw identiteit"
+    },
+    "steps": {
+      "address": {
+        "title": "Adres"
+      },
+      "financialProfile": {
+        "accountPurpose": "Doel van de rekening",
+        "actingAsIntermediary": "Optreden als tussenpersoon",
+        "actingAsIntermediaryHint": "Namens iemand anders, niet voor uzelf.",
+        "chooseAccountsHint": "Kies USD en/of EUR, of alleen EURDE.",
+        "describeAccountPurpose": "Beschrijf het doel van de rekening",
+        "employmentStatus": "Arbeidssituatie",
+        "eurdeCombined": "EURDE (gecombineerd)",
+        "expectedMonthlyPayments": "Verwachte maandelijkse betalingen (USD)",
+        "extraFeeNote": "kan extra kosten met zich meebrengen",
+        "occupation": "Beroep",
+        "sourceOfFunds": "Herkomst van de middelen",
+        "title": "Financieel profiel",
+        "virtualAccounts": "Aan te maken virtuele rekeningen"
+      },
+      "identityDocument": {
+        "govIdHeading": "Door de overheid uitgegeven ID",
+        "selfieHint": "Een duidelijke foto van uw gezicht.",
+        "selfiePhoto": "Selfiefoto",
+        "title": "Identiteitsdocument"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11 cijfers",
+        "currentEmployer": "Huidige werkgever (optioneel)",
+        "dateOfBirth": "Geboortedatum",
+        "dialCode": "Landcode",
+        "dialCodePlaceholder": "+1",
+        "email": "E-mail",
+        "firstName": "Voornaam",
+        "gender": "Geslacht",
+        "genderFemale": "Vrouw",
+        "genderMale": "Man",
+        "immigrationStatus": "Immigratiestatus (optioneel)",
+        "immigrationStatusPlaceholder": "Niet van toepassing",
+        "lastName": "Achternaam",
+        "middleName": "Tweede naam (optioneel)",
+        "nationality": "Nationaliteit",
+        "nin": "NIN",
+        "ninPlaceholder": "11 cijfers",
+        "phone": "Telefoon",
+        "phoneHint": "Landcode zoals \"+1\", alleen de telefooncijfers (8-15 cijfers).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "Fiscaal identificatienummer",
+        "taxIdPlaceholder": "BSN / nationaal fiscaal nummer",
+        "title": "Persoonlijke gegevens"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "Doel van de rekening",
+          "address": "Adres",
+          "email": "E-mail",
+          "idDocument": "ID-document",
+          "name": "Naam",
+          "nationality": "Nationaliteit",
+          "phone": "Telefoon"
+        },
+        "ready": "Alles ziet er klaar uit. Controleer de gegevens en dien ze in.",
+        "title": "Controleren"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Enkele verplichte velden moeten nog worden ingevuld.",
+        "title": "Controleer onderstaande velden"
+      },
+      "submitFailed": {
+        "title": "Indienen mislukt"
+      },
+      "submitted": {
+        "description": "We beoordelen uw gegevens binnenkort.",
+        "title": "Verificatie ingediend"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "Terug",
+    "chooseCountryFirstPlaceholder": "Kies eerst een land",
+    "cityLabel": "Plaats",
+    "clickToUpload": "Klik om te uploaden",
+    "countryLabel": "Land",
+    "dateIssuedLabel": "Afgiftedatum",
+    "documentBackOptionalLabel": "Document — achterkant (optioneel)",
+    "documentFrontLabel": "Document — voorkant",
+    "documentNumberLabel": "Documentnummer",
+    "documentNumberPlaceholder": "bijv. P00012345",
+    "documentTypeLabel": "Documenttype",
+    "expirationDateLabel": "Vervaldatum",
+    "expirationDateOptionalLabel": "Vervaldatum (optioneel)",
+    "fixBeforeContinuing": "Los het volgende op voordat u verdergaat:",
+    "issuingCountryLabel": "Land van afgifte",
+    "loadingEllipsis": "Laden…",
+    "noMatches": "Geen resultaten.",
+    "noPostalCodesText": "Dit land gebruikt geen postcodes.",
+    "postalCodeFormatError": "Komt niet overeen met het verwachte formaat.",
+    "postalCodeFormatErrorWithExample": "Komt niet overeen met het verwachte formaat (bijv. {{example}}).",
+    "postalCodeLabel": "Postcode",
+    "proofOfAddressHint": "Energierekening, bankafschrift of huurcontract.",
+    "proofOfAddressLabel": "Adresbewijs",
+    "searchPlaceholder": "Zoeken…",
+    "selectCountryPlaceholder": "Selecteer een land",
+    "selectOption": "Selecteren",
+    "selectPlaceholder": "Selecteren…",
+    "setNationalityFirstPlaceholder": "Stel eerst de nationaliteit in",
+    "stateProvinceLabel": "Staat / provincie",
+    "stepOf": "Stap {{current}} van {{total}}",
+    "streetAddress2Label": "Adresregel 2 (optioneel)",
+    "streetAddressLabel": "Straat en huisnummer",
+    "streetAddressPlaceholder": "123 Main St"
+  },
+  "kycWizard": {
+    "backToDashboard": "Terug naar dashboard",
+    "pendingDescription": "We hebben uw gegevens ontvangen en beoordelen ze. We laten het u weten zodra er een beslissing is genomen.",
+    "pendingHeading": "Verificatie in behandeling",
+    "verifiedDescription": "Uw identiteit is geverifieerd. U heeft volledige toegang tot geld versturen, kaarten en virtuele rekeningen.",
+    "verifiedHeading": "U bent geverifieerd"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "Zakelijk inloggen",
+      "demoCard": "Kaart",
+      "demoDeposit": "Storten",
+      "demoSend": "Versturen",
+      "demoTotalBalance": "Totaalsaldo",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "Salarisverwerking",
+      "demoTransaction3": "Vaste vergoeding design",
+      "feature1Desc": "Houd en verplaats fiat en crypto naast elkaar, met een saldo waar u altijd op kunt vertrouwen.",
+      "feature1Title": "Eén saldo, elke valuta",
+      "feature2Desc": "Kies een contactpersoon, ontvang een live koers, bevestig — geld verplaatst zich zonder papierwerk.",
+      "feature2Title": "Versturen in seconden",
+      "feature3Desc": "Maak in één tik een virtuele kaart aan en blokkeer deze net zo snel.",
+      "feature3Title": "Kaarten op aanvraag",
+      "feature4Desc": "Elke transactie wordt op de achtergrond vastgelegd in een onveranderlijk, gereconcilieerd grootboek.",
+      "feature4Title": "Grootboek van bankniveau",
+      "featuresHeading": "Alles wat uw geld nodig heeft",
+      "featuresSubheading": "Geen verborgen kosten, geen verwarrende menu's — gewoon bankieren dat werkt.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "Geld, eenvoudig gemaakt",
+      "heroHeadlineHighlight": "moeiteloos.",
+      "heroHeadlinePrefix": "Bankieren dat aanvoelt als",
+      "heroSubheadline": "{{productName}} is een moderne wallet voor het versturen, aanhouden en uitgeven van uw geld — verrassend eenvoudig, serieus veilig.",
+      "logIn": "Inloggen",
+      "openAccountCta": "Open uw account",
+      "planBusinessBlurb": "Toegang voor meerdere gebruikers, hogere limieten, toegewijde ondersteuning.",
+      "planBusinessCta": "Neem contact met ons op",
+      "planBusinessName": "Zakelijk",
+      "planBusinessPrice": "Op maat",
+      "planPersonalBlurb": "Dagelijks uitgeven en versturen voor particulieren.",
+      "planPersonalCta": "Aan de slag",
+      "planPersonalName": "Persoonlijk",
+      "planPersonalPrice": "Gratis",
+      "pricingHeading": "Eenvoudige tarieven",
+      "pricingSubheading": "Begin gratis. Upgrade pas wanneer uw bedrijf meer nodig heeft.",
+      "signUpFree": "Gratis registreren"
+    },
+    "aurora": {
+      "badge": "Verrassend eenvoudig geld beheren",
+      "businessLogin": "Zakelijk inloggen",
+      "demoActionCard": "Kaart",
+      "demoActionDeposit": "Storten",
+      "demoActionSend": "Versturen",
+      "demoBalance": "$8.942,10",
+      "demoGrowth": "+12,4%",
+      "feature1Desc": "Elke wallet, elke valuta, altijd gereconcilieerd.",
+      "feature1Title": "Eén overzichtelijk saldo",
+      "feature2Desc": "Live koersen, directe bevestiging, geen papierwerk.",
+      "feature2Title": "Versturen in seconden",
+      "feature3Desc": "Geef een virtuele kaart uit zodra u bent geverifieerd.",
+      "feature3Title": "Kaarten op aanvraag",
+      "feature4Desc": "Elke transactie, gereconcilieerd en controleerbaar.",
+      "feature4Title": "Grootboek van bankniveau",
+      "featuresHeading": "Alles wat uw geld nodig heeft",
+      "featuresSubheading": "Geen verborgen kosten, geen verwarrende menu's — gewoon bankieren dat werkt.",
+      "heroHeadlineHighlight": "één prachtig overzicht.",
+      "heroHeadlinePrefix": "Elke rekening,",
+      "heroSubheadline": "{{productName}} brengt wallets, uitbetalingen en kaarten samen in een dashboard dat mensen graag openen.",
+      "logIn": "Inloggen",
+      "openAccount": "Open uw account",
+      "signUpFree": "Gratis registreren",
+      "thisMonth": "Deze maand",
+      "totalBalance": "Totaalsaldo",
+      "vsLastMonth": "t.o.v. vorige maand"
+    },
+    "meridian": {
+      "eyebrow": "Operationeel platform",
+      "featureCardIssuingDesc": "Geef klanten een virtuele kaart uit zodra ze zijn geverifieerd.",
+      "featureCardIssuingTitle": "Kaartuitgifte",
+      "featureComplianceDesc": "KYC, endorsements en audit trails zijn er vanaf dag één in ingebouwd.",
+      "featureComplianceTitle": "Ingebouwde compliance",
+      "featureLedgerDesc": "Elke wallet, elke valuta, gereconcilieerd tot één enkele bron van waarheid.",
+      "featureLedgerTitle": "Uniform grootboek",
+      "featurePayoutsDesc": "Vraag een koers aan, bevestig en verreken grensoverschrijdende overboekingen in enkele klikken.",
+      "featurePayoutsTitle": "Wereldwijde uitbetalingen",
+      "featuresHeading": "Alles wat operations nodig heeft",
+      "featuresSubheading": "Eén platform voor de volledige geldverwerkingsketen.",
+      "heroHeadline": "Beheer geldstromen als een operator, niet als een spreadsheet.",
+      "heroSubheadline": "{{productName}} geeft uw team één console voor wallets, uitbetalingen, kaarten en compliance — ondersteund door een grootboek dat u kunt vertrouwen.",
+      "logIn": "Inloggen",
+      "openAccountCta": "Open een account",
+      "operatorLoginCta": "Operator-login",
+      "reconciledDesc": "Elke geboekte transactie is double-entry, idempotent en wordt automatisch afgestemd op de gegevens van de provider.",
+      "reconciledTitle": "Standaard gereconcilieerd",
+      "signUp": "Registreren",
+      "statCurrenciesLabel": "Valuta's",
+      "statPayoutTimeLabel": "Gem. uitbetalingstijd",
+      "statUptimeLabel": "Uptime",
+      "teamsDesc": "Rolgebaseerde toegang voor eigenaren, beheerders en operators, met een volledige audit trail voor elke actie.",
+      "teamsTitle": "Gebouwd voor teams"
+    },
+    "nova": {
+      "createAccountCta": "Maak uw account aan",
+      "ctaHeading": "Klaar om uw eigen infrastructuur te draaien?",
+      "ctaSubheading": "Uw klanten, uw merk, uw grootboek — ondersteund door Yativo.",
+      "feature1Desc": "Elke cent gevolgd via onveranderlijke, controleerbare journaalposten — nooit een simpele saldokolom.",
+      "feature1Title": "Double-entry grootboek",
+      "feature2Desc": "Webhook-gestuurde boekingen houden klantsaldi actueel op het moment dat geld beweegt.",
+      "feature2Title": "Realtime afwikkeling",
+      "feature3Desc": "Geplande taken vergelijken uw grootboek met de upstream-afwikkeling en signaleren afwijkingen direct.",
+      "feature3Title": "Automatisch gereconcilieerd",
+      "feature4Desc": "Fiat- en crypto-infrastructuur onder één rekeningschema, klaar voor wereldwijde uitbetalingscorridors.",
+      "feature4Title": "Multi-valuta",
+      "feature5Desc": "Klant- en medewerkerssessies kruisen elkaar nooit — aparte tokens, apart risicogebied.",
+      "feature5Title": "Twee geïsoleerde authenticatiedomeinen",
+      "feature6Desc": "KYC-beoordeling, handmatige aanpassingen, uitbetalingen, kaarten en webhooks — één console.",
+      "feature6Title": "Volledig backoffice",
+      "featuresHeading": "Gebouwd als infrastructuur, niet als demo",
+      "featuresSubheading": "Alles wat een reseller nodig heeft om veilig echt klantgeld te beheren.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "Aan de slag",
+      "heroHeadlineHighlight": "draai onder uw eigen merk.",
+      "heroHeadlinePrefix": "Fintech-infrastructuur,",
+      "heroSubheadline": "{{productName}} geeft uw bedrijf een white-label wallet-, uitbetalings- en kaartplatform op een echt double-entry grootboek — implementeer het, brand het, en run uw eigen fintechbedrijf erop.",
+      "openAccountCta": "Open een account",
+      "operatorConsole": "Operatorconsole",
+      "signIn": "Inloggen",
+      "trustBadge": "Grootboek-geverifieerd · Elk uur gereconcilieerd"
+    },
+    "prime": {
+      "balance": "Saldo",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "Dashboard-login",
+      "feature": {
+        "cardIssuing": {
+          "desc": "Geef klanten een virtuele kaart uit zodra ze zijn geverifieerd.",
+          "title": "Kaartuitgifte"
+        },
+        "compliance": {
+          "desc": "KYC, endorsements en audit trails zijn er vanaf dag één in ingebouwd.",
+          "title": "Ingebouwde compliance"
+        },
+        "ledger": {
+          "desc": "Elke wallet, elke valuta, gereconcilieerd tot één enkele bron van waarheid.",
+          "title": "Uniform grootboek"
+        },
+        "payouts": {
+          "desc": "Vraag een koers aan, bevestig en verreken grensoverschrijdende overboekingen in enkele klikken.",
+          "title": "Wereldwijde uitbetalingen"
+        }
+      },
+      "featuresHeading": "Alles wat operations nodig heeft",
+      "heroHeadline": "Betalingsinfrastructuur voor het internet.",
+      "heroSubheadline": "{{productName}} geeft u één API en één dashboard voor wallets, uitbetalingen, kaarten en compliance.",
+      "logIn": "Inloggen",
+      "signUp": "Registreren",
+      "startNow": "Nu starten",
+      "stat": {
+        "deposits": "Stortingen",
+        "payouts": "Uitbetalingen",
+        "refunds": "Terugbetalingen"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← Terug naar home",
+    "backToSignIn": "← Terug naar inloggen",
+    "createAccount": "Account aanmaken",
+    "defaultProductName": "White Label",
+    "emailLabel": "E-mail",
+    "genericError": "Inloggen niet mogelijk. Controleer uw gegevens.",
+    "invalidCodeError": "Ongeldige code. Probeer het opnieuw.",
+    "newHere": "Nieuw hier?",
+    "passwordLabel": "Wachtwoord",
+    "signIn": "Inloggen",
+    "signInDescription": "Log in op uw account",
+    "signingIn": "Bezig met inloggen…",
+    "verificationCodeLabel": "Verificatiecode",
+    "verify": "Verifiëren",
+    "verifyDescription": "Voer de 6-cijferige code uit uw authenticator-app in, of een back-upcode.",
+    "verifyHeading": "Bevestig dat u het bent",
+    "verifying": "Bezig met verifiëren…",
+    "welcomeBack": "Welkom terug"
+  },
+  "nav": {
+    "account": "Account",
+    "atlas": {
+      "contacts": "Contacten",
+      "home": "Home",
+      "profile": "Profiel",
+      "send": "Versturen"
+    },
+    "beneficiaries": "Begunstigden",
+    "cards": "Kaarten",
+    "cryptoWallets": "Cryptowallets",
+    "dashboard": "Dashboard",
+    "deposit": "Storten",
+    "logout": "Uitloggen",
+    "portal": "Portaal",
+    "profileKyc": "Profiel & KYC",
+    "section": {
+      "account": "Account",
+      "manage": "Beheren"
+    },
+    "sendMoney": "Geld versturen",
+    "settings": "Instellingen",
+    "virtualAccounts": "Virtuele rekeningen",
+    "wallets": "Wallets",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "Account",
+    "emailLabel": "E-mail",
+    "endorsementsDescription": "Verificatie per dienst vereist voor bepaalde functies, zoals lokale bankoverschrijvingen of virtuele kaarten.",
+    "endorsementsLoadError": "Endorsements konden niet worden geladen.",
+    "endorsementsTitle": "Endorsements",
+    "heading": "Profiel & verificatie",
+    "identityVerificationTitle": "Identiteitsverificatie",
+    "restartVerification": "Verificatie opnieuw starten",
+    "startVerification": "Verificatie starten",
+    "statusApproved": "U bent geverifieerd. Volledige toegang tot geld versturen, kaarten en virtuele rekeningen.",
+    "statusNotStarted": "Vereist voordat u geld kunt versturen, een virtuele rekening kunt aanhouden of een kaart kunt aanvragen.",
+    "statusPending": "We hebben uw gegevens ontvangen en beoordelen ze — we laten het u weten zodra er een beslissing is genomen.",
+    "statusRejected": "Uw laatste aanvraag is niet goedgekeurd — start hieronder een nieuwe.",
+    "subheading": "Beheer uw identiteitsgegevens",
+    "typeLabel": "Type"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "Te versturen bedrag ({{currency}})",
+      "amountPlaceholder": "100,00",
+      "debitWalletLabel": "Afschrijven van wallet",
+      "prompt": "Te versturen bedrag",
+      "promptTo": "Te versturen bedrag naar {{name}}",
+      "recipientFallback": "de ontvanger",
+      "willReceive": "We tonen precies hoeveel {{recipient}} ontvangt voordat u bevestigt.",
+      "willReceiveWithCurrency": "We tonen precies hoeveel {{recipient}} ontvangt in {{currency}} voordat u bevestigt."
+    },
+    "buttons": {
+      "back": "Terug",
+      "confirmAndSend": "Bevestigen en versturen",
+      "continue": "Doorgaan",
+      "getQuote": "Koers opvragen",
+      "requote": "Nieuwe koers"
+    },
+    "errors": {
+      "enterAmount": "Voer een bedrag in",
+      "fieldRequired": "{{field}} is verplicht",
+      "maxLength": "Maximaal {{max}} tekens",
+      "minLength": "Minimaal {{min}} tekens"
+    },
+    "result": {
+      "payoutId": "Uitbetalings-ID: {{id}}",
+      "payoutSubmitted": "Uitbetaling ingediend",
+      "refreshing": "(vernieuwen…)",
+      "sendAnother": "Nog een keer versturen",
+      "statusLabel": "Status:",
+      "viewWallets": "Wallets bekijken"
+    },
+    "review": {
+      "expired": "Deze koers is verlopen — vraag een nieuwe aan om door te gaan.",
+      "expiresIn": "Koers verloopt over {{seconds}} sec.",
+      "rateLabel": "Koers",
+      "recipientGetsLabel": "Ontvanger krijgt",
+      "toLabel": "Naar",
+      "totalChargedLabel": "Totaal in rekening gebracht"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "Selecteer een begunstigde",
+      "prompt": "Naar wie stuurt u geld?"
+    },
+    "step0": {
+      "countryLabel": "Land",
+      "countryPlaceholder": "Selecteer een land",
+      "prompt": "Naar wie stuurt u geld?",
+      "recipientNameLabel": "Naam ontvanger",
+      "recipientNamePlaceholder": "Jane Doe"
+    },
+    "step1": {
+      "countryFallback": "dit land",
+      "methodRange": "{{min}}–{{max}} {{currency}} per overboeking",
+      "noMethods": "Nog geen actieve uitbetaalmethoden voor dit land.",
+      "prompt": "Hoe wilt u {{recipient}} in {{country}} uitbetalen?",
+      "recipientFallback": "deze ontvanger"
+    },
+    "step2": {
+      "noDetailsNeeded": "Voor deze uitbetaalmethode zijn geen extra gegevens nodig.",
+      "prompt": "Gegevens {{method}}",
+      "selectFieldPlaceholder": "Selecteer {{field}}"
+    },
+    "steps": {
+      "amount": "Bedrag",
+      "beneficiary": "Begunstigde",
+      "details": "Gegevens",
+      "method": "Methode",
+      "recipient": "Ontvanger",
+      "review": "Controleren"
+    },
+    "subtitle": "Kies een land en de uitbetaalmethode, bevestig daarna het bedrag.",
+    "title": "Geld versturen",
+    "toast": {
+      "enterNameAndCountry": "Voer een naam in en kies een land om door te gaan",
+      "payoutFailed": "Uitbetaling mislukt",
+      "payoutSubmitted": "Uitbetaling ingediend",
+      "payoutSubmittedDescription": "We laten het u weten zodra deze is verwerkt.",
+      "pickBeneficiary": "Kies een begunstigde om door te gaan",
+      "pickMethod": "Kies een uitbetaalmethode om door te gaan",
+      "quoteFailed": "Kon geen koers ophalen",
+      "saveRecipientFailed": "Ontvanger kon niet worden opgeslagen",
+      "tryAgain": "Probeer het opnieuw."
+    },
+    "toggle": {
+      "newRecipient": "Nieuwe ontvanger",
+      "savedBeneficiary": "Opgeslagen begunstigde"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "Nieuw wachtwoord bevestigen",
+      "currentPasswordLabel": "Huidig wachtwoord",
+      "description": "Kies een sterk wachtwoord dat u nergens anders gebruikt.",
+      "newPasswordLabel": "Nieuw wachtwoord",
+      "submit": "Wachtwoord bijwerken",
+      "title": "Wachtwoord wijzigen",
+      "toastDescription": "Wachtwoord wijzigen is in deze versie nog niet beschikbaar.",
+      "toastTitle": "Nog niet beschikbaar"
+    },
+    "copiedToClipboard": "Gekopieerd naar klembord",
+    "copyError": "Kopiëren mislukt",
+    "subtitle": "Beheer de beveiliging van uw account",
+    "title": "Instellingen",
+    "twoFactor": {
+      "authenticatorApp": "Authenticator-app",
+      "description": "Voeg een extra beveiligingslaag toe aan uw account.",
+      "disable": {
+        "description": "Bevestig uw wachtwoord om tweefactorauthenticatie uit te schakelen.",
+        "error": "Tweefactorauthenticatie kon niet worden uitgeschakeld.",
+        "passwordLabel": "Wachtwoord",
+        "submit": "Tweefactorauthenticatie uitschakelen",
+        "submitting": "Uitschakelen…",
+        "title": "Tweefactorauthenticatie uitschakelen"
+      },
+      "enabled": "Ingeschakeld",
+      "loading": "Laden…",
+      "notConfigured": "Nog niet ingesteld",
+      "setup": {
+        "backupCodesDescription": "Bewaar deze op een veilige plek — elke code kan één keer worden gebruikt om in te loggen als u geen toegang meer heeft tot uw authenticator-app. Ze worden niet opnieuw getoond.",
+        "backupCodesTitle": "Sla uw back-upcodes op",
+        "codeLabel": "6-cijferige code",
+        "continueButton": "Doorgaan",
+        "copyAll": "Alles kopiëren",
+        "done": "Klaar",
+        "enableButton": "Tweefactorauthenticatie inschakelen",
+        "enterCodeTitle": "Voer de code in",
+        "manualKeyLabel": "Kunt u niet scannen? Voer deze sleutel handmatig in",
+        "qrAlt": "QR-code voor 2FA-instelling",
+        "scanTitle": "Scan met uw authenticator-app",
+        "verifyError": "Die code kon niet worden geverifieerd.",
+        "verifying": "Verifiëren…"
+      },
+      "title": "Tweefactorauthenticatie",
+      "toast": {
+        "disabled": "Tweefactorauthenticatie uitgeschakeld",
+        "setupError": "Instellen kon niet worden gestart"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "Accounttype",
+    "alreadyHaveAccount": "Heeft u al een account?",
+    "business": "Zakelijk",
+    "businessNameLabel": "Bedrijfsnaam",
+    "callingCodeAriaLabel": "Landcode",
+    "countryLabel": "Land",
+    "createAccount": "Account aanmaken",
+    "createYourAccount": "Maak uw account aan",
+    "creatingAccount": "Account wordt aangemaakt…",
+    "defaultProductName": "White Label",
+    "emailLabel": "E-mail",
+    "fullNameLabel": "Volledige naam",
+    "genericError": "Uw account kon niet worden aangemaakt.",
+    "individual": "Particulier",
+    "passwordLabel": "Wachtwoord",
+    "phoneNumberLabel": "Telefoonnummer",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "Selecteer uw land",
+    "signIn": "Inloggen",
+    "startSendingDescription": "Begin binnen enkele minuten met versturen, aanhouden en uitgeven"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "Profiel bekijken"
+    },
+    "prime": {
+      "notifications": "Meldingen",
+      "switchToDarkMode": "Overschakelen naar donkere modus",
+      "switchToLightMode": "Overschakelen naar lichte modus"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "Virtuele rekening klaar",
+    "addCurrency": "Een valuta toevoegen",
+    "allCurrenciesAdded": "U heeft al een rekening voor elke beschikbare valuta.",
+    "copiedToClipboard": "Gekopieerd naar klembord",
+    "copyError": "Kopiëren mislukt",
+    "copyField": "{{field}} kopiëren",
+    "createAccount": "Rekening aanmaken",
+    "createAccountError": "Rekening kon niet worden aangemaakt",
+    "creating": "Aanmaken…",
+    "noAccountsYet": "Nog geen virtuele rekeningen — maak er hieronder een aan voor een valuta.",
+    "noCurrenciesAvailable": "Er zijn nog geen valuta's beschikbaar voor virtuele rekeningen.",
+    "noVerificationNeeded": "Geen verificatie nodig",
+    "requiresVerification": "Vereist {{endorsement}}-verificatie — neem contact op met support om te beginnen.",
+    "shareDetails": "Deel deze gegevens met iedereen die u geld stuurt.",
+    "startVerification": "Verificatie starten",
+    "subtitle": "Vaste bankgegevens die u kunt hergebruiken voor elke inkomende overboeking, eenmalig per valuta.",
+    "title": "Virtuele rekeningen",
+    "verificationNote": "Voor sommige betaalmethoden is eenmalige verificatie nodig voordat een rekening kan worden uitgegeven.",
+    "verified": "Geverifieerd",
+    "yourAccounts": "Uw rekeningen"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} in behandeling",
+    "wallet": "Wallet"
+  },
+  "walletDetail": {
+    "allWallets": "Alle wallets",
+    "available": "Beschikbaar",
+    "balanceOverTime": "Saldoverloop",
+    "cancel": "Annuleren",
+    "noActivity": "Nog geen activiteit",
+    "pageOf": "Pagina {{page}} / {{totalPages}}",
+    "pending": "In behandeling",
+    "removeDialogDescription": "Deze wallet is leeg, dus dit is veilig — u kunt {{currencyCode}} later weer toevoegen als deze nog wordt aangeboden.",
+    "removeDialogTitle": "Uw {{currencyCode}}-wallet verwijderen?",
+    "removeWallet": "Wallet verwijderen",
+    "removeWalletError": "Wallet kon niet worden verwijderd",
+    "removing": "Verwijderen…",
+    "statement": "Rekeningoverzicht",
+    "walletRemoved": "Wallet verwijderd",
+    "walletTitle": "{{currencyCode}}-wallet"
+  },
+  "wallets": {
+    "add": "Toevoegen",
+    "addCurrencyPlaceholder": "Valuta toevoegen",
+    "addWalletError": "Wallet kon niet worden toegevoegd",
+    "empty": "Nog geen wallets. Ze verschijnen hier zodra u een saldo heeft.",
+    "subtitle": "Uw saldi in elke valuta",
+    "title": "Wallets",
+    "walletAdded": "Wallet toegevoegd",
+    "walletLabel": "Wallet"
+  }
+}

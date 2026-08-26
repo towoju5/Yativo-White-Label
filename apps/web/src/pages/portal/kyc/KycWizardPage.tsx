@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { KycCountry } from "@white-label/shared-types";
 import { CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import { portalApi } from "@/lib/api-client";
@@ -9,6 +10,7 @@ import IndividualKycWizard from "./IndividualKycWizard";
 import BusinessKycWizard from "./BusinessKycWizard";
 
 export default function KycWizardPage() {
+  const { t } = useTranslation();
   const { user } = useCustomerAuth();
   const navigate = useNavigate();
 
@@ -32,14 +34,22 @@ export default function KycWizardPage() {
           ) : (
             <Clock className="mx-auto mb-4 h-10 w-10 text-warning" />
           )}
-          <h1 className="font-heading text-xl font-semibold">{status === "APPROVED" ? "You're verified" : "Verification pending"}</h1>
+          <h1 className="font-heading text-xl font-semibold">
+            {status === "APPROVED" ? t("kycWizard.verifiedHeading", "You're verified") : t("kycWizard.pendingHeading", "Verification pending")}
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {status === "APPROVED"
-              ? "Your identity has been verified. You have full access to sending, cards, and virtual accounts."
-              : "We've received your details and are reviewing them. We'll notify you once a decision is made."}
+              ? t(
+                  "kycWizard.verifiedDescription",
+                  "Your identity has been verified. You have full access to sending, cards, and virtual accounts.",
+                )
+              : t(
+                  "kycWizard.pendingDescription",
+                  "We've received your details and are reviewing them. We'll notify you once a decision is made.",
+                )}
           </p>
           <Button className="mt-6" onClick={() => navigate("/portal")}>
-            Back to dashboard
+            {t("kycWizard.backToDashboard", "Back to dashboard")}
           </Button>
         </div>
       </div>

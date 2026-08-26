@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ChevronRight, Menu, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { NavSection } from "./Sidebar";
 
 interface TopbarProps {
@@ -16,6 +18,7 @@ interface TopbarProps {
 /** Mobile-only header — the desktop nav lives in AuroraSidebar. */
 export function AuroraTopbar({ sections, productName, userLabel, onLogout, profileTo }: TopbarProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
@@ -59,20 +62,23 @@ export function AuroraTopbar({ sections, productName, userLabel, onLogout, profi
                 </div>
               </div>
             ))}
+            <div className="rounded-2xl border border-border bg-card p-2.5">
+              <LanguageSwitcher />
+            </div>
             {profileTo && (
               <NavLink
                 to={profileTo}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
               >
-                View profile <ChevronRight className="ml-auto h-4 w-4" />
+                {t("topbar.aurora.viewProfile", "View profile")} <ChevronRight className="ml-auto h-4 w-4" />
               </NavLink>
             )}
             <button
               onClick={onLogout}
               className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10"
             >
-              <LogOut className="h-4 w-4" /> Log out
+              <LogOut className="h-4 w-4" /> {t("nav.logout", "Log out")}
             </button>
           </SheetContent>
         </Sheet>

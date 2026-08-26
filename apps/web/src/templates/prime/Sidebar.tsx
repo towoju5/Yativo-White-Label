@@ -1,8 +1,10 @@
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import type { LucideIcon } from "lucide-react";
 import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export interface NavItem {
   to: string;
@@ -22,9 +24,10 @@ interface SidebarProps {
 
 export function PrimeSidebar({ sections }: SidebarProps) {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
+  const { t } = useTranslation();
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card lg:flex">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex">
       <div className="flex h-14 items-center gap-2 border-b border-border px-4">
         {branding?.logoUrl ? (
           <img src={branding.logoUrl} alt="" className="h-6 w-6 rounded object-cover" />
@@ -33,7 +36,7 @@ export function PrimeSidebar({ sections }: SidebarProps) {
             {(branding?.productName ?? "W").slice(0, 1)}
           </div>
         )}
-        <span className="truncate text-sm font-semibold tracking-tight">{branding?.productName ?? "White Label"}</span>
+        <span className="truncate text-sm font-semibold tracking-tight">{branding?.productName ?? t("nav.whiteLabel", "White Label")}</span>
       </div>
 
       <nav className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">
@@ -66,6 +69,10 @@ export function PrimeSidebar({ sections }: SidebarProps) {
           </div>
         ))}
       </nav>
+
+      <div className="border-t border-border px-3 py-3">
+        <LanguageSwitcher />
+      </div>
     </aside>
   );
 }

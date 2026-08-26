@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { NavSection } from "./Sidebar";
 
 interface TopbarProps {
@@ -46,6 +47,9 @@ export function NovaTopbar({ sections, productName, right }: TopbarProps) {
               </div>
             ))}
           </nav>
+          <div className="border-t border-border px-3 py-3">
+            <LanguageSwitcher />
+          </div>
         </SheetContent>
       </Sheet>
       <span className="font-heading text-sm font-semibold">{productName}</span>

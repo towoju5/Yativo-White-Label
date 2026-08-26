@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "수취인 추가",
+    "addBeneficiary": "수취인 추가",
+    "addError": "수취인을 추가하지 못했습니다",
+    "added": "수취인이 추가되었습니다",
+    "back": "뒤로",
+    "cancel": "취소",
+    "continue": "계속",
+    "country": "국가",
+    "detail": {
+      "added": "추가됨",
+      "currency": "통화",
+      "editHint": "결제 정보는 이곳에서 수정할 수 없습니다 — 변경 사항이 있으면 이 수취인을 삭제하고 새로 추가해 주세요.",
+      "editName": "이름 수정",
+      "name": "이름",
+      "paymentDetails": "결제 정보",
+      "removeBeneficiary": "수취인 삭제",
+      "save": "저장",
+      "title": "수취인 상세정보",
+      "type": "유형"
+    },
+    "empty": "아직 등록된 수취인이 없습니다. 송금을 시작하려면 수취인을 추가하세요.",
+    "fieldRequiredError": "{{field}}은(는) 필수 항목입니다",
+    "maxCharsError": "최대 {{max}}자까지 입력 가능합니다",
+    "methodDetailsHeading": "{{method}} 상세정보",
+    "minCharsError": "최소 {{min}}자 이상 입력해 주세요",
+    "nameAndCountryRequired": "계속하려면 이름을 입력하고 국가를 선택하세요",
+    "noExtraDetailsNeeded": "이 지급 방법은 추가 정보가 필요하지 않습니다.",
+    "noPayoutMethods": "이 국가에 이용 가능한 지급 방법이 아직 없습니다.",
+    "payoutMethodQuestion": "{{country}}의 {{name}}님에게 어떻게 지급할까요?",
+    "payoutMethodRequired": "계속하려면 지급 방법을 선택하세요",
+    "recipientName": "수취인 이름",
+    "recipientNamePlaceholder": "Jane Doe",
+    "remove": "삭제",
+    "removeDialogDescription": "이후 다시 송금하려면 수취인을 다시 추가해야 합니다. 기존 송금 내역에는 영향을 주지 않습니다.",
+    "removeDialogTitle": "{{name}}님을 삭제하시겠습니까?",
+    "removeError": "수취인을 삭제하지 못했습니다",
+    "removed": "수취인이 삭제되었습니다",
+    "selectCountryPlaceholder": "국가 선택",
+    "selectFieldPlaceholder": "{{field}} 선택",
+    "steps": {
+      "paymentDetails": "결제 정보",
+      "payoutMethod": "지급 방법",
+      "recipient": "수취인"
+    },
+    "subtitle": "송금하는 대상 인물 및 계좌",
+    "table": {
+      "actions": "작업",
+      "added": "추가됨",
+      "currency": "통화",
+      "name": "이름"
+    },
+    "thisCountry": "이 국가",
+    "thisRecipient": "이 수취인",
+    "title": "수취인",
+    "transferRange": "송금 1건당 {{min}}–{{max}} {{currency}}",
+    "updateError": "수취인을 업데이트하지 못했습니다",
+    "updated": "수취인이 업데이트되었습니다",
+    "whoAreYouSendingTo": "누구에게 송금하시나요?"
+  },
+  "cards": {
+    "addFunds": "충전하기",
+    "addedThisMonth": "이번 달 충전액",
+    "airlinePayments": "항공사 결제",
+    "balance": "잔액 {{amount}}",
+    "billingAddress": "청구지 주소",
+    "cancel": "취소",
+    "cardEndingIn": "끝자리 {{last4}} 카드",
+    "cardNumberLabel": "카드 번호",
+    "cardholder": "카드 소유자",
+    "confirmTerminate": "다시 클릭하여 확인하세요 — 이 작업은 되돌릴 수 없습니다",
+    "copyNumber": "번호 복사",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "아직 카드가 없습니다. 카드를 신청하여 결제를 시작하세요.",
+    "exp": "유효기간 {{expiry}}",
+    "feeAmount": "수수료 {{amount}}",
+    "freezeCard": "카드 정지",
+    "hidesAutomatically": "자동으로 숨겨집니다",
+    "initialFundingHelp": "최소 $3. USD 지갑에서 생성 수수료 및 충전 수수료와 함께 차감됩니다.",
+    "initialFundingLabel": "초기 충전 금액 (USD)",
+    "manage": "관리 →",
+    "noTransactions": "아직 거래 내역이 없습니다.",
+    "program": "프로그램",
+    "requestCard": "카드 신청",
+    "requestDialogTitle": "가상 카드 신청",
+    "requesting": "신청 중…",
+    "spentThisMonth": "이번 달 사용액",
+    "subtitle": "USD 지갑과 연동된 Visa 가상 카드",
+    "terminateCard": "카드 해지",
+    "title": "카드",
+    "toast": {
+      "airlineDisabled": "항공사 결제가 비활성화되었습니다",
+      "airlineEnabled": "항공사 결제가 활성화되었습니다",
+      "airlineError": "항공사 결제 설정을 업데이트하지 못했습니다",
+      "cardFrozen": "카드가 정지되었습니다",
+      "cardIssued": "카드가 발급되었습니다",
+      "cardTerminated": "카드가 해지되었습니다",
+      "cardTerminatedDescription": "남은 잔액은 자동으로 지갑에 환불됩니다.",
+      "cardToppedUp": "카드가 충전되었습니다",
+      "cardUnfrozen": "카드 정지가 해제되었습니다",
+      "copied": "{{label}}이(가) 복사되었습니다",
+      "copyError": "복사하지 못했습니다",
+      "freezeError": "정지 상태를 업데이트하지 못했습니다",
+      "issueCardError": "카드를 발급하지 못했습니다",
+      "revealCardError": "카드 정보를 표시하지 못했습니다",
+      "terminateError": "카드를 해지하지 못했습니다",
+      "topupFailed": "충전에 실패했습니다",
+      "withdrawalFailed": "출금에 실패했습니다",
+      "withdrawalSubmitted": "출금이 요청되었습니다",
+      "withdrawalSubmittedDescription": "순 금액이 지갑에 입금되기 전에 수수료가 차감됩니다."
+    },
+    "topUp": "충전",
+    "transactionFallback": "거래",
+    "transactions": "거래 내역",
+    "unfreezeCard": "정지 해제",
+    "virtualUsd": "가상 · USD",
+    "visaVirtualCardUsd": "Visa 가상 카드 · USD",
+    "withdraw": "출금",
+    "withdrawFeeNote": "순 금액이 지갑에 입금되기 전에 출금액에서 수수료가 차감됩니다."
+  },
+  "common": {
+    "language": "언어"
+  },
+  "crypto": {
+    "addressCopied": "주소가 복사되었습니다",
+    "copyAddressError": "주소를 복사하지 못했습니다",
+    "depositAddressReady": "입금 주소가 준비되었습니다",
+    "generateAddress": "주소 생성",
+    "generateAddressError": "주소를 생성하지 못했습니다",
+    "generateDescription": "지원되는 체인에 대한 입금 주소를 생성하세요.",
+    "generating": "생성 중…",
+    "noDepositsYet": "아직 암호화폐 입금 내역이 없습니다",
+    "noWalletsYet": "아직 암호화폐 지갑이 없습니다 — 아래에서 주소를 생성하여 시작하세요.",
+    "selectAssetPlaceholder": "자산 선택",
+    "sharedAddressWarning": "이 주소는 동일한 자산에 대해 다른 사용자와 공유될 수 있습니다. 입금은 회원님의 계정과 매칭되며, 저희 팀의 확인을 거친 후 잔액에 반영됩니다.",
+    "subtitle": "지원되는 자산의 입금 주소 및 온체인 입금 내역.",
+    "title": "암호화폐 지갑",
+    "transactionsDescription": "회원님의 계정과 매칭된 모든 온체인 입금 내역입니다.",
+    "transactionsTitle": "암호화폐 거래 내역",
+    "viewOnExplorer": "블록 탐색기에서 보기",
+    "yourWallets": "내 지갑"
+  },
+  "dashboard": {
+    "activityTitle": "최근 활동",
+    "heroLabel": "총 잔액",
+    "stats": {
+      "available": "사용 가능",
+      "pending": "대기 중",
+      "recentActivity": "최근 활동",
+      "wallets": "지갑"
+    },
+    "subtitle": "회원님의 계정 현황을 확인하세요",
+    "title": "다시 오신 것을 환영합니다",
+    "walletLabel": "지갑"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "아직 지갑이 없습니다",
+      "nothingHereYet": "아직 표시할 내용이 없습니다",
+      "recentActivity": "최근 활동",
+      "totalBalance": "총 잔액",
+      "yourWallets": "내 지갑"
+    },
+    "aurora": {
+      "balance": "잔액",
+      "noTrendData": "아직 추이 데이터가 없습니다",
+      "noWalletsYet": "아직 지갑이 없습니다",
+      "nothingHereYet": "아직 표시할 내용이 없습니다",
+      "recentActivity": "최근 활동",
+      "trend": "추이",
+      "wallets": "지갑"
+    },
+    "meridian": {
+      "balanceTrend": "잔액 추이",
+      "noWalletsYet": "아직 지갑이 없습니다",
+      "nothingHereYet": "아직 표시할 내용이 없습니다",
+      "overview": "개요",
+      "recentActivity": "최근 활동",
+      "wallets": "지갑"
+    },
+    "nova": {
+      "balanceTrend": "잔액 추이",
+      "noActivityYet": "아직 활동 내역이 없습니다",
+      "noWalletsYet": "아직 지갑이 없습니다",
+      "nothingHereYet": "아직 표시할 내용이 없습니다",
+      "recentActivity": "최근 활동",
+      "wallets": "지갑"
+    },
+    "prime": {
+      "amount": "금액",
+      "balanceTrend": "잔액 추이",
+      "description": "설명",
+      "noWalletsYet": "아직 지갑이 없습니다",
+      "nothingHereYet": "아직 표시할 내용이 없습니다",
+      "recentActivity": "최근 활동",
+      "status": "상태",
+      "wallets": "지갑"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "뒤로",
+      "continue": "계속",
+      "startDeposit": "입금 시작"
+    },
+    "cryptoCard": {
+      "description": "입금 주소 및 온체인 입금 내역은 이제 별도 페이지에서 제공됩니다.",
+      "goToWallets": "암호화폐 지갑으로 이동",
+      "title": "또는 암호화폐로 입금하기"
+    },
+    "dialog": {
+      "amountToPay": "결제 금액",
+      "copyLinkAriaLabel": "링크 복사",
+      "estimatedDelivery": "예상 도착 시간",
+      "exchangeRate": "환율",
+      "fee": "수수료",
+      "initiated": "입금이 시작되었습니다",
+      "openLinkAriaLabel": "링크 열기",
+      "title": "자금 입금",
+      "youllReceive": "받으실 금액"
+    },
+    "errors": {
+      "enterAmount": "금액을 입력하세요",
+      "fieldRequired": "{{field}}은(는) 필수 항목입니다",
+      "pickWallet": "입금할 지갑을 선택하세요"
+    },
+    "localCard": {
+      "depositButton": "입금",
+      "description": "국가를 선택하고 은행 송금, CODI, DEBIN 등 현지 결제 방식으로 결제하세요.",
+      "title": "또는 현지 결제 방식으로 입금하기"
+    },
+    "step0": {
+      "countryLabel": "국가",
+      "countryPlaceholder": "국가 선택",
+      "prompt": "어느 국가에서 결제하시나요?"
+    },
+    "step1": {
+      "methodRange": "입금 1건당 {{min}}–{{max}} {{currency}}",
+      "noMethods": "이 국가에 이용 가능한 입금 방법이 아직 없습니다.",
+      "prompt": "{{country}}에서 어떻게 결제하시겠습니까?",
+      "thisCountryFallback": "이 국가"
+    },
+    "step2": {
+      "amountLabel": "금액 ({{currency}})",
+      "prompt": "{{method}} — 금액 및 상세정보",
+      "selectFieldPlaceholder": "{{field}} 선택",
+      "walletLabel": "입금할 지갑",
+      "walletLoading": "불러오는 중…",
+      "walletPlaceholder": "지갑 선택"
+    },
+    "steps": {
+      "amountDetails": "금액 및 상세정보",
+      "country": "국가",
+      "method": "방법"
+    },
+    "subtitle": "현지 결제 방식이나 암호화폐로 지갑에 일회성 입금을 하세요.",
+    "title": "입금",
+    "toast": {
+      "copied": "클립보드에 복사되었습니다",
+      "copyFailed": "복사하지 못했습니다",
+      "pickCountry": "계속하려면 국가를 선택하세요",
+      "pickMethod": "계속하려면 결제 방법을 선택하세요",
+      "startFailed": "입금을 시작하지 못했습니다"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "계속",
+      "submit": "검토 요청"
+    },
+    "common": {
+      "select": "선택"
+    },
+    "header": {
+      "subtitle": "기업 실사(KYB) — 회사 및 소유자에 대한 정보.",
+      "title": "사업체 인증"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "계정 사용 목적",
+        "complianceScreeningProgram": "컴플라이언스 심사 프로그램",
+        "conductsMoneyServices": "자금 서비스업 영위 여부",
+        "conductsMoneyServicesHint": "송금, 환전 또는 이와 유사한 규제 대상 MSB(자금서비스업) 활동.",
+        "describeAccountPurpose": "계정 사용 목적을 설명해 주세요",
+        "describeMoneyServicesActivity": "자금 서비스 활동을 설명해 주세요",
+        "estimatedAnnualRevenue": "예상 연 매출, USD (선택)",
+        "estimatedAnnualRevenuePlaceholder": "예: 1000000_to_5000000",
+        "eurdeCombined": "EURDE (통합)",
+        "explainFlaggedActivity": "표시된 활동에 대해 설명해 주세요",
+        "extraFeeHint": "(추가 수수료가 발생할 수 있음)",
+        "highRiskActivities": "고위험 활동 (해당하는 항목 모두 선택)",
+        "notSpecified": "지정되지 않음",
+        "pepStatus": "정치적 주요인물(PEP) 여부",
+        "pepStatusHint": "소유자/이사 중 PEP이거나 그 밀접한 관계자인 경우.",
+        "prohibitedCountries": "금지 국가에서의 영업 여부 (선택)",
+        "selectPlaceholder": "선택",
+        "sourceOfFunds": "자금 출처",
+        "thirdPartyMsbPayments": "제3자 MSB를 위한 결제 처리 여부",
+        "virtualAccountsToProvision": "발급할 가상계좌"
+      },
+      "addresses": {
+        "physicalAddressHeading": "실거주 주소",
+        "physicalProofHint": "등록 주소와 다른 경우 임대차 계약서, 공과금 고지서 등이 필요합니다.",
+        "registeredAddressHeading": "등록 주소",
+        "sameAsRegistered": "등록 주소와 동일",
+        "title": "주소"
+      },
+      "businessDocument": {
+        "title": "사업자 서류"
+      },
+      "businessInfo": {
+        "businessType": "사업체 유형",
+        "description": "사업체 설명",
+        "dialCode": "국가 번호",
+        "dialCodePlaceholder": "+1",
+        "email": "사업체 이메일",
+        "incorporationCountry": "설립 국가 (선택)",
+        "incorporationDate": "설립일",
+        "industry": "업종 (선택)",
+        "legalName": "법인명",
+        "phone": "전화번호",
+        "registrationNumber": "사업자 등록번호",
+        "requiredFieldsHint": "위의 필수 항목을 입력해 주세요.",
+        "taxId": "세금 식별번호 (선택)",
+        "title": "사업체 정보",
+        "tradeName": "상호명",
+        "website": "웹사이트 (선택)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "\"사업자 등록\" 목적의 서류가 필요합니다 — 위의 기본 서류가 이를 충족합니다.",
+        "description": "설명",
+        "descriptionPlaceholder": "설립 인증서",
+        "documentPurpose": "서류 목적",
+        "fileLabel": "파일",
+        "selectPlaceholder": "선택"
+      },
+      "ownerIdDocuments": {
+        "title": "소유자 신분증 서류"
+      },
+      "ownersDirectors": {
+        "addAnother": "소유자 / 이사 추가",
+        "authorizedSigner": "서명 권한자",
+        "dateOfBirth": "생년월일",
+        "director": "이사",
+        "email": "이메일",
+        "firstName": "이름",
+        "hasControl": "지배권 보유",
+        "hasOwnership": "지분 보유",
+        "identityDocsRequired": "모든 소유자/이사는 두 가지 신분증명 서류가 모두 필요합니다.",
+        "lastName": "성",
+        "nationality": "국적",
+        "ownerHeading": "소유자 / 이사 {{number}}",
+        "ownershipPercent": "지분율 %",
+        "personFallbackName": "소유자 / 이사 {{index}}",
+        "personTitle": "직함",
+        "phoneOptional": "전화번호 (선택)",
+        "photoIdHeading": "2. 정부 발급 사진 신분증",
+        "residentialAddressHeading": "거주지 주소",
+        "taxId": "SSN / EIN / ITIN",
+        "taxIdHeading": "1. 세금 식별번호",
+        "title": "소유자 및 이사",
+        "titlePlaceholder": "CEO, 대표사원 등"
+      },
+      "review": {
+        "accountPurpose": "계정 사용 목적",
+        "business": "사업체",
+        "highRiskActivities": "고위험 활동",
+        "none": "없음",
+        "ownersDirectors": "소유자 / 이사",
+        "readyMessage": "모든 준비가 완료되었습니다. 검토 후 제출해 주세요.",
+        "registeredAddress": "등록 주소",
+        "title": "검토",
+        "tradeName": "상호명",
+        "type": "유형"
+      },
+      "riskPurpose": {
+        "title": "위험 및 목적"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "필수 입력 항목이 아직 남아 있습니다.",
+        "title": "아래 항목을 확인해 주세요"
+      },
+      "submitFailed": {
+        "title": "제출에 실패했습니다"
+      },
+      "submitted": {
+        "description": "곧 사업체 정보를 검토해 드리겠습니다.",
+        "title": "인증 요청이 제출되었습니다"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "계속",
+      "submit": "검토 요청"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "선택"
+    },
+    "header": {
+      "subtitle": "본인 확인을 위한 몇 가지 정보를 입력해 주세요.",
+      "title": "신원 인증"
+    },
+    "steps": {
+      "address": {
+        "title": "주소"
+      },
+      "financialProfile": {
+        "accountPurpose": "계정 사용 목적",
+        "actingAsIntermediary": "중개인으로서 활동",
+        "actingAsIntermediaryHint": "본인이 아닌 타인을 대신하여 사용하는 경우.",
+        "chooseAccountsHint": "USD 및/또는 EUR, 또는 EURDE 단독을 선택하세요.",
+        "describeAccountPurpose": "계정 사용 목적을 설명해 주세요",
+        "employmentStatus": "고용 상태",
+        "eurdeCombined": "EURDE (통합)",
+        "expectedMonthlyPayments": "예상 월 결제액 (USD)",
+        "extraFeeNote": "추가 수수료가 발생할 수 있음",
+        "occupation": "직업",
+        "sourceOfFunds": "자금 출처",
+        "title": "재무 프로필",
+        "virtualAccounts": "발급할 가상계좌"
+      },
+      "identityDocument": {
+        "govIdHeading": "정부 발급 신분증",
+        "selfieHint": "얼굴이 선명하게 보이는 사진.",
+        "selfiePhoto": "셀피 사진",
+        "title": "신분증"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11자리",
+        "currentEmployer": "현재 고용주 (선택)",
+        "dateOfBirth": "생년월일",
+        "dialCode": "국가 번호",
+        "dialCodePlaceholder": "+1",
+        "email": "이메일",
+        "firstName": "이름",
+        "gender": "성별",
+        "genderFemale": "여성",
+        "genderMale": "남성",
+        "immigrationStatus": "체류 자격 (선택)",
+        "immigrationStatusPlaceholder": "해당 없음",
+        "lastName": "성",
+        "middleName": "중간 이름 (선택)",
+        "nationality": "국적",
+        "nin": "NIN",
+        "ninPlaceholder": "11자리",
+        "phone": "전화번호",
+        "phoneHint": "\"+1\"과 같은 국가 번호와 숫자만 입력하세요 (8~15자리).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "세금 식별번호",
+        "taxIdPlaceholder": "SSN / 국가 세금 식별번호",
+        "title": "개인 정보"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "계정 사용 목적",
+          "address": "주소",
+          "email": "이메일",
+          "idDocument": "신분증",
+          "name": "이름",
+          "nationality": "국적",
+          "phone": "전화번호"
+        },
+        "ready": "모든 준비가 완료되었습니다. 검토 후 제출해 주세요.",
+        "title": "검토"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "필수 입력 항목이 아직 남아 있습니다.",
+        "title": "아래 항목을 확인해 주세요"
+      },
+      "submitFailed": {
+        "title": "제출에 실패했습니다"
+      },
+      "submitted": {
+        "description": "곧 회원님의 정보를 검토해 드리겠습니다.",
+        "title": "인증 요청이 제출되었습니다"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "뒤로",
+    "chooseCountryFirstPlaceholder": "먼저 국가를 선택하세요",
+    "cityLabel": "시/도",
+    "clickToUpload": "클릭하여 업로드",
+    "countryLabel": "국가",
+    "dateIssuedLabel": "발급일",
+    "documentBackOptionalLabel": "서류 — 뒷면 (선택)",
+    "documentFrontLabel": "서류 — 앞면",
+    "documentNumberLabel": "서류 번호",
+    "documentNumberPlaceholder": "예: P00012345",
+    "documentTypeLabel": "서류 종류",
+    "expirationDateLabel": "만료일",
+    "expirationDateOptionalLabel": "만료일 (선택)",
+    "fixBeforeContinuing": "계속하기 전에 다음 사항을 수정해 주세요:",
+    "issuingCountryLabel": "발급 국가",
+    "loadingEllipsis": "불러오는 중…",
+    "noMatches": "일치하는 결과가 없습니다.",
+    "noPostalCodesText": "이 국가는 우편번호를 사용하지 않습니다.",
+    "postalCodeFormatError": "예상 형식과 일치하지 않습니다.",
+    "postalCodeFormatErrorWithExample": "예상 형식과 일치하지 않습니다 (예: {{example}}).",
+    "postalCodeLabel": "우편번호",
+    "proofOfAddressHint": "공과금 고지서, 은행 명세서 또는 임대차 계약서.",
+    "proofOfAddressLabel": "주소 증빙 서류",
+    "searchPlaceholder": "검색…",
+    "selectCountryPlaceholder": "국가 선택",
+    "selectOption": "선택",
+    "selectPlaceholder": "선택…",
+    "setNationalityFirstPlaceholder": "먼저 국적을 설정하세요",
+    "stateProvinceLabel": "주 / 도",
+    "stepOf": "{{total}}단계 중 {{current}}단계",
+    "streetAddress2Label": "상세 주소 2 (선택)",
+    "streetAddressLabel": "도로명 주소",
+    "streetAddressPlaceholder": "123 Main St"
+  },
+  "kycWizard": {
+    "backToDashboard": "대시보드로 돌아가기",
+    "pendingDescription": "제출하신 정보를 받았으며 검토 중입니다. 결정이 나면 알려드리겠습니다.",
+    "pendingHeading": "인증 심사 중",
+    "verifiedDescription": "신원 인증이 완료되었습니다. 송금, 카드, 가상계좌 기능을 모두 이용하실 수 있습니다.",
+    "verifiedHeading": "인증이 완료되었습니다"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "비즈니스 로그인",
+      "demoCard": "카드",
+      "demoDeposit": "입금",
+      "demoSend": "송금",
+      "demoTotalBalance": "총 잔액",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "급여",
+      "demoTransaction3": "디자인 계약금",
+      "feature1Desc": "언제나 신뢰할 수 있는 잔액으로 법정화폐와 암호화폐를 함께 보유하고 이동하세요.",
+      "feature1Title": "하나의 잔액, 모든 통화",
+      "feature2Desc": "연락처를 선택하고, 실시간 견적을 받고, 확인만 하면 서류 없이 송금이 완료됩니다.",
+      "feature2Title": "몇 초 만에 송금",
+      "feature3Desc": "한 번의 탭으로 가상 카드를 발급하고, 그만큼 빠르게 정지할 수 있습니다.",
+      "feature3Title": "즉시 발급되는 카드",
+      "feature4Desc": "모든 거래는 뒤에서 변경 불가능하고 대조된 원장에 기록됩니다.",
+      "feature4Title": "은행 수준의 원장",
+      "featuresHeading": "필요한 모든 금융 기능",
+      "featuresSubheading": "숨겨진 수수료도, 복잡한 메뉴도 없이 — 제대로 작동하는 뱅킹.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "간편해진 자금 관리",
+      "heroHeadlineHighlight": "손쉬운 뱅킹.",
+      "heroHeadlinePrefix": "느낌부터 다른",
+      "heroSubheadline": "{{productName}}은(는) 송금, 보관, 지출을 위한 현대적인 지갑입니다 — 아름다울 만큼 간단하고, 진지할 만큼 안전합니다.",
+      "logIn": "로그인",
+      "openAccountCta": "계좌 개설하기",
+      "planBusinessBlurb": "다중 사용자 액세스, 높은 한도, 전담 지원.",
+      "planBusinessCta": "문의하기",
+      "planBusinessName": "비즈니스",
+      "planBusinessPrice": "맞춤형",
+      "planPersonalBlurb": "개인을 위한 일상적인 지출 및 송금.",
+      "planPersonalCta": "시작하기",
+      "planPersonalName": "개인",
+      "planPersonalPrice": "무료",
+      "pricingHeading": "간단한 요금제",
+      "pricingSubheading": "무료로 시작하고, 비즈니스가 성장하면 업그레이드하세요.",
+      "signUpFree": "무료로 가입하기"
+    },
+    "aurora": {
+      "badge": "아름답고 간편한 자금 관리",
+      "businessLogin": "비즈니스 로그인",
+      "demoActionCard": "카드",
+      "demoActionDeposit": "입금",
+      "demoActionSend": "송금",
+      "demoBalance": "$8,942.10",
+      "demoGrowth": "+12.4%",
+      "feature1Desc": "모든 지갑, 모든 통화가 항상 대조되어 관리됩니다.",
+      "feature1Title": "하나의 아름다운 잔액",
+      "feature2Desc": "실시간 견적, 즉시 확인, 서류 절차 없음.",
+      "feature2Title": "몇 초 만에 송금",
+      "feature3Desc": "인증이 완료되는 즉시 가상 카드를 발급하세요.",
+      "feature3Title": "즉시 발급되는 카드",
+      "feature4Desc": "모든 거래가 대조되고 감사 가능합니다.",
+      "feature4Title": "은행 수준의 원장",
+      "featuresHeading": "필요한 모든 금융 기능",
+      "featuresSubheading": "숨겨진 수수료도, 복잡한 메뉴도 없이 — 제대로 작동하는 뱅킹.",
+      "heroHeadlineHighlight": "하나의 멋진 화면에서.",
+      "heroHeadlinePrefix": "모든 계좌를,",
+      "heroSubheadline": "{{productName}}은(는) 지갑, 송금, 카드를 사람들이 정말로 즐겨 찾는 대시보드 하나에 모았습니다.",
+      "logIn": "로그인",
+      "openAccount": "계좌 개설하기",
+      "signUpFree": "무료로 가입하기",
+      "thisMonth": "이번 달",
+      "totalBalance": "총 잔액",
+      "vsLastMonth": "전월 대비"
+    },
+    "meridian": {
+      "eyebrow": "운영 플랫폼",
+      "featureCardIssuingDesc": "고객이 인증되는 즉시 가상 카드를 발급하세요.",
+      "featureCardIssuingTitle": "카드 발급",
+      "featureComplianceDesc": "KYC, 승인, 감사 추적이 처음부터 내장되어 있습니다.",
+      "featureComplianceTitle": "내장된 컴플라이언스",
+      "featureLedgerDesc": "모든 지갑, 모든 통화가 하나의 정확한 원장으로 대조됩니다.",
+      "featureLedgerTitle": "통합 원장",
+      "featurePayoutsDesc": "몇 번의 클릭으로 해외 송금을 견적, 확인, 정산하세요.",
+      "featurePayoutsTitle": "글로벌 송금",
+      "featuresHeading": "운영에 필요한 모든 것",
+      "featuresSubheading": "자금 이동 전체를 위한 하나의 플랫폼.",
+      "heroHeadline": "스프레드시트가 아닌 운영자처럼 자금 흐름을 관리하세요.",
+      "heroSubheadline": "{{productName}}은(는) 지갑, 송금, 카드, 컴플라이언스를 위한 하나의 콘솔을 팀에 제공합니다 — 신뢰할 수 있는 원장이 그 뒤를 받쳐줍니다.",
+      "logIn": "로그인",
+      "openAccountCta": "계좌 개설하기",
+      "operatorLoginCta": "운영자 로그인",
+      "reconciledDesc": "모든 등록된 거래는 복식부기 방식이며, 멱등성을 보장하고, 제공업체 기록과 자동으로 대조됩니다.",
+      "reconciledTitle": "기본적으로 대조됨",
+      "signUp": "회원가입",
+      "statCurrenciesLabel": "지원 통화",
+      "statPayoutTimeLabel": "평균 송금 소요 시간",
+      "statUptimeLabel": "가동률",
+      "teamsDesc": "소유자, 관리자, 운영자를 위한 역할 기반 액세스와 모든 작업에 대한 전체 감사 추적을 제공합니다.",
+      "teamsTitle": "팀을 위한 설계"
+    },
+    "nova": {
+      "createAccountCta": "계정 만들기",
+      "ctaHeading": "직접 결제 레일을 운영할 준비가 되셨나요?",
+      "ctaSubheading": "당신의 고객, 당신의 브랜드, 당신의 원장 — 그 아래에서는 Yativo가 뒷받침합니다.",
+      "feature1Desc": "단순한 잔액 컬럼이 아닌, 변경 불가능하고 감사 가능한 분개 기록으로 모든 금액을 추적합니다.",
+      "feature1Title": "복식부기 원장",
+      "feature2Desc": "웹훅 기반 기록으로 자금이 이동하는 즉시 고객 잔액이 최신 상태를 유지합니다.",
+      "feature2Title": "실시간 정산",
+      "feature3Desc": "예약된 작업이 원장과 상위 정산 내역을 대조하여 오차를 즉시 감지합니다.",
+      "feature3Title": "자동 대조",
+      "feature4Desc": "법정화폐와 암호화폐 레일이 하나의 계정 체계 아래 있어 글로벌 송금 경로에 바로 대응합니다.",
+      "feature4Title": "다중 통화 지원",
+      "feature5Desc": "고객과 직원의 세션이 절대 겹치지 않습니다 — 토큰과 영향 범위가 완전히 분리됩니다.",
+      "feature5Title": "이중으로 분리된 인증 영역",
+      "feature6Desc": "KYC 심사, 수동 조정, 송금, 카드, 웹훅 — 하나의 콘솔에서 모두 처리합니다.",
+      "feature6Title": "완전한 백오피스",
+      "featuresHeading": "데모가 아닌 인프라 수준으로 구축됨",
+      "featuresSubheading": "리셀러가 실제 고객 자금을 안전하게 운영하는 데 필요한 모든 것.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "시작하기",
+      "heroHeadlineHighlight": "당신의 브랜드로 운영하세요.",
+      "heroHeadlinePrefix": "핀테크 인프라를,",
+      "heroSubheadline": "{{productName}}은(는) 실제 복식부기 원장 기반의 화이트라벨 지갑, 송금, 카드 플랫폼을 제공합니다 — 배포하고, 브랜딩하고, 직접 핀테크 사업을 운영하세요.",
+      "openAccountCta": "계좌 개설하기",
+      "operatorConsole": "운영자 콘솔",
+      "signIn": "로그인",
+      "trustBadge": "원장 검증 완료 · 매시간 대조"
+    },
+    "prime": {
+      "balance": "잔액",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "대시보드 로그인",
+      "feature": {
+        "cardIssuing": {
+          "desc": "고객이 인증되는 즉시 가상 카드를 발급하세요.",
+          "title": "카드 발급"
+        },
+        "compliance": {
+          "desc": "KYC, 승인, 감사 추적이 처음부터 내장되어 있습니다.",
+          "title": "내장된 컴플라이언스"
+        },
+        "ledger": {
+          "desc": "모든 지갑, 모든 통화가 하나의 정확한 원장으로 대조됩니다.",
+          "title": "통합 원장"
+        },
+        "payouts": {
+          "desc": "몇 번의 클릭으로 해외 송금을 견적, 확인, 정산하세요.",
+          "title": "글로벌 송금"
+        }
+      },
+      "featuresHeading": "운영에 필요한 모든 것",
+      "heroHeadline": "인터넷을 위한 결제 인프라.",
+      "heroSubheadline": "{{productName}}은(는) 지갑, 송금, 카드, 컴플라이언스를 위한 하나의 API와 하나의 대시보드를 제공합니다.",
+      "logIn": "로그인",
+      "signUp": "회원가입",
+      "startNow": "지금 시작하기",
+      "stat": {
+        "deposits": "입금",
+        "payouts": "송금",
+        "refunds": "환불"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← 홈으로 돌아가기",
+    "backToSignIn": "← 로그인으로 돌아가기",
+    "createAccount": "계정 만들기",
+    "defaultProductName": "White Label",
+    "emailLabel": "이메일",
+    "genericError": "로그인할 수 없습니다. 계정 정보를 확인해 주세요.",
+    "invalidCodeError": "잘못된 코드입니다. 다시 시도해 주세요.",
+    "newHere": "처음 방문하셨나요?",
+    "passwordLabel": "비밀번호",
+    "signIn": "로그인",
+    "signInDescription": "계정에 로그인하세요",
+    "signingIn": "로그인 중…",
+    "verificationCodeLabel": "인증 코드",
+    "verify": "확인",
+    "verifyDescription": "인증 앱에 표시된 6자리 코드 또는 백업 코드를 입력하세요.",
+    "verifyHeading": "본인 확인",
+    "verifying": "확인 중…",
+    "welcomeBack": "다시 오신 것을 환영합니다"
+  },
+  "nav": {
+    "account": "계정",
+    "atlas": {
+      "contacts": "연락처",
+      "home": "홈",
+      "profile": "프로필",
+      "send": "송금"
+    },
+    "beneficiaries": "수취인",
+    "cards": "카드",
+    "cryptoWallets": "암호화폐 지갑",
+    "dashboard": "대시보드",
+    "deposit": "입금",
+    "logout": "로그아웃",
+    "portal": "포털",
+    "profileKyc": "프로필 및 인증",
+    "section": {
+      "account": "계정",
+      "manage": "관리"
+    },
+    "sendMoney": "송금하기",
+    "settings": "설정",
+    "virtualAccounts": "가상계좌",
+    "wallets": "지갑",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "계정",
+    "emailLabel": "이메일",
+    "endorsementsDescription": "현지 은행 송금이나 가상 카드 등 특정 기능은 서비스별 인증이 필요합니다.",
+    "endorsementsLoadError": "인증 항목을 불러오지 못했습니다.",
+    "endorsementsTitle": "인증 항목",
+    "heading": "프로필 및 인증",
+    "identityVerificationTitle": "신원 인증",
+    "restartVerification": "인증 다시 시작",
+    "startVerification": "인증 시작",
+    "statusApproved": "인증이 완료되었습니다. 송금, 카드, 가상계좌 기능을 모두 이용하실 수 있습니다.",
+    "statusNotStarted": "송금, 가상계좌 개설 또는 카드 발급 전에 필요합니다.",
+    "statusPending": "제출하신 정보를 받았으며 검토 중입니다 — 결정이 나면 알려드리겠습니다.",
+    "statusRejected": "지난 제출 내용이 승인되지 않았습니다 — 아래에서 새로 시작해 주세요.",
+    "subheading": "신원 정보를 관리하세요",
+    "typeLabel": "유형"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "송금액 ({{currency}})",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "출금할 지갑",
+      "prompt": "송금할 금액",
+      "promptTo": "{{name}}님에게 보낼 금액",
+      "recipientFallback": "수취인",
+      "willReceive": "확인하시기 전에 {{recipient}}님이 정확히 얼마를 받는지 보여드리겠습니다.",
+      "willReceiveWithCurrency": "확인하시기 전에 {{recipient}}님이 {{currency}}로 정확히 얼마를 받는지 보여드리겠습니다."
+    },
+    "buttons": {
+      "back": "뒤로",
+      "confirmAndSend": "확인 후 송금",
+      "continue": "계속",
+      "getQuote": "견적 받기",
+      "requote": "견적 다시 받기"
+    },
+    "errors": {
+      "enterAmount": "금액을 입력하세요",
+      "fieldRequired": "{{field}}은(는) 필수 항목입니다",
+      "maxLength": "최대 {{max}}자까지 입력 가능합니다",
+      "minLength": "최소 {{min}}자 이상 입력해 주세요"
+    },
+    "result": {
+      "payoutId": "송금 ID: {{id}}",
+      "payoutSubmitted": "송금이 요청되었습니다",
+      "refreshing": "(새로고침 중…)",
+      "sendAnother": "다시 송금하기",
+      "statusLabel": "상태:",
+      "viewWallets": "지갑 보기"
+    },
+    "review": {
+      "expired": "이 견적은 만료되었습니다 — 계속하려면 새 견적을 받아주세요.",
+      "expiresIn": "견적이 {{seconds}}초 후 만료됩니다.",
+      "rateLabel": "환율",
+      "recipientGetsLabel": "수취인 수령액",
+      "toLabel": "받는 사람",
+      "totalChargedLabel": "총 청구 금액"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "수취인 선택",
+      "prompt": "누구에게 송금하시나요?"
+    },
+    "step0": {
+      "countryLabel": "국가",
+      "countryPlaceholder": "국가 선택",
+      "prompt": "누구에게 송금하시나요?",
+      "recipientNameLabel": "수취인 이름",
+      "recipientNamePlaceholder": "Jane Doe"
+    },
+    "step1": {
+      "countryFallback": "이 국가",
+      "methodRange": "송금 1건당 {{min}}–{{max}} {{currency}}",
+      "noMethods": "이 국가에 이용 가능한 지급 방법이 아직 없습니다.",
+      "prompt": "{{country}}의 {{recipient}}님에게 어떻게 지급할까요?",
+      "recipientFallback": "이 수취인"
+    },
+    "step2": {
+      "noDetailsNeeded": "이 지급 방법은 추가 정보가 필요하지 않습니다.",
+      "prompt": "{{method}} 상세정보",
+      "selectFieldPlaceholder": "{{field}} 선택"
+    },
+    "steps": {
+      "amount": "금액",
+      "beneficiary": "수취인",
+      "details": "상세정보",
+      "method": "방법",
+      "recipient": "수취인",
+      "review": "검토"
+    },
+    "subtitle": "국가와 지급 방법을 선택한 후 금액을 확인하세요.",
+    "title": "송금",
+    "toast": {
+      "enterNameAndCountry": "계속하려면 이름을 입력하고 국가를 선택하세요",
+      "payoutFailed": "송금에 실패했습니다",
+      "payoutSubmitted": "송금이 요청되었습니다",
+      "payoutSubmittedDescription": "정산이 완료되면 알려드리겠습니다.",
+      "pickBeneficiary": "계속하려면 수취인을 선택하세요",
+      "pickMethod": "계속하려면 지급 방법을 선택하세요",
+      "quoteFailed": "견적을 받지 못했습니다",
+      "saveRecipientFailed": "수취인을 저장하지 못했습니다",
+      "tryAgain": "다시 시도해 주세요."
+    },
+    "toggle": {
+      "newRecipient": "신규 수취인",
+      "savedBeneficiary": "저장된 수취인"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "새 비밀번호 확인",
+      "currentPasswordLabel": "현재 비밀번호",
+      "description": "다른 곳에서 사용하지 않는 강력한 비밀번호를 선택하세요.",
+      "newPasswordLabel": "새 비밀번호",
+      "submit": "비밀번호 변경",
+      "title": "비밀번호 변경",
+      "toastDescription": "이 버전에서는 비밀번호 변경 기능이 아직 연결되어 있지 않습니다.",
+      "toastTitle": "아직 사용할 수 없습니다"
+    },
+    "copiedToClipboard": "클립보드에 복사되었습니다",
+    "copyError": "복사하지 못했습니다",
+    "subtitle": "계정 보안을 관리하세요",
+    "title": "설정",
+    "twoFactor": {
+      "authenticatorApp": "인증 앱",
+      "description": "계정에 추가 보안 계층을 더하세요.",
+      "disable": {
+        "description": "2단계 인증을 비활성화하려면 비밀번호를 확인해 주세요.",
+        "error": "2단계 인증을 비활성화하지 못했습니다.",
+        "passwordLabel": "비밀번호",
+        "submit": "2단계 인증 비활성화",
+        "submitting": "비활성화 중…",
+        "title": "2단계 인증 비활성화"
+      },
+      "enabled": "활성화됨",
+      "loading": "불러오는 중…",
+      "notConfigured": "아직 설정되지 않음",
+      "setup": {
+        "backupCodesDescription": "안전한 곳에 보관하세요 — 각 코드는 인증 앱에 액세스할 수 없을 때 한 번씩 로그인에 사용할 수 있습니다. 다시 표시되지 않습니다.",
+        "backupCodesTitle": "백업 코드를 저장하세요",
+        "codeLabel": "6자리 코드",
+        "continueButton": "계속",
+        "copyAll": "모두 복사",
+        "done": "완료",
+        "enableButton": "2단계 인증 활성화",
+        "enterCodeTitle": "코드 입력",
+        "manualKeyLabel": "스캔할 수 없나요? 이 키를 직접 입력하세요",
+        "qrAlt": "2FA 설정 QR 코드",
+        "scanTitle": "인증 앱으로 스캔하세요",
+        "verifyError": "해당 코드를 확인하지 못했습니다.",
+        "verifying": "확인 중…"
+      },
+      "title": "2단계 인증",
+      "toast": {
+        "disabled": "2단계 인증이 비활성화되었습니다",
+        "setupError": "설정을 시작하지 못했습니다"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "계정 유형",
+    "alreadyHaveAccount": "이미 계정이 있으신가요?",
+    "business": "비즈니스",
+    "businessNameLabel": "사업체 이름",
+    "callingCodeAriaLabel": "국가 번호",
+    "countryLabel": "국가",
+    "createAccount": "계정 만들기",
+    "createYourAccount": "계정을 만들어보세요",
+    "creatingAccount": "계정을 만드는 중…",
+    "defaultProductName": "White Label",
+    "emailLabel": "이메일",
+    "fullNameLabel": "성명",
+    "genericError": "계정을 만들 수 없습니다.",
+    "individual": "개인",
+    "passwordLabel": "비밀번호",
+    "phoneNumberLabel": "전화번호",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "국가를 선택하세요",
+    "signIn": "로그인",
+    "startSendingDescription": "몇 분 안에 송금, 보관, 지출을 시작하세요"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "프로필 보기"
+    },
+    "prime": {
+      "notifications": "알림",
+      "switchToDarkMode": "다크 모드로 전환",
+      "switchToLightMode": "라이트 모드로 전환"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "가상계좌가 준비되었습니다",
+    "addCurrency": "통화 추가",
+    "allCurrenciesAdded": "이용 가능한 모든 통화의 계좌를 이미 보유하고 계십니다.",
+    "copiedToClipboard": "클립보드에 복사되었습니다",
+    "copyError": "복사하지 못했습니다",
+    "copyField": "{{field}} 복사",
+    "createAccount": "계좌 개설",
+    "createAccountError": "계좌를 개설하지 못했습니다",
+    "creating": "개설 중…",
+    "noAccountsYet": "아직 가상계좌가 없습니다 — 아래에서 통화를 선택해 계좌를 개설하세요.",
+    "noCurrenciesAvailable": "아직 이용 가능한 가상계좌 통화가 없습니다.",
+    "noVerificationNeeded": "인증이 필요하지 않습니다",
+    "requiresVerification": "{{endorsement}} 인증이 필요합니다 — 시작하려면 고객지원팀에 문의하세요.",
+    "shareDetails": "송금하는 상대방에게 이 정보를 공유하세요.",
+    "startVerification": "인증 시작",
+    "subtitle": "통화별로 한 번씩, 모든 입금에 재사용할 수 있는 전용 계좌 정보입니다.",
+    "title": "가상계좌",
+    "verificationNote": "일부 결제 레일은 계좌 발급 전에 일회성 인증이 필요합니다.",
+    "verified": "인증됨",
+    "yourAccounts": "내 계좌"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} 대기 중",
+    "wallet": "지갑"
+  },
+  "walletDetail": {
+    "allWallets": "모든 지갑",
+    "available": "사용 가능",
+    "balanceOverTime": "기간별 잔액 추이",
+    "cancel": "취소",
+    "noActivity": "아직 활동 내역이 없습니다",
+    "pageOf": "{{page}} / {{totalPages}} 페이지",
+    "pending": "대기 중",
+    "removeDialogDescription": "잔액이 없어 안전하게 삭제할 수 있습니다 — {{currencyCode}}가 계속 제공된다면 나중에 다시 추가할 수 있습니다.",
+    "removeDialogTitle": "{{currencyCode}} 지갑을 삭제하시겠습니까?",
+    "removeWallet": "지갑 삭제",
+    "removeWalletError": "지갑을 삭제하지 못했습니다",
+    "removing": "삭제 중…",
+    "statement": "명세서",
+    "walletRemoved": "지갑이 삭제되었습니다",
+    "walletTitle": "{{currencyCode}} 지갑"
+  },
+  "wallets": {
+    "add": "추가",
+    "addCurrencyPlaceholder": "통화 추가",
+    "addWalletError": "지갑을 추가하지 못했습니다",
+    "empty": "아직 지갑이 없습니다. 잔액이 생기면 여기에 표시됩니다.",
+    "subtitle": "모든 통화별 잔액 현황",
+    "title": "지갑",
+    "walletAdded": "지갑이 추가되었습니다",
+    "walletLabel": "지갑"
+  }
+}

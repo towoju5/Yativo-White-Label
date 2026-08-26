@@ -1,5 +1,6 @@
 import { formatMinorAmount, formatCurrencyAmount } from "@white-label/shared-types";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BalanceChart } from "@/components/charts/BalanceChart";
 import { cn } from "@/lib/utils";
@@ -19,10 +20,12 @@ export function AuroraDashboardLayout({
   stats,
   wallets,
   activity,
-  activityTitle = "Recent activity",
+  activityTitle,
   actions,
   isLoading,
 }: DashboardLayoutProps) {
+  const { t } = useTranslation();
+  const resolvedActivityTitle = activityTitle ?? t("dashboardLayout.aurora.recentActivity", "Recent activity");
   const hasChart = isLoading || (chartData && chartData.length > 0);
 
   return (
@@ -41,7 +44,7 @@ export function AuroraDashboardLayout({
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-3xl" />
           <div className="relative">
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">{heroLabel ?? "Balance"}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">{heroLabel ?? t("dashboardLayout.aurora.balance", "Balance")}</p>
             {isLoading ? (
               <Skeleton className="mt-3 h-10 w-56" />
             ) : heroAmountMinor !== undefined ? (
@@ -61,14 +64,14 @@ export function AuroraDashboardLayout({
         </div>
 
         <div className="rounded-3xl border border-border bg-card p-6 shadow-elevated lg:col-span-1">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Trend</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.aurora.trend", "Trend")}</p>
           {isLoading ? (
             <Skeleton className="h-[140px] w-full" />
           ) : hasChart ? (
             <BalanceChart data={chartData!} height={140} />
           ) : (
             <div className="flex h-[140px] items-center justify-center rounded-xl bg-muted/40 text-center text-xs text-muted-foreground">
-              No trend data yet
+              {t("dashboardLayout.aurora.noTrendData", "No trend data yet")}
             </div>
           )}
         </div>
@@ -93,7 +96,7 @@ export function AuroraDashboardLayout({
       <div className="grid gap-5 lg:grid-cols-2">
         {wallets && (
           <div className="rounded-3xl border border-border bg-card p-5 shadow-elevated">
-            <p className="mb-4 text-sm font-semibold">Wallets</p>
+            <p className="mb-4 text-sm font-semibold">{t("dashboardLayout.aurora.wallets", "Wallets")}</p>
             {isLoading ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 <Skeleton className="h-28 rounded-2xl" />
@@ -106,13 +109,13 @@ export function AuroraDashboardLayout({
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No wallets yet</div>
+              <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.aurora.noWalletsYet", "No wallets yet")}</div>
             )}
           </div>
         )}
 
         <div className={cn("rounded-3xl border border-border bg-card p-5 shadow-elevated", !wallets && "lg:col-span-2")}>
-          <p className="mb-4 text-sm font-semibold">{activityTitle}</p>
+          <p className="mb-4 text-sm font-semibold">{resolvedActivityTitle}</p>
           {isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -120,7 +123,7 @@ export function AuroraDashboardLayout({
               ))}
             </div>
           ) : activity.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nothing here yet</div>
+            <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.aurora.nothingHereYet", "Nothing here yet")}</div>
           ) : (
             <div className="space-y-1.5">
               {activity.map((item) => (

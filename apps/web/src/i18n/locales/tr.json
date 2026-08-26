@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "Bir alıcı ekleyin",
+    "addBeneficiary": "Alıcı ekle",
+    "addError": "Alıcı eklenemedi",
+    "added": "Alıcı eklendi",
+    "back": "Geri",
+    "cancel": "Vazgeç",
+    "continue": "Devam et",
+    "country": "Ülke",
+    "detail": {
+      "added": "Eklenme tarihi",
+      "currency": "Para birimi",
+      "editHint": "Ödeme bilgileri burada düzenlenemez — bu alıcıyı kaldırıp bilgiler değiştiyse yenisini ekleyin.",
+      "editName": "Adı düzenle",
+      "name": "Ad",
+      "paymentDetails": "Ödeme bilgileri",
+      "removeBeneficiary": "Alıcıyı kaldır",
+      "save": "Kaydet",
+      "title": "Alıcı bilgileri",
+      "type": "Tür"
+    },
+    "empty": "Henüz alıcı yok. Para göndermeye başlamak için bir tane ekleyin.",
+    "fieldRequiredError": "{{field}} zorunludur",
+    "maxCharsError": "En fazla {{max}} karakter olmalıdır",
+    "methodDetailsHeading": "{{method}} bilgileri",
+    "minCharsError": "En az {{min}} karakter olmalıdır",
+    "nameAndCountryRequired": "Devam etmek için bir ad girin ve ülke seçin",
+    "noExtraDetailsNeeded": "Bu ödeme yöntemi ek bilgi gerektirmiyor.",
+    "noPayoutMethods": "Bu ülke için henüz aktif ödeme yöntemi yok.",
+    "payoutMethodQuestion": "{{country}} ülkesindeki {{name}} adlı alıcıya ödeme nasıl yapılsın?",
+    "payoutMethodRequired": "Devam etmek için bir ödeme yöntemi seçin",
+    "recipientName": "Alıcı adı",
+    "recipientNamePlaceholder": "Jane Doe",
+    "remove": "Kaldır",
+    "removeDialogDescription": "Buraya tekrar para göndermek için ileride yeniden eklemeniz gerekecek. Bu işlem geçmiş ödemeleri etkilemez.",
+    "removeDialogTitle": "{{name}} kaldırılsın mı?",
+    "removeError": "Alıcı kaldırılamadı",
+    "removed": "Alıcı kaldırıldı",
+    "selectCountryPlaceholder": "Bir ülke seçin",
+    "selectFieldPlaceholder": "{{field}} seçin",
+    "steps": {
+      "paymentDetails": "Ödeme bilgileri",
+      "payoutMethod": "Ödeme yöntemi",
+      "recipient": "Alıcı"
+    },
+    "subtitle": "Para gönderdiğiniz kişiler ve hesaplar",
+    "table": {
+      "actions": "İşlemler",
+      "added": "Eklenme tarihi",
+      "currency": "Para birimi",
+      "name": "Ad"
+    },
+    "thisCountry": "bu ülke",
+    "thisRecipient": "bu alıcı",
+    "title": "Alıcılar",
+    "transferRange": "Transfer başına {{min}}–{{max}} {{currency}}",
+    "updateError": "Alıcı güncellenemedi",
+    "updated": "Alıcı güncellendi",
+    "whoAreYouSendingTo": "Kime para gönderiyorsunuz?"
+  },
+  "cards": {
+    "addFunds": "Bakiye ekle",
+    "addedThisMonth": "Bu ay eklenen",
+    "airlinePayments": "Havayolu ödemeleri",
+    "balance": "Bakiye {{amount}}",
+    "billingAddress": "Fatura adresi",
+    "cancel": "Vazgeç",
+    "cardEndingIn": "Sonu {{last4}} ile biten kart",
+    "cardNumberLabel": "Kart numarası",
+    "cardholder": "Kart sahibi",
+    "confirmTerminate": "Onaylamak için tekrar tıklayın — bu işlem geri alınamaz",
+    "copyNumber": "Numarayı kopyala",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "Henüz kart yok. Harcamaya başlamak için bir kart talep edin.",
+    "exp": "SKT {{expiry}}",
+    "feeAmount": "Ücret {{amount}}",
+    "freezeCard": "Kartı dondur",
+    "hidesAutomatically": "Otomatik olarak gizlenir",
+    "initialFundingHelp": "En az 3 ABD doları. USD cüzdanınızdan oluşturma ücreti ve yükleme ücretiyle birlikte tahsil edilir.",
+    "initialFundingLabel": "Başlangıç bakiyesi (USD)",
+    "manage": "Yönet →",
+    "noTransactions": "Henüz işlem yok.",
+    "program": "Program",
+    "requestCard": "Kart talep et",
+    "requestDialogTitle": "Sanal kart talep edin",
+    "requesting": "Talep ediliyor…",
+    "spentThisMonth": "Bu ay harcanan",
+    "subtitle": "USD cüzdanınıza bağlı Visa sanal kartları",
+    "terminateCard": "Kartı iptal et",
+    "title": "Kartlar",
+    "toast": {
+      "airlineDisabled": "Havayolu ödemeleri devre dışı bırakıldı",
+      "airlineEnabled": "Havayolu ödemeleri etkinleştirildi",
+      "airlineError": "Havayolu ödemeleri güncellenemedi",
+      "cardFrozen": "Kart donduruldu",
+      "cardIssued": "Kart oluşturuldu",
+      "cardTerminated": "Kart iptal edildi",
+      "cardTerminatedDescription": "Kalan bakiye varsa otomatik olarak cüzdanınıza iade edilir.",
+      "cardToppedUp": "Karta bakiye yüklendi",
+      "cardUnfrozen": "Kartın dondurulması kaldırıldı",
+      "copied": "{{label}} kopyalandı",
+      "copyError": "Kopyalanamadı",
+      "freezeError": "Dondurma durumu güncellenemedi",
+      "issueCardError": "Kart oluşturulamadı",
+      "revealCardError": "Kart bilgileri görüntülenemedi",
+      "terminateError": "Kart iptal edilemedi",
+      "topupFailed": "Bakiye yükleme başarısız oldu",
+      "withdrawalFailed": "Para çekme işlemi başarısız oldu",
+      "withdrawalSubmitted": "Para çekme talebi gönderildi",
+      "withdrawalSubmittedDescription": "Net tutar cüzdanınıza geri yansımadan önce bir ücret düşülür."
+    },
+    "topUp": "Bakiye yükle",
+    "transactionFallback": "İşlem",
+    "transactions": "İşlemler",
+    "unfreezeCard": "Kartın dondurulmasını kaldır",
+    "virtualUsd": "Sanal · USD",
+    "visaVirtualCardUsd": "Visa sanal kart · USD",
+    "withdraw": "Para çek",
+    "withdrawFeeNote": "Net tutar cüzdanınıza ulaşmadan önce para çekme işlemlerinden bir ücret düşülür."
+  },
+  "common": {
+    "language": "Dil"
+  },
+  "crypto": {
+    "addressCopied": "Adres kopyalandı",
+    "copyAddressError": "Adres kopyalanamadı",
+    "depositAddressReady": "Yatırma adresi hazır",
+    "generateAddress": "Adres oluştur",
+    "generateAddressError": "Adres oluşturulamadı",
+    "generateDescription": "Desteklenen herhangi bir ağ için bir yatırma adresi oluşturun.",
+    "generating": "Oluşturuluyor…",
+    "noDepositsYet": "Henüz kripto para yatırma işlemi yok",
+    "noWalletsYet": "Henüz kripto cüzdanınız yok — başlamak için aşağıdan bir adres oluşturun.",
+    "selectAssetPlaceholder": "Bir varlık seçin",
+    "sharedAddressWarning": "Bu adres aynı varlık için diğer kullanıcılarla paylaşılıyor olabilir. Yatırılan tutarlar hesabınızla eşleştirilir ve bakiyeniz güncellenmeden önce ekibimiz tarafından onaylanır.",
+    "subtitle": "Desteklenen varlıklar için yatırma adresleri ve zincir üstü yatırma geçmişi.",
+    "title": "Kripto cüzdanlar",
+    "transactionsDescription": "Hesabınızla eşleştirilen her zincir üstü yatırma işlemi.",
+    "transactionsTitle": "Kripto işlemleri",
+    "viewOnExplorer": "Blok gezgininde görüntüle",
+    "yourWallets": "Cüzdanlarınız"
+  },
+  "dashboard": {
+    "activityTitle": "Son işlemler",
+    "heroLabel": "Toplam bakiye",
+    "stats": {
+      "available": "Kullanılabilir",
+      "pending": "Beklemede",
+      "recentActivity": "Son işlemler",
+      "wallets": "Cüzdanlar"
+    },
+    "subtitle": "Hesaplarınızda olup bitenler burada",
+    "title": "Tekrar hoş geldiniz",
+    "walletLabel": "Cüzdan"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "Henüz cüzdan yok",
+      "nothingHereYet": "Burada henüz bir şey yok",
+      "recentActivity": "Son işlemler",
+      "totalBalance": "Toplam bakiye",
+      "yourWallets": "Cüzdanlarınız"
+    },
+    "aurora": {
+      "balance": "Bakiye",
+      "noTrendData": "Henüz eğilim verisi yok",
+      "noWalletsYet": "Henüz cüzdan yok",
+      "nothingHereYet": "Burada henüz bir şey yok",
+      "recentActivity": "Son işlemler",
+      "trend": "Eğilim",
+      "wallets": "Cüzdanlar"
+    },
+    "meridian": {
+      "balanceTrend": "Bakiye eğilimi",
+      "noWalletsYet": "Henüz cüzdan yok",
+      "nothingHereYet": "Burada henüz bir şey yok",
+      "overview": "Genel bakış",
+      "recentActivity": "Son işlemler",
+      "wallets": "Cüzdanlar"
+    },
+    "nova": {
+      "balanceTrend": "Bakiye eğilimi",
+      "noActivityYet": "Henüz işlem yok",
+      "noWalletsYet": "Henüz cüzdan yok",
+      "nothingHereYet": "Burada henüz bir şey yok",
+      "recentActivity": "Son işlemler",
+      "wallets": "Cüzdanlar"
+    },
+    "prime": {
+      "amount": "Tutar",
+      "balanceTrend": "Bakiye eğilimi",
+      "description": "Açıklama",
+      "noWalletsYet": "Henüz cüzdan yok",
+      "nothingHereYet": "Burada henüz bir şey yok",
+      "recentActivity": "Son işlemler",
+      "status": "Durum",
+      "wallets": "Cüzdanlar"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "Geri",
+      "continue": "Devam et",
+      "startDeposit": "Para yatırmayı başlat"
+    },
+    "cryptoCard": {
+      "description": "Yatırma adresleri ve zincir üstü yatırma geçmişi artık kendi sayfasında.",
+      "goToWallets": "Kripto cüzdanlara git",
+      "title": "Veya kripto para yatırın"
+    },
+    "dialog": {
+      "amountToPay": "Ödenecek tutar",
+      "copyLinkAriaLabel": "Bağlantıyı kopyala",
+      "estimatedDelivery": "Tahmini teslim süresi",
+      "exchangeRate": "Döviz kuru",
+      "fee": "Ücret",
+      "initiated": "Para yatırma işlemi başlatıldı",
+      "openLinkAriaLabel": "Bağlantıyı aç",
+      "title": "Para yatır",
+      "youllReceive": "Alacağınız tutar"
+    },
+    "errors": {
+      "enterAmount": "Bir tutar girin",
+      "fieldRequired": "{{field}} zorunludur",
+      "pickWallet": "Hangi cüzdana yükleme yapılacağını seçin"
+    },
+    "localCard": {
+      "depositButton": "Yatır",
+      "description": "Ülkenizi seçin ve yerel kanal üzerinden ödeyin — banka havalesi, CODI, DEBIN ve daha fazlası.",
+      "title": "Veya yerel bir ödeme yöntemiyle para yatırın"
+    },
+    "step0": {
+      "countryLabel": "Ülke",
+      "countryPlaceholder": "Bir ülke seçin",
+      "prompt": "Hangi ülkeden ödeme yapıyorsunuz?"
+    },
+    "step1": {
+      "methodRange": "Yatırım başına {{min}}–{{max}} {{currency}}",
+      "noMethods": "Bu ülke için henüz aktif para yatırma yöntemi yok.",
+      "prompt": "{{country}} ülkesinden nasıl ödeme yapmak istiyorsunuz?",
+      "thisCountryFallback": "bu ülke"
+    },
+    "step2": {
+      "amountLabel": "Tutar ({{currency}})",
+      "prompt": "{{method}} — tutar ve bilgiler",
+      "selectFieldPlaceholder": "{{field}} seçin",
+      "walletLabel": "Yüklenecek cüzdan",
+      "walletLoading": "Yükleniyor…",
+      "walletPlaceholder": "Bir cüzdan seçin"
+    },
+    "steps": {
+      "amountDetails": "Tutar ve bilgiler",
+      "country": "Ülke",
+      "method": "Yöntem"
+    },
+    "subtitle": "Cüzdanınızı yerel bir kanal veya kripto ile tek seferlik bir ödemeyle yükleyin.",
+    "title": "Para yatır",
+    "toast": {
+      "copied": "Panoya kopyalandı",
+      "copyFailed": "Kopyalanamadı",
+      "pickCountry": "Devam etmek için bir ülke seçin",
+      "pickMethod": "Devam etmek için bir ödeme yöntemi seçin",
+      "startFailed": "Para yatırma işlemi başlatılamadı"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "Devam et",
+      "submit": "İncelemeye gönder"
+    },
+    "common": {
+      "select": "Seç"
+    },
+    "header": {
+      "subtitle": "İşletme KYB'si — şirket ve sahipleriyle ilgili bilgiler.",
+      "title": "İşletmenizi doğrulayın"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "Hesap amacı",
+        "complianceScreeningProgram": "Uyum tarama programı",
+        "conductsMoneyServices": "Para hizmetleri faaliyeti yürütüyor",
+        "conductsMoneyServicesHint": "Havale, döviz alışverişi veya benzeri düzenlenmiş MSB faaliyeti.",
+        "describeAccountPurpose": "Hesap amacını açıklayın",
+        "describeMoneyServicesActivity": "Para hizmetleri faaliyetini açıklayın",
+        "estimatedAnnualRevenue": "Tahmini yıllık gelir, USD (isteğe bağlı)",
+        "estimatedAnnualRevenuePlaceholder": "örn. 1000000_to_5000000",
+        "eurdeCombined": "EURDE (birleşik)",
+        "explainFlaggedActivity": "İşaretlenen faaliyeti açıklayın",
+        "extraFeeHint": "(ek ücrete tabi olabilir)",
+        "highRiskActivities": "Yüksek riskli faaliyetler (geçerli olanları seçin)",
+        "notSpecified": "Belirtilmedi",
+        "pepStatus": "Politik olarak etkin kişi (PEP)",
+        "pepStatusHint": "Herhangi bir sahip/yönetici bir PEP veya onun yakın çalışma arkadaşıdır.",
+        "prohibitedCountries": "Yasaklı ülkelerde faaliyet gösteriyor (isteğe bağlı)",
+        "selectPlaceholder": "Seç",
+        "sourceOfFunds": "Fon kaynağı",
+        "thirdPartyMsbPayments": "Üçüncü taraf MSB'ler için ödeme işliyor",
+        "virtualAccountsToProvision": "Sağlanacak sanal hesaplar"
+      },
+      "addresses": {
+        "physicalAddressHeading": "Fiziksel adres",
+        "physicalProofHint": "Kira sözleşmesi, fatura veya benzeri — kayıtlı adresten farklıysa gereklidir.",
+        "registeredAddressHeading": "Kayıtlı adres",
+        "sameAsRegistered": "Kayıtlı adresle aynı",
+        "title": "Adresler"
+      },
+      "businessDocument": {
+        "title": "İşletme belgesi"
+      },
+      "businessInfo": {
+        "businessType": "İşletme türü",
+        "description": "İşletme açıklaması",
+        "dialCode": "Ülke kodu",
+        "dialCodePlaceholder": "+1",
+        "email": "İşletme e-postası",
+        "incorporationCountry": "Kuruluş ülkesi (isteğe bağlı)",
+        "incorporationDate": "Kuruluş tarihi",
+        "industry": "Sektör (isteğe bağlı)",
+        "legalName": "Yasal işletme adı",
+        "phone": "Telefon",
+        "registrationNumber": "Sicil numarası",
+        "requiredFieldsHint": "Yukarıdaki zorunlu alanları doldurun.",
+        "taxId": "Vergi kimlik numarası (isteğe bağlı)",
+        "title": "İşletme bilgileri",
+        "tradeName": "Ticari unvan",
+        "website": "Web sitesi (isteğe bağlı)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "Amacı \"İşletme kaydı\" olan bir belge gereklidir — yukarıdaki varsayılan belge bu şartı karşılar.",
+        "description": "Açıklama",
+        "descriptionPlaceholder": "Kuruluş Sertifikası",
+        "documentPurpose": "Belge amacı",
+        "fileLabel": "Dosya",
+        "selectPlaceholder": "Seç"
+      },
+      "ownerIdDocuments": {
+        "title": "Sahiplerin kimlik belgeleri"
+      },
+      "ownersDirectors": {
+        "addAnother": "Başka bir sahip / yönetici ekle",
+        "authorizedSigner": "Yetkili imza sahibi",
+        "dateOfBirth": "Doğum tarihi",
+        "director": "Yönetici",
+        "email": "E-posta",
+        "firstName": "Ad",
+        "hasControl": "Kontrol yetkisi var",
+        "hasOwnership": "Ortaklık payı var",
+        "identityDocsRequired": "Her sahip/yönetici için her iki kimlik belgesi de gereklidir.",
+        "lastName": "Soyad",
+        "nationality": "Uyruk",
+        "ownerHeading": "Sahip / yönetici {{number}}",
+        "ownershipPercent": "Ortaklık yüzdesi",
+        "personFallbackName": "Sahip / yönetici {{index}}",
+        "personTitle": "Unvan",
+        "phoneOptional": "Telefon (isteğe bağlı)",
+        "photoIdHeading": "2. Resmi kimlik fotoğrafı",
+        "residentialAddressHeading": "İkamet adresi",
+        "taxId": "SSN / EIN / ITIN",
+        "taxIdHeading": "1. Vergi kimlik numarası",
+        "title": "Sahipler ve yöneticiler",
+        "titlePlaceholder": "CEO, Yönetici Ortak…"
+      },
+      "review": {
+        "accountPurpose": "Hesap amacı",
+        "business": "İşletme",
+        "highRiskActivities": "Yüksek riskli faaliyetler",
+        "none": "Yok",
+        "ownersDirectors": "Sahipler / yöneticiler",
+        "readyMessage": "Her şey hazır görünüyor. Gözden geçirip gönderin.",
+        "registeredAddress": "Kayıtlı adres",
+        "title": "Gözden geçir",
+        "tradeName": "Ticari unvan",
+        "type": "Tür"
+      },
+      "riskPurpose": {
+        "title": "Risk ve amaç"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Bazı zorunlu alanlar hâlâ bilgi girmenizi bekliyor.",
+        "title": "Aşağıdaki alanları kontrol edin"
+      },
+      "submitFailed": {
+        "title": "Gönderim başarısız oldu"
+      },
+      "submitted": {
+        "description": "İşletme bilgilerinizi en kısa sürede inceleyeceğiz.",
+        "title": "Doğrulama gönderildi"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "Devam et",
+      "submit": "İncelemeye gönder"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "Seç"
+    },
+    "header": {
+      "subtitle": "Kimliğinizi doğrulayabilmemiz için birkaç bilgi.",
+      "title": "Kimliğinizi doğrulayın"
+    },
+    "steps": {
+      "address": {
+        "title": "Adres"
+      },
+      "financialProfile": {
+        "accountPurpose": "Hesap amacı",
+        "actingAsIntermediary": "Aracı olarak hareket ediyor",
+        "actingAsIntermediaryHint": "Kendiniz için değil, başka biri adına.",
+        "chooseAccountsHint": "USD ve/veya EUR seçin, ya da yalnızca EURDE.",
+        "describeAccountPurpose": "Hesap amacını açıklayın",
+        "employmentStatus": "İstihdam durumu",
+        "eurdeCombined": "EURDE (birleşik)",
+        "expectedMonthlyPayments": "Beklenen aylık ödemeler (USD)",
+        "extraFeeNote": "ek ücrete tabi olabilir",
+        "occupation": "Meslek",
+        "sourceOfFunds": "Fon kaynağı",
+        "title": "Finansal profil",
+        "virtualAccounts": "Sağlanacak sanal hesaplar"
+      },
+      "identityDocument": {
+        "govIdHeading": "Resmi kimlik belgesi",
+        "selfieHint": "Yüzünüzün net bir fotoğrafı.",
+        "selfiePhoto": "Selfie fotoğrafı",
+        "title": "Kimlik belgesi"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11 haneli",
+        "currentEmployer": "Mevcut işveren (isteğe bağlı)",
+        "dateOfBirth": "Doğum tarihi",
+        "dialCode": "Ülke kodu",
+        "dialCodePlaceholder": "+1",
+        "email": "E-posta",
+        "firstName": "Ad",
+        "gender": "Cinsiyet",
+        "genderFemale": "Kadın",
+        "genderMale": "Erkek",
+        "immigrationStatus": "Göçmenlik statüsü (isteğe bağlı)",
+        "immigrationStatusPlaceholder": "Geçerli değil",
+        "lastName": "Soyad",
+        "middleName": "İkinci ad (isteğe bağlı)",
+        "nationality": "Uyruk",
+        "nin": "NIN",
+        "ninPlaceholder": "11 haneli",
+        "phone": "Telefon",
+        "phoneHint": "\"+1\" gibi bir ülke kodu, ardından sadece rakamlardan oluşan telefon numarası (8-15 hane).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "Vergi kimlik numarası",
+        "taxIdPlaceholder": "SSN / ulusal vergi numarası",
+        "title": "Kişisel bilgiler"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "Hesap amacı",
+          "address": "Adres",
+          "email": "E-posta",
+          "idDocument": "Kimlik belgesi",
+          "name": "Ad",
+          "nationality": "Uyruk",
+          "phone": "Telefon"
+        },
+        "ready": "Her şey hazır görünüyor. Gözden geçirip gönderin.",
+        "title": "Gözden geçir"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Bazı zorunlu alanlar hâlâ bilgi girmenizi bekliyor.",
+        "title": "Aşağıdaki alanları kontrol edin"
+      },
+      "submitFailed": {
+        "title": "Gönderim başarısız oldu"
+      },
+      "submitted": {
+        "description": "Bilgilerinizi en kısa sürede inceleyeceğiz.",
+        "title": "Doğrulama gönderildi"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "Geri",
+    "chooseCountryFirstPlaceholder": "Önce bir ülke seçin",
+    "cityLabel": "Şehir",
+    "clickToUpload": "Yüklemek için tıklayın",
+    "countryLabel": "Ülke",
+    "dateIssuedLabel": "Düzenlenme tarihi",
+    "documentBackOptionalLabel": "Belge — arka yüz (isteğe bağlı)",
+    "documentFrontLabel": "Belge — ön yüz",
+    "documentNumberLabel": "Belge numarası",
+    "documentNumberPlaceholder": "örn. P00012345",
+    "documentTypeLabel": "Belge türü",
+    "expirationDateLabel": "Son geçerlilik tarihi",
+    "expirationDateOptionalLabel": "Son geçerlilik tarihi (isteğe bağlı)",
+    "fixBeforeContinuing": "Devam etmeden önce lütfen aşağıdakileri düzeltin:",
+    "issuingCountryLabel": "Düzenleyen ülke",
+    "loadingEllipsis": "Yükleniyor…",
+    "noMatches": "Eşleşme bulunamadı.",
+    "noPostalCodesText": "Bu ülke posta kodu kullanmıyor.",
+    "postalCodeFormatError": "Beklenen biçimle eşleşmiyor.",
+    "postalCodeFormatErrorWithExample": "Beklenen biçimle eşleşmiyor (örn. {{example}}).",
+    "postalCodeLabel": "Posta kodu",
+    "proofOfAddressHint": "Fatura, banka hesap özeti veya kira sözleşmesi.",
+    "proofOfAddressLabel": "Adres belgesi",
+    "searchPlaceholder": "Ara…",
+    "selectCountryPlaceholder": "Bir ülke seçin",
+    "selectOption": "Seç",
+    "selectPlaceholder": "Seçin…",
+    "setNationalityFirstPlaceholder": "Önce uyruğu belirleyin",
+    "stateProvinceLabel": "Eyalet / il",
+    "stepOf": "Adım {{current}} / {{total}}",
+    "streetAddress2Label": "Adres satırı 2 (isteğe bağlı)",
+    "streetAddressLabel": "Adres",
+    "streetAddressPlaceholder": "123 Main St"
+  },
+  "kycWizard": {
+    "backToDashboard": "Panele dön",
+    "pendingDescription": "Bilgilerinizi aldık ve inceliyoruz. Bir karar verildiğinde sizi bilgilendireceğiz.",
+    "pendingHeading": "Doğrulama beklemede",
+    "verifiedDescription": "Kimliğiniz doğrulandı. Para gönderme, kartlar ve sanal hesaplara tam erişiminiz var.",
+    "verifiedHeading": "Doğrulandınız"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "İşletme girişi",
+      "demoCard": "Kart",
+      "demoDeposit": "Para yatır",
+      "demoSend": "Gönder",
+      "demoTotalBalance": "Toplam bakiye",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "Maaş bordrosu",
+      "demoTransaction3": "Tasarım anlaşması",
+      "feature1Desc": "Fiat ve kripto paranızı yan yana tutun ve taşıyın, her zaman güvenebileceğiniz bir bakiyeyle.",
+      "feature1Title": "Tek bakiye, her para birimi",
+      "feature2Desc": "Bir kişi seçin, anlık kur alın, onaylayın — para evrak işi olmadan hareket eder.",
+      "feature2Title": "Saniyeler içinde gönderin",
+      "feature3Desc": "Bir dokunuşla sanal kart oluşturun, aynı hızla dondurun.",
+      "feature3Title": "Talep üzerine kartlar",
+      "feature4Desc": "Her işlem, perde arkasında değiştirilemez ve mutabakatlı bir deftere kaydedilir.",
+      "feature4Title": "Banka düzeyinde defter",
+      "featuresHeading": "Paranızın ihtiyaç duyduğu her şey",
+      "featuresSubheading": "Gizli ücret yok, kafa karıştıran menüler yok — sadece işleyen bir bankacılık deneyimi.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "Para, basitleştirildi",
+      "heroHeadlineHighlight": "zahmetsiz.",
+      "heroHeadlinePrefix": "Bankacılığı",
+      "heroSubheadline": "{{productName}}, para göndermek, tutmak ve harcamak için modern bir cüzdandır — güzel derecede basit, ciddi derecede güvenli.",
+      "logIn": "Giriş yap",
+      "openAccountCta": "Hesabınızı açın",
+      "planBusinessBlurb": "Çoklu kullanıcı erişimi, daha yüksek limitler, özel destek.",
+      "planBusinessCta": "Bizimle görüşün",
+      "planBusinessName": "İşletme",
+      "planBusinessPrice": "Özel",
+      "planPersonalBlurb": "Bireyler için günlük harcama ve gönderme.",
+      "planPersonalCta": "Başlayın",
+      "planPersonalName": "Bireysel",
+      "planPersonalPrice": "Ücretsiz",
+      "pricingHeading": "Basit fiyatlandırma",
+      "pricingSubheading": "Ücretsiz başlayın. İşletmenizin ihtiyacı arttığında yükseltin.",
+      "signUpFree": "Ücretsiz kaydolun"
+    },
+    "aurora": {
+      "badge": "Güzel derecede basit para",
+      "businessLogin": "İşletme girişi",
+      "demoActionCard": "Kart",
+      "demoActionDeposit": "Para yatır",
+      "demoActionSend": "Gönder",
+      "demoBalance": "8.942,10 $",
+      "demoGrowth": "+%12,4",
+      "feature1Desc": "Her cüzdan, her para birimi, her zaman mutabakatlı.",
+      "feature1Title": "Tek bir güzel bakiye",
+      "feature2Desc": "Anlık kurlar, anında onay, sıfır evrak işi.",
+      "feature2Title": "Saniyeler içinde gönderin",
+      "feature3Desc": "Doğrulandığınız anda sanal kart oluşturun.",
+      "feature3Title": "Talep üzerine kartlar",
+      "feature4Desc": "Her işlem mutabakatlı ve denetlenebilir.",
+      "feature4Title": "Banka düzeyinde defter",
+      "featuresHeading": "Paranızın ihtiyaç duyduğu her şey",
+      "featuresSubheading": "Gizli ücret yok, kafa karıştıran menüler yok — sadece işleyen bir bankacılık deneyimi.",
+      "heroHeadlineHighlight": "tek bir muhteşem görünümde.",
+      "heroHeadlinePrefix": "Her hesap,",
+      "heroSubheadline": "{{productName}}, cüzdanları, ödemeleri ve kartları insanların açmaktan gerçekten keyif aldığı bir panelde bir araya getirir.",
+      "logIn": "Giriş yap",
+      "openAccount": "Hesabınızı açın",
+      "signUpFree": "Ücretsiz kaydolun",
+      "thisMonth": "Bu ay",
+      "totalBalance": "Toplam bakiye",
+      "vsLastMonth": "geçen aya göre"
+    },
+    "meridian": {
+      "eyebrow": "Operasyon platformu",
+      "featureCardIssuingDesc": "Müşteriler doğrulandığı anda onlara sanal kart verin.",
+      "featureCardIssuingTitle": "Kart ihracı",
+      "featureComplianceDesc": "KYC, onaylar ve denetim kayıtları ilk günden itibaren entegre.",
+      "featureComplianceTitle": "Yerleşik uyumluluk",
+      "featureLedgerDesc": "Her cüzdan, her para birimi, tek bir güvenilir kaynakla mutabık.",
+      "featureLedgerTitle": "Birleşik defter",
+      "featurePayoutsDesc": "Sınır ötesi transferleri birkaç tıklamada teklif alın, onaylayın ve tamamlayın.",
+      "featurePayoutsTitle": "Küresel ödemeler",
+      "featuresHeading": "Operasyonların ihtiyaç duyduğu her şey",
+      "featuresSubheading": "Tüm para hareketi altyapısı için tek bir platform.",
+      "heroHeadline": "Para hareketini bir tablo değil, bir operatör gibi yönetin.",
+      "heroSubheadline": "{{productName}}, ekibinize cüzdanlar, ödemeler, kartlar ve uyumluluk için tek bir konsol sunar — güvenebileceğiniz bir defterle desteklenir.",
+      "logIn": "Giriş yap",
+      "openAccountCta": "Hesap aç",
+      "operatorLoginCta": "Operatör girişi",
+      "reconciledDesc": "Kaydedilen her işlem çift girişlidir, tekrarsızdır ve sağlayıcı kayıtlarıyla otomatik olarak eşleştirilir.",
+      "reconciledTitle": "Varsayılan olarak mutabakatlı",
+      "signUp": "Kaydol",
+      "statCurrenciesLabel": "Para birimleri",
+      "statPayoutTimeLabel": "Ort. ödeme süresi",
+      "statUptimeLabel": "Çalışma süresi",
+      "teamsDesc": "Sahipler, yöneticiler ve operatörler için rol tabanlı erişim, her işlemde tam denetim kaydıyla.",
+      "teamsTitle": "Ekipler için tasarlandı"
+    },
+    "nova": {
+      "createAccountCta": "Hesabınızı oluşturun",
+      "ctaHeading": "Kendi rayınızı çalıştırmaya hazır mısınız?",
+      "ctaSubheading": "Müşterileriniz, markanız, defteriniz — altyapısında Yativo çalışır.",
+      "feature1Desc": "Her kuruş, değiştirilemez ve denetlenebilir yevmiye kayıtlarıyla izlenir — asla basit bir bakiye sütunu değil.",
+      "feature1Title": "Çift girişli defter",
+      "feature2Desc": "Webhook tabanlı kayıt, fon hareketinin olduğu anda müşteri bakiyelerini güncel tutar.",
+      "feature2Title": "Gerçek zamanlı mutabakat",
+      "feature3Desc": "Zamanlanmış işler, defterinizi üst düzey mutabakatla karşılaştırır ve sapmaları anında işaretler.",
+      "feature3Title": "Otomatik mutabakat",
+      "feature4Desc": "Küresel ödeme koridorlarına hazır, tek bir hesap planı altında fiat ve kripto rayları.",
+      "feature4Title": "Çoklu para birimi",
+      "feature5Desc": "Müşteri ve personel oturumları asla kesişmez — ayrı belirteçler, ayrı etki alanları.",
+      "feature5Title": "İki izole kimlik doğrulama alanı",
+      "feature6Desc": "KYC incelemesi, manuel düzeltmeler, ödemeler, kartlar ve webhook'lar — tek bir konsolda.",
+      "feature6Title": "Eksiksiz arka ofis",
+      "featuresHeading": "Bir demo gibi değil, altyapı gibi inşa edildi",
+      "featuresSubheading": "Bir bayinin gerçek müşteri parasını güvenle yönetmek için ihtiyaç duyduğu her şey.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "Başlayın",
+      "heroHeadlineHighlight": "kendi markanız altında çalışır.",
+      "heroHeadlinePrefix": "Fintek altyapısı,",
+      "heroSubheadline": "{{productName}}, işletmenize gerçek bir çift girişli defter üzerinde beyaz etiketli bir cüzdan, ödeme ve kart platformu sunar — dağıtın, markalayın ve kendi fintek işinizi bunun üzerinde yürütün.",
+      "openAccountCta": "Hesap aç",
+      "operatorConsole": "Operatör konsolu",
+      "signIn": "Giriş yap",
+      "trustBadge": "Defter onaylı · Saatlik mutabakat"
+    },
+    "prime": {
+      "balance": "Bakiye",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "Panel girişi",
+      "feature": {
+        "cardIssuing": {
+          "desc": "Müşteriler doğrulandığı anda onlara sanal kart verin.",
+          "title": "Kart ihracı"
+        },
+        "compliance": {
+          "desc": "KYC, onaylar ve denetim kayıtları ilk günden itibaren entegre.",
+          "title": "Yerleşik uyumluluk"
+        },
+        "ledger": {
+          "desc": "Her cüzdan, her para birimi, tek bir güvenilir kaynakla mutabık.",
+          "title": "Birleşik defter"
+        },
+        "payouts": {
+          "desc": "Sınır ötesi transferleri birkaç tıklamada teklif alın, onaylayın ve tamamlayın.",
+          "title": "Küresel ödemeler"
+        }
+      },
+      "featuresHeading": "Operasyonların ihtiyaç duyduğu her şey",
+      "heroHeadline": "İnternet için ödeme altyapısı.",
+      "heroSubheadline": "{{productName}}, cüzdanlar, ödemeler, kartlar ve uyumluluk için tek bir API ve tek bir panel sunar.",
+      "logIn": "Giriş yap",
+      "signUp": "Kaydol",
+      "startNow": "Hemen başlayın",
+      "stat": {
+        "deposits": "Para yatırma",
+        "payouts": "Ödemeler",
+        "refunds": "İadeler"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← Ana sayfaya dön",
+    "backToSignIn": "← Girişe dön",
+    "createAccount": "Hesap oluştur",
+    "defaultProductName": "White Label",
+    "emailLabel": "E-posta",
+    "genericError": "Giriş yapılamıyor. Bilgilerinizi kontrol edin.",
+    "invalidCodeError": "Geçersiz kod. Lütfen tekrar deneyin.",
+    "newHere": "Yeni misiniz?",
+    "passwordLabel": "Şifre",
+    "signIn": "Giriş yap",
+    "signInDescription": "Hesabınıza giriş yapın",
+    "signingIn": "Giriş yapılıyor…",
+    "verificationCodeLabel": "Doğrulama kodu",
+    "verify": "Doğrula",
+    "verifyDescription": "Kimlik doğrulama uygulamanızdaki 6 haneli kodu veya bir yedek kod girin.",
+    "verifyHeading": "Kimliğinizi doğrulayın",
+    "verifying": "Doğrulanıyor…",
+    "welcomeBack": "Tekrar hoş geldiniz"
+  },
+  "nav": {
+    "account": "Hesap",
+    "atlas": {
+      "contacts": "Kişiler",
+      "home": "Ana sayfa",
+      "profile": "Profil",
+      "send": "Gönder"
+    },
+    "beneficiaries": "Alıcılar",
+    "cards": "Kartlar",
+    "cryptoWallets": "Kripto cüzdanlar",
+    "dashboard": "Panel",
+    "deposit": "Para yatır",
+    "logout": "Çıkış yap",
+    "portal": "Portal",
+    "profileKyc": "Profil ve KYC",
+    "section": {
+      "account": "Hesap",
+      "manage": "Yönet"
+    },
+    "sendMoney": "Para gönder",
+    "settings": "Ayarlar",
+    "virtualAccounts": "Sanal hesaplar",
+    "wallets": "Cüzdanlar",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "Hesap",
+    "emailLabel": "E-posta",
+    "endorsementsDescription": "Yerel banka havaleleri veya sanal kartlar gibi belirli özellikler için hizmet bazlı doğrulama gereklidir.",
+    "endorsementsLoadError": "Onaylar yüklenemedi.",
+    "endorsementsTitle": "Onaylar",
+    "heading": "Profil ve doğrulama",
+    "identityVerificationTitle": "Kimlik doğrulama",
+    "restartVerification": "Doğrulamayı yeniden başlat",
+    "startVerification": "Doğrulamayı başlat",
+    "statusApproved": "Doğrulandınız. Para gönderme, kartlar ve sanal hesaplara tam erişiminiz var.",
+    "statusNotStarted": "Para gönderebilmeniz, sanal hesap tutabilmeniz veya kart alabilmeniz için gereklidir.",
+    "statusPending": "Bilgilerinizi aldık ve inceliyoruz — karar verildiğinde sizi bilgilendireceğiz.",
+    "statusRejected": "Son başvurunuz onaylanmadı — aşağıdan yeni bir başvuru başlatın.",
+    "subheading": "Kimlik bilgilerinizi yönetin",
+    "typeLabel": "Tür"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "Gönderilecek tutar ({{currency}})",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "Çekilecek cüzdan",
+      "prompt": "Gönderilecek tutar",
+      "promptTo": "{{name}} adlı alıcıya gönderilecek tutar",
+      "recipientFallback": "alıcı",
+      "willReceive": "Onaylamadan önce {{recipient}} adlı alıcının tam olarak ne kadar alacağını göstereceğiz.",
+      "willReceiveWithCurrency": "Onaylamadan önce {{recipient}} adlı alıcının {{currency}} cinsinden tam olarak ne kadar alacağını göstereceğiz."
+    },
+    "buttons": {
+      "back": "Geri",
+      "confirmAndSend": "Onayla ve gönder",
+      "continue": "Devam et",
+      "getQuote": "Kur al",
+      "requote": "Yeniden kur al"
+    },
+    "errors": {
+      "enterAmount": "Bir tutar girin",
+      "fieldRequired": "{{field}} zorunludur",
+      "maxLength": "En fazla {{max}} karakter olmalıdır",
+      "minLength": "En az {{min}} karakter olmalıdır"
+    },
+    "result": {
+      "payoutId": "Ödeme kimliği: {{id}}",
+      "payoutSubmitted": "Ödeme gönderildi",
+      "refreshing": "(yenileniyor…)",
+      "sendAnother": "Başka bir tane gönder",
+      "statusLabel": "Durum:",
+      "viewWallets": "Cüzdanları görüntüle"
+    },
+    "review": {
+      "expired": "Bu kurun süresi doldu — devam etmek için yeni bir kur alın.",
+      "expiresIn": "Kurun süresi {{seconds}} saniye içinde dolacak.",
+      "rateLabel": "Kur",
+      "recipientGetsLabel": "Alıcının alacağı tutar",
+      "toLabel": "Alıcı",
+      "totalChargedLabel": "Toplam tahsil edilen tutar"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "Bir alıcı seçin",
+      "prompt": "Kime para gönderiyorsunuz?"
+    },
+    "step0": {
+      "countryLabel": "Ülke",
+      "countryPlaceholder": "Bir ülke seçin",
+      "prompt": "Kime para gönderiyorsunuz?",
+      "recipientNameLabel": "Alıcı adı",
+      "recipientNamePlaceholder": "Jane Doe"
+    },
+    "step1": {
+      "countryFallback": "bu ülke",
+      "methodRange": "Transfer başına {{min}}–{{max}} {{currency}}",
+      "noMethods": "Bu ülke için henüz aktif ödeme yöntemi yok.",
+      "prompt": "{{country}} ülkesindeki {{recipient}} adlı alıcıya ödeme nasıl yapılsın?",
+      "recipientFallback": "bu alıcı"
+    },
+    "step2": {
+      "noDetailsNeeded": "Bu ödeme yöntemi ek bilgi gerektirmiyor.",
+      "prompt": "{{method}} bilgileri",
+      "selectFieldPlaceholder": "{{field}} seçin"
+    },
+    "steps": {
+      "amount": "Tutar",
+      "beneficiary": "Alıcı",
+      "details": "Bilgiler",
+      "method": "Yöntem",
+      "recipient": "Alıcı",
+      "review": "Gözden geçir"
+    },
+    "subtitle": "Bir ülke ve ödeme yöntemini seçin, ardından tutarı onaylayın.",
+    "title": "Para gönder",
+    "toast": {
+      "enterNameAndCountry": "Devam etmek için bir ad girin ve ülke seçin",
+      "payoutFailed": "Ödeme başarısız oldu",
+      "payoutSubmitted": "Ödeme gönderildi",
+      "payoutSubmittedDescription": "Ödeme tamamlandığında sizi bilgilendireceğiz.",
+      "pickBeneficiary": "Devam etmek için bir alıcı seçin",
+      "pickMethod": "Devam etmek için bir ödeme yöntemi seçin",
+      "quoteFailed": "Kur alınamadı",
+      "saveRecipientFailed": "Alıcı kaydedilemedi",
+      "tryAgain": "Tekrar deneyin."
+    },
+    "toggle": {
+      "newRecipient": "Yeni alıcı",
+      "savedBeneficiary": "Kayıtlı alıcı"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "Yeni şifreyi onayla",
+      "currentPasswordLabel": "Mevcut şifre",
+      "description": "Başka yerde kullanmadığınız güçlü bir şifre seçin.",
+      "newPasswordLabel": "Yeni şifre",
+      "submit": "Şifreyi güncelle",
+      "title": "Şifre değiştir",
+      "toastDescription": "Şifre değişiklikleri bu sürümde henüz etkin değil.",
+      "toastTitle": "Henüz kullanılamıyor"
+    },
+    "copiedToClipboard": "Panoya kopyalandı",
+    "copyError": "Kopyalanamadı",
+    "subtitle": "Hesap güvenliğinizi yönetin",
+    "title": "Ayarlar",
+    "twoFactor": {
+      "authenticatorApp": "Kimlik doğrulama uygulaması",
+      "description": "Hesabınıza ekstra bir güvenlik katmanı ekleyin.",
+      "disable": {
+        "description": "İki faktörlü kimlik doğrulamayı kapatmak için şifrenizi onaylayın.",
+        "error": "İki faktörlü kimlik doğrulama devre dışı bırakılamadı.",
+        "passwordLabel": "Şifre",
+        "submit": "İki faktörlü kimlik doğrulamayı devre dışı bırak",
+        "submitting": "Devre dışı bırakılıyor…",
+        "title": "İki faktörlü kimlik doğrulamayı devre dışı bırak"
+      },
+      "enabled": "Etkin",
+      "loading": "Yükleniyor…",
+      "notConfigured": "Henüz yapılandırılmadı",
+      "setup": {
+        "backupCodesDescription": "Bunları güvenli bir yerde saklayın — kimlik doğrulama uygulamanıza erişiminizi kaybederseniz her biri bir kez giriş yapmak için kullanılabilir. Tekrar gösterilmeyecekler.",
+        "backupCodesTitle": "Yedek kodlarınızı kaydedin",
+        "codeLabel": "6 haneli kod",
+        "continueButton": "Devam et",
+        "copyAll": "Tümünü kopyala",
+        "done": "Tamam",
+        "enableButton": "İki faktörlü kimlik doğrulamayı etkinleştir",
+        "enterCodeTitle": "Kodu girin",
+        "manualKeyLabel": "Tarayamıyor musunuz? Bu anahtarı manuel olarak girin",
+        "qrAlt": "2FA kurulum QR kodu",
+        "scanTitle": "Kimlik doğrulama uygulamanızla tarayın",
+        "verifyError": "Bu kod doğrulanamadı.",
+        "verifying": "Doğrulanıyor…"
+      },
+      "title": "İki faktörlü kimlik doğrulama",
+      "toast": {
+        "disabled": "İki faktörlü kimlik doğrulama devre dışı bırakıldı",
+        "setupError": "Kurulum başlatılamadı"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "Hesap türü",
+    "alreadyHaveAccount": "Zaten bir hesabınız var mı?",
+    "business": "İşletme",
+    "businessNameLabel": "İşletme adı",
+    "callingCodeAriaLabel": "Arama kodu",
+    "countryLabel": "Ülke",
+    "createAccount": "Hesap oluştur",
+    "createYourAccount": "Hesabınızı oluşturun",
+    "creatingAccount": "Hesap oluşturuluyor…",
+    "defaultProductName": "White Label",
+    "emailLabel": "E-posta",
+    "fullNameLabel": "Ad soyad",
+    "genericError": "Hesabınız oluşturulamıyor.",
+    "individual": "Bireysel",
+    "passwordLabel": "Şifre",
+    "phoneNumberLabel": "Telefon numarası",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "Ülkenizi seçin",
+    "signIn": "Giriş yap",
+    "startSendingDescription": "Dakikalar içinde göndermeye, tutmaya ve harcamaya başlayın"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "Profili görüntüle"
+    },
+    "prime": {
+      "notifications": "Bildirimler",
+      "switchToDarkMode": "Koyu moda geç",
+      "switchToLightMode": "Açık moda geç"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "Sanal hesap hazır",
+    "addCurrency": "Bir para birimi ekleyin",
+    "allCurrenciesAdded": "Mevcut her para birimi için zaten bir hesabınız var.",
+    "copiedToClipboard": "Panoya kopyalandı",
+    "copyError": "Kopyalanamadı",
+    "copyField": "{{field}} kopyala",
+    "createAccount": "Hesap oluştur",
+    "createAccountError": "Hesap oluşturulamadı",
+    "creating": "Oluşturuluyor…",
+    "noAccountsYet": "Henüz sanal hesabınız yok — aşağıdan bir para birimi için hesap oluşturun.",
+    "noCurrenciesAvailable": "Henüz kullanılabilir sanal hesap para birimi yok.",
+    "noVerificationNeeded": "Doğrulama gerekmiyor",
+    "requiresVerification": "{{endorsement}} doğrulaması gerektirir — başlamak için destek ekibiyle iletişime geçin.",
+    "shareDetails": "Bu bilgileri size para gönderecek kişiyle paylaşın.",
+    "startVerification": "Doğrulamayı başlat",
+    "subtitle": "Her para birimi için bir kez oluşturulan, her gelen transfer için yeniden kullanabileceğiniz özel banka bilgileri.",
+    "title": "Sanal hesaplar",
+    "verificationNote": "Bazı raylar bir hesap oluşturulmadan önce tek seferlik bir doğrulama gerektirir.",
+    "verified": "Doğrulandı",
+    "yourAccounts": "Hesaplarınız"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} beklemede",
+    "wallet": "Cüzdan"
+  },
+  "walletDetail": {
+    "allWallets": "Tüm cüzdanlar",
+    "available": "Kullanılabilir",
+    "balanceOverTime": "Zaman içinde bakiye",
+    "cancel": "Vazgeç",
+    "noActivity": "Henüz işlem yok",
+    "pageOf": "Sayfa {{page}} / {{totalPages}}",
+    "pending": "Beklemede",
+    "removeDialogDescription": "Boş olduğu için bu işlem güvenlidir — hâlâ sunuluyorsa {{currencyCode}} cüzdanını daha sonra tekrar ekleyebilirsiniz.",
+    "removeDialogTitle": "{{currencyCode}} cüzdanınız kaldırılsın mı?",
+    "removeWallet": "Cüzdanı kaldır",
+    "removeWalletError": "Cüzdan kaldırılamadı",
+    "removing": "Kaldırılıyor…",
+    "statement": "Ekstre",
+    "walletRemoved": "Cüzdan kaldırıldı",
+    "walletTitle": "{{currencyCode}} cüzdanı"
+  },
+  "wallets": {
+    "add": "Ekle",
+    "addCurrencyPlaceholder": "Para birimi ekle",
+    "addWalletError": "Cüzdan eklenemedi",
+    "empty": "Henüz cüzdan yok. Bir bakiyeniz olduğunda burada görünecekler.",
+    "subtitle": "Her para biriminde bakiyeleriniz",
+    "title": "Cüzdanlar",
+    "walletAdded": "Cüzdan eklendi",
+    "walletLabel": "Cüzdan"
+  }
+}

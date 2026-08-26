@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+#
+# git post-receive hook — lets you deploy with `git push production master`.
+#
+# Companion to deploy.sh: that script does the one-time server provisioning
+# (systemd unit "whitelabel-api", Nginx, ufw, Postgres/Redis). This hook re-runs
+# the "update" subset of those steps (install, migrate, build, restart) every
+# time a push lands on the bare repo below.
+#
+# ── One-time server setup ───────────────────────────────────────────────────
+#
+#   1. Create a bare repo the whitelabel service user owns, separate from the
+#      working tree deploy.sh already built (WORK_TREE below):
+#        sudo -u whitelabel git init --bare /home/whitelabel/white-label.git
+#
+#   2. Install this file as its post-receive hook:
+#        sudo cp post-receive /home/whitelabel/white-label.git/hooks/post-receive
+#        sudo chown whitelabel:whitelabel /home/whitelabel/white-label.git/hooks/post-receive
+#        sudo chmod +x /home/whitelabel/white-label.git/hooks/post-receive
+#
+#   3. Edit WORK_TREE below to match REPO_ROOT from your deploy.sh run
+#      (the directory that already has apps/api/.env, apps/web/.env.production,
+#      and a working systemd service pointed at it).
+#
+#   4. This hook restarts the systemd service and reloads Nginx, which normally
+#      needs root. Grant the whitelabel user just those two commands, nothing
+#      else, via visudo:
+#        whitelabel ALL=(root) NOPASSWD: /usr/bin/systemctl restart whitelabel-api, /usr/bin/systemctl reload nginx
+#      (Skip this if you push as root instead of the whitelabel user — not
+#      recommended, since that also owns your production database container.)
+#
+#   5. On your machine:
+#        git remote add production whitelabel@YOUR_SERVER:white-label.git
+#        git push production master
+#
+# Every step below is the same idempotent pattern as deploy.sh, so a push that
+# fails partway through is safe to just fix and push again.
+
+set -euo pipefail
+
+WORK_TREE="/home/whitelabel/white-label"   # <-- must match REPO_ROOT in deploy.sh
+DEPLOY_BRANCH="master"
+SERVICE_NAME="whitelabel-api"
+LOG_FILE="$HOME/deploy.log"
+
+exec > >(tee -a "$LOG_FILE") 2>&1
+echo "=== post-receive: $(date -u +%FT%TZ) ==="
+
+while read -r _oldrev newrev refname; do
+  branch="${refname##*/}"
+  if [ "$branch" != "$DEPLOY_BRANCH" ]; then
+    echo "Push to '$branch' ignored — only '$DEPLOY_BRANCH' deploys."
+    continue
+  fi
+
+  if [ ! -d "$WORK_TREE" ]; then
+    echo "==> $WORK_TREE doesn't exist yet — creating it"
+    mkdir -p "$WORK_TREE"
+  fi
+
+  echo "==> Checking out $newrev into $WORK_TREE"
+  GIT_WORK_TREE="$WORK_TREE" GIT_DIR="$(pwd)" git checkout -f "$branch"
+
+  cd "$WORK_TREE"
+
+  if [ ! -f apps/api/.env ] || [ ! -f apps/web/.env.production ]; then
+    echo "!!  apps/api/.env or apps/web/.env.production is missing."
+    echo "!!  This looks like a first-ever deploy to this box — run deploy.sh once"
+    echo "!!  first (it generates these with fresh secrets) or copy them over"
+    echo "!!  manually, then push again."
+    continue
+  fi
+
+  echo "==> Installing dependencies"
+  pnpm install --frozen-lockfile
+
+  echo "==> Running Prisma migrations"
+  pnpm --filter api exec prisma generate
+  pnpm --filter api exec prisma migrate deploy
+
+  echo "==> Building API"
+  pnpm --filter api build
+
+  echo "==> Building web app"
+  pnpm --filter web build
+
+  if systemctl list-unit-files "${SERVICE_NAME}.service" >/dev/null 2>&1; then
+    echo "==> Restarting $SERVICE_NAME"
+    sudo systemctl restart "$SERVICE_NAME"
+  else
+    echo "!!  systemd service '$SERVICE_NAME' doesn't exist yet — skipping restart."
+    echo "!!  Run deploy.sh once to create it, then push again."
+  fi
+
+  if command -v nginx >/dev/null 2>&1; then
+    echo "==> Reloading Nginx"
+    sudo nginx -t
+    sudo systemctl reload nginx
+  else
+    echo "!!  Nginx isn't installed yet — skipping reload. Run deploy.sh to set it up."
+  fi
+
+  echo "=== Deploy of $newrev complete: $(date -u +%FT%TZ) ==="
+done

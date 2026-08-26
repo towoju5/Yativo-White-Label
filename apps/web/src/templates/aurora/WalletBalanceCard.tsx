@@ -1,9 +1,11 @@
 import { formatCurrencyAmount } from "@white-label/shared-types";
 import { Wallet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { WalletBalanceCardProps } from "../types";
 
 export function AuroraWalletBalanceCard({ currencyCode, decimals, symbol, availableMinor, pendingMinor, label, onClick, className }: WalletBalanceCardProps) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
@@ -20,10 +22,12 @@ export function AuroraWalletBalanceCard({ currencyCode, decimals, symbol, availa
         <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground">{currencyCode}</span>
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground">{label ?? "Wallet"}</p>
+        <p className="text-xs font-medium text-muted-foreground">{label ?? t("walletBalanceCard.wallet", "Wallet")}</p>
         <p className="font-heading text-lg font-bold tracking-tight">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
         {BigInt(pendingMinor || "0") !== 0n && (
-          <p className="mt-0.5 text-xs text-warning">+{formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode)} pending</p>
+          <p className="mt-0.5 text-xs text-warning">
+            {t("walletBalanceCard.pending", "+{{amount}} pending", { amount: formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode) })}
+          </p>
         )}
       </div>
     </button>

@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "Добавить получателя",
+    "addBeneficiary": "Добавить получателя",
+    "addError": "Не удалось добавить получателя",
+    "added": "Получатель добавлен",
+    "back": "Назад",
+    "cancel": "Отмена",
+    "continue": "Продолжить",
+    "country": "Страна",
+    "detail": {
+      "added": "Добавлен",
+      "currency": "Валюта",
+      "editHint": "Платёжные реквизиты нельзя изменить здесь — удалите этого получателя и добавьте нового, если данные изменились.",
+      "editName": "Изменить имя",
+      "name": "Имя",
+      "paymentDetails": "Платёжные реквизиты",
+      "removeBeneficiary": "Удалить получателя",
+      "save": "Сохранить",
+      "title": "Данные получателя",
+      "type": "Тип"
+    },
+    "empty": "Получателей пока нет. Добавьте одного, чтобы начать отправлять деньги.",
+    "fieldRequiredError": "Поле «{{field}}» обязательно",
+    "maxCharsError": "Не более {{max}} символов",
+    "methodDetailsHeading": "Реквизиты: {{method}}",
+    "minCharsError": "Не менее {{min}} символов",
+    "nameAndCountryRequired": "Введите имя и выберите страну, чтобы продолжить",
+    "noExtraDetailsNeeded": "Для этого способа выплаты дополнительные данные не требуются.",
+    "noPayoutMethods": "Для этой страны пока нет активных способов выплаты.",
+    "payoutMethodQuestion": "Как выплатить средства получателю {{name}} в стране {{country}}?",
+    "payoutMethodRequired": "Выберите способ выплаты, чтобы продолжить",
+    "recipientName": "Имя получателя",
+    "recipientNamePlaceholder": "Иван Иванов",
+    "remove": "Удалить",
+    "removeDialogDescription": "Чтобы снова отправлять деньги этому получателю, его нужно будет добавить заново. На прошлые выплаты это не влияет.",
+    "removeDialogTitle": "Удалить {{name}}?",
+    "removeError": "Не удалось удалить получателя",
+    "removed": "Получатель удалён",
+    "selectCountryPlaceholder": "Выберите страну",
+    "selectFieldPlaceholder": "Выберите: {{field}}",
+    "steps": {
+      "paymentDetails": "Платёжные реквизиты",
+      "payoutMethod": "Способ выплаты",
+      "recipient": "Получатель"
+    },
+    "subtitle": "Люди и счета, которым вы отправляете деньги",
+    "table": {
+      "actions": "Действия",
+      "added": "Добавлен",
+      "currency": "Валюта",
+      "name": "Имя"
+    },
+    "thisCountry": "этой страны",
+    "thisRecipient": "этого получателя",
+    "title": "Получатели",
+    "transferRange": "{{min}}–{{max}} {{currency}} за перевод",
+    "updateError": "Не удалось обновить получателя",
+    "updated": "Получатель обновлён",
+    "whoAreYouSendingTo": "Кому вы отправляете деньги?"
+  },
+  "cards": {
+    "addFunds": "Пополнить",
+    "addedThisMonth": "Пополнено в этом месяце",
+    "airlinePayments": "Оплата авиабилетов",
+    "balance": "Баланс {{amount}}",
+    "billingAddress": "Платёжный адрес",
+    "cancel": "Отмена",
+    "cardEndingIn": "Карта, оканчивающаяся на {{last4}}",
+    "cardNumberLabel": "Номер карты",
+    "cardholder": "Держатель карты",
+    "confirmTerminate": "Нажмите ещё раз для подтверждения — это действие необратимо",
+    "copyNumber": "Скопировать номер",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "Карт пока нет. Закажите карту, чтобы начать тратить.",
+    "exp": "Срок действия {{expiry}}",
+    "feeAmount": "Комиссия {{amount}}",
+    "freezeCard": "Заморозить карту",
+    "hidesAutomatically": "Скрывается автоматически",
+    "initialFundingHelp": "Минимум 3 $. Списывается с вашего USD-кошелька вместе с комиссией за выпуск и пополнение.",
+    "initialFundingLabel": "Первоначальное пополнение (USD)",
+    "manage": "Управление →",
+    "noTransactions": "Пока нет транзакций.",
+    "program": "Программа",
+    "requestCard": "Заказать карту",
+    "requestDialogTitle": "Заказать виртуальную карту",
+    "requesting": "Оформление…",
+    "spentThisMonth": "Потрачено в этом месяце",
+    "subtitle": "Виртуальные карты Visa, привязанные к вашему USD-кошельку",
+    "terminateCard": "Закрыть карту",
+    "title": "Карты",
+    "toast": {
+      "airlineDisabled": "Оплата авиабилетов отключена",
+      "airlineEnabled": "Оплата авиабилетов включена",
+      "airlineError": "Не удалось изменить настройку оплаты авиабилетов",
+      "cardFrozen": "Карта заморожена",
+      "cardIssued": "Карта выпущена",
+      "cardTerminated": "Карта закрыта",
+      "cardTerminatedDescription": "Оставшийся баланс автоматически возвращается на ваш кошелёк.",
+      "cardToppedUp": "Карта пополнена",
+      "cardUnfrozen": "Заморозка карты снята",
+      "copied": "{{label}} скопировано",
+      "copyError": "Не удалось скопировать",
+      "freezeError": "Не удалось изменить статус заморозки",
+      "issueCardError": "Не удалось выпустить карту",
+      "revealCardError": "Не удалось показать данные карты",
+      "terminateError": "Не удалось закрыть карту",
+      "topupFailed": "Пополнение не выполнено",
+      "withdrawalFailed": "Вывод средств не выполнен",
+      "withdrawalSubmitted": "Заявка на вывод отправлена",
+      "withdrawalSubmittedDescription": "Перед зачислением на кошелёк из суммы удерживается комиссия."
+    },
+    "topUp": "Пополнить",
+    "transactionFallback": "Транзакция",
+    "transactions": "Транзакции",
+    "unfreezeCard": "Снять заморозку карты",
+    "virtualUsd": "Виртуальная · USD",
+    "visaVirtualCardUsd": "Виртуальная карта Visa · USD",
+    "withdraw": "Вывести",
+    "withdrawFeeNote": "Перед зачислением на кошелёк из суммы вывода удерживается комиссия."
+  },
+  "common": {
+    "language": "Язык"
+  },
+  "crypto": {
+    "addressCopied": "Адрес скопирован",
+    "copyAddressError": "Не удалось скопировать адрес",
+    "depositAddressReady": "Адрес для пополнения готов",
+    "generateAddress": "Сгенерировать адрес",
+    "generateAddressError": "Не удалось сгенерировать адрес",
+    "generateDescription": "Сгенерируйте адрес для пополнения в любой поддерживаемой сети.",
+    "generating": "Генерация…",
+    "noDepositsYet": "Пока нет пополнений в криптовалюте",
+    "noWalletsYet": "Пока нет криптокошельков — сгенерируйте адрес ниже, чтобы начать.",
+    "selectAssetPlaceholder": "Выберите актив",
+    "sharedAddressWarning": "Этот адрес может использоваться совместно с другими пользователями для того же актива. Пополнения сопоставляются с вашим аккаунтом и подтверждаются нашей командой перед обновлением баланса.",
+    "subtitle": "Адреса для пополнения и история ончейн-пополнений по поддерживаемым активам.",
+    "title": "Криптокошельки",
+    "transactionsDescription": "Каждое ончейн-пополнение, сопоставленное с вашим аккаунтом.",
+    "transactionsTitle": "Криптотранзакции",
+    "viewOnExplorer": "Посмотреть в block explorer",
+    "yourWallets": "Ваши кошельки"
+  },
+  "dashboard": {
+    "activityTitle": "Недавняя активность",
+    "heroLabel": "Общий баланс",
+    "stats": {
+      "available": "Доступно",
+      "pending": "В обработке",
+      "recentActivity": "Недавняя активность",
+      "wallets": "Кошельки"
+    },
+    "subtitle": "Вот что происходит на ваших счетах",
+    "title": "С возвращением",
+    "walletLabel": "Кошелёк"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "Пока нет кошельков",
+      "nothingHereYet": "Здесь пока пусто",
+      "recentActivity": "Недавняя активность",
+      "totalBalance": "Общий баланс",
+      "yourWallets": "Ваши кошельки"
+    },
+    "aurora": {
+      "balance": "Баланс",
+      "noTrendData": "Пока нет данных для графика",
+      "noWalletsYet": "Пока нет кошельков",
+      "nothingHereYet": "Здесь пока пусто",
+      "recentActivity": "Недавняя активность",
+      "trend": "Динамика",
+      "wallets": "Кошельки"
+    },
+    "meridian": {
+      "balanceTrend": "Динамика баланса",
+      "noWalletsYet": "Пока нет кошельков",
+      "nothingHereYet": "Здесь пока пусто",
+      "overview": "Обзор",
+      "recentActivity": "Недавняя активность",
+      "wallets": "Кошельки"
+    },
+    "nova": {
+      "balanceTrend": "Динамика баланса",
+      "noActivityYet": "Пока нет активности",
+      "noWalletsYet": "Пока нет кошельков",
+      "nothingHereYet": "Здесь пока пусто",
+      "recentActivity": "Недавняя активность",
+      "wallets": "Кошельки"
+    },
+    "prime": {
+      "amount": "Сумма",
+      "balanceTrend": "Динамика баланса",
+      "description": "Описание",
+      "noWalletsYet": "Пока нет кошельков",
+      "nothingHereYet": "Здесь пока пусто",
+      "recentActivity": "Недавняя активность",
+      "status": "Статус",
+      "wallets": "Кошельки"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "Назад",
+      "continue": "Продолжить",
+      "startDeposit": "Начать пополнение"
+    },
+    "cryptoCard": {
+      "description": "Адреса для пополнения и история ончейн-пополнений теперь находятся на отдельной странице.",
+      "goToWallets": "Перейти к криптокошелькам",
+      "title": "Или пополните криптовалютой"
+    },
+    "dialog": {
+      "amountToPay": "Сумма к оплате",
+      "copyLinkAriaLabel": "Скопировать ссылку",
+      "estimatedDelivery": "Ориентировочный срок зачисления",
+      "exchangeRate": "Курс обмена",
+      "fee": "Комиссия",
+      "initiated": "Пополнение инициировано",
+      "openLinkAriaLabel": "Открыть ссылку",
+      "title": "Пополнение счёта",
+      "youllReceive": "Вы получите"
+    },
+    "errors": {
+      "enterAmount": "Введите сумму",
+      "fieldRequired": "Поле «{{field}}» обязательно",
+      "pickWallet": "Выберите кошелёк для зачисления"
+    },
+    "localCard": {
+      "depositButton": "Пополнить",
+      "description": "Выберите страну и оплатите локальным способом — банковский перевод, CODI, DEBIN и другие.",
+      "title": "Или пополните локальным способом оплаты"
+    },
+    "step0": {
+      "countryLabel": "Страна",
+      "countryPlaceholder": "Выберите страну",
+      "prompt": "Из какой страны вы платите?"
+    },
+    "step1": {
+      "methodRange": "{{min}}–{{max}} {{currency}} за пополнение",
+      "noMethods": "Для этой страны пока нет активных способов пополнения.",
+      "prompt": "Как вы хотите заплатить из страны {{country}}?",
+      "thisCountryFallback": "этой страны"
+    },
+    "step2": {
+      "amountLabel": "Сумма ({{currency}})",
+      "prompt": "{{method}} — сумма и реквизиты",
+      "selectFieldPlaceholder": "Выберите: {{field}}",
+      "walletLabel": "Кошелёк для зачисления",
+      "walletLoading": "Загрузка…",
+      "walletPlaceholder": "Выберите кошелёк"
+    },
+    "steps": {
+      "amountDetails": "Сумма и реквизиты",
+      "country": "Страна",
+      "method": "Способ"
+    },
+    "subtitle": "Пополните кошелёк разовым платежом через локальный способ оплаты или криптовалюту.",
+    "title": "Пополнение",
+    "toast": {
+      "copied": "Скопировано в буфер обмена",
+      "copyFailed": "Не удалось скопировать",
+      "pickCountry": "Выберите страну, чтобы продолжить",
+      "pickMethod": "Выберите способ оплаты, чтобы продолжить",
+      "startFailed": "Не удалось начать пополнение"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "Продолжить",
+      "submit": "Отправить на проверку"
+    },
+    "common": {
+      "select": "Выбрать"
+    },
+    "header": {
+      "subtitle": "Проверка компании (KYB) — данные о компании и её владельцах.",
+      "title": "Верификация компании"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "Цель открытия счёта",
+        "complianceScreeningProgram": "Программа комплаенс-проверки",
+        "conductsMoneyServices": "Оказывает услуги денежных переводов",
+        "conductsMoneyServicesHint": "Денежные переводы, обмен валют или иная регулируемая деятельность MSB.",
+        "describeAccountPurpose": "Опишите цель открытия счёта",
+        "describeMoneyServicesActivity": "Опишите деятельность по оказанию денежных услуг",
+        "estimatedAnnualRevenue": "Предполагаемый годовой доход, USD (необязательно)",
+        "estimatedAnnualRevenuePlaceholder": "например, 1000000_to_5000000",
+        "eurdeCombined": "EURDE (объединённый)",
+        "explainFlaggedActivity": "Поясните отмеченную деятельность",
+        "extraFeeHint": "(может взиматься дополнительная комиссия)",
+        "highRiskActivities": "Виды деятельности повышенного риска (выберите применимые)",
+        "notSpecified": "Не указано",
+        "pepStatus": "Политически значимое лицо (PEP)",
+        "pepStatusHint": "Любой владелец/директор является PEP или его близким партнёром.",
+        "prohibitedCountries": "Ведёт деятельность в запрещённых странах (необязательно)",
+        "selectPlaceholder": "Выбрать",
+        "sourceOfFunds": "Источник средств",
+        "thirdPartyMsbPayments": "Обрабатывает платежи для сторонних MSB",
+        "virtualAccountsToProvision": "Виртуальные счета для открытия"
+      },
+      "addresses": {
+        "physicalAddressHeading": "Фактический адрес",
+        "physicalProofHint": "Договор аренды, счёт за коммунальные услуги и т. п. — требуется, если отличается от юридического адреса.",
+        "registeredAddressHeading": "Юридический адрес",
+        "sameAsRegistered": "Совпадает с юридическим",
+        "title": "Адреса"
+      },
+      "businessDocument": {
+        "title": "Документ компании"
+      },
+      "businessInfo": {
+        "businessType": "Тип организации",
+        "description": "Описание деятельности",
+        "dialCode": "Код страны",
+        "dialCodePlaceholder": "+1",
+        "email": "Электронная почта компании",
+        "incorporationCountry": "Страна регистрации (необязательно)",
+        "incorporationDate": "Дата регистрации",
+        "industry": "Отрасль (необязательно)",
+        "legalName": "Юридическое наименование",
+        "phone": "Телефон",
+        "registrationNumber": "Регистрационный номер",
+        "requiredFieldsHint": "Заполните обязательные поля выше.",
+        "taxId": "ИНН (необязательно)",
+        "title": "Информация о компании",
+        "tradeName": "Торговое наименование",
+        "website": "Веб-сайт (необязательно)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "Требуется документ с назначением «Регистрация компании» — документ по умолчанию выше это условие выполняет.",
+        "description": "Описание",
+        "descriptionPlaceholder": "Свидетельство о регистрации",
+        "documentPurpose": "Назначение документа",
+        "fileLabel": "Файл",
+        "selectPlaceholder": "Выбрать"
+      },
+      "ownerIdDocuments": {
+        "title": "Документы, удостоверяющие личность владельцев"
+      },
+      "ownersDirectors": {
+        "addAnother": "Добавить ещё одного владельца / директора",
+        "authorizedSigner": "Уполномоченное лицо",
+        "dateOfBirth": "Дата рождения",
+        "director": "Директор",
+        "email": "Электронная почта",
+        "firstName": "Имя",
+        "hasControl": "Имеет контроль",
+        "hasOwnership": "Имеет долю владения",
+        "identityDocsRequired": "Для каждого владельца/директора требуются оба документа, удостоверяющих личность.",
+        "lastName": "Фамилия",
+        "nationality": "Гражданство",
+        "ownerHeading": "Владелец / директор {{number}}",
+        "ownershipPercent": "Доля владения, %",
+        "personFallbackName": "Владелец / директор {{index}}",
+        "personTitle": "Должность",
+        "phoneOptional": "Телефон (необязательно)",
+        "photoIdHeading": "2. Государственное удостоверение личности с фото",
+        "residentialAddressHeading": "Адрес проживания",
+        "taxId": "СНИЛС / ИНН / номер налогоплательщика",
+        "taxIdHeading": "1. ИНН",
+        "title": "Владельцы и директора",
+        "titlePlaceholder": "Генеральный директор, управляющий партнёр…"
+      },
+      "review": {
+        "accountPurpose": "Цель открытия счёта",
+        "business": "Компания",
+        "highRiskActivities": "Виды деятельности повышенного риска",
+        "none": "Нет",
+        "ownersDirectors": "Владельцы / директора",
+        "readyMessage": "Всё готово. Проверьте данные и отправьте заявку.",
+        "registeredAddress": "Юридический адрес",
+        "title": "Проверка данных",
+        "tradeName": "Торговое наименование",
+        "type": "Тип"
+      },
+      "riskPurpose": {
+        "title": "Риск и цель"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Некоторые обязательные поля ещё не заполнены.",
+        "title": "Проверьте поля ниже"
+      },
+      "submitFailed": {
+        "title": "Не удалось отправить заявку"
+      },
+      "submitted": {
+        "description": "Мы рассмотрим данные вашей компании в ближайшее время.",
+        "title": "Заявка на верификацию отправлена"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "Продолжить",
+      "submit": "Отправить на проверку"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "Выбрать"
+    },
+    "header": {
+      "subtitle": "Несколько данных, чтобы мы могли подтвердить вашу личность.",
+      "title": "Верификация личности"
+    },
+    "steps": {
+      "address": {
+        "title": "Адрес"
+      },
+      "financialProfile": {
+        "accountPurpose": "Цель открытия счёта",
+        "actingAsIntermediary": "Действую как посредник",
+        "actingAsIntermediaryHint": "От имени другого лица, а не для себя.",
+        "chooseAccountsHint": "Выберите USD и/или EUR, либо только EURDE.",
+        "describeAccountPurpose": "Опишите цель открытия счёта",
+        "employmentStatus": "Занятость",
+        "eurdeCombined": "EURDE (объединённый)",
+        "expectedMonthlyPayments": "Ожидаемые ежемесячные платежи (USD)",
+        "extraFeeNote": "может взиматься дополнительная комиссия",
+        "occupation": "Профессия",
+        "sourceOfFunds": "Источник средств",
+        "title": "Финансовый профиль",
+        "virtualAccounts": "Виртуальные счета для открытия"
+      },
+      "identityDocument": {
+        "govIdHeading": "Государственное удостоверение личности",
+        "selfieHint": "Чёткая фотография вашего лица.",
+        "selfiePhoto": "Селфи",
+        "title": "Документ, удостоверяющий личность"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11 цифр",
+        "currentEmployer": "Текущий работодатель (необязательно)",
+        "dateOfBirth": "Дата рождения",
+        "dialCode": "Код страны",
+        "dialCodePlaceholder": "+1",
+        "email": "Электронная почта",
+        "firstName": "Имя",
+        "gender": "Пол",
+        "genderFemale": "Женский",
+        "genderMale": "Мужской",
+        "immigrationStatus": "Иммиграционный статус (необязательно)",
+        "immigrationStatusPlaceholder": "Не применимо",
+        "lastName": "Фамилия",
+        "middleName": "Отчество (необязательно)",
+        "nationality": "Гражданство",
+        "nin": "NIN",
+        "ninPlaceholder": "11 цифр",
+        "phone": "Телефон",
+        "phoneHint": "Код страны, например «+1», и только цифры номера (8–15 цифр).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "ИНН",
+        "taxIdPlaceholder": "СНИЛС / номер налогоплательщика",
+        "title": "Личные данные"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "Цель открытия счёта",
+          "address": "Адрес",
+          "email": "Электронная почта",
+          "idDocument": "Документ, удостоверяющий личность",
+          "name": "Имя",
+          "nationality": "Гражданство",
+          "phone": "Телефон"
+        },
+        "ready": "Всё готово. Проверьте данные и отправьте заявку.",
+        "title": "Проверка данных"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Некоторые обязательные поля ещё не заполнены.",
+        "title": "Проверьте поля ниже"
+      },
+      "submitFailed": {
+        "title": "Не удалось отправить заявку"
+      },
+      "submitted": {
+        "description": "Мы рассмотрим ваши данные в ближайшее время.",
+        "title": "Заявка на верификацию отправлена"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "Назад",
+    "chooseCountryFirstPlaceholder": "Сначала выберите страну",
+    "cityLabel": "Город",
+    "clickToUpload": "Нажмите, чтобы загрузить",
+    "countryLabel": "Страна",
+    "dateIssuedLabel": "Дата выдачи",
+    "documentBackOptionalLabel": "Документ — оборотная сторона (необязательно)",
+    "documentFrontLabel": "Документ — лицевая сторона",
+    "documentNumberLabel": "Номер документа",
+    "documentNumberPlaceholder": "например, P00012345",
+    "documentTypeLabel": "Тип документа",
+    "expirationDateLabel": "Срок действия",
+    "expirationDateOptionalLabel": "Срок действия (необязательно)",
+    "fixBeforeContinuing": "Пожалуйста, исправьте следующее, прежде чем продолжить:",
+    "issuingCountryLabel": "Страна выдачи",
+    "loadingEllipsis": "Загрузка…",
+    "noMatches": "Совпадений не найдено.",
+    "noPostalCodesText": "В этой стране почтовые индексы не используются.",
+    "postalCodeFormatError": "Не соответствует ожидаемому формату.",
+    "postalCodeFormatErrorWithExample": "Не соответствует ожидаемому формату (например, {{example}}).",
+    "postalCodeLabel": "Почтовый индекс",
+    "proofOfAddressHint": "Счёт за коммунальные услуги, банковская выписка или договор аренды.",
+    "proofOfAddressLabel": "Подтверждение адреса",
+    "searchPlaceholder": "Поиск…",
+    "selectCountryPlaceholder": "Выберите страну",
+    "selectOption": "Выбрать",
+    "selectPlaceholder": "Выбрать…",
+    "setNationalityFirstPlaceholder": "Сначала укажите гражданство",
+    "stateProvinceLabel": "Штат / провинция",
+    "stepOf": "Шаг {{current}} из {{total}}",
+    "streetAddress2Label": "Адрес, строка 2 (необязательно)",
+    "streetAddressLabel": "Адрес (улица, дом)",
+    "streetAddressPlaceholder": "ул. Ленина, 123"
+  },
+  "kycWizard": {
+    "backToDashboard": "Вернуться на панель управления",
+    "pendingDescription": "Мы получили ваши данные и рассматриваем их. Мы сообщим вам, как только будет принято решение.",
+    "pendingHeading": "Верификация на рассмотрении",
+    "verifiedDescription": "Ваша личность подтверждена. Вам доступны отправка денег, карты и виртуальные счета.",
+    "verifiedHeading": "Вы прошли верификацию"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "Вход для бизнеса",
+      "demoCard": "Карта",
+      "demoDeposit": "Пополнение",
+      "demoSend": "Отправка",
+      "demoTotalBalance": "Общий баланс",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "Зарплата",
+      "demoTransaction3": "Оплата дизайна",
+      "feature1Desc": "Храните и перемещайте фиат и криптовалюту вместе, с балансом, которому всегда можно доверять.",
+      "feature1Title": "Один баланс, любая валюта",
+      "feature2Desc": "Выберите контакт, получите актуальный курс, подтвердите — деньги переводятся без лишних бумаг.",
+      "feature2Title": "Отправляйте за секунды",
+      "feature3Desc": "Выпустите виртуальную карту одним нажатием, так же быстро заморозьте её.",
+      "feature3Title": "Карты по требованию",
+      "feature4Desc": "Каждая транзакция записывается в неизменяемый, сверенный реестр за кулисами.",
+      "feature4Title": "Реестр банковского уровня",
+      "featuresHeading": "Всё, что нужно вашим деньгам",
+      "featuresSubheading": "Никаких скрытых комиссий, никаких запутанных меню — просто банкинг, который работает.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "Деньги, ставшие простыми",
+      "heroHeadlineHighlight": "лёгким.",
+      "heroHeadlinePrefix": "Банкинг, который ощущается",
+      "heroSubheadline": "{{productName}} — это современный кошелёк для отправки, хранения и трат ваших денег: удивительно простой и по-настоящему защищённый.",
+      "logIn": "Войти",
+      "openAccountCta": "Откройте счёт",
+      "planBusinessBlurb": "Доступ для нескольких пользователей, повышенные лимиты, выделенная поддержка.",
+      "planBusinessCta": "Связаться с нами",
+      "planBusinessName": "Бизнес",
+      "planBusinessPrice": "Индивидуально",
+      "planPersonalBlurb": "Повседневные траты и переводы для физических лиц.",
+      "planPersonalCta": "Начать",
+      "planPersonalName": "Личный",
+      "planPersonalPrice": "Бесплатно",
+      "pricingHeading": "Простые тарифы",
+      "pricingSubheading": "Начните бесплатно. Переходите на более высокий тариф только тогда, когда бизнесу нужно больше.",
+      "signUpFree": "Зарегистрироваться бесплатно"
+    },
+    "aurora": {
+      "badge": "Удивительно простые деньги",
+      "businessLogin": "Вход для бизнеса",
+      "demoActionCard": "Карта",
+      "demoActionDeposit": "Пополнение",
+      "demoActionSend": "Отправка",
+      "demoBalance": "$8,942.10",
+      "demoGrowth": "+12.4%",
+      "feature1Desc": "Каждый кошелёк, каждая валюта — всегда сверены.",
+      "feature1Title": "Один прекрасный баланс",
+      "feature2Desc": "Актуальные курсы, мгновенное подтверждение, никакой бумажной волокиты.",
+      "feature2Title": "Отправляйте за секунды",
+      "feature3Desc": "Выпускайте виртуальную карту сразу после верификации.",
+      "feature3Title": "Карты по требованию",
+      "feature4Desc": "Каждая транзакция сверена и проверяема.",
+      "feature4Title": "Реестр банковского уровня",
+      "featuresHeading": "Всё, что нужно вашим деньгам",
+      "featuresSubheading": "Никаких скрытых комиссий, никаких запутанных меню — просто банкинг, который работает.",
+      "heroHeadlineHighlight": "в одном прекрасном виде.",
+      "heroHeadlinePrefix": "Каждый счёт —",
+      "heroSubheadline": "{{productName}} объединяет кошельки, выплаты и карты в панели управления, которую действительно приятно открывать.",
+      "logIn": "Войти",
+      "openAccount": "Откройте счёт",
+      "signUpFree": "Зарегистрироваться бесплатно",
+      "thisMonth": "В этом месяце",
+      "totalBalance": "Общий баланс",
+      "vsLastMonth": "по сравнению с прошлым месяцем"
+    },
+    "meridian": {
+      "eyebrow": "Операционная платформа",
+      "featureCardIssuingDesc": "Выпускайте виртуальные карты клиентам сразу после верификации.",
+      "featureCardIssuingTitle": "Выпуск карт",
+      "featureComplianceDesc": "KYC, разрешения и аудиторские журналы встроены с самого первого дня.",
+      "featureComplianceTitle": "Встроенный комплаенс",
+      "featureLedgerDesc": "Каждый кошелёк, каждая валюта сверены с единым источником достоверных данных.",
+      "featureLedgerTitle": "Единый реестр",
+      "featurePayoutsDesc": "Запрашивайте курс, подтверждайте и проводите трансграничные переводы в несколько кликов.",
+      "featurePayoutsTitle": "Глобальные выплаты",
+      "featuresHeading": "Всё, что нужно операционному отделу",
+      "featuresSubheading": "Единая платформа для всего стека движения денег.",
+      "heroHeadline": "Управляйте движением денег как оператор, а не как таблица Excel.",
+      "heroSubheadline": "{{productName}} даёт вашей команде единую консоль для кошельков, выплат, карт и комплаенса — на основе реестра, которому можно доверять.",
+      "logIn": "Войти",
+      "openAccountCta": "Открыть счёт",
+      "operatorLoginCta": "Вход для оператора",
+      "reconciledDesc": "Каждая проведённая транзакция — двойная запись, идемпотентная и автоматически сверяемая с записями провайдера.",
+      "reconciledTitle": "Сверка по умолчанию",
+      "signUp": "Зарегистрироваться",
+      "statCurrenciesLabel": "Валюты",
+      "statPayoutTimeLabel": "Среднее время выплаты",
+      "statUptimeLabel": "Доступность",
+      "teamsDesc": "Ролевой доступ для владельцев, администраторов и операторов с полным журналом аудита каждого действия.",
+      "teamsTitle": "Создано для команд"
+    },
+    "nova": {
+      "createAccountCta": "Создайте счёт",
+      "ctaHeading": "Готовы запустить собственные платёжные рельсы?",
+      "ctaSubheading": "Ваши клиенты, ваш бренд, ваш реестр — а под капотом работает Yativo.",
+      "feature1Desc": "Каждый цент отслеживается через неизменяемые, проверяемые записи журнала — никогда просто столбец баланса.",
+      "feature1Title": "Реестр двойной записи",
+      "feature2Desc": "Проводки на основе вебхуков поддерживают баланс клиентов актуальным в момент движения средств.",
+      "feature2Title": "Расчёты в реальном времени",
+      "feature3Desc": "Плановые задачи сверяют ваш реестр с данными вышестоящих расчётов и мгновенно отмечают расхождения.",
+      "feature3Title": "Автоматическая сверка",
+      "feature4Desc": "Фиатные и криптовалютные рельсы в едином плане счетов, готовые для глобальных платёжных коридоров.",
+      "feature4Title": "Мультивалютность",
+      "feature5Desc": "Сессии клиентов и сотрудников никогда не пересекаются — раздельные токены, раздельная зона риска.",
+      "feature5Title": "Два изолированных домена авторизации",
+      "feature6Desc": "Проверка KYC, ручные корректировки, выплаты, карты и вебхуки — в единой консоли.",
+      "feature6Title": "Полноценный бэк-офис",
+      "featuresHeading": "Построено как инфраструктура, а не демоверсия",
+      "featuresSubheading": "Всё, что нужно реселлеру для безопасной работы с реальными деньгами клиентов.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "Начать",
+      "heroHeadlineHighlight": "работает под вашим брендом.",
+      "heroHeadlinePrefix": "Финтех-инфраструктура,",
+      "heroSubheadline": "{{productName}} предоставляет вашему бизнесу платформу кошельков, выплат и карт под собственным брендом на реальном реестре двойной записи — разверните её, оформите под свой бренд и ведите собственный финтех-бизнес.",
+      "openAccountCta": "Открыть счёт",
+      "operatorConsole": "Консоль оператора",
+      "signIn": "Войти",
+      "trustBadge": "Проверено реестром · Сверка каждый час"
+    },
+    "prime": {
+      "balance": "Баланс",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "Вход в панель управления",
+      "feature": {
+        "cardIssuing": {
+          "desc": "Выпускайте виртуальные карты клиентам сразу после верификации.",
+          "title": "Выпуск карт"
+        },
+        "compliance": {
+          "desc": "KYC, разрешения и аудиторские журналы встроены с самого первого дня.",
+          "title": "Встроенный комплаенс"
+        },
+        "ledger": {
+          "desc": "Каждый кошелёк, каждая валюта сверены с единым источником достоверных данных.",
+          "title": "Единый реестр"
+        },
+        "payouts": {
+          "desc": "Запрашивайте курс, подтверждайте и проводите трансграничные переводы в несколько кликов.",
+          "title": "Глобальные выплаты"
+        }
+      },
+      "featuresHeading": "Всё, что нужно операционному отделу",
+      "heroHeadline": "Платёжная инфраструктура для интернета.",
+      "heroSubheadline": "{{productName}} даёт вам единый API и единую панель управления для кошельков, выплат, карт и комплаенса.",
+      "logIn": "Войти",
+      "signUp": "Зарегистрироваться",
+      "startNow": "Начать сейчас",
+      "stat": {
+        "deposits": "Пополнения",
+        "payouts": "Выплаты",
+        "refunds": "Возвраты"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← Назад на главную",
+    "backToSignIn": "← Назад ко входу",
+    "createAccount": "Создать аккаунт",
+    "defaultProductName": "White Label",
+    "emailLabel": "Электронная почта",
+    "genericError": "Не удалось войти. Проверьте свои учётные данные.",
+    "invalidCodeError": "Неверный код. Попробуйте ещё раз.",
+    "newHere": "Впервые здесь?",
+    "passwordLabel": "Пароль",
+    "signIn": "Войти",
+    "signInDescription": "Войдите в свой аккаунт",
+    "signingIn": "Выполняется вход…",
+    "verificationCodeLabel": "Код подтверждения",
+    "verify": "Подтвердить",
+    "verifyDescription": "Введите 6-значный код из приложения-аутентификатора или резервный код.",
+    "verifyHeading": "Подтвердите, что это вы",
+    "verifying": "Проверка…",
+    "welcomeBack": "С возвращением"
+  },
+  "nav": {
+    "account": "Аккаунт",
+    "atlas": {
+      "contacts": "Контакты",
+      "home": "Главная",
+      "profile": "Профиль",
+      "send": "Отправить"
+    },
+    "beneficiaries": "Получатели",
+    "cards": "Карты",
+    "cryptoWallets": "Криптокошельки",
+    "dashboard": "Панель управления",
+    "deposit": "Пополнение",
+    "logout": "Выйти",
+    "portal": "Портал",
+    "profileKyc": "Профиль и верификация",
+    "section": {
+      "account": "Аккаунт",
+      "manage": "Управление"
+    },
+    "sendMoney": "Отправить деньги",
+    "settings": "Настройки",
+    "virtualAccounts": "Виртуальные счета",
+    "wallets": "Кошельки",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "Аккаунт",
+    "emailLabel": "Электронная почта",
+    "endorsementsDescription": "Для некоторых функций, таких как локальные банковские переводы или виртуальные карты, требуется отдельная верификация по услуге.",
+    "endorsementsLoadError": "Не удалось загрузить разрешения.",
+    "endorsementsTitle": "Разрешения",
+    "heading": "Профиль и верификация",
+    "identityVerificationTitle": "Верификация личности",
+    "restartVerification": "Пройти верификацию заново",
+    "startVerification": "Начать верификацию",
+    "statusApproved": "Вы прошли верификацию. Вам доступны отправка денег, карты и виртуальные счета.",
+    "statusNotStarted": "Требуется, прежде чем вы сможете отправлять деньги, открыть виртуальный счёт или получить карту.",
+    "statusPending": "Мы получили ваши данные и рассматриваем их — сообщим, как только будет принято решение.",
+    "statusRejected": "Ваша последняя заявка не была одобрена — подайте новую ниже.",
+    "subheading": "Управляйте данными своей личности",
+    "typeLabel": "Тип"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "Сумма к отправке ({{currency}})",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "Списать с кошелька",
+      "prompt": "Сумма к отправке",
+      "promptTo": "Сумма к отправке получателю {{name}}",
+      "recipientFallback": "получатель",
+      "willReceive": "Мы покажем точную сумму, которую получит {{recipient}}, прежде чем вы подтвердите перевод.",
+      "willReceiveWithCurrency": "Мы покажем точную сумму, которую получит {{recipient}} в {{currency}}, прежде чем вы подтвердите перевод."
+    },
+    "buttons": {
+      "back": "Назад",
+      "confirmAndSend": "Подтвердить и отправить",
+      "continue": "Продолжить",
+      "getQuote": "Получить курс",
+      "requote": "Обновить курс"
+    },
+    "errors": {
+      "enterAmount": "Введите сумму",
+      "fieldRequired": "Поле «{{field}}» обязательно",
+      "maxLength": "Не более {{max}} символов",
+      "minLength": "Не менее {{min}} символов"
+    },
+    "result": {
+      "payoutId": "ID выплаты: {{id}}",
+      "payoutSubmitted": "Выплата отправлена",
+      "refreshing": "(обновление…)",
+      "sendAnother": "Отправить ещё раз",
+      "statusLabel": "Статус:",
+      "viewWallets": "Посмотреть кошельки"
+    },
+    "review": {
+      "expired": "Срок действия курса истёк — получите новый, чтобы продолжить.",
+      "expiresIn": "Курс истекает через {{seconds}} с.",
+      "rateLabel": "Курс",
+      "recipientGetsLabel": "Получатель получит",
+      "toLabel": "Кому",
+      "totalChargedLabel": "Итого списано"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "Выберите получателя",
+      "prompt": "Кому вы отправляете деньги?"
+    },
+    "step0": {
+      "countryLabel": "Страна",
+      "countryPlaceholder": "Выберите страну",
+      "prompt": "Кому вы отправляете деньги?",
+      "recipientNameLabel": "Имя получателя",
+      "recipientNamePlaceholder": "Иван Иванов"
+    },
+    "step1": {
+      "countryFallback": "этой страны",
+      "methodRange": "{{min}}–{{max}} {{currency}} за перевод",
+      "noMethods": "Для этой страны пока нет активных способов выплаты.",
+      "prompt": "Как выплатить средства получателю {{recipient}} в стране {{country}}?",
+      "recipientFallback": "этого получателя"
+    },
+    "step2": {
+      "noDetailsNeeded": "Для этого способа выплаты дополнительные данные не требуются.",
+      "prompt": "Реквизиты: {{method}}",
+      "selectFieldPlaceholder": "Выберите: {{field}}"
+    },
+    "steps": {
+      "amount": "Сумма",
+      "beneficiary": "Получатель",
+      "details": "Реквизиты",
+      "method": "Способ",
+      "recipient": "Получатель",
+      "review": "Проверка"
+    },
+    "subtitle": "Выберите страну и способ выплаты, затем подтвердите сумму.",
+    "title": "Отправить деньги",
+    "toast": {
+      "enterNameAndCountry": "Введите имя и выберите страну, чтобы продолжить",
+      "payoutFailed": "Не удалось выполнить выплату",
+      "payoutSubmitted": "Выплата отправлена",
+      "payoutSubmittedDescription": "Мы уведомим вас, как только она будет проведена.",
+      "pickBeneficiary": "Выберите получателя, чтобы продолжить",
+      "pickMethod": "Выберите способ выплаты, чтобы продолжить",
+      "quoteFailed": "Не удалось получить курс",
+      "saveRecipientFailed": "Не удалось сохранить получателя",
+      "tryAgain": "Попробуйте снова."
+    },
+    "toggle": {
+      "newRecipient": "Новый получатель",
+      "savedBeneficiary": "Сохранённый получатель"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "Подтвердите новый пароль",
+      "currentPasswordLabel": "Текущий пароль",
+      "description": "Выберите надёжный пароль, который вы не используете больше нигде.",
+      "newPasswordLabel": "Новый пароль",
+      "submit": "Обновить пароль",
+      "title": "Смена пароля",
+      "toastDescription": "Смена пароля пока не реализована в этой версии.",
+      "toastTitle": "Пока недоступно"
+    },
+    "copiedToClipboard": "Скопировано в буфер обмена",
+    "copyError": "Не удалось скопировать",
+    "subtitle": "Управляйте безопасностью своего аккаунта",
+    "title": "Настройки",
+    "twoFactor": {
+      "authenticatorApp": "Приложение-аутентификатор",
+      "description": "Добавьте дополнительный уровень защиты для своего аккаунта.",
+      "disable": {
+        "description": "Подтвердите пароль, чтобы отключить двухфакторную аутентификацию.",
+        "error": "Не удалось отключить двухфакторную аутентификацию.",
+        "passwordLabel": "Пароль",
+        "submit": "Отключить двухфакторную аутентификацию",
+        "submitting": "Отключение…",
+        "title": "Отключить двухфакторную аутентификацию"
+      },
+      "enabled": "Включена",
+      "loading": "Загрузка…",
+      "notConfigured": "Пока не настроена",
+      "setup": {
+        "backupCodesDescription": "Сохраните их в надёжном месте — каждый код можно использовать один раз для входа, если вы потеряете доступ к приложению-аутентификатору. Повторно они показаны не будут.",
+        "backupCodesTitle": "Сохраните резервные коды",
+        "codeLabel": "6-значный код",
+        "continueButton": "Продолжить",
+        "copyAll": "Скопировать все",
+        "done": "Готово",
+        "enableButton": "Включить двухфакторную аутентификацию",
+        "enterCodeTitle": "Введите код",
+        "manualKeyLabel": "Не можете отсканировать? Введите этот ключ вручную",
+        "qrAlt": "QR-код для настройки 2FA",
+        "scanTitle": "Отсканируйте в приложении-аутентификаторе",
+        "verifyError": "Не удалось проверить этот код.",
+        "verifying": "Проверка…"
+      },
+      "title": "Двухфакторная аутентификация",
+      "toast": {
+        "disabled": "Двухфакторная аутентификация отключена",
+        "setupError": "Не удалось начать настройку"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "Тип аккаунта",
+    "alreadyHaveAccount": "Уже есть аккаунт?",
+    "business": "Компания",
+    "businessNameLabel": "Название компании",
+    "callingCodeAriaLabel": "Код страны",
+    "countryLabel": "Страна",
+    "createAccount": "Создать аккаунт",
+    "createYourAccount": "Создайте свой аккаунт",
+    "creatingAccount": "Создание аккаунта…",
+    "defaultProductName": "White Label",
+    "emailLabel": "Электронная почта",
+    "fullNameLabel": "Полное имя",
+    "genericError": "Не удалось создать ваш аккаунт.",
+    "individual": "Физическое лицо",
+    "passwordLabel": "Пароль",
+    "phoneNumberLabel": "Номер телефона",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "Выберите вашу страну",
+    "signIn": "Войти",
+    "startSendingDescription": "Начните отправлять, хранить и тратить деньги за несколько минут"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "Посмотреть профиль"
+    },
+    "prime": {
+      "notifications": "Уведомления",
+      "switchToDarkMode": "Включить тёмную тему",
+      "switchToLightMode": "Включить светлую тему"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "Виртуальный счёт готов",
+    "addCurrency": "Добавить валюту",
+    "allCurrenciesAdded": "У вас уже есть счёт для каждой доступной валюты.",
+    "copiedToClipboard": "Скопировано в буфер обмена",
+    "copyError": "Не удалось скопировать",
+    "copyField": "Скопировать: {{field}}",
+    "createAccount": "Создать счёт",
+    "createAccountError": "Не удалось создать счёт",
+    "creating": "Создание…",
+    "noAccountsYet": "Виртуальных счетов пока нет — откройте счёт для валюты ниже.",
+    "noCurrenciesAvailable": "Пока нет доступных валют для виртуальных счетов.",
+    "noVerificationNeeded": "Верификация не требуется",
+    "requiresVerification": "Требуется верификация «{{endorsement}}» — обратитесь в поддержку, чтобы начать.",
+    "shareDetails": "Поделитесь этими реквизитами с тем, кто отправляет вам средства.",
+    "startVerification": "Начать верификацию",
+    "subtitle": "Выделенные банковские реквизиты, которые можно использовать повторно для каждого входящего перевода — по одному на валюту.",
+    "title": "Виртуальные счета",
+    "verificationNote": "Для некоторых способов перевода требуется разовая верификация, прежде чем можно будет открыть счёт.",
+    "verified": "Подтверждено",
+    "yourAccounts": "Ваши счета"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} в обработке",
+    "wallet": "Кошелёк"
+  },
+  "walletDetail": {
+    "allWallets": "Все кошельки",
+    "available": "Доступно",
+    "balanceOverTime": "Баланс с течением времени",
+    "cancel": "Отмена",
+    "noActivity": "Активности пока нет",
+    "pageOf": "Страница {{page}} / {{totalPages}}",
+    "pending": "В обработке",
+    "removeDialogDescription": "Он пуст, так что это безопасно — вы сможете добавить {{currencyCode}} обратно позже, если он будет по-прежнему доступен.",
+    "removeDialogTitle": "Удалить кошелёк {{currencyCode}}?",
+    "removeWallet": "Удалить кошелёк",
+    "removeWalletError": "Не удалось удалить кошелёк",
+    "removing": "Удаление…",
+    "statement": "Выписка",
+    "walletRemoved": "Кошелёк удалён",
+    "walletTitle": "Кошелёк {{currencyCode}}"
+  },
+  "wallets": {
+    "add": "Добавить",
+    "addCurrencyPlaceholder": "Добавить валюту",
+    "addWalletError": "Не удалось добавить кошелёк",
+    "empty": "Кошельков пока нет. Они появятся здесь, как только у вас будет баланс.",
+    "subtitle": "Ваши балансы по всем валютам",
+    "title": "Кошельки",
+    "walletAdded": "Кошелёк добавлен",
+    "walletLabel": "Кошелёк"
+  }
+}

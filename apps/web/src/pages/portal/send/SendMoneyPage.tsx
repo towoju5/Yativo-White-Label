@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   formatMinorAmount,
   type Beneficiary,
@@ -27,11 +28,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
 
-const NEW_STEPS = ["Recipient", "Method", "Details", "Amount", "Review"];
-const SAVED_STEPS = ["Beneficiary", "Amount", "Review"];
 const QUOTE_LIFETIME_MS = 5 * 60_000;
 
 export default function SendMoneyPage() {
+  const { t } = useTranslation();
+  const NEW_STEPS = [
+    t("send.steps.recipient", "Recipient"),
+    t("send.steps.method", "Method"),
+    t("send.steps.details", "Details"),
+    t("send.steps.amount", "Amount"),
+    t("send.steps.review", "Review"),
+  ];
+  const SAVED_STEPS = [t("send.steps.beneficiary", "Beneficiary"), t("send.steps.amount", "Amount"), t("send.steps.review", "Review")];
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -112,7 +120,12 @@ export default function SendMoneyPage() {
       setActiveBeneficiary({ id: b.id, name: b.name, currency });
       setStep((s) => s + 1);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't save recipient", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) =>
+      toast({
+        variant: "destructive",
+        title: t("send.toast.saveRecipientFailed", "Couldn't save recipient"),
+        description: e instanceof ApiError ? e.message : undefined,
+      }),
   });
 
   const quoteMutation = useMutation({
@@ -122,17 +135,27 @@ export default function SendMoneyPage() {
       setQuote(q);
       setStep((s) => s + 1);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Could not get a quote", description: e instanceof ApiError ? e.message : "Try again." }),
+    onError: (e) =>
+      toast({
+        variant: "destructive",
+        title: t("send.toast.quoteFailed", "Could not get a quote"),
+        description: e instanceof ApiError ? e.message : t("send.toast.tryAgain", "Try again."),
+      }),
   });
 
   const payoutMutation = useMutation({
     mutationFn: (input: CreatePayoutInput) => portalApi.post<Payout>("/portal/payouts", input),
     onSuccess: (payout) => {
-      toast({ title: "Payout submitted", description: "We'll notify you once it settles." });
+      toast({ title: t("send.toast.payoutSubmitted", "Payout submitted"), description: t("send.toast.payoutSubmittedDescription", "We'll notify you once it settles.") });
       queryClient.invalidateQueries({ queryKey: ["portal", "wallets"] });
       setSubmittedPayout(payout);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Payout failed", description: e instanceof ApiError ? e.message : "Try again." }),
+    onError: (e) =>
+      toast({
+        variant: "destructive",
+        title: t("send.toast.payoutFailed", "Payout failed"),
+        description: e instanceof ApiError ? e.message : t("send.toast.tryAgain", "Try again."),
+      }),
   });
 
   const statusQuery = useQuery({
@@ -172,9 +195,11 @@ export default function SendMoneyPage() {
     const errors: Record<string, string> = {};
     for (const f of visibleFields) {
       const value = paymentData[f.key]?.trim() ?? "";
-      if (isFieldRequired(f) && !value) errors[f.key] = `${f.name} is required`;
-      else if (value && f.min !== undefined && value.length < f.min) errors[f.key] = `At least ${f.min} characters`;
-      else if (value && f.max !== undefined && value.length > f.max) errors[f.key] = `At most ${f.max} characters`;
+      if (isFieldRequired(f) && !value) errors[f.key] = t("send.errors.fieldRequired", "{{field}} is required", { field: f.name });
+      else if (value && f.min !== undefined && value.length < f.min)
+        errors[f.key] = t("send.errors.minLength", "At least {{min}} characters", { min: f.min });
+      else if (value && f.max !== undefined && value.length > f.max)
+        errors[f.key] = t("send.errors.maxLength", "At most {{max}} characters", { max: f.max });
     }
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
@@ -191,7 +216,7 @@ export default function SendMoneyPage() {
     setAmountError(null);
     const n = Number(sendAmount);
     if (!sendAmount || Number.isNaN(n) || n <= 0) {
-      setAmountError("Enter an amount");
+      setAmountError(t("send.errors.enterAmount", "Enter an amount"));
       return;
     }
     quoteMutation.mutate();
@@ -201,7 +226,7 @@ export default function SendMoneyPage() {
     if (!useExisting) {
       if (step === 0) {
         if (!name.trim() || !countryIso3) {
-          toast({ variant: "destructive", title: "Enter a name and pick a country to continue" });
+          toast({ variant: "destructive", title: t("send.toast.enterNameAndCountry", "Enter a name and pick a country to continue") });
           return;
         }
         setStep(1);
@@ -209,7 +234,7 @@ export default function SendMoneyPage() {
       }
       if (step === 1) {
         if (!selectedMethod) {
-          toast({ variant: "destructive", title: "Pick a payout method to continue" });
+          toast({ variant: "destructive", title: t("send.toast.pickMethod", "Pick a payout method to continue") });
           return;
         }
         setStep(2);
@@ -222,7 +247,7 @@ export default function SendMoneyPage() {
     } else {
       if (step === 0) {
         if (!selectedBeneficiaryId) {
-          toast({ variant: "destructive", title: "Pick a beneficiary to continue" });
+          toast({ variant: "destructive", title: t("send.toast.pickBeneficiary", "Pick a beneficiary to continue") });
           return;
         }
         const b = beneficiariesQuery.data?.find((x) => x.id === selectedBeneficiaryId);
@@ -264,17 +289,21 @@ export default function SendMoneyPage() {
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
             <CheckCircle2 className="h-10 w-10 text-success" />
-            <p className="font-heading text-lg font-semibold">Payout submitted</p>
+            <p className="font-heading text-lg font-semibold">{t("send.result.payoutSubmitted", "Payout submitted")}</p>
             <p className="text-sm text-muted-foreground">
-              Status: <span className="font-medium">{statusQuery.data?.status ?? "pending"}</span>
-              {statusQuery.isFetching && " (refreshing…)"}
+              {t("send.result.statusLabel", "Status:")} <span className="font-medium">{statusQuery.data?.status ?? "pending"}</span>
+              {statusQuery.isFetching && ` ${t("send.result.refreshing", "(refreshing…)")}`}
             </p>
-            {submittedPayout.yativoPayoutId && <p className="text-xs text-muted-foreground">Payout ID: {submittedPayout.yativoPayoutId}</p>}
+            {submittedPayout.yativoPayoutId && (
+              <p className="text-xs text-muted-foreground">
+                {t("send.result.payoutId", "Payout ID: {{id}}", { id: submittedPayout.yativoPayoutId })}
+              </p>
+            )}
             <div className="mt-2 flex gap-2">
               <Button variant="outline" onClick={() => navigate("/portal/wallets")}>
-                View wallets
+                {t("send.result.viewWallets", "View wallets")}
               </Button>
-              <Button onClick={resetAll}>Send another</Button>
+              <Button onClick={resetAll}>{t("send.result.sendAnother", "Send another")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -285,8 +314,10 @@ export default function SendMoneyPage() {
   return (
     <div className="mx-auto max-w-lg space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">Send money</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Pick a country and how they get paid, then confirm the amount.</p>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("send.title", "Send money")}</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          {t("send.subtitle", "Pick a country and how they get paid, then confirm the amount.")}
+        </p>
       </div>
 
       {step === 0 && (
@@ -302,7 +333,7 @@ export default function SendMoneyPage() {
               !useExisting ? "bg-background shadow-soft" : "text-muted-foreground hover:text-foreground",
             )}
           >
-            New recipient
+            {t("send.toggle.newRecipient", "New recipient")}
           </button>
           <button
             type="button"
@@ -316,7 +347,7 @@ export default function SendMoneyPage() {
               useExisting ? "bg-background shadow-soft" : "text-muted-foreground hover:text-foreground",
             )}
           >
-            Saved beneficiary
+            {t("send.toggle.savedBeneficiary", "Saved beneficiary")}
           </button>
         </div>
       )}
@@ -329,14 +360,20 @@ export default function SendMoneyPage() {
           {!useExisting && step === 0 && (
             <div className="space-y-5">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <User className="h-4 w-4" /> Who are you sending to?
+                <User className="h-4 w-4" /> {t("send.step0.prompt", "Who are you sending to?")}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="recipientName">Recipient name</Label>
-                <Input id="recipientName" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" autoFocus />
+                <Label htmlFor="recipientName">{t("send.step0.recipientNameLabel", "Recipient name")}</Label>
+                <Input
+                  id="recipientName"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t("send.step0.recipientNamePlaceholder", "Jane Doe")}
+                  autoFocus
+                />
               </div>
               <div className="space-y-1.5">
-                <Label>Country</Label>
+                <Label>{t("send.step0.countryLabel", "Country")}</Label>
                 <SearchableSelect
                   value={countryIso3}
                   onChange={(v) => {
@@ -345,7 +382,7 @@ export default function SendMoneyPage() {
                     setPaymentData({});
                   }}
                   options={(countriesQuery.data ?? []).map((c) => ({ value: c.iso3, label: c.name }))}
-                  placeholder="Select a country"
+                  placeholder={t("send.step0.countryPlaceholder", "Select a country")}
                   isLoading={countriesQuery.isLoading}
                 />
               </div>
@@ -355,7 +392,11 @@ export default function SendMoneyPage() {
           {!useExisting && step === 1 && (
             <div className="space-y-5">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Landmark className="h-4 w-4" /> How should {name || "this recipient"} in {selectedCountry?.name ?? "this country"} get paid?
+                <Landmark className="h-4 w-4" />{" "}
+                {t("send.step1.prompt", "How should {{recipient}} in {{country}} get paid?", {
+                  recipient: name || t("send.step1.recipientFallback", "this recipient"),
+                  country: selectedCountry?.name ?? t("send.step1.countryFallback", "this country"),
+                })}
               </div>
               {payoutMethodsQuery.isLoading ? (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -365,7 +406,7 @@ export default function SendMoneyPage() {
                 </div>
               ) : (payoutMethodsQuery.data ?? []).length === 0 ? (
                 <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                  No active payout methods for this country yet.
+                  {t("send.step1.noMethods", "No active payout methods for this country yet.")}
                 </p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -399,7 +440,11 @@ export default function SendMoneyPage() {
                         </div>
                         {(m.minimumWithdrawal || m.maximumWithdrawal) && (
                           <p className="text-xs text-muted-foreground">
-                            {m.minimumWithdrawal ?? "0"}–{m.maximumWithdrawal ?? "∞"} {m.currency} per transfer
+                            {t("send.step1.methodRange", "{{min}}–{{max}} {{currency}} per transfer", {
+                              min: m.minimumWithdrawal ?? "0",
+                              max: m.maximumWithdrawal ?? "∞",
+                              currency: m.currency,
+                            })}
                           </p>
                         )}
                       </button>
@@ -413,7 +458,8 @@ export default function SendMoneyPage() {
           {!useExisting && step === 2 && (
             <div className="space-y-5">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Landmark className="h-4 w-4" /> {selectedMethod?.methodName} details
+                <Landmark className="h-4 w-4" />{" "}
+                {t("send.step2.prompt", "{{method}} details", { method: selectedMethod?.methodName ?? "" })}
               </div>
               {formQuery.isLoading ? (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -423,7 +469,7 @@ export default function SendMoneyPage() {
                 </div>
               ) : renderableFields.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                  This payout method doesn't need any extra details.
+                  {t("send.step2.noDetailsNeeded", "This payout method doesn't need any extra details.")}
                 </p>
               ) : (
                 <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
@@ -442,7 +488,9 @@ export default function SendMoneyPage() {
                           }}
                         >
                           <SelectTrigger className={fieldErrors[f.key] ? "border-destructive" : undefined}>
-                            <SelectValue placeholder={`Select ${f.name.toLowerCase()}`} />
+                            <SelectValue
+                              placeholder={t("send.step2.selectFieldPlaceholder", "Select {{field}}", { field: f.name.toLowerCase() })}
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {(f.options ?? []).map((o) => (
@@ -474,14 +522,14 @@ export default function SendMoneyPage() {
           {useExisting && step === 0 && (
             <div className="space-y-5">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Users className="h-4 w-4" /> Who are you sending to?
+                <Users className="h-4 w-4" /> {t("send.savedStep0.prompt", "Who are you sending to?")}
               </div>
               {busy ? (
                 <Skeleton className="h-10" />
               ) : (
                 <Select value={selectedBeneficiaryId} onValueChange={setSelectedBeneficiaryId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a beneficiary" />
+                    <SelectValue placeholder={t("send.savedStep0.beneficiaryPlaceholder", "Select a beneficiary")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(beneficiariesQuery.data ?? []).map((b) => (
@@ -498,10 +546,13 @@ export default function SendMoneyPage() {
           {step === amountStepIndex && (
             <div className="space-y-5">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <Banknote className="h-4 w-4" /> Amount to send {activeBeneficiary?.name ? `to ${activeBeneficiary.name}` : ""}
+                <Banknote className="h-4 w-4" />{" "}
+                {activeBeneficiary?.name
+                  ? t("send.amountStep.promptTo", "Amount to send to {{name}}", { name: activeBeneficiary.name })
+                  : t("send.amountStep.prompt", "Amount to send")}
               </div>
               <div className="space-y-1.5">
-                <Label>Debit from wallet</Label>
+                <Label>{t("send.amountStep.debitWalletLabel", "Debit from wallet")}</Label>
                 <Select value={debitCurrency} onValueChange={setDebitCurrency}>
                   <SelectTrigger>
                     <SelectValue />
@@ -516,10 +567,12 @@ export default function SendMoneyPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="sendAmount">Amount to send ({debitCurrency})</Label>
+                <Label htmlFor="sendAmount">
+                  {t("send.amountStep.amountLabel", "Amount to send ({{currency}})", { currency: debitCurrency })}
+                </Label>
                 <Input
                   id="sendAmount"
-                  placeholder="100.00"
+                  placeholder={t("send.amountStep.amountPlaceholder", "100.00")}
                   value={sendAmount}
                   className={amountError ? "border-destructive" : undefined}
                   onChange={(e) => {
@@ -529,8 +582,14 @@ export default function SendMoneyPage() {
                 />
                 {amountError && <p className="text-xs text-destructive">{amountError}</p>}
                 <p className="text-xs text-muted-foreground">
-                  We'll show exactly how much {activeBeneficiary?.name ?? "the recipient"} receives
-                  {activeBeneficiary?.currency ? ` in ${activeBeneficiary.currency}` : ""} before you confirm.
+                  {activeBeneficiary?.currency
+                    ? t("send.amountStep.willReceiveWithCurrency", "We'll show exactly how much {{recipient}} receives in {{currency}} before you confirm.", {
+                        recipient: activeBeneficiary?.name ?? t("send.amountStep.recipientFallback", "the recipient"),
+                        currency: activeBeneficiary.currency,
+                      })
+                    : t("send.amountStep.willReceive", "We'll show exactly how much {{recipient}} receives before you confirm.", {
+                        recipient: activeBeneficiary?.name ?? t("send.amountStep.recipientFallback", "the recipient"),
+                      })}
                 </p>
               </div>
             </div>
@@ -539,27 +598,29 @@ export default function SendMoneyPage() {
           {step === reviewStepIndex && quote && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                {quoteExpired ? "This quote has expired — get a fresh one to continue." : `Quote expires in ${Math.ceil(msRemaining / 1000)}s.`}
+                {quoteExpired
+                  ? t("send.review.expired", "This quote has expired — get a fresh one to continue.")
+                  : t("send.review.expiresIn", "Quote expires in {{seconds}}s.", { seconds: Math.ceil(msRemaining / 1000) })}
               </div>
               <dl className="space-y-2.5 rounded-lg border border-border bg-muted/40 p-4 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">To</dt>
+                  <dt className="text-muted-foreground">{t("send.review.toLabel", "To")}</dt>
                   <dd className="font-medium">{activeBeneficiary?.name}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Rate</dt>
+                  <dt className="text-muted-foreground">{t("send.review.rateLabel", "Rate")}</dt>
                   <dd className="font-mono">
                     1 {quote.debitCurrency} = {quote.rate} {quote.payoutCurrency}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Total charged</dt>
+                  <dt className="text-muted-foreground">{t("send.review.totalChargedLabel", "Total charged")}</dt>
                   <dd className="font-mono font-medium">
                     {formatMinorAmount(quote.debitAmountMinor, quote.debitDecimals)} {quote.debitCurrency}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Recipient gets</dt>
+                  <dt className="text-muted-foreground">{t("send.review.recipientGetsLabel", "Recipient gets")}</dt>
                   <dd className="font-mono font-medium">
                     {formatMinorAmount(quote.receiveAmountMinor, quote.payoutDecimals)} {quote.payoutCurrency}
                   </dd>
@@ -571,16 +632,22 @@ export default function SendMoneyPage() {
 
         <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
           <Button type="button" variant="ghost" onClick={goBack} disabled={step === 0 || isPending || payoutMutation.isPending}>
-            <ArrowLeft className="h-4 w-4" /> Back
+            <ArrowLeft className="h-4 w-4" /> {t("send.buttons.back", "Back")}
           </Button>
           {step === reviewStepIndex ? (
             quoteExpired ? (
               <Button onClick={reQuote} disabled={quoteMutation.isPending}>
-                {quoteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><RefreshCw className="h-4 w-4" /> Re-quote</>}
+                {quoteMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4" /> {t("send.buttons.requote", "Re-quote")}
+                  </>
+                )}
               </Button>
             ) : (
               <Button onClick={confirmPayout} disabled={payoutMutation.isPending}>
-                {payoutMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm & send"}
+                {payoutMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("send.buttons.confirmAndSend", "Confirm & send")}
               </Button>
             )
           ) : (
@@ -588,10 +655,10 @@ export default function SendMoneyPage() {
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : step === amountStepIndex ? (
-                "Get quote"
+                t("send.buttons.getQuote", "Get quote")
               ) : (
                 <>
-                  Continue <ArrowRight className="h-4 w-4" />
+                  {t("send.buttons.continue", "Continue")} <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </Button>

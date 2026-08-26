@@ -16,6 +16,7 @@ import {
   BadgeCheck,
   FileText,
   Lock,
+  Fingerprint,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { MeridianSidebar, type NavSection } from "./Sidebar";
@@ -52,6 +53,7 @@ const sections: NavSection[] = [
     items: [
       { to: "/admin/settings/branding", label: "Branding", icon: Palette },
       { to: "/admin/settings/api-keys", label: "API keys", icon: KeyRound },
+      { to: "/admin/settings/authentication", label: "Authentication", icon: Fingerprint },
       { to: "/admin/settings/wallet-currencies", label: "Wallet currencies", icon: Landmark },
       { to: "/admin/settings/verification", label: "Verification", icon: ShieldCheck },
     ],

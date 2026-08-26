@@ -1,5 +1,6 @@
 import { formatMinorAmount } from "@white-label/shared-types";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BalanceChart } from "@/components/charts/BalanceChart";
@@ -16,14 +17,16 @@ export function MeridianDashboardLayout({
   stats,
   wallets,
   activity,
-  activityTitle = "Recent activity",
+  activityTitle,
   actions,
   isLoading,
 }: DashboardLayoutProps) {
+  const { t } = useTranslation();
+  const resolvedActivityTitle = activityTitle ?? t("dashboardLayout.meridian.recentActivity", "Recent activity");
   return (
     <div className="flex flex-col gap-6">
       <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-r from-card to-muted/50 p-8 shadow-soft">
-        <p className="text-xs font-semibold uppercase tracking-wider text-primary">{heroLabel ?? "Overview"}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">{heroLabel ?? t("dashboardLayout.meridian.overview", "Overview")}</p>
         <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight">{title}</h1>
         {subtitle && <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{subtitle}</p>}
         {actions && <div className="mt-6 flex flex-wrap gap-3">{actions}</div>}
@@ -31,7 +34,7 @@ export function MeridianDashboardLayout({
 
       <Card>
         <CardHeader>
-          <CardTitle>Overview</CardTitle>
+          <CardTitle>{t("dashboardLayout.meridian.overview", "Overview")}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -53,7 +56,7 @@ export function MeridianDashboardLayout({
       {(isLoading || (chartData && chartData.length > 0)) && (
         <Card>
           <CardHeader>
-            <CardTitle>Balance trend</CardTitle>
+            <CardTitle>{t("dashboardLayout.meridian.balanceTrend", "Balance trend")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? <Skeleton className="h-[220px] w-full" /> : <BalanceChart data={chartData!} showAxes />}
@@ -64,7 +67,7 @@ export function MeridianDashboardLayout({
       {wallets && (
         <Card>
           <CardHeader>
-            <CardTitle>Wallets</CardTitle>
+            <CardTitle>{t("dashboardLayout.meridian.wallets", "Wallets")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -79,7 +82,9 @@ export function MeridianDashboardLayout({
                 ))}
               </div>
             ) : (
-              <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No wallets yet</div>
+              <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                {t("dashboardLayout.meridian.noWalletsYet", "No wallets yet")}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -87,7 +92,7 @@ export function MeridianDashboardLayout({
 
       <Card>
         <CardHeader>
-          <CardTitle>{activityTitle}</CardTitle>
+          <CardTitle>{resolvedActivityTitle}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
@@ -97,7 +102,7 @@ export function MeridianDashboardLayout({
               ))}
             </div>
           ) : activity.length === 0 ? (
-            <div className="p-8 pt-0 text-center text-sm text-muted-foreground">Nothing here yet</div>
+            <div className="p-8 pt-0 text-center text-sm text-muted-foreground">{t("dashboardLayout.meridian.nothingHereYet", "Nothing here yet")}</div>
           ) : (
             <div className="divide-y divide-border border-t border-border">
               {activity.map((item) => (

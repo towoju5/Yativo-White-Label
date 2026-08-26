@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Menu, LogOut, Sun, Moon, Bell } from "lucide-react";
 import { useTemplate } from "@/templates/useTemplate";
 import { getStoredColorScheme, setStoredColorScheme } from "@/templates/TemplateProvider";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +27,7 @@ interface TopbarProps {
 
 export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, onLogout }: TopbarProps) {
   const template = useTemplate();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => (getStoredColorScheme(template.id) ?? (template.id === "nova" ? "dark" : "light")) === "dark");
 
@@ -67,6 +70,9 @@ export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, on
                 </div>
               ))}
             </nav>
+            <div className="border-t border-border px-3 py-3 lg:hidden">
+              <LanguageSwitcher />
+            </div>
           </SheetContent>
         </Sheet>
         <span className="text-sm font-medium text-muted-foreground lg:hidden">{productName}</span>
@@ -75,15 +81,15 @@ export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, on
       <div className="flex items-center gap-1.5">
         <button
           onClick={toggleTheme}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={isDark ? t("topbar.prime.switchToLightMode", "Switch to light mode") : t("topbar.prime.switchToDarkMode", "Switch to dark mode")}
+          title={isDark ? t("topbar.prime.switchToLightMode", "Switch to light mode") : t("topbar.prime.switchToDarkMode", "Switch to dark mode")}
           className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <button
-          aria-label="Notifications"
-          title="Notifications"
+          aria-label={t("topbar.prime.notifications", "Notifications")}
+          title={t("topbar.prime.notifications", "Notifications")}
           className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Bell className="h-4 w-4" />
@@ -97,7 +103,7 @@ export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, on
             <DropdownMenuLabel className="truncate">{userSubLabel}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onLogout} className="text-destructive">
-              <LogOut className="mr-2 h-4 w-4" /> Log out
+              <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout", "Log out")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

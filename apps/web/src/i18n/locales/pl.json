@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "Dodaj odbiorcę",
+    "addBeneficiary": "Dodaj odbiorcę",
+    "addError": "Nie udało się dodać odbiorcy",
+    "added": "Odbiorca dodany",
+    "back": "Wstecz",
+    "cancel": "Anuluj",
+    "continue": "Dalej",
+    "country": "Kraj",
+    "detail": {
+      "added": "Dodano",
+      "currency": "Waluta",
+      "editHint": "Danych płatności nie można edytować tutaj — usuń tego odbiorcę i dodaj nowego, jeśli uległy zmianie.",
+      "editName": "Edytuj nazwę",
+      "name": "Nazwa",
+      "paymentDetails": "Dane płatności",
+      "removeBeneficiary": "Usuń odbiorcę",
+      "save": "Zapisz",
+      "title": "Szczegóły odbiorcy",
+      "type": "Typ"
+    },
+    "empty": "Brak odbiorców. Dodaj jednego, aby zacząć wysyłać pieniądze.",
+    "fieldRequiredError": "Pole {{field}} jest wymagane",
+    "maxCharsError": "Maksymalnie {{max}} znaków",
+    "methodDetailsHeading": "Szczegóły: {{method}}",
+    "minCharsError": "Co najmniej {{min}} znaków",
+    "nameAndCountryRequired": "Podaj nazwę i wybierz kraj, aby kontynuować",
+    "noExtraDetailsNeeded": "Ta metoda wypłaty nie wymaga dodatkowych danych.",
+    "noPayoutMethods": "Brak aktywnych metod wypłaty dla tego kraju.",
+    "payoutMethodQuestion": "W jaki sposób {{name}} w kraju {{country}} ma otrzymać płatność?",
+    "payoutMethodRequired": "Wybierz metodę wypłaty, aby kontynuować",
+    "recipientName": "Nazwa odbiorcy",
+    "recipientNamePlaceholder": "Jan Kowalski",
+    "remove": "Usuń",
+    "removeDialogDescription": "Aby ponownie wysłać pieniądze do tego odbiorcy, będziesz musiał dodać go jeszcze raz. Nie wpływa to na dotychczasowe wypłaty.",
+    "removeDialogTitle": "Usunąć {{name}}?",
+    "removeError": "Nie udało się usunąć odbiorcy",
+    "removed": "Odbiorca usunięty",
+    "selectCountryPlaceholder": "Wybierz kraj",
+    "selectFieldPlaceholder": "Wybierz: {{field}}",
+    "steps": {
+      "paymentDetails": "Dane płatności",
+      "payoutMethod": "Metoda wypłaty",
+      "recipient": "Odbiorca"
+    },
+    "subtitle": "Osoby i konta, do których wysyłasz pieniądze",
+    "table": {
+      "actions": "Działania",
+      "added": "Dodano",
+      "currency": "Waluta",
+      "name": "Nazwa"
+    },
+    "thisCountry": "tego kraju",
+    "thisRecipient": "tego odbiorcy",
+    "title": "Odbiorcy",
+    "transferRange": "{{min}}–{{max}} {{currency}} za przelew",
+    "updateError": "Nie udało się zaktualizować odbiorcy",
+    "updated": "Odbiorca zaktualizowany",
+    "whoAreYouSendingTo": "Do kogo wysyłasz pieniądze?"
+  },
+  "cards": {
+    "addFunds": "Doładuj środki",
+    "addedThisMonth": "Dodano w tym miesiącu",
+    "airlinePayments": "Płatności lotnicze",
+    "balance": "Saldo {{amount}}",
+    "billingAddress": "Adres rozliczeniowy",
+    "cancel": "Anuluj",
+    "cardEndingIn": "Karta kończąca się na {{last4}}",
+    "cardNumberLabel": "Numer karty",
+    "cardholder": "Posiadacz karty",
+    "confirmTerminate": "Kliknij ponownie, aby potwierdzić — tej operacji nie można cofnąć",
+    "copyNumber": "Kopiuj numer",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "Brak kart. Zamów kartę, aby zacząć nią płacić.",
+    "exp": "Ważna do {{expiry}}",
+    "feeAmount": "Opłata {{amount}}",
+    "freezeCard": "Zablokuj kartę",
+    "hidesAutomatically": "Ukrywa się automatycznie",
+    "initialFundingHelp": "Minimum 3 USD. Kwota zostanie pobrana z portfela USD wraz z opłatą za wydanie karty i opłatą za doładowanie.",
+    "initialFundingLabel": "Wstępne doładowanie (USD)",
+    "manage": "Zarządzaj →",
+    "noTransactions": "Brak transakcji.",
+    "program": "Program",
+    "requestCard": "Zamów kartę",
+    "requestDialogTitle": "Zamów wirtualną kartę",
+    "requesting": "Trwa składanie zamówienia…",
+    "spentThisMonth": "Wydano w tym miesiącu",
+    "subtitle": "Wirtualne karty Visa powiązane z Twoim portfelem USD",
+    "terminateCard": "Zamknij kartę",
+    "title": "Karty",
+    "toast": {
+      "airlineDisabled": "Płatności lotnicze wyłączone",
+      "airlineEnabled": "Płatności lotnicze włączone",
+      "airlineError": "Nie udało się zaktualizować ustawień płatności lotniczych",
+      "cardFrozen": "Karta zablokowana",
+      "cardIssued": "Karta wydana",
+      "cardTerminated": "Karta zamknięta",
+      "cardTerminatedDescription": "Pozostałe środki zostaną automatycznie zwrócone na Twój portfel.",
+      "cardToppedUp": "Karta doładowana",
+      "cardUnfrozen": "Blokada karty zdjęta",
+      "copied": "{{label}} skopiowano",
+      "copyError": "Nie udało się skopiować",
+      "freezeError": "Nie udało się zmienić stanu blokady",
+      "issueCardError": "Nie udało się wydać karty",
+      "revealCardError": "Nie udało się wyświetlić danych karty",
+      "terminateError": "Nie udało się zamknąć karty",
+      "topupFailed": "Doładowanie nie powiodło się",
+      "withdrawalFailed": "Wypłata nie powiodła się",
+      "withdrawalSubmitted": "Wypłata zlecona",
+      "withdrawalSubmittedDescription": "Przed zaksięgowaniem kwoty netto na Twoim portfelu pobierana jest opłata."
+    },
+    "topUp": "Doładuj",
+    "transactionFallback": "Transakcja",
+    "transactions": "Transakcje",
+    "unfreezeCard": "Odblokuj kartę",
+    "virtualUsd": "Wirtualna · USD",
+    "visaVirtualCardUsd": "Wirtualna karta Visa · USD",
+    "withdraw": "Wypłać",
+    "withdrawFeeNote": "Przed zaksięgowaniem kwoty netto na Twoim portfelu z wypłat pobierana jest opłata."
+  },
+  "common": {
+    "language": "Język"
+  },
+  "crypto": {
+    "addressCopied": "Adres skopiowany",
+    "copyAddressError": "Nie udało się skopiować adresu",
+    "depositAddressReady": "Adres depozytowy gotowy",
+    "generateAddress": "Wygeneruj adres",
+    "generateAddressError": "Nie udało się wygenerować adresu",
+    "generateDescription": "Wygeneruj adres depozytowy dla dowolnego obsługiwanego łańcucha bloków.",
+    "generating": "Generowanie…",
+    "noDepositsYet": "Brak wpłat kryptowalut",
+    "noWalletsYet": "Brak portfeli kryptowalut — wygeneruj adres poniżej, aby zacząć.",
+    "selectAssetPlaceholder": "Wybierz aktywo",
+    "sharedAddressWarning": "Ten adres może być współdzielony z innymi użytkownikami dla tego samego aktywa. Wpłaty są przypisywane do Twojego konta i zatwierdzane przez nasz zespół, zanim zaktualizowane zostanie Twoje saldo.",
+    "subtitle": "Adresy depozytowe i historia wpłat on-chain dla obsługiwanych aktywów.",
+    "title": "Portfele kryptowalut",
+    "transactionsDescription": "Każda wpłata on-chain przypisana do Twojego konta.",
+    "transactionsTitle": "Transakcje kryptowalutowe",
+    "viewOnExplorer": "Zobacz w eksploratorze bloków",
+    "yourWallets": "Twoje portfele"
+  },
+  "dashboard": {
+    "activityTitle": "Ostatnia aktywność",
+    "heroLabel": "Saldo łączne",
+    "stats": {
+      "available": "Dostępne",
+      "pending": "Oczekujące",
+      "recentActivity": "Ostatnia aktywność",
+      "wallets": "Portfele"
+    },
+    "subtitle": "Oto co dzieje się na Twoich kontach",
+    "title": "Witaj ponownie",
+    "walletLabel": "Portfel"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "Brak portfeli",
+      "nothingHereYet": "Nic tu jeszcze nie ma",
+      "recentActivity": "Ostatnia aktywność",
+      "totalBalance": "Saldo łączne",
+      "yourWallets": "Twoje portfele"
+    },
+    "aurora": {
+      "balance": "Saldo",
+      "noTrendData": "Brak danych o trendzie",
+      "noWalletsYet": "Brak portfeli",
+      "nothingHereYet": "Nic tu jeszcze nie ma",
+      "recentActivity": "Ostatnia aktywność",
+      "trend": "Trend",
+      "wallets": "Portfele"
+    },
+    "meridian": {
+      "balanceTrend": "Trend salda",
+      "noWalletsYet": "Brak portfeli",
+      "nothingHereYet": "Nic tu jeszcze nie ma",
+      "overview": "Przegląd",
+      "recentActivity": "Ostatnia aktywność",
+      "wallets": "Portfele"
+    },
+    "nova": {
+      "balanceTrend": "Trend salda",
+      "noActivityYet": "Brak aktywności",
+      "noWalletsYet": "Brak portfeli",
+      "nothingHereYet": "Nic tu jeszcze nie ma",
+      "recentActivity": "Ostatnia aktywność",
+      "wallets": "Portfele"
+    },
+    "prime": {
+      "amount": "Kwota",
+      "balanceTrend": "Trend salda",
+      "description": "Opis",
+      "noWalletsYet": "Brak portfeli",
+      "nothingHereYet": "Nic tu jeszcze nie ma",
+      "recentActivity": "Ostatnia aktywność",
+      "status": "Status",
+      "wallets": "Portfele"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "Wstecz",
+      "continue": "Dalej",
+      "startDeposit": "Rozpocznij wpłatę"
+    },
+    "cryptoCard": {
+      "description": "Adresy depozytowe i historia wpłat on-chain znajdują się teraz na osobnej stronie.",
+      "goToWallets": "Przejdź do portfeli kryptowalut",
+      "title": "Lub wpłać kryptowaluty"
+    },
+    "dialog": {
+      "amountToPay": "Kwota do zapłaty",
+      "copyLinkAriaLabel": "Kopiuj link",
+      "estimatedDelivery": "Szacowany czas realizacji",
+      "exchangeRate": "Kurs wymiany",
+      "fee": "Opłata",
+      "initiated": "Wpłata zainicjowana",
+      "openLinkAriaLabel": "Otwórz link",
+      "title": "Wpłać środki",
+      "youllReceive": "Otrzymasz"
+    },
+    "errors": {
+      "enterAmount": "Podaj kwotę",
+      "fieldRequired": "Pole {{field}} jest wymagane",
+      "pickWallet": "Wybierz portfel do zasilenia"
+    },
+    "localCard": {
+      "depositButton": "Wpłać",
+      "description": "Wybierz swój kraj i zapłać lokalną metodą — przelewem bankowym, CODI, DEBIN i innymi.",
+      "title": "Lub wpłać lokalną metodą płatności"
+    },
+    "step0": {
+      "countryLabel": "Kraj",
+      "countryPlaceholder": "Wybierz kraj",
+      "prompt": "Z jakiego kraju dokonujesz płatności?"
+    },
+    "step1": {
+      "methodRange": "{{min}}–{{max}} {{currency}} za wpłatę",
+      "noMethods": "Brak aktywnych metod wpłaty dla tego kraju.",
+      "prompt": "Jak chcesz zapłacić z kraju {{country}}?",
+      "thisCountryFallback": "tego kraju"
+    },
+    "step2": {
+      "amountLabel": "Kwota ({{currency}})",
+      "prompt": "{{method}} — kwota i dane",
+      "selectFieldPlaceholder": "Wybierz: {{field}}",
+      "walletLabel": "Portfel do zasilenia",
+      "walletLoading": "Ładowanie…",
+      "walletPlaceholder": "Wybierz portfel"
+    },
+    "steps": {
+      "amountDetails": "Kwota i dane",
+      "country": "Kraj",
+      "method": "Metoda"
+    },
+    "subtitle": "Zasil swój portfel jednorazową płatnością lokalną metodą lub kryptowalutą.",
+    "title": "Wpłata",
+    "toast": {
+      "copied": "Skopiowano do schowka",
+      "copyFailed": "Nie udało się skopiować",
+      "pickCountry": "Wybierz kraj, aby kontynuować",
+      "pickMethod": "Wybierz metodę płatności, aby kontynuować",
+      "startFailed": "Nie udało się rozpocząć wpłaty"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "Dalej",
+      "submit": "Wyślij do weryfikacji"
+    },
+    "common": {
+      "select": "Wybierz"
+    },
+    "header": {
+      "subtitle": "Weryfikacja KYB firmy — dane o firmie i jej właścicielach.",
+      "title": "Zweryfikuj swoją firmę"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "Cel konta",
+        "complianceScreeningProgram": "Program weryfikacji zgodności",
+        "conductsMoneyServices": "Prowadzi usługi finansowe",
+        "conductsMoneyServicesHint": "Przekazy pieniężne, wymiana walut lub podobna regulowana działalność typu MSB.",
+        "describeAccountPurpose": "Opisz cel konta",
+        "describeMoneyServicesActivity": "Opisz działalność w zakresie usług finansowych",
+        "estimatedAnnualRevenue": "Szacowany roczny przychód, USD (opcjonalnie)",
+        "estimatedAnnualRevenuePlaceholder": "np. 1000000_to_5000000",
+        "eurdeCombined": "EURDE (łącznie)",
+        "explainFlaggedActivity": "Wyjaśnij oznaczoną aktywność",
+        "extraFeeHint": "(może wiązać się z dodatkową opłatą)",
+        "highRiskActivities": "Działania wysokiego ryzyka (zaznacz wszystkie, które dotyczą)",
+        "notSpecified": "Nie określono",
+        "pepStatus": "Osoba zajmująca eksponowane stanowisko polityczne (PEP)",
+        "pepStatusHint": "Dowolny właściciel/dyrektor jest osobą PEP lub jej bliskim współpracownikiem.",
+        "prohibitedCountries": "Działa w krajach objętych zakazem (opcjonalnie)",
+        "selectPlaceholder": "Wybierz",
+        "sourceOfFunds": "Źródło środków",
+        "thirdPartyMsbPayments": "Przetwarza płatności dla zewnętrznych MSB",
+        "virtualAccountsToProvision": "Konta wirtualne do utworzenia"
+      },
+      "addresses": {
+        "physicalAddressHeading": "Adres fizyczny",
+        "physicalProofHint": "Umowa najmu, rachunek za media lub podobny dokument — wymagany, jeśli różni się od adresu rejestrowego.",
+        "registeredAddressHeading": "Adres rejestrowy",
+        "sameAsRegistered": "Taki sam jak rejestrowy",
+        "title": "Adresy"
+      },
+      "businessDocument": {
+        "title": "Dokument firmy"
+      },
+      "businessInfo": {
+        "businessType": "Rodzaj działalności",
+        "description": "Opis działalności",
+        "dialCode": "Numer kierunkowy",
+        "dialCodePlaceholder": "+1",
+        "email": "E-mail firmowy",
+        "incorporationCountry": "Kraj rejestracji (opcjonalnie)",
+        "incorporationDate": "Data rejestracji",
+        "industry": "Branża (opcjonalnie)",
+        "legalName": "Nazwa prawna firmy",
+        "phone": "Telefon",
+        "registrationNumber": "Numer rejestracyjny",
+        "requiredFieldsHint": "Uzupełnij powyższe wymagane pola.",
+        "taxId": "NIP (opcjonalnie)",
+        "title": "Dane firmy",
+        "tradeName": "Nazwa handlowa",
+        "website": "Strona internetowa (opcjonalnie)",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "Wymagany jest dokument o przeznaczeniu „Rejestracja firmy” — powyższy domyślny dokument to spełnia.",
+        "description": "Opis",
+        "descriptionPlaceholder": "Zaświadczenie o rejestracji",
+        "documentPurpose": "Przeznaczenie dokumentu",
+        "fileLabel": "Plik",
+        "selectPlaceholder": "Wybierz"
+      },
+      "ownerIdDocuments": {
+        "title": "Dokumenty tożsamości właścicieli"
+      },
+      "ownersDirectors": {
+        "addAnother": "Dodaj kolejnego właściciela / dyrektora",
+        "authorizedSigner": "Osoba upoważniona do podpisu",
+        "dateOfBirth": "Data urodzenia",
+        "director": "Dyrektor",
+        "email": "E-mail",
+        "firstName": "Imię",
+        "hasControl": "Posiada kontrolę",
+        "hasOwnership": "Posiada udziały",
+        "identityDocsRequired": "Oba dokumenty tożsamości są wymagane dla każdego właściciela/dyrektora.",
+        "lastName": "Nazwisko",
+        "nationality": "Narodowość",
+        "ownerHeading": "Właściciel / dyrektor {{number}}",
+        "ownershipPercent": "Udział %",
+        "personFallbackName": "Właściciel / dyrektor {{index}}",
+        "personTitle": "Stanowisko",
+        "phoneOptional": "Telefon (opcjonalnie)",
+        "photoIdHeading": "2. Zdjęcie dokumentu tożsamości",
+        "residentialAddressHeading": "Adres zamieszkania",
+        "taxId": "Numer PESEL / NIP / identyfikator podatkowy",
+        "taxIdHeading": "1. Identyfikator podatkowy",
+        "title": "Właściciele i dyrektorzy",
+        "titlePlaceholder": "CEO, wspólnik zarządzający…"
+      },
+      "review": {
+        "accountPurpose": "Cel konta",
+        "business": "Firma",
+        "highRiskActivities": "Działania wysokiego ryzyka",
+        "none": "Brak",
+        "ownersDirectors": "Właściciele / dyrektorzy",
+        "readyMessage": "Wszystko wygląda gotowo. Sprawdź i wyślij.",
+        "registeredAddress": "Adres rejestrowy",
+        "title": "Podsumowanie",
+        "tradeName": "Nazwa handlowa",
+        "type": "Typ"
+      },
+      "riskPurpose": {
+        "title": "Ryzyko i cel"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Kilka wymaganych pól nadal wymaga uzupełnienia.",
+        "title": "Sprawdź poniższe pola"
+      },
+      "submitFailed": {
+        "title": "Wysłanie nie powiodło się"
+      },
+      "submitted": {
+        "description": "Wkrótce zweryfikujemy dane Twojej firmy.",
+        "title": "Weryfikacja wysłana"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "Dalej",
+      "submit": "Wyślij do weryfikacji"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "Wybierz"
+    },
+    "header": {
+      "subtitle": "Kilka danych, które pozwolą nam potwierdzić Twoją tożsamość.",
+      "title": "Zweryfikuj swoją tożsamość"
+    },
+    "steps": {
+      "address": {
+        "title": "Adres"
+      },
+      "financialProfile": {
+        "accountPurpose": "Cel konta",
+        "actingAsIntermediary": "Działanie jako pośrednik",
+        "actingAsIntermediaryHint": "W imieniu innej osoby, nie na własny rachunek.",
+        "chooseAccountsHint": "Wybierz USD i/lub EUR, albo samo EURDE.",
+        "describeAccountPurpose": "Opisz cel konta",
+        "employmentStatus": "Status zatrudnienia",
+        "eurdeCombined": "EURDE (łącznie)",
+        "expectedMonthlyPayments": "Oczekiwane płatności miesięczne (USD)",
+        "extraFeeNote": "może wiązać się z dodatkową opłatą",
+        "occupation": "Zawód",
+        "sourceOfFunds": "Źródło środków",
+        "title": "Profil finansowy",
+        "virtualAccounts": "Konta wirtualne do utworzenia"
+      },
+      "identityDocument": {
+        "govIdHeading": "Dokument tożsamości wydany przez urząd",
+        "selfieHint": "Wyraźne zdjęcie Twojej twarzy.",
+        "selfiePhoto": "Zdjęcie selfie",
+        "title": "Dokument tożsamości"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11 cyfr",
+        "currentEmployer": "Obecny pracodawca (opcjonalnie)",
+        "dateOfBirth": "Data urodzenia",
+        "dialCode": "Numer kierunkowy",
+        "dialCodePlaceholder": "+1",
+        "email": "E-mail",
+        "firstName": "Imię",
+        "gender": "Płeć",
+        "genderFemale": "Kobieta",
+        "genderMale": "Mężczyzna",
+        "immigrationStatus": "Status imigracyjny (opcjonalnie)",
+        "immigrationStatusPlaceholder": "Nie dotyczy",
+        "lastName": "Nazwisko",
+        "middleName": "Drugie imię (opcjonalnie)",
+        "nationality": "Narodowość",
+        "nin": "NIN",
+        "ninPlaceholder": "11 cyfr",
+        "phone": "Telefon",
+        "phoneHint": "Numer kierunkowy, np. „+1”, oraz same cyfry numeru telefonu (8–15 cyfr).",
+        "phonePlaceholder": "5551234567",
+        "taxId": "Identyfikator podatkowy",
+        "taxIdPlaceholder": "PESEL / krajowy numer podatkowy",
+        "title": "Dane osobowe"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "Cel konta",
+          "address": "Adres",
+          "email": "E-mail",
+          "idDocument": "Dokument tożsamości",
+          "name": "Imię i nazwisko",
+          "nationality": "Narodowość",
+          "phone": "Telefon"
+        },
+        "ready": "Wszystko wygląda gotowo. Sprawdź i wyślij.",
+        "title": "Podsumowanie"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "Kilka wymaganych pól nadal wymaga uzupełnienia.",
+        "title": "Sprawdź poniższe pola"
+      },
+      "submitFailed": {
+        "title": "Wysłanie nie powiodło się"
+      },
+      "submitted": {
+        "description": "Wkrótce zweryfikujemy Twoje dane.",
+        "title": "Weryfikacja wysłana"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "Wstecz",
+    "chooseCountryFirstPlaceholder": "Najpierw wybierz kraj",
+    "cityLabel": "Miasto",
+    "clickToUpload": "Kliknij, aby przesłać",
+    "countryLabel": "Kraj",
+    "dateIssuedLabel": "Data wydania",
+    "documentBackOptionalLabel": "Dokument — tył (opcjonalnie)",
+    "documentFrontLabel": "Dokument — przód",
+    "documentNumberLabel": "Numer dokumentu",
+    "documentNumberPlaceholder": "np. P00012345",
+    "documentTypeLabel": "Rodzaj dokumentu",
+    "expirationDateLabel": "Data ważności",
+    "expirationDateOptionalLabel": "Data ważności (opcjonalnie)",
+    "fixBeforeContinuing": "Popraw poniższe błędy, aby kontynuować:",
+    "issuingCountryLabel": "Kraj wydania",
+    "loadingEllipsis": "Ładowanie…",
+    "noMatches": "Brak wyników.",
+    "noPostalCodesText": "Ten kraj nie używa kodów pocztowych.",
+    "postalCodeFormatError": "Nie pasuje do oczekiwanego formatu.",
+    "postalCodeFormatErrorWithExample": "Nie pasuje do oczekiwanego formatu (np. {{example}}).",
+    "postalCodeLabel": "Kod pocztowy",
+    "proofOfAddressHint": "Rachunek za media, wyciąg bankowy lub umowa najmu.",
+    "proofOfAddressLabel": "Potwierdzenie adresu",
+    "searchPlaceholder": "Szukaj…",
+    "selectCountryPlaceholder": "Wybierz kraj",
+    "selectOption": "Wybierz",
+    "selectPlaceholder": "Wybierz…",
+    "setNationalityFirstPlaceholder": "Najpierw ustaw narodowość",
+    "stateProvinceLabel": "Województwo / stan",
+    "stepOf": "Krok {{current}} z {{total}}",
+    "streetAddress2Label": "Adres, ciąg dalszy (opcjonalnie)",
+    "streetAddressLabel": "Adres",
+    "streetAddressPlaceholder": "ul. Główna 123"
+  },
+  "kycWizard": {
+    "backToDashboard": "Powrót do panelu",
+    "pendingDescription": "Otrzymaliśmy Twoje dane i weryfikujemy je. Powiadomimy Cię, gdy zapadnie decyzja.",
+    "pendingHeading": "Weryfikacja w toku",
+    "verifiedDescription": "Twoja tożsamość została zweryfikowana. Masz pełny dostęp do wysyłania, kart i kont wirtualnych.",
+    "verifiedHeading": "Tożsamość zweryfikowana"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "Logowanie dla firm",
+      "demoCard": "Karta",
+      "demoDeposit": "Wpłata",
+      "demoSend": "Wyślij",
+      "demoTotalBalance": "Saldo łączne",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "Wynagrodzenia",
+      "demoTransaction3": "Honorarium projektowe",
+      "feature1Desc": "Przechowuj i przesyłaj waluty tradycyjne i kryptowaluty obok siebie, z saldem, któremu zawsze możesz zaufać.",
+      "feature1Title": "Jedno saldo, każda waluta",
+      "feature2Desc": "Wybierz kontakt, otrzymaj aktualną wycenę, potwierdź — pieniądze poruszają się bez papierologii.",
+      "feature2Title": "Wysyłaj w kilka sekund",
+      "feature3Desc": "Utwórz wirtualną kartę jednym dotknięciem, równie szybko ją zablokuj.",
+      "feature3Title": "Karty na żądanie",
+      "feature4Desc": "Każda transakcja jest zapisywana w niezmiennej, uzgadnianej księdze w tle.",
+      "feature4Title": "Księga na poziomie bankowym",
+      "featuresHeading": "Wszystko, czego potrzebują Twoje pieniądze",
+      "featuresSubheading": "Żadnych ukrytych opłat, żadnych mylących menu — po prostu bankowość, która działa.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "Pieniądze w prostej formie",
+      "heroHeadlineHighlight": "bezwysiłkowa.",
+      "heroHeadlinePrefix": "Bankowość, która wydaje się",
+      "heroSubheadline": "{{productName}} to nowoczesny portfel do wysyłania, przechowywania i wydawania pieniędzy — pięknie prosty, poważnie bezpieczny.",
+      "logIn": "Zaloguj się",
+      "openAccountCta": "Otwórz konto",
+      "planBusinessBlurb": "Dostęp wielu użytkowników, wyższe limity, dedykowane wsparcie.",
+      "planBusinessCta": "Skontaktuj się z nami",
+      "planBusinessName": "Firmowy",
+      "planBusinessPrice": "Indywidualnie",
+      "planPersonalBlurb": "Codzienne wydatki i przelewy dla osób prywatnych.",
+      "planPersonalCta": "Zacznij teraz",
+      "planPersonalName": "Osobisty",
+      "planPersonalPrice": "Bezpłatnie",
+      "pricingHeading": "Prosty cennik",
+      "pricingSubheading": "Zacznij bezpłatnie. Rozbuduj plan tylko wtedy, gdy Twoja firma tego potrzebuje.",
+      "signUpFree": "Zarejestruj się za darmo"
+    },
+    "aurora": {
+      "badge": "Pięknie proste pieniądze",
+      "businessLogin": "Logowanie dla firm",
+      "demoActionCard": "Karta",
+      "demoActionDeposit": "Wpłata",
+      "demoActionSend": "Wyślij",
+      "demoBalance": "8 942,10 USD",
+      "demoGrowth": "+12,4%",
+      "feature1Desc": "Każdy portfel, każda waluta, zawsze uzgodnione.",
+      "feature1Title": "Jedno piękne saldo",
+      "feature2Desc": "Aktualne wyceny, natychmiastowe potwierdzenie, zero papierologii.",
+      "feature2Title": "Wysyłaj w kilka sekund",
+      "feature3Desc": "Wydaj wirtualną kartę w chwili, gdy zostaniesz zweryfikowany.",
+      "feature3Title": "Karty na żądanie",
+      "feature4Desc": "Każda transakcja, uzgodniona i możliwa do zweryfikowania.",
+      "feature4Title": "Księga na poziomie bankowym",
+      "featuresHeading": "Wszystko, czego potrzebują Twoje pieniądze",
+      "featuresSubheading": "Żadnych ukrytych opłat, żadnych mylących menu — po prostu bankowość, która działa.",
+      "heroHeadlineHighlight": "jeden piękny widok.",
+      "heroHeadlinePrefix": "Każde konto,",
+      "heroSubheadline": "{{productName}} łączy portfele, wypłaty i karty w jednym panelu, który naprawdę chce się otwierać.",
+      "logIn": "Zaloguj się",
+      "openAccount": "Otwórz konto",
+      "signUpFree": "Zarejestruj się za darmo",
+      "thisMonth": "W tym miesiącu",
+      "totalBalance": "Saldo łączne",
+      "vsLastMonth": "w porównaniu z poprzednim miesiącem"
+    },
+    "meridian": {
+      "eyebrow": "Platforma operacyjna",
+      "featureCardIssuingDesc": "Wydawaj klientom wirtualne karty w chwili, gdy zostaną zweryfikowani.",
+      "featureCardIssuingTitle": "Wydawanie kart",
+      "featureComplianceDesc": "KYC, potwierdzenia i ścieżki audytu wbudowane od pierwszego dnia.",
+      "featureComplianceTitle": "Wbudowana zgodność",
+      "featureLedgerDesc": "Każdy portfel, każda waluta, uzgodnione w jednym źródle prawdy.",
+      "featureLedgerTitle": "Jednolita księga",
+      "featurePayoutsDesc": "Wyceniaj, potwierdzaj i rozliczaj przelewy transgraniczne w kilku kliknięciach.",
+      "featurePayoutsTitle": "Globalne wypłaty",
+      "featuresHeading": "Wszystko, czego potrzebują operacje",
+      "featuresSubheading": "Jedna platforma dla całego stosu przepływu pieniędzy.",
+      "heroHeadline": "Prowadź przepływ pieniędzy jak operator, nie jak arkusz kalkulacyjny.",
+      "heroSubheadline": "{{productName}} daje Twojemu zespołowi jedną konsolę do portfeli, wypłat, kart i zgodności — wspieraną przez księgę, której możesz zaufać.",
+      "logIn": "Zaloguj się",
+      "openAccountCta": "Otwórz konto",
+      "operatorLoginCta": "Logowanie operatora",
+      "reconciledDesc": "Każda zaksięgowana transakcja jest podwójnie zapisana, idempotentna i automatycznie dopasowywana do rekordów dostawcy.",
+      "reconciledTitle": "Domyślnie uzgadniane",
+      "signUp": "Zarejestruj się",
+      "statCurrenciesLabel": "Waluty",
+      "statPayoutTimeLabel": "Śr. czas wypłaty",
+      "statUptimeLabel": "Dostępność",
+      "teamsDesc": "Dostęp oparty na rolach dla właścicieli, administratorów i operatorów, z pełną ścieżką audytu każdej czynności.",
+      "teamsTitle": "Stworzone dla zespołów"
+    },
+    "nova": {
+      "createAccountCta": "Utwórz konto",
+      "ctaHeading": "Gotowy poprowadzić własną infrastrukturę płatniczą?",
+      "ctaSubheading": "Twoi klienci, Twoja marka, Twoja księga — zasilane od wewnątrz przez Yativo.",
+      "feature1Desc": "Każdy grosz śledzony przez niezmienne, możliwe do zaudytowania zapisy księgowe — nigdy przez naiwną kolumnę salda.",
+      "feature1Title": "Księga podwójnego zapisu",
+      "feature2Desc": "Księgowanie sterowane webhookami utrzymuje salda klientów aktualne w chwili przepływu środków.",
+      "feature2Title": "Rozliczenie w czasie rzeczywistym",
+      "feature3Desc": "Zaplanowane zadania porównują Twoją księgę z rozliczeniem nadrzędnym i natychmiast zgłaszają rozbieżności.",
+      "feature3Title": "Uzgadniane automatycznie",
+      "feature4Desc": "Szyny fiat i krypto w jednym planie kont, gotowe do globalnych korytarzy wypłat.",
+      "feature4Title": "Wielowalutowość",
+      "feature5Desc": "Sesje klientów i personelu nigdy się nie przecinają — osobne tokeny, osobny zasięg oddziaływania.",
+      "feature5Title": "Dwie izolowane domeny uwierzytelniania",
+      "feature6Desc": "Weryfikacja KYC, korekty ręczne, wypłaty, karty i webhooki — jedna konsola.",
+      "feature6Title": "Pełne zaplecze operacyjne",
+      "featuresHeading": "Zbudowane jak infrastruktura, nie jak demo",
+      "featuresSubheading": "Wszystko, czego potrzebuje reseller, aby bezpiecznie obsługiwać prawdziwe pieniądze klientów.",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "Zacznij teraz",
+      "heroHeadlineHighlight": "działająca pod Twoją własną marką.",
+      "heroHeadlinePrefix": "Infrastruktura fintech,",
+      "heroSubheadline": "{{productName}} daje Twojej firmie platformę portfeli, wypłat i kart pod własną marką, opartą na prawdziwej księdze podwójnego zapisu — wdróż ją, oznacz swoją marką i prowadź na niej własny biznes fintech.",
+      "openAccountCta": "Otwórz konto",
+      "operatorConsole": "Konsola operatora",
+      "signIn": "Zaloguj się",
+      "trustBadge": "Zweryfikowane w księdze · Uzgadniane co godzinę"
+    },
+    "prime": {
+      "balance": "Saldo",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "Logowanie do panelu",
+      "feature": {
+        "cardIssuing": {
+          "desc": "Wydawaj klientom wirtualne karty w chwili, gdy zostaną zweryfikowani.",
+          "title": "Wydawanie kart"
+        },
+        "compliance": {
+          "desc": "KYC, potwierdzenia i ścieżki audytu wbudowane od pierwszego dnia.",
+          "title": "Wbudowana zgodność"
+        },
+        "ledger": {
+          "desc": "Każdy portfel, każda waluta, uzgodnione w jednym źródle prawdy.",
+          "title": "Jednolita księga"
+        },
+        "payouts": {
+          "desc": "Wyceniaj, potwierdzaj i rozliczaj przelewy transgraniczne w kilku kliknięciach.",
+          "title": "Globalne wypłaty"
+        }
+      },
+      "featuresHeading": "Wszystko, czego potrzebują operacje",
+      "heroHeadline": "Infrastruktura płatnicza dla internetu.",
+      "heroSubheadline": "{{productName}} daje Ci jedno API i jeden panel do portfeli, wypłat, kart i zgodności.",
+      "logIn": "Zaloguj się",
+      "signUp": "Zarejestruj się",
+      "startNow": "Zacznij teraz",
+      "stat": {
+        "deposits": "Wpłaty",
+        "payouts": "Wypłaty",
+        "refunds": "Zwroty"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← Powrót do strony głównej",
+    "backToSignIn": "← Powrót do logowania",
+    "createAccount": "Utwórz konto",
+    "defaultProductName": "White Label",
+    "emailLabel": "E-mail",
+    "genericError": "Nie można się zalogować. Sprawdź swoje dane logowania.",
+    "invalidCodeError": "Nieprawidłowy kod. Spróbuj ponownie.",
+    "newHere": "Nowy tutaj?",
+    "passwordLabel": "Hasło",
+    "signIn": "Zaloguj się",
+    "signInDescription": "Zaloguj się do swojego konta",
+    "signingIn": "Logowanie…",
+    "verificationCodeLabel": "Kod weryfikacyjny",
+    "verify": "Zweryfikuj",
+    "verifyDescription": "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej lub kod zapasowy.",
+    "verifyHeading": "Potwierdź, że to Ty",
+    "verifying": "Weryfikowanie…",
+    "welcomeBack": "Witaj ponownie"
+  },
+  "nav": {
+    "account": "Konto",
+    "atlas": {
+      "contacts": "Kontakty",
+      "home": "Strona główna",
+      "profile": "Profil",
+      "send": "Wyślij"
+    },
+    "beneficiaries": "Odbiorcy",
+    "cards": "Karty",
+    "cryptoWallets": "Portfele kryptowalut",
+    "dashboard": "Panel",
+    "deposit": "Wpłata",
+    "logout": "Wyloguj się",
+    "portal": "Portal",
+    "profileKyc": "Profil i weryfikacja KYC",
+    "section": {
+      "account": "Konto",
+      "manage": "Zarządzanie"
+    },
+    "sendMoney": "Wyślij pieniądze",
+    "settings": "Ustawienia",
+    "virtualAccounts": "Konta wirtualne",
+    "wallets": "Portfele",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "Konto",
+    "emailLabel": "E-mail",
+    "endorsementsDescription": "Weryfikacja wymagana osobno dla poszczególnych usług, np. lokalnych przelewów bankowych lub kart wirtualnych.",
+    "endorsementsLoadError": "Nie udało się wczytać potwierdzeń.",
+    "endorsementsTitle": "Potwierdzenia",
+    "heading": "Profil i weryfikacja",
+    "identityVerificationTitle": "Weryfikacja tożsamości",
+    "restartVerification": "Rozpocznij weryfikację ponownie",
+    "startVerification": "Rozpocznij weryfikację",
+    "statusApproved": "Twoja tożsamość została zweryfikowana. Masz pełny dostęp do wysyłania, kart i kont wirtualnych.",
+    "statusNotStarted": "Wymagane, zanim będziesz mógł wysyłać pieniądze, posiadać konto wirtualne lub otrzymać kartę.",
+    "statusPending": "Otrzymaliśmy Twoje dane i weryfikujemy je — powiadomimy Cię, gdy zapadnie decyzja.",
+    "statusRejected": "Twoje ostatnie zgłoszenie nie zostało zatwierdzone — rozpocznij nowe poniżej.",
+    "subheading": "Zarządzaj danymi swojej tożsamości",
+    "typeLabel": "Typ"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "Kwota do wysłania ({{currency}})",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "Obciąż portfel",
+      "prompt": "Kwota do wysłania",
+      "promptTo": "Kwota do wysłania dla {{name}}",
+      "recipientFallback": "odbiorcę",
+      "willReceive": "Pokażemy dokładnie, ile otrzyma {{recipient}}, zanim potwierdzisz.",
+      "willReceiveWithCurrency": "Pokażemy dokładnie, ile otrzyma {{recipient}} w walucie {{currency}}, zanim potwierdzisz."
+    },
+    "buttons": {
+      "back": "Wstecz",
+      "confirmAndSend": "Potwierdź i wyślij",
+      "continue": "Dalej",
+      "getQuote": "Pobierz wycenę",
+      "requote": "Nowa wycena"
+    },
+    "errors": {
+      "enterAmount": "Podaj kwotę",
+      "fieldRequired": "Pole {{field}} jest wymagane",
+      "maxLength": "Maksymalnie {{max}} znaków",
+      "minLength": "Co najmniej {{min}} znaków"
+    },
+    "result": {
+      "payoutId": "ID wypłaty: {{id}}",
+      "payoutSubmitted": "Wypłata zlecona",
+      "refreshing": "(odświeżanie…)",
+      "sendAnother": "Wyślij kolejną",
+      "statusLabel": "Status:",
+      "viewWallets": "Zobacz portfele"
+    },
+    "review": {
+      "expired": "Ta wycena wygasła — pobierz nową, aby kontynuować.",
+      "expiresIn": "Wycena wygasa za {{seconds}} s.",
+      "rateLabel": "Kurs",
+      "recipientGetsLabel": "Odbiorca otrzymuje",
+      "toLabel": "Do",
+      "totalChargedLabel": "Łączna kwota obciążenia"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "Wybierz odbiorcę",
+      "prompt": "Do kogo wysyłasz pieniądze?"
+    },
+    "step0": {
+      "countryLabel": "Kraj",
+      "countryPlaceholder": "Wybierz kraj",
+      "prompt": "Do kogo wysyłasz pieniądze?",
+      "recipientNameLabel": "Nazwa odbiorcy",
+      "recipientNamePlaceholder": "Jan Kowalski"
+    },
+    "step1": {
+      "countryFallback": "tego kraju",
+      "methodRange": "{{min}}–{{max}} {{currency}} za przelew",
+      "noMethods": "Brak aktywnych metod wypłaty dla tego kraju.",
+      "prompt": "W jaki sposób {{recipient}} w kraju {{country}} ma otrzymać płatność?",
+      "recipientFallback": "tego odbiorcy"
+    },
+    "step2": {
+      "noDetailsNeeded": "Ta metoda wypłaty nie wymaga dodatkowych danych.",
+      "prompt": "Szczegóły: {{method}}",
+      "selectFieldPlaceholder": "Wybierz: {{field}}"
+    },
+    "steps": {
+      "amount": "Kwota",
+      "beneficiary": "Odbiorca",
+      "details": "Szczegóły",
+      "method": "Metoda",
+      "recipient": "Odbiorca",
+      "review": "Podsumowanie"
+    },
+    "subtitle": "Wybierz kraj i sposób płatności, a następnie potwierdź kwotę.",
+    "title": "Wyślij pieniądze",
+    "toast": {
+      "enterNameAndCountry": "Podaj nazwę i wybierz kraj, aby kontynuować",
+      "payoutFailed": "Wypłata nie powiodła się",
+      "payoutSubmitted": "Wypłata zlecona",
+      "payoutSubmittedDescription": "Powiadomimy Cię, gdy zostanie rozliczona.",
+      "pickBeneficiary": "Wybierz odbiorcę, aby kontynuować",
+      "pickMethod": "Wybierz metodę wypłaty, aby kontynuować",
+      "quoteFailed": "Nie udało się pobrać wyceny",
+      "saveRecipientFailed": "Nie udało się zapisać odbiorcy",
+      "tryAgain": "Spróbuj ponownie."
+    },
+    "toggle": {
+      "newRecipient": "Nowy odbiorca",
+      "savedBeneficiary": "Zapisany odbiorca"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "Potwierdź nowe hasło",
+      "currentPasswordLabel": "Obecne hasło",
+      "description": "Wybierz silne hasło, którego nie używasz nigdzie indziej.",
+      "newPasswordLabel": "Nowe hasło",
+      "submit": "Zaktualizuj hasło",
+      "title": "Zmień hasło",
+      "toastDescription": "Zmiana hasła nie jest jeszcze dostępna w tej wersji.",
+      "toastTitle": "Jeszcze niedostępne"
+    },
+    "copiedToClipboard": "Skopiowano do schowka",
+    "copyError": "Nie udało się skopiować",
+    "subtitle": "Zarządzaj bezpieczeństwem swojego konta",
+    "title": "Ustawienia",
+    "twoFactor": {
+      "authenticatorApp": "Aplikacja uwierzytelniająca",
+      "description": "Dodaj dodatkową warstwę zabezpieczeń do swojego konta.",
+      "disable": {
+        "description": "Potwierdź swoje hasło, aby wyłączyć uwierzytelnianie dwuskładnikowe.",
+        "error": "Nie udało się wyłączyć uwierzytelniania dwuskładnikowego.",
+        "passwordLabel": "Hasło",
+        "submit": "Wyłącz uwierzytelnianie dwuskładnikowe",
+        "submitting": "Wyłączanie…",
+        "title": "Wyłącz uwierzytelnianie dwuskładnikowe"
+      },
+      "enabled": "Włączone",
+      "loading": "Ładowanie…",
+      "notConfigured": "Jeszcze nie skonfigurowano",
+      "setup": {
+        "backupCodesDescription": "Zachowaj je w bezpiecznym miejscu — każdy z nich można użyć raz, aby zalogować się, jeśli stracisz dostęp do aplikacji uwierzytelniającej. Nie zostaną ponownie wyświetlone.",
+        "backupCodesTitle": "Zapisz swoje kody zapasowe",
+        "codeLabel": "Kod 6-cyfrowy",
+        "continueButton": "Dalej",
+        "copyAll": "Kopiuj wszystkie",
+        "done": "Gotowe",
+        "enableButton": "Włącz uwierzytelnianie dwuskładnikowe",
+        "enterCodeTitle": "Wpisz kod",
+        "manualKeyLabel": "Nie możesz zeskanować? Wpisz ten klucz ręcznie",
+        "qrAlt": "Kod QR konfiguracji 2FA",
+        "scanTitle": "Zeskanuj aplikacją uwierzytelniającą",
+        "verifyError": "Nie udało się zweryfikować tego kodu.",
+        "verifying": "Weryfikowanie…"
+      },
+      "title": "Uwierzytelnianie dwuskładnikowe",
+      "toast": {
+        "disabled": "Uwierzytelnianie dwuskładnikowe wyłączone",
+        "setupError": "Nie udało się rozpocząć konfiguracji"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "Rodzaj konta",
+    "alreadyHaveAccount": "Masz już konto?",
+    "business": "Firma",
+    "businessNameLabel": "Nazwa firmy",
+    "callingCodeAriaLabel": "Numer kierunkowy",
+    "countryLabel": "Kraj",
+    "createAccount": "Utwórz konto",
+    "createYourAccount": "Utwórz swoje konto",
+    "creatingAccount": "Tworzenie konta…",
+    "defaultProductName": "White Label",
+    "emailLabel": "E-mail",
+    "fullNameLabel": "Imię i nazwisko",
+    "genericError": "Nie udało się utworzyć konta.",
+    "individual": "Osoba prywatna",
+    "passwordLabel": "Hasło",
+    "phoneNumberLabel": "Numer telefonu",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "Wybierz swój kraj",
+    "signIn": "Zaloguj się",
+    "startSendingDescription": "Zacznij wysyłać, przechowywać i wydawać w kilka minut"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "Zobacz profil"
+    },
+    "prime": {
+      "notifications": "Powiadomienia",
+      "switchToDarkMode": "Przełącz na tryb ciemny",
+      "switchToLightMode": "Przełącz na tryb jasny"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "Konto wirtualne gotowe",
+    "addCurrency": "Dodaj walutę",
+    "allCurrenciesAdded": "Masz już konto dla każdej dostępnej waluty.",
+    "copiedToClipboard": "Skopiowano do schowka",
+    "copyError": "Nie udało się skopiować",
+    "copyField": "Kopiuj: {{field}}",
+    "createAccount": "Utwórz konto",
+    "createAccountError": "Nie udało się utworzyć konta",
+    "creating": "Tworzenie…",
+    "noAccountsYet": "Brak kont wirtualnych — utwórz jedno dla wybranej waluty poniżej.",
+    "noCurrenciesAvailable": "Żadne waluty dla kont wirtualnych nie są jeszcze dostępne.",
+    "noVerificationNeeded": "Weryfikacja niewymagana",
+    "requiresVerification": "Wymaga weryfikacji: {{endorsement}} — skontaktuj się z pomocą techniczną, aby zacząć.",
+    "shareDetails": "Udostępnij te dane osobie, która wysyła Ci środki.",
+    "startVerification": "Rozpocznij weryfikację",
+    "subtitle": "Dedykowane dane bankowe, których możesz używać wielokrotnie dla każdego przychodzącego przelewu, raz na walutę.",
+    "title": "Konta wirtualne",
+    "verificationNote": "Niektóre szyny płatnicze wymagają jednorazowej weryfikacji przed wydaniem konta.",
+    "verified": "Zweryfikowano",
+    "yourAccounts": "Twoje konta"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} oczekujące",
+    "wallet": "Portfel"
+  },
+  "walletDetail": {
+    "allWallets": "Wszystkie portfele",
+    "available": "Dostępne",
+    "balanceOverTime": "Saldo w czasie",
+    "cancel": "Anuluj",
+    "noActivity": "Brak aktywności",
+    "pageOf": "Strona {{page}} / {{totalPages}}",
+    "pending": "Oczekujące",
+    "removeDialogDescription": "Portfel jest pusty, więc jest to bezpieczne — możesz ponownie dodać {{currencyCode}} później, jeśli nadal będzie dostępna.",
+    "removeDialogTitle": "Usunąć portfel {{currencyCode}}?",
+    "removeWallet": "Usuń portfel",
+    "removeWalletError": "Nie udało się usunąć portfela",
+    "removing": "Usuwanie…",
+    "statement": "Wyciąg",
+    "walletRemoved": "Portfel usunięty",
+    "walletTitle": "Portfel {{currencyCode}}"
+  },
+  "wallets": {
+    "add": "Dodaj",
+    "addCurrencyPlaceholder": "Dodaj walutę",
+    "addWalletError": "Nie udało się dodać portfela",
+    "empty": "Brak portfeli. Pojawią się tutaj, gdy tylko będziesz mieć saldo.",
+    "subtitle": "Twoje salda we wszystkich walutach",
+    "title": "Portfele",
+    "walletAdded": "Portfel dodany",
+    "walletLabel": "Portfel"
+  }
+}

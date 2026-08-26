@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "受取人を追加",
+    "addBeneficiary": "受取人を追加",
+    "addError": "受取人を追加できませんでした",
+    "added": "受取人を追加しました",
+    "back": "戻る",
+    "cancel": "キャンセル",
+    "continue": "続ける",
+    "country": "国",
+    "detail": {
+      "added": "追加日",
+      "currency": "通貨",
+      "editHint": "支払い情報はここでは編集できません。変更がある場合は、この受取人を削除して新しく追加してください。",
+      "editName": "名前を編集",
+      "name": "名前",
+      "paymentDetails": "支払い情報",
+      "removeBeneficiary": "受取人を削除",
+      "save": "保存",
+      "title": "受取人の詳細",
+      "type": "種類"
+    },
+    "empty": "受取人はまだ登録されていません。追加して送金を始めましょう。",
+    "fieldRequiredError": "{{field}}を入力してください",
+    "maxCharsError": "最大{{max}}文字まで入力できます",
+    "methodDetailsHeading": "{{method}}の詳細",
+    "minCharsError": "{{min}}文字以上入力してください",
+    "nameAndCountryRequired": "続けるには名前を入力し、国を選択してください",
+    "noExtraDetailsNeeded": "この受取方法には追加情報は不要です。",
+    "noPayoutMethods": "この国に対応する受取方法は現在ありません。",
+    "payoutMethodQuestion": "{{country}}の{{name}}へどの方法で支払いますか？",
+    "payoutMethodRequired": "続けるには受取方法を選択してください",
+    "recipientName": "受取人名",
+    "recipientNamePlaceholder": "Jane Doe",
+    "remove": "削除",
+    "removeDialogDescription": "今後ここへ送金するには再度追加が必要です。過去の送金には影響しません。",
+    "removeDialogTitle": "{{name}}を削除しますか？",
+    "removeError": "受取人を削除できませんでした",
+    "removed": "受取人を削除しました",
+    "selectCountryPlaceholder": "国を選択",
+    "selectFieldPlaceholder": "{{field}}を選択",
+    "steps": {
+      "paymentDetails": "支払い情報",
+      "payoutMethod": "受取方法",
+      "recipient": "受取人"
+    },
+    "subtitle": "送金先の人物や口座",
+    "table": {
+      "actions": "操作",
+      "added": "追加日",
+      "currency": "通貨",
+      "name": "名前"
+    },
+    "thisCountry": "この国",
+    "thisRecipient": "この受取人",
+    "title": "受取人",
+    "transferRange": "1回の送金につき{{min}}〜{{max}} {{currency}}",
+    "updateError": "受取人を更新できませんでした",
+    "updated": "受取人を更新しました",
+    "whoAreYouSendingTo": "誰に送金しますか？"
+  },
+  "cards": {
+    "addFunds": "入金する",
+    "addedThisMonth": "今月の入金額",
+    "airlinePayments": "航空会社への支払い",
+    "balance": "残高 {{amount}}",
+    "billingAddress": "請求先住所",
+    "cancel": "キャンセル",
+    "cardEndingIn": "下4桁が{{last4}}のカード",
+    "cardNumberLabel": "カード番号",
+    "cardholder": "カード名義人",
+    "confirmTerminate": "もう一度クリックして確定してください — この操作は取り消せません",
+    "copyNumber": "番号をコピー",
+    "cvv": "CVV {{cvv}}",
+    "emptyState": "カードはまだありません。発行を申請して利用を開始しましょう。",
+    "exp": "有効期限 {{expiry}}",
+    "feeAmount": "手数料 {{amount}}",
+    "freezeCard": "カードを凍結",
+    "hidesAutomatically": "自動的に非表示になります",
+    "initialFundingHelp": "最低3ドルです。作成手数料およびチャージ手数料とともにUSDウォレットから引き落とされます。",
+    "initialFundingLabel": "初回入金額（USD）",
+    "manage": "管理 →",
+    "noTransactions": "取引履歴はまだありません。",
+    "program": "プログラム",
+    "requestCard": "カードを申請",
+    "requestDialogTitle": "バーチャルカードを申請",
+    "requesting": "申請中…",
+    "spentThisMonth": "今月の利用額",
+    "subtitle": "USDウォレットに紐づいたVisaバーチャルカード",
+    "terminateCard": "カードを解約",
+    "title": "カード",
+    "toast": {
+      "airlineDisabled": "航空会社への支払いを無効にしました",
+      "airlineEnabled": "航空会社への支払いを有効にしました",
+      "airlineError": "航空会社への支払い設定を更新できませんでした",
+      "cardFrozen": "カードを凍結しました",
+      "cardIssued": "カードを発行しました",
+      "cardTerminated": "カードを解約しました",
+      "cardTerminatedDescription": "残高がある場合は自動的にウォレットへ返金されます。",
+      "cardToppedUp": "カードにチャージしました",
+      "cardUnfrozen": "カードの凍結を解除しました",
+      "copied": "{{label}}をコピーしました",
+      "copyError": "コピーできませんでした",
+      "freezeError": "凍結状態を更新できませんでした",
+      "issueCardError": "カードを発行できませんでした",
+      "revealCardError": "カード情報を表示できませんでした",
+      "terminateError": "カードを解約できませんでした",
+      "topupFailed": "チャージに失敗しました",
+      "withdrawalFailed": "出金に失敗しました",
+      "withdrawalSubmitted": "出金を申請しました",
+      "withdrawalSubmittedDescription": "手数料が差し引かれた後、差額がウォレットに反映されます。"
+    },
+    "topUp": "チャージ",
+    "transactionFallback": "取引",
+    "transactions": "取引履歴",
+    "unfreezeCard": "凍結を解除",
+    "virtualUsd": "バーチャル・USD",
+    "visaVirtualCardUsd": "Visaバーチャルカード・USD",
+    "withdraw": "出金",
+    "withdrawFeeNote": "出金額がウォレットに反映される前に手数料が差し引かれます。"
+  },
+  "common": {
+    "language": "言語"
+  },
+  "crypto": {
+    "addressCopied": "アドレスをコピーしました",
+    "copyAddressError": "アドレスをコピーできませんでした",
+    "depositAddressReady": "入金アドレスの準備ができました",
+    "generateAddress": "アドレスを生成",
+    "generateAddressError": "アドレスを生成できませんでした",
+    "generateDescription": "対応チェーンの入金アドレスを生成します。",
+    "generating": "生成中…",
+    "noDepositsYet": "暗号資産の入金履歴はまだありません",
+    "noWalletsYet": "暗号資産ウォレットはまだありません — 下のボタンからアドレスを生成して始めましょう。",
+    "selectAssetPlaceholder": "資産を選択",
+    "sharedAddressWarning": "このアドレスは同じ資産を扱う他のユーザーと共有される場合があります。入金はお客様のアカウントに照合され、弊社チームによる確認後に残高へ反映されます。",
+    "subtitle": "対応資産の入金アドレスとオンチェーン入金履歴。",
+    "title": "暗号資産ウォレット",
+    "transactionsDescription": "お客様のアカウントに照合されたすべてのオンチェーン入金。",
+    "transactionsTitle": "暗号資産の取引履歴",
+    "viewOnExplorer": "ブロックエクスプローラーで見る",
+    "yourWallets": "お客様のウォレット"
+  },
+  "dashboard": {
+    "activityTitle": "最近のアクティビティ",
+    "heroLabel": "合計残高",
+    "stats": {
+      "available": "利用可能額",
+      "pending": "保留中",
+      "recentActivity": "最近のアクティビティ",
+      "wallets": "ウォレット"
+    },
+    "subtitle": "お客様のアカウントの最新状況です",
+    "title": "おかえりなさい",
+    "walletLabel": "ウォレット"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "ウォレットはまだありません",
+      "nothingHereYet": "ここにはまだ何もありません",
+      "recentActivity": "最近のアクティビティ",
+      "totalBalance": "合計残高",
+      "yourWallets": "お客様のウォレット"
+    },
+    "aurora": {
+      "balance": "残高",
+      "noTrendData": "推移データはまだありません",
+      "noWalletsYet": "ウォレットはまだありません",
+      "nothingHereYet": "ここにはまだ何もありません",
+      "recentActivity": "最近のアクティビティ",
+      "trend": "推移",
+      "wallets": "ウォレット"
+    },
+    "meridian": {
+      "balanceTrend": "残高の推移",
+      "noWalletsYet": "ウォレットはまだありません",
+      "nothingHereYet": "ここにはまだ何もありません",
+      "overview": "概要",
+      "recentActivity": "最近のアクティビティ",
+      "wallets": "ウォレット"
+    },
+    "nova": {
+      "balanceTrend": "残高の推移",
+      "noActivityYet": "アクティビティはまだありません",
+      "noWalletsYet": "ウォレットはまだありません",
+      "nothingHereYet": "ここにはまだ何もありません",
+      "recentActivity": "最近のアクティビティ",
+      "wallets": "ウォレット"
+    },
+    "prime": {
+      "amount": "金額",
+      "balanceTrend": "残高の推移",
+      "description": "内容",
+      "noWalletsYet": "ウォレットはまだありません",
+      "nothingHereYet": "ここにはまだ何もありません",
+      "recentActivity": "最近のアクティビティ",
+      "status": "ステータス",
+      "wallets": "ウォレット"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "戻る",
+      "continue": "続ける",
+      "startDeposit": "入金を開始"
+    },
+    "cryptoCard": {
+      "description": "入金アドレスとオンチェーン入金履歴は専用ページに移動しました。",
+      "goToWallets": "暗号資産ウォレットへ移動",
+      "title": "または暗号資産で入金"
+    },
+    "dialog": {
+      "amountToPay": "お支払い金額",
+      "copyLinkAriaLabel": "リンクをコピー",
+      "estimatedDelivery": "着金予定日",
+      "exchangeRate": "為替レート",
+      "fee": "手数料",
+      "initiated": "入金を開始しました",
+      "openLinkAriaLabel": "リンクを開く",
+      "title": "入金する",
+      "youllReceive": "受取金額"
+    },
+    "errors": {
+      "enterAmount": "金額を入力してください",
+      "fieldRequired": "{{field}}を入力してください",
+      "pickWallet": "入金先のウォレットを選択してください"
+    },
+    "localCard": {
+      "depositButton": "入金する",
+      "description": "国を選択し、銀行振込、CODI、DEBINなどのローカル決済で入金してください。",
+      "title": "またはローカル決済方法で入金"
+    },
+    "step0": {
+      "countryLabel": "国",
+      "countryPlaceholder": "国を選択",
+      "prompt": "どの国からお支払いしますか？"
+    },
+    "step1": {
+      "methodRange": "1回の入金につき{{min}}〜{{max}} {{currency}}",
+      "noMethods": "この国に対応する入金方法は現在ありません。",
+      "prompt": "{{country}}からどのようにお支払いしますか？",
+      "thisCountryFallback": "この国"
+    },
+    "step2": {
+      "amountLabel": "金額（{{currency}}）",
+      "prompt": "{{method}} — 金額と詳細",
+      "selectFieldPlaceholder": "{{field}}を選択",
+      "walletLabel": "入金先ウォレット",
+      "walletLoading": "読み込み中…",
+      "walletPlaceholder": "ウォレットを選択"
+    },
+    "steps": {
+      "amountDetails": "金額と詳細",
+      "country": "国",
+      "method": "方法"
+    },
+    "subtitle": "ローカル決済または暗号資産による一括入金でウォレットにチャージできます。",
+    "title": "入金",
+    "toast": {
+      "copied": "クリップボードにコピーしました",
+      "copyFailed": "コピーできませんでした",
+      "pickCountry": "続けるには国を選択してください",
+      "pickMethod": "続けるには支払い方法を選択してください",
+      "startFailed": "入金を開始できませんでした"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "続ける",
+      "submit": "審査へ提出"
+    },
+    "common": {
+      "select": "選択"
+    },
+    "header": {
+      "subtitle": "法人KYB — 会社および所有者に関する情報。",
+      "title": "法人の本人確認"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "口座利用の目的",
+        "complianceScreeningProgram": "コンプライアンス・スクリーニングプログラム",
+        "conductsMoneyServices": "マネーサービス業務を行っている",
+        "conductsMoneyServicesHint": "送金、外貨両替、その他これに類する規制対象のMSB業務。",
+        "describeAccountPurpose": "口座利用の目的を記入してください",
+        "describeMoneyServicesActivity": "マネーサービス業務の内容を記入してください",
+        "estimatedAnnualRevenue": "年間売上高の見込み（USD、任意）",
+        "estimatedAnnualRevenuePlaceholder": "例：1000000_to_5000000",
+        "eurdeCombined": "EURDE（合算）",
+        "explainFlaggedActivity": "該当した項目について説明してください",
+        "extraFeeHint": "（追加手数料が発生する場合があります）",
+        "highRiskActivities": "高リスク業務（該当するものをすべて選択）",
+        "notSpecified": "未指定",
+        "pepStatus": "重要な公的地位を有する者（PEP）",
+        "pepStatusHint": "所有者・役員のいずれかがPEPまたはその近親者・関係者に該当する場合。",
+        "prohibitedCountries": "禁止国での事業活動（任意）",
+        "selectPlaceholder": "選択",
+        "sourceOfFunds": "資金の出所",
+        "thirdPartyMsbPayments": "第三者MSBの決済を処理している",
+        "virtualAccountsToProvision": "発行するバーチャルアカウント"
+      },
+      "addresses": {
+        "physicalAddressHeading": "実所在地",
+        "physicalProofHint": "賃貸契約書や公共料金請求書など。登録住所と異なる場合に必要です。",
+        "registeredAddressHeading": "登録住所",
+        "sameAsRegistered": "登録住所と同じ",
+        "title": "住所"
+      },
+      "businessDocument": {
+        "title": "事業関連書類"
+      },
+      "businessInfo": {
+        "businessType": "事業形態",
+        "description": "事業内容",
+        "dialCode": "国番号",
+        "dialCodePlaceholder": "+1",
+        "email": "会社のメールアドレス",
+        "incorporationCountry": "設立国（任意）",
+        "incorporationDate": "設立日",
+        "industry": "業種（任意）",
+        "legalName": "法人正式名称",
+        "phone": "電話番号",
+        "registrationNumber": "登録番号",
+        "requiredFieldsHint": "上記の必須項目をご入力ください。",
+        "taxId": "納税者番号（任意）",
+        "title": "事業情報",
+        "tradeName": "屋号",
+        "website": "ウェブサイト（任意）",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "「事業登録」を目的とする書類が1点必要です — 上記の初期設定でこの条件を満たします。",
+        "description": "内容",
+        "descriptionPlaceholder": "設立証明書",
+        "documentPurpose": "書類の用途",
+        "fileLabel": "ファイル",
+        "selectPlaceholder": "選択"
+      },
+      "ownerIdDocuments": {
+        "title": "所有者の本人確認書類"
+      },
+      "ownersDirectors": {
+        "addAnother": "所有者・役員をさらに追加",
+        "authorizedSigner": "署名権限者",
+        "dateOfBirth": "生年月日",
+        "director": "役員",
+        "email": "メールアドレス",
+        "firstName": "名",
+        "hasControl": "支配権を有する",
+        "hasOwnership": "持分を有する",
+        "identityDocsRequired": "すべての所有者・役員について、本人確認書類が2点とも必要です。",
+        "lastName": "姓",
+        "nationality": "国籍",
+        "ownerHeading": "所有者・役員 {{number}}",
+        "ownershipPercent": "持分比率（%）",
+        "personFallbackName": "所有者・役員 {{index}}",
+        "personTitle": "役職",
+        "phoneOptional": "電話番号（任意）",
+        "photoIdHeading": "2. 政府発行の写真付きID",
+        "residentialAddressHeading": "住所",
+        "taxId": "SSN / EIN / ITIN",
+        "taxIdHeading": "1. 納税者番号",
+        "title": "所有者・役員",
+        "titlePlaceholder": "CEO、業務執行社員など"
+      },
+      "review": {
+        "accountPurpose": "口座利用の目的",
+        "business": "事業",
+        "highRiskActivities": "高リスク業務",
+        "none": "なし",
+        "ownersDirectors": "所有者・役員",
+        "readyMessage": "内容の準備ができました。ご確認のうえ提出してください。",
+        "registeredAddress": "登録住所",
+        "title": "確認",
+        "tradeName": "屋号",
+        "type": "種類"
+      },
+      "riskPurpose": {
+        "title": "リスクと利用目的"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "入力が必要な項目がまだ残っています。",
+        "title": "以下の項目をご確認ください"
+      },
+      "submitFailed": {
+        "title": "提出に失敗しました"
+      },
+      "submitted": {
+        "description": "貴社の事業情報を確認のうえ、追ってご連絡いたします。",
+        "title": "本人確認情報を提出しました"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "続ける",
+      "submit": "審査へ提出"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "選択"
+    },
+    "header": {
+      "subtitle": "本人確認のためにいくつかの情報をご入力ください。",
+      "title": "本人確認"
+    },
+    "steps": {
+      "address": {
+        "title": "住所"
+      },
+      "financialProfile": {
+        "accountPurpose": "口座利用の目的",
+        "actingAsIntermediary": "第三者の代理として利用する",
+        "actingAsIntermediaryHint": "ご自身のためではなく、他の方の代理として利用する場合。",
+        "chooseAccountsHint": "USDとEUR、またはEURDE単独のいずれかをお選びください。",
+        "describeAccountPurpose": "口座利用の目的を記入してください",
+        "employmentStatus": "雇用形態",
+        "eurdeCombined": "EURDE（合算）",
+        "expectedMonthlyPayments": "月間の想定決済額（USD）",
+        "extraFeeNote": "追加手数料が発生する場合があります",
+        "occupation": "職業",
+        "sourceOfFunds": "資金の出所",
+        "title": "財務プロフィール",
+        "virtualAccounts": "発行するバーチャルアカウント"
+      },
+      "identityDocument": {
+        "govIdHeading": "政府発行の身分証明書",
+        "selfieHint": "顔がはっきり写った写真をご用意ください。",
+        "selfiePhoto": "自撮り写真",
+        "title": "本人確認書類"
+      },
+      "personalInfo": {
+        "bvn": "BVN",
+        "bvnPlaceholder": "11桁",
+        "currentEmployer": "現在の勤務先（任意）",
+        "dateOfBirth": "生年月日",
+        "dialCode": "国番号",
+        "dialCodePlaceholder": "+1",
+        "email": "メールアドレス",
+        "firstName": "名",
+        "gender": "性別",
+        "genderFemale": "女性",
+        "genderMale": "男性",
+        "immigrationStatus": "在留資格（任意）",
+        "immigrationStatusPlaceholder": "該当なし",
+        "lastName": "姓",
+        "middleName": "ミドルネーム（任意）",
+        "nationality": "国籍",
+        "nin": "NIN",
+        "ninPlaceholder": "11桁",
+        "phone": "電話番号",
+        "phoneHint": "「+1」のような国番号と、数字のみの電話番号（8〜15桁）を入力してください。",
+        "phonePlaceholder": "5551234567",
+        "taxId": "納税者番号",
+        "taxIdPlaceholder": "SSN / 国の納税者番号",
+        "title": "個人情報"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "口座利用の目的",
+          "address": "住所",
+          "email": "メールアドレス",
+          "idDocument": "本人確認書類",
+          "name": "氏名",
+          "nationality": "国籍",
+          "phone": "電話番号"
+        },
+        "ready": "内容の準備ができました。ご確認のうえ提出してください。",
+        "title": "確認"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "入力が必要な項目がまだ残っています。",
+        "title": "以下の項目をご確認ください"
+      },
+      "submitFailed": {
+        "title": "提出に失敗しました"
+      },
+      "submitted": {
+        "description": "お客様の情報を確認のうえ、追ってご連絡いたします。",
+        "title": "本人確認情報を提出しました"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "戻る",
+    "chooseCountryFirstPlaceholder": "先に国を選択してください",
+    "cityLabel": "市区町村",
+    "clickToUpload": "クリックしてアップロード",
+    "countryLabel": "国",
+    "dateIssuedLabel": "発行日",
+    "documentBackOptionalLabel": "書類 — 裏面（任意）",
+    "documentFrontLabel": "書類 — 表面",
+    "documentNumberLabel": "書類番号",
+    "documentNumberPlaceholder": "例：P00012345",
+    "documentTypeLabel": "書類の種類",
+    "expirationDateLabel": "有効期限",
+    "expirationDateOptionalLabel": "有効期限（任意）",
+    "fixBeforeContinuing": "続ける前に、以下の内容を修正してください。",
+    "issuingCountryLabel": "発行国",
+    "loadingEllipsis": "読み込み中…",
+    "noMatches": "一致する結果はありません。",
+    "noPostalCodesText": "この国では郵便番号は使用されません。",
+    "postalCodeFormatError": "入力形式が正しくありません。",
+    "postalCodeFormatErrorWithExample": "入力形式が正しくありません（例：{{example}}）。",
+    "postalCodeLabel": "郵便番号",
+    "proofOfAddressHint": "公共料金請求書、銀行明細書、または賃貸契約書。",
+    "proofOfAddressLabel": "住所証明書類",
+    "searchPlaceholder": "検索…",
+    "selectCountryPlaceholder": "国を選択",
+    "selectOption": "選択",
+    "selectPlaceholder": "選択…",
+    "setNationalityFirstPlaceholder": "先に国籍を設定してください",
+    "stateProvinceLabel": "都道府県／州",
+    "stepOf": "ステップ {{current}} / {{total}}",
+    "streetAddress2Label": "番地・建物名2（任意）",
+    "streetAddressLabel": "番地・建物名",
+    "streetAddressPlaceholder": "123 Main St"
+  },
+  "kycWizard": {
+    "backToDashboard": "ダッシュボードに戻る",
+    "pendingDescription": "ご提出いただいた情報を確認しております。審査が完了次第ご連絡いたします。",
+    "pendingHeading": "本人確認 審査中",
+    "verifiedDescription": "本人確認が完了しました。送金、カード、バーチャルアカウントのすべての機能をご利用いただけます。",
+    "verifiedHeading": "本人確認が完了しました"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "法人ログイン",
+      "demoCard": "カード",
+      "demoDeposit": "入金",
+      "demoSend": "送金",
+      "demoTotalBalance": "合計残高",
+      "demoTransaction1": "Coffee & co.",
+      "demoTransaction2": "給与",
+      "demoTransaction3": "デザイン報酬",
+      "feature1Desc": "法定通貨と暗号資産をひとつの残高で保有・移動でき、常に信頼できる残高を確認できます。",
+      "feature1Title": "ひとつの残高、すべての通貨",
+      "feature2Desc": "連絡先を選び、リアルタイムの見積もりを取得し、確定するだけ — 面倒な書類手続きなしで送金できます。",
+      "feature2Title": "数秒で送金",
+      "feature3Desc": "タップひとつでバーチャルカードを発行、同じ速さで凍結もできます。",
+      "feature3Title": "オンデマンドカード",
+      "feature4Desc": "すべての取引は、裏側で変更不可能な照合済み台帳に記録されます。",
+      "feature4Title": "銀行水準の台帳",
+      "featuresHeading": "資金管理に必要なすべてを",
+      "featuresSubheading": "隠れた手数料も複雑なメニューもない、シンプルに機能するバンキング。",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "お金を、シンプルに",
+      "heroHeadlineHighlight": "手間いらずに。",
+      "heroHeadlinePrefix": "バンキングを",
+      "heroSubheadline": "{{productName}}は、送金・保有・利用のためのモダンなウォレットです — 驚くほどシンプルで、確かなセキュリティ。",
+      "logIn": "ログイン",
+      "openAccountCta": "口座を開設する",
+      "planBusinessBlurb": "複数ユーザーでのアクセス、より高い利用限度額、専任サポート。",
+      "planBusinessCta": "お問い合わせ",
+      "planBusinessName": "ビジネス",
+      "planBusinessPrice": "個別見積もり",
+      "planPersonalBlurb": "個人向けの日常的な支払い・送金。",
+      "planPersonalCta": "始める",
+      "planPersonalName": "パーソナル",
+      "planPersonalPrice": "無料",
+      "pricingHeading": "シンプルな料金プラン",
+      "pricingSubheading": "まずは無料で始めて、事業の成長に応じてアップグレードできます。",
+      "signUpFree": "無料で登録"
+    },
+    "aurora": {
+      "badge": "驚くほどシンプルなお金の管理",
+      "businessLogin": "法人ログイン",
+      "demoActionCard": "カード",
+      "demoActionDeposit": "入金",
+      "demoActionSend": "送金",
+      "demoBalance": "$8,942.10",
+      "demoGrowth": "+12.4%",
+      "feature1Desc": "すべてのウォレット、すべての通貨が常に照合された状態で保たれます。",
+      "feature1Title": "ひとつの美しい残高",
+      "feature2Desc": "リアルタイムの見積もり、即時確定、書類手続き不要。",
+      "feature2Title": "数秒で送金",
+      "feature3Desc": "本人確認が完了したその瞬間にバーチャルカードを発行できます。",
+      "feature3Title": "オンデマンドカード",
+      "feature4Desc": "すべての取引が照合・監査可能な状態で記録されます。",
+      "feature4Title": "銀行水準の台帳",
+      "featuresHeading": "資金管理に必要なすべてを",
+      "featuresSubheading": "隠れた手数料も複雑なメニューもない、シンプルに機能するバンキング。",
+      "heroHeadlineHighlight": "ひとつの美しいビューに。",
+      "heroHeadlinePrefix": "すべての口座を、",
+      "heroSubheadline": "{{productName}}は、ウォレット・送金・カードをひとつにまとめた、開くのが楽しいダッシュボードを提供します。",
+      "logIn": "ログイン",
+      "openAccount": "口座を開設する",
+      "signUpFree": "無料で登録",
+      "thisMonth": "今月",
+      "totalBalance": "合計残高",
+      "vsLastMonth": "前月比"
+    },
+    "meridian": {
+      "eyebrow": "オペレーションプラットフォーム",
+      "featureCardIssuingDesc": "本人確認が完了したその瞬間に、顧客へバーチャルカードを発行できます。",
+      "featureCardIssuingTitle": "カード発行",
+      "featureComplianceDesc": "KYC、承認プロセス、監査ログを最初から組み込み。",
+      "featureComplianceTitle": "組み込みのコンプライアンス",
+      "featureLedgerDesc": "すべてのウォレット、すべての通貨をひとつの正確な記録に照合。",
+      "featureLedgerTitle": "統合台帳",
+      "featurePayoutsDesc": "数クリックでクロスボーダー送金の見積もり・確定・決済が完了します。",
+      "featurePayoutsTitle": "グローバル送金",
+      "featuresHeading": "業務に必要なすべてを",
+      "featuresSubheading": "資金移動業務のすべてを担う、ひとつのプラットフォーム。",
+      "heroHeadline": "スプレッドシートではなく、オペレーターとして資金移動を運用する。",
+      "heroSubheadline": "{{productName}}は、ウォレット・送金・カード・コンプライアンスをひとつのコンソールでチームに提供し、信頼できる台帳がその基盤を支えます。",
+      "logIn": "ログイン",
+      "openAccountCta": "口座を開設する",
+      "operatorLoginCta": "運営者ログイン",
+      "reconciledDesc": "計上されるすべての取引は複式簿記かつ冪等であり、プロバイダーの記録と自動的に照合されます。",
+      "reconciledTitle": "標準で照合済み",
+      "signUp": "新規登録",
+      "statCurrenciesLabel": "対応通貨数",
+      "statPayoutTimeLabel": "平均送金時間",
+      "statUptimeLabel": "稼働率",
+      "teamsDesc": "オーナー、管理者、オペレーターに対するロールベースのアクセス制御と、すべての操作の完全な監査ログ。",
+      "teamsTitle": "チーム向けに設計"
+    },
+    "nova": {
+      "createAccountCta": "アカウントを作成する",
+      "ctaHeading": "自社の決済基盤を運用する準備はできていますか？",
+      "ctaSubheading": "お客様のブランド、お客様の台帳 — その裏側をYativoが支えます。",
+      "feature1Desc": "すべての取引は変更不可能で監査可能な仕訳記録を通じて追跡されます — 単純な残高カラムに頼ることはありません。",
+      "feature1Title": "複式簿記台帳",
+      "feature2Desc": "Webhook駆動の計上により、資金移動の瞬間に顧客残高が常に最新の状態で保たれます。",
+      "feature2Title": "リアルタイム決済",
+      "feature3Desc": "定期実行されるジョブが台帳と上流の決済情報を照合し、差異を即座に検知します。",
+      "feature3Title": "自動照合",
+      "feature4Desc": "法定通貨と暗号資産のレールをひとつの勘定科目体系で管理し、グローバルな送金コリドーに対応します。",
+      "feature4Title": "マルチカレンシー対応",
+      "feature5Desc": "顧客セッションとスタッフセッションが交わることはありません — トークンも影響範囲も別々です。",
+      "feature5Title": "分離された2つの認証ドメイン",
+      "feature6Desc": "KYC審査、手動調整、送金、カード、Webhook — すべてをひとつのコンソールで。",
+      "feature6Title": "フルバックオフィス機能",
+      "featuresHeading": "デモではなく、インフラとして設計",
+      "featuresSubheading": "リセラーが顧客の実際の資金を安全に運用するために必要なすべて。",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "始める",
+      "heroHeadlineHighlight": "自社ブランドで運用する。",
+      "heroHeadlinePrefix": "フィンテック基盤を、",
+      "heroSubheadline": "{{productName}}は、実際の複式簿記台帳の上に構築されたホワイトラベルのウォレット・送金・カードプラットフォームを貴社に提供します — デプロイし、ブランド化し、独自のフィンテック事業を運用できます。",
+      "openAccountCta": "口座を開設する",
+      "operatorConsole": "運営者コンソール",
+      "signIn": "サインイン",
+      "trustBadge": "台帳で検証済み・1時間ごとに照合"
+    },
+    "prime": {
+      "balance": "残高",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "ダッシュボードにログイン",
+      "feature": {
+        "cardIssuing": {
+          "desc": "本人確認が完了したその瞬間に、顧客へバーチャルカードを発行できます。",
+          "title": "カード発行"
+        },
+        "compliance": {
+          "desc": "KYC、承認プロセス、監査ログを最初から組み込み。",
+          "title": "組み込みのコンプライアンス"
+        },
+        "ledger": {
+          "desc": "すべてのウォレット、すべての通貨をひとつの正確な記録に照合。",
+          "title": "統合台帳"
+        },
+        "payouts": {
+          "desc": "数クリックでクロスボーダー送金の見積もり・確定・決済が完了します。",
+          "title": "グローバル送金"
+        }
+      },
+      "featuresHeading": "業務に必要なすべてを",
+      "heroHeadline": "インターネットのための決済基盤。",
+      "heroSubheadline": "{{productName}}は、ウォレット・送金・カード・コンプライアンスをひとつのAPIとひとつのダッシュボードで提供します。",
+      "logIn": "ログイン",
+      "signUp": "新規登録",
+      "startNow": "今すぐ始める",
+      "stat": {
+        "deposits": "入金",
+        "payouts": "送金",
+        "refunds": "返金"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← ホームに戻る",
+    "backToSignIn": "← サインインに戻る",
+    "createAccount": "アカウントを作成",
+    "defaultProductName": "White Label",
+    "emailLabel": "メールアドレス",
+    "genericError": "サインインできません。認証情報をご確認ください。",
+    "invalidCodeError": "コードが正しくありません。もう一度お試しください。",
+    "newHere": "初めてご利用ですか？",
+    "passwordLabel": "パスワード",
+    "signIn": "サインイン",
+    "signInDescription": "アカウントにサインインしてください",
+    "signingIn": "サインイン中…",
+    "verificationCodeLabel": "確認コード",
+    "verify": "確認",
+    "verifyDescription": "認証アプリに表示された6桁のコード、またはバックアップコードを入力してください。",
+    "verifyHeading": "本人確認",
+    "verifying": "確認中…",
+    "welcomeBack": "おかえりなさい"
+  },
+  "nav": {
+    "account": "アカウント",
+    "atlas": {
+      "contacts": "連絡先",
+      "home": "ホーム",
+      "profile": "プロフィール",
+      "send": "送金"
+    },
+    "beneficiaries": "受取人",
+    "cards": "カード",
+    "cryptoWallets": "暗号資産ウォレット",
+    "dashboard": "ダッシュボード",
+    "deposit": "入金",
+    "logout": "ログアウト",
+    "portal": "ポータル",
+    "profileKyc": "プロフィール・本人確認",
+    "section": {
+      "account": "アカウント",
+      "manage": "管理"
+    },
+    "sendMoney": "送金する",
+    "settings": "設定",
+    "virtualAccounts": "バーチャルアカウント",
+    "wallets": "ウォレット",
+    "whiteLabel": "White Label"
+  },
+  "profile": {
+    "accountTitle": "アカウント",
+    "emailLabel": "メールアドレス",
+    "endorsementsDescription": "国内銀行振込やバーチャルカードなど、一部の機能にはサービスごとの本人確認が必要です。",
+    "endorsementsLoadError": "認証情報を読み込めませんでした。",
+    "endorsementsTitle": "認証情報",
+    "heading": "プロフィール・本人確認",
+    "identityVerificationTitle": "本人確認",
+    "restartVerification": "本人確認をやり直す",
+    "startVerification": "本人確認を開始",
+    "statusApproved": "本人確認が完了しました。送金、カード、バーチャルアカウントのすべての機能をご利用いただけます。",
+    "statusNotStarted": "送金、バーチャルアカウントの保有、カードの発行には本人確認が必要です。",
+    "statusPending": "ご提出いただいた情報を確認しております — 審査が完了次第ご連絡いたします。",
+    "statusRejected": "前回のご提出は承認されませんでした — 以下から新たに提出してください。",
+    "subheading": "本人確認情報を管理する",
+    "typeLabel": "種類"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "送金額（{{currency}}）",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "引き落とし元ウォレット",
+      "prompt": "送金額",
+      "promptTo": "{{name}}への送金額",
+      "recipientFallback": "受取人",
+      "willReceive": "確定前に、{{recipient}}が受け取る正確な金額を表示します。",
+      "willReceiveWithCurrency": "確定前に、{{recipient}}が{{currency}}で受け取る正確な金額を表示します。"
+    },
+    "buttons": {
+      "back": "戻る",
+      "confirmAndSend": "確認して送金",
+      "continue": "続ける",
+      "getQuote": "見積もりを取得",
+      "requote": "再見積もり"
+    },
+    "errors": {
+      "enterAmount": "金額を入力してください",
+      "fieldRequired": "{{field}}を入力してください",
+      "maxLength": "最大{{max}}文字まで入力できます",
+      "minLength": "{{min}}文字以上入力してください"
+    },
+    "result": {
+      "payoutId": "送金ID：{{id}}",
+      "payoutSubmitted": "送金を申請しました",
+      "refreshing": "（更新中…）",
+      "sendAnother": "もう一度送金する",
+      "statusLabel": "ステータス：",
+      "viewWallets": "ウォレットを見る"
+    },
+    "review": {
+      "expired": "この見積もりの有効期限が切れました — 続けるには再取得してください。",
+      "expiresIn": "見積もりの有効期限まであと{{seconds}}秒です。",
+      "rateLabel": "レート",
+      "recipientGetsLabel": "受取人の受取額",
+      "toLabel": "宛先",
+      "totalChargedLabel": "合計請求額"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "受取人を選択",
+      "prompt": "誰に送金しますか？"
+    },
+    "step0": {
+      "countryLabel": "国",
+      "countryPlaceholder": "国を選択",
+      "prompt": "誰に送金しますか？",
+      "recipientNameLabel": "受取人名",
+      "recipientNamePlaceholder": "Jane Doe"
+    },
+    "step1": {
+      "countryFallback": "この国",
+      "methodRange": "1回の送金につき{{min}}〜{{max}} {{currency}}",
+      "noMethods": "この国に対応する受取方法は現在ありません。",
+      "prompt": "{{country}}の{{recipient}}へどの方法で支払いますか？",
+      "recipientFallback": "この受取人"
+    },
+    "step2": {
+      "noDetailsNeeded": "この受取方法には追加情報は不要です。",
+      "prompt": "{{method}}の詳細",
+      "selectFieldPlaceholder": "{{field}}を選択"
+    },
+    "steps": {
+      "amount": "金額",
+      "beneficiary": "受取人",
+      "details": "詳細",
+      "method": "方法",
+      "recipient": "受取人",
+      "review": "確認"
+    },
+    "subtitle": "国と受取方法を選び、金額を確認してください。",
+    "title": "送金",
+    "toast": {
+      "enterNameAndCountry": "続けるには名前を入力し、国を選択してください",
+      "payoutFailed": "送金に失敗しました",
+      "payoutSubmitted": "送金を申請しました",
+      "payoutSubmittedDescription": "決済が完了次第ご連絡いたします。",
+      "pickBeneficiary": "続けるには受取人を選択してください",
+      "pickMethod": "続けるには受取方法を選択してください",
+      "quoteFailed": "見積もりを取得できませんでした",
+      "saveRecipientFailed": "受取人を保存できませんでした",
+      "tryAgain": "もう一度お試しください。"
+    },
+    "toggle": {
+      "newRecipient": "新しい受取人",
+      "savedBeneficiary": "保存済みの受取人"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "新しいパスワード（確認）",
+      "currentPasswordLabel": "現在のパスワード",
+      "description": "他では使用していない、強固なパスワードを設定してください。",
+      "newPasswordLabel": "新しいパスワード",
+      "submit": "パスワードを更新",
+      "title": "パスワードを変更",
+      "toastDescription": "パスワード変更機能は現在このビルドでは利用できません。",
+      "toastTitle": "まだご利用いただけません"
+    },
+    "copiedToClipboard": "クリップボードにコピーしました",
+    "copyError": "コピーできませんでした",
+    "subtitle": "アカウントのセキュリティを管理する",
+    "title": "設定",
+    "twoFactor": {
+      "authenticatorApp": "認証アプリ",
+      "description": "アカウントにもう一段階のセキュリティを追加します。",
+      "disable": {
+        "description": "二段階認証を無効にするにはパスワードを確認してください。",
+        "error": "二段階認証を無効にできませんでした。",
+        "passwordLabel": "パスワード",
+        "submit": "二段階認証を無効にする",
+        "submitting": "無効にしています…",
+        "title": "二段階認証を無効にする"
+      },
+      "enabled": "有効",
+      "loading": "読み込み中…",
+      "notConfigured": "未設定",
+      "setup": {
+        "backupCodesDescription": "これらのコードは安全な場所に保管してください。認証アプリにアクセスできなくなった場合、それぞれ1回ずつサインインに使用できます。再度表示されることはありません。",
+        "backupCodesTitle": "バックアップコードを保存",
+        "codeLabel": "6桁のコード",
+        "continueButton": "続ける",
+        "copyAll": "すべてコピー",
+        "done": "完了",
+        "enableButton": "二段階認証を有効にする",
+        "enterCodeTitle": "コードを入力",
+        "manualKeyLabel": "スキャンできない場合は、このキーを手動で入力してください",
+        "qrAlt": "2FA設定用QRコード",
+        "scanTitle": "認証アプリでスキャンしてください",
+        "verifyError": "コードを確認できませんでした。",
+        "verifying": "確認中…"
+      },
+      "title": "二段階認証",
+      "toast": {
+        "disabled": "二段階認証を無効にしました",
+        "setupError": "設定を開始できませんでした"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "アカウントの種類",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "business": "法人",
+    "businessNameLabel": "会社名",
+    "callingCodeAriaLabel": "国番号",
+    "countryLabel": "国",
+    "createAccount": "アカウントを作成",
+    "createYourAccount": "アカウントを作成する",
+    "creatingAccount": "アカウントを作成中…",
+    "defaultProductName": "White Label",
+    "emailLabel": "メールアドレス",
+    "fullNameLabel": "氏名",
+    "genericError": "アカウントを作成できませんでした。",
+    "individual": "個人",
+    "passwordLabel": "パスワード",
+    "phoneNumberLabel": "電話番号",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "国を選択してください",
+    "signIn": "サインイン",
+    "startSendingDescription": "数分で送金・保有・利用を始められます"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "プロフィールを表示"
+    },
+    "prime": {
+      "notifications": "通知",
+      "switchToDarkMode": "ダークモードに切り替え",
+      "switchToLightMode": "ライトモードに切り替え"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "バーチャルアカウントの準備ができました",
+    "addCurrency": "通貨を追加",
+    "allCurrenciesAdded": "利用可能なすべての通貨のアカウントをすでにお持ちです。",
+    "copiedToClipboard": "クリップボードにコピーしました",
+    "copyError": "コピーできませんでした",
+    "copyField": "{{field}}をコピー",
+    "createAccount": "アカウントを作成",
+    "createAccountError": "アカウントを作成できませんでした",
+    "creating": "作成中…",
+    "noAccountsYet": "バーチャルアカウントはまだありません — 下から通貨を選んで発行してください。",
+    "noCurrenciesAvailable": "現在利用可能なバーチャルアカウントの通貨はありません。",
+    "noVerificationNeeded": "本人確認は不要です",
+    "requiresVerification": "{{endorsement}}の本人確認が必要です — 開始するにはサポートまでお問い合わせください。",
+    "shareDetails": "この情報を送金元の相手に共有してください。",
+    "startVerification": "本人確認を開始",
+    "subtitle": "通貨ごとに1つ、すべての入金に繰り返しご利用いただける専用の銀行口座情報です。",
+    "title": "バーチャルアカウント",
+    "verificationNote": "一部のレールでは、アカウント発行前に一度限りの本人確認が必要です。",
+    "verified": "確認済み",
+    "yourAccounts": "お客様のアカウント"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} 保留中",
+    "wallet": "ウォレット"
+  },
+  "walletDetail": {
+    "allWallets": "すべてのウォレット",
+    "available": "利用可能額",
+    "balanceOverTime": "残高の推移",
+    "cancel": "キャンセル",
+    "noActivity": "アクティビティはまだありません",
+    "pageOf": "ページ {{page}} / {{totalPages}}",
+    "pending": "保留中",
+    "removeDialogDescription": "残高が空のため安全に削除できます — {{currencyCode}}が引き続き提供される場合は、後から再度追加できます。",
+    "removeDialogTitle": "{{currencyCode}}ウォレットを削除しますか？",
+    "removeWallet": "ウォレットを削除",
+    "removeWalletError": "ウォレットを削除できませんでした",
+    "removing": "削除中…",
+    "statement": "明細書",
+    "walletRemoved": "ウォレットを削除しました",
+    "walletTitle": "{{currencyCode}}ウォレット"
+  },
+  "wallets": {
+    "add": "追加",
+    "addCurrencyPlaceholder": "通貨を追加",
+    "addWalletError": "ウォレットを追加できませんでした",
+    "empty": "ウォレットはまだありません。残高が発生すると表示されます。",
+    "subtitle": "すべての通貨の残高をまとめて確認",
+    "title": "ウォレット",
+    "walletAdded": "ウォレットを追加しました",
+    "walletLabel": "ウォレット"
+  }
+}

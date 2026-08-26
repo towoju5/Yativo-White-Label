@@ -1,0 +1,974 @@
+{
+  "beneficiaries": {
+    "addABeneficiary": "添加收款人",
+    "addBeneficiary": "添加收款人",
+    "addError": "无法添加收款人",
+    "added": "收款人已添加",
+    "back": "返回",
+    "cancel": "取消",
+    "continue": "继续",
+    "country": "国家/地区",
+    "detail": {
+      "added": "添加时间",
+      "currency": "货币",
+      "editHint": "此处无法编辑收款信息——如信息有变，请移除该收款人并重新添加。",
+      "editName": "编辑姓名",
+      "name": "姓名",
+      "paymentDetails": "收款信息",
+      "removeBeneficiary": "移除收款人",
+      "save": "保存",
+      "title": "收款人详情",
+      "type": "类型"
+    },
+    "empty": "暂无收款人。添加一位以开始转账。",
+    "fieldRequiredError": "{{field}}为必填项",
+    "maxCharsError": "最多 {{max}} 个字符",
+    "methodDetailsHeading": "{{method}}详情",
+    "minCharsError": "至少 {{min}} 个字符",
+    "nameAndCountryRequired": "请输入姓名并选择国家/地区以继续",
+    "noExtraDetailsNeeded": "此收款方式无需填写其他信息。",
+    "noPayoutMethods": "该国家/地区暂无可用的收款方式。",
+    "payoutMethodQuestion": "{{country}}的{{name}}应如何收款？",
+    "payoutMethodRequired": "请选择一种收款方式以继续",
+    "recipientName": "收款人姓名",
+    "recipientNamePlaceholder": "张三",
+    "remove": "移除",
+    "removeDialogDescription": "移除后如需再次向此处转账，需要重新添加。此操作不会影响以往的转账记录。",
+    "removeDialogTitle": "移除{{name}}？",
+    "removeError": "无法移除收款人",
+    "removed": "收款人已移除",
+    "selectCountryPlaceholder": "选择国家/地区",
+    "selectFieldPlaceholder": "选择{{field}}",
+    "steps": {
+      "paymentDetails": "收款信息",
+      "payoutMethod": "收款方式",
+      "recipient": "收款人"
+    },
+    "subtitle": "您转账的对象和账户",
+    "table": {
+      "actions": "操作",
+      "added": "添加时间",
+      "currency": "货币",
+      "name": "姓名"
+    },
+    "thisCountry": "该国家/地区",
+    "thisRecipient": "该收款人",
+    "title": "收款人",
+    "transferRange": "每笔转账 {{min}}–{{max}} {{currency}}",
+    "updateError": "无法更新收款人",
+    "updated": "收款人已更新",
+    "whoAreYouSendingTo": "您要向谁转账？"
+  },
+  "cards": {
+    "addFunds": "充值",
+    "addedThisMonth": "本月充值",
+    "airlinePayments": "航空公司付款",
+    "balance": "余额 {{amount}}",
+    "billingAddress": "账单地址",
+    "cancel": "取消",
+    "cardEndingIn": "尾号为 {{last4}} 的卡片",
+    "cardNumberLabel": "卡号",
+    "cardholder": "持卡人",
+    "confirmTerminate": "再次点击以确认——此操作无法撤销",
+    "copyNumber": "复制卡号",
+    "cvv": "安全码 {{cvv}}",
+    "emptyState": "暂无卡片。申请一张即可开始消费。",
+    "exp": "有效期 {{expiry}}",
+    "feeAmount": "手续费 {{amount}}",
+    "freezeCard": "冻结卡片",
+    "hidesAutomatically": "自动隐藏",
+    "initialFundingHelp": "最低 3 美元。将从您的美元钱包中扣除，同时收取开卡费和充值费。",
+    "initialFundingLabel": "初始充值金额（美元）",
+    "manage": "管理 →",
+    "noTransactions": "暂无交易记录。",
+    "program": "卡片项目",
+    "requestCard": "申请卡片",
+    "requestDialogTitle": "申请一张虚拟卡",
+    "requesting": "申请中…",
+    "spentThisMonth": "本月支出",
+    "subtitle": "与您美元钱包关联的 Visa 虚拟卡",
+    "terminateCard": "注销卡片",
+    "title": "卡片",
+    "toast": {
+      "airlineDisabled": "已禁用航空公司付款",
+      "airlineEnabled": "已启用航空公司付款",
+      "airlineError": "无法更新航空公司付款设置",
+      "cardFrozen": "卡片已冻结",
+      "cardIssued": "卡片已发放",
+      "cardTerminated": "卡片已注销",
+      "cardTerminatedDescription": "剩余余额将自动退回您的钱包。",
+      "cardToppedUp": "卡片已充值",
+      "cardUnfrozen": "卡片已解冻",
+      "copied": "已复制{{label}}",
+      "copyError": "无法复制",
+      "freezeError": "无法更新冻结状态",
+      "issueCardError": "无法发放卡片",
+      "revealCardError": "无法查看卡片信息",
+      "terminateError": "无法注销卡片",
+      "topupFailed": "充值失败",
+      "withdrawalFailed": "提现失败",
+      "withdrawalSubmitted": "提现已提交",
+      "withdrawalSubmittedDescription": "扣除手续费后，净额将存入您的钱包。"
+    },
+    "topUp": "充值",
+    "transactionFallback": "交易",
+    "transactions": "交易记录",
+    "unfreezeCard": "解冻卡片",
+    "virtualUsd": "虚拟卡 · 美元",
+    "visaVirtualCardUsd": "Visa 虚拟卡 · 美元",
+    "withdraw": "提现",
+    "withdrawFeeNote": "提现将先扣除手续费，净额再存入您的钱包。"
+  },
+  "common": {
+    "language": "语言"
+  },
+  "crypto": {
+    "addressCopied": "地址已复制",
+    "copyAddressError": "无法复制地址",
+    "depositAddressReady": "充值地址已生成",
+    "generateAddress": "生成地址",
+    "generateAddressError": "无法生成地址",
+    "generateDescription": "为任意支持的链生成充值地址。",
+    "generating": "生成中…",
+    "noDepositsYet": "暂无加密货币充值记录",
+    "noWalletsYet": "暂无加密钱包——请在下方生成一个地址以开始使用。",
+    "selectAssetPlaceholder": "选择资产",
+    "sharedAddressWarning": "该地址可能与其他用户共用于同一资产。充值将根据您的账户进行匹配，并在我们团队确认后更新您的余额。",
+    "subtitle": "支持资产的充值地址及链上充值记录。",
+    "title": "加密钱包",
+    "transactionsDescription": "与您账户匹配的每一笔链上充值。",
+    "transactionsTitle": "加密货币交易记录",
+    "viewOnExplorer": "在区块浏览器中查看",
+    "yourWallets": "您的钱包"
+  },
+  "dashboard": {
+    "activityTitle": "近期活动",
+    "heroLabel": "总余额",
+    "stats": {
+      "available": "可用余额",
+      "pending": "待处理",
+      "recentActivity": "近期活动",
+      "wallets": "钱包"
+    },
+    "subtitle": "这是您各账户的最新动态",
+    "title": "欢迎回来",
+    "walletLabel": "钱包"
+  },
+  "dashboardLayout": {
+    "atlas": {
+      "noWalletsYet": "暂无钱包",
+      "nothingHereYet": "暂无内容",
+      "recentActivity": "近期活动",
+      "totalBalance": "总余额",
+      "yourWallets": "您的钱包"
+    },
+    "aurora": {
+      "balance": "余额",
+      "noTrendData": "暂无趋势数据",
+      "noWalletsYet": "暂无钱包",
+      "nothingHereYet": "暂无内容",
+      "recentActivity": "近期活动",
+      "trend": "趋势",
+      "wallets": "钱包"
+    },
+    "meridian": {
+      "balanceTrend": "余额趋势",
+      "noWalletsYet": "暂无钱包",
+      "nothingHereYet": "暂无内容",
+      "overview": "概览",
+      "recentActivity": "近期活动",
+      "wallets": "钱包"
+    },
+    "nova": {
+      "balanceTrend": "余额趋势",
+      "noActivityYet": "暂无活动",
+      "noWalletsYet": "暂无钱包",
+      "nothingHereYet": "暂无内容",
+      "recentActivity": "近期活动",
+      "wallets": "钱包"
+    },
+    "prime": {
+      "amount": "金额",
+      "balanceTrend": "余额趋势",
+      "description": "描述",
+      "noWalletsYet": "暂无钱包",
+      "nothingHereYet": "暂无内容",
+      "recentActivity": "近期活动",
+      "status": "状态",
+      "wallets": "钱包"
+    }
+  },
+  "deposit": {
+    "buttons": {
+      "back": "返回",
+      "continue": "继续",
+      "startDeposit": "开始充值"
+    },
+    "cryptoCard": {
+      "description": "加密货币充值地址及链上充值记录现已迁移至独立页面。",
+      "goToWallets": "前往加密钱包",
+      "title": "或充值加密货币"
+    },
+    "dialog": {
+      "amountToPay": "应付金额",
+      "copyLinkAriaLabel": "复制链接",
+      "estimatedDelivery": "预计到账时间",
+      "exchangeRate": "汇率",
+      "fee": "手续费",
+      "initiated": "充值已发起",
+      "openLinkAriaLabel": "打开链接",
+      "title": "充值资金",
+      "youllReceive": "您将收到"
+    },
+    "errors": {
+      "enterAmount": "请输入金额",
+      "fieldRequired": "{{field}}为必填项",
+      "pickWallet": "请选择要充值的钱包"
+    },
+    "localCard": {
+      "depositButton": "充值",
+      "description": "选择您所在的国家/地区，通过本地渠道付款——银行转账、CODI、DEBIN 等。",
+      "title": "或使用本地支付方式充值"
+    },
+    "step0": {
+      "countryLabel": "国家/地区",
+      "countryPlaceholder": "选择国家/地区",
+      "prompt": "您从哪个国家/地区付款？"
+    },
+    "step1": {
+      "methodRange": "每笔充值 {{min}}–{{max}} {{currency}}",
+      "noMethods": "该国家/地区暂无可用的充值方式。",
+      "prompt": "您希望从{{country}}以何种方式付款？",
+      "thisCountryFallback": "该国家/地区"
+    },
+    "step2": {
+      "amountLabel": "金额（{{currency}}）",
+      "prompt": "{{method}} —— 金额与详情",
+      "selectFieldPlaceholder": "选择{{field}}",
+      "walletLabel": "充值到钱包",
+      "walletLoading": "加载中…",
+      "walletPlaceholder": "选择钱包"
+    },
+    "steps": {
+      "amountDetails": "金额与详情",
+      "country": "国家/地区",
+      "method": "方式"
+    },
+    "subtitle": "通过本地渠道或加密货币进行一次性充值。",
+    "title": "充值",
+    "toast": {
+      "copied": "已复制到剪贴板",
+      "copyFailed": "无法复制",
+      "pickCountry": "请选择国家/地区以继续",
+      "pickMethod": "请选择支付方式以继续",
+      "startFailed": "无法发起充值"
+    }
+  },
+  "kycBusiness": {
+    "actions": {
+      "continue": "继续",
+      "submit": "提交审核"
+    },
+    "common": {
+      "select": "请选择"
+    },
+    "header": {
+      "subtitle": "企业 KYB 认证——公司及其所有者的详细信息。",
+      "title": "验证您的企业"
+    },
+    "steps": {
+      "accountInfo": {
+        "accountPurpose": "账户用途",
+        "complianceScreeningProgram": "合规审查计划",
+        "conductsMoneyServices": "从事资金服务业务",
+        "conductsMoneyServicesHint": "汇款、货币兑换或类似受监管的 MSB（货币服务业务）活动。",
+        "describeAccountPurpose": "请描述账户用途",
+        "describeMoneyServicesActivity": "请描述该资金服务活动",
+        "estimatedAnnualRevenue": "预计年收入，美元（可选）",
+        "estimatedAnnualRevenuePlaceholder": "例如 1000000_to_5000000",
+        "eurdeCombined": "EURDE（合并）",
+        "explainFlaggedActivity": "请说明被标记的活动",
+        "extraFeeHint": "（可能产生额外费用）",
+        "highRiskActivities": "高风险活动（可多选）",
+        "notSpecified": "未指定",
+        "pepStatus": "政治公众人物（PEP）",
+        "pepStatusHint": "任一所有者/董事为 PEP 或其亲密联系人。",
+        "prohibitedCountries": "在受限制国家/地区开展业务（可选）",
+        "selectPlaceholder": "请选择",
+        "sourceOfFunds": "资金来源",
+        "thirdPartyMsbPayments": "为第三方 MSB 处理付款",
+        "virtualAccountsToProvision": "需开通的虚拟账户"
+      },
+      "addresses": {
+        "physicalAddressHeading": "实际地址",
+        "physicalProofHint": "租赁合同、水电账单或类似文件——若与注册地址不同则为必填。",
+        "registeredAddressHeading": "注册地址",
+        "sameAsRegistered": "与注册地址相同",
+        "title": "地址"
+      },
+      "businessDocument": {
+        "title": "企业文件"
+      },
+      "businessInfo": {
+        "businessType": "企业类型",
+        "description": "企业简介",
+        "dialCode": "国家/地区代码",
+        "dialCodePlaceholder": "+1",
+        "email": "企业邮箱",
+        "incorporationCountry": "注册国家/地区（可选）",
+        "incorporationDate": "注册日期",
+        "industry": "所属行业（可选）",
+        "legalName": "企业法定名称",
+        "phone": "电话",
+        "registrationNumber": "注册号",
+        "requiredFieldsHint": "请填写上方必填字段。",
+        "taxId": "税号（可选）",
+        "title": "企业信息",
+        "tradeName": "商号名称",
+        "website": "网站（可选）",
+        "websitePlaceholder": "https://"
+      },
+      "documents": {
+        "businessRegistrationRequiredHint": "需上传用途为“企业注册文件”的文件——上方默认项已满足此要求。",
+        "description": "描述",
+        "descriptionPlaceholder": "公司注册证书",
+        "documentPurpose": "文件用途",
+        "fileLabel": "文件",
+        "selectPlaceholder": "请选择"
+      },
+      "ownerIdDocuments": {
+        "title": "所有者身份证件"
+      },
+      "ownersDirectors": {
+        "addAnother": "添加另一位所有者/董事",
+        "authorizedSigner": "授权签字人",
+        "dateOfBirth": "出生日期",
+        "director": "董事",
+        "email": "邮箱",
+        "firstName": "名",
+        "hasControl": "拥有控制权",
+        "hasOwnership": "拥有股权",
+        "identityDocsRequired": "每位所有者/董事均需提供两份身份证明文件。",
+        "lastName": "姓",
+        "nationality": "国籍",
+        "ownerHeading": "所有者/董事 {{number}}",
+        "ownershipPercent": "持股比例",
+        "personFallbackName": "所有者/董事 {{index}}",
+        "personTitle": "职位",
+        "phoneOptional": "电话（可选）",
+        "photoIdHeading": "2. 政府颁发的带照片证件",
+        "residentialAddressHeading": "住宅地址",
+        "taxId": "社会安全号/雇主识别号/个人纳税识别号",
+        "taxIdHeading": "1. 税号",
+        "title": "所有者与董事",
+        "titlePlaceholder": "首席执行官、执行成员等"
+      },
+      "review": {
+        "accountPurpose": "账户用途",
+        "business": "企业",
+        "highRiskActivities": "高风险活动",
+        "none": "无",
+        "ownersDirectors": "所有者/董事",
+        "readyMessage": "一切就绪。请检查后提交。",
+        "registeredAddress": "注册地址",
+        "title": "审核确认",
+        "tradeName": "商号名称",
+        "type": "类型"
+      },
+      "riskPurpose": {
+        "title": "风险与用途"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "仍有部分必填字段需要填写。",
+        "title": "请检查以下字段"
+      },
+      "submitFailed": {
+        "title": "提交失败"
+      },
+      "submitted": {
+        "description": "我们将尽快审核您的企业信息。",
+        "title": "认证已提交"
+      }
+    }
+  },
+  "kycIndividual": {
+    "actions": {
+      "continue": "继续",
+      "submit": "提交审核"
+    },
+    "common": {
+      "emptyValue": "—",
+      "select": "请选择"
+    },
+    "header": {
+      "subtitle": "请提供以下信息以便我们核实您的身份。",
+      "title": "验证您的身份"
+    },
+    "steps": {
+      "address": {
+        "title": "地址"
+      },
+      "financialProfile": {
+        "accountPurpose": "账户用途",
+        "actingAsIntermediary": "作为中介代理",
+        "actingAsIntermediaryHint": "代表他人操作，而非本人使用。",
+        "chooseAccountsHint": "请选择美元和/或欧元，或仅选择 EURDE。",
+        "describeAccountPurpose": "请描述账户用途",
+        "employmentStatus": "就业状况",
+        "eurdeCombined": "EURDE（合并）",
+        "expectedMonthlyPayments": "预计月收付款额（美元）",
+        "extraFeeNote": "可能产生额外费用",
+        "occupation": "职业",
+        "sourceOfFunds": "资金来源",
+        "title": "财务概况",
+        "virtualAccounts": "需开通的虚拟账户"
+      },
+      "identityDocument": {
+        "govIdHeading": "政府颁发的身份证件",
+        "selfieHint": "一张清晰的正面照片。",
+        "selfiePhoto": "自拍照",
+        "title": "身份证件"
+      },
+      "personalInfo": {
+        "bvn": "银行验证码（BVN）",
+        "bvnPlaceholder": "11 位数字",
+        "currentEmployer": "现雇主（可选）",
+        "dateOfBirth": "出生日期",
+        "dialCode": "国家/地区代码",
+        "dialCodePlaceholder": "+1",
+        "email": "邮箱",
+        "firstName": "名",
+        "gender": "性别",
+        "genderFemale": "女",
+        "genderMale": "男",
+        "immigrationStatus": "移民身份（可选）",
+        "immigrationStatusPlaceholder": "不适用",
+        "lastName": "姓",
+        "middleName": "中间名（可选）",
+        "nationality": "国籍",
+        "nin": "国民身份证号（NIN）",
+        "ninPlaceholder": "11 位数字",
+        "phone": "电话",
+        "phoneHint": "国家/地区代码如“+1”，电话号码仅限数字（8-15 位）。",
+        "phonePlaceholder": "5551234567",
+        "taxId": "税号",
+        "taxIdPlaceholder": "社会安全号/国家税号",
+        "title": "个人信息"
+      },
+      "review": {
+        "labels": {
+          "accountPurpose": "账户用途",
+          "address": "地址",
+          "email": "邮箱",
+          "idDocument": "身份证件",
+          "name": "姓名",
+          "nationality": "国籍",
+          "phone": "电话"
+        },
+        "ready": "一切就绪。请检查后提交。",
+        "title": "审核确认"
+      }
+    },
+    "toast": {
+      "checkFields": {
+        "description": "仍有部分必填字段需要填写。",
+        "title": "请检查以下字段"
+      },
+      "submitFailed": {
+        "title": "提交失败"
+      },
+      "submitted": {
+        "description": "我们将尽快审核您的信息。",
+        "title": "认证已提交"
+      }
+    }
+  },
+  "kycShared": {
+    "backButton": "返回",
+    "chooseCountryFirstPlaceholder": "请先选择国家/地区",
+    "cityLabel": "城市",
+    "clickToUpload": "点击上传",
+    "countryLabel": "国家/地区",
+    "dateIssuedLabel": "签发日期",
+    "documentBackOptionalLabel": "证件——背面（可选）",
+    "documentFrontLabel": "证件——正面",
+    "documentNumberLabel": "证件号码",
+    "documentNumberPlaceholder": "例如 P00012345",
+    "documentTypeLabel": "证件类型",
+    "expirationDateLabel": "有效期至",
+    "expirationDateOptionalLabel": "有效期至（可选）",
+    "fixBeforeContinuing": "请先修正以下问题再继续：",
+    "issuingCountryLabel": "签发国家/地区",
+    "loadingEllipsis": "加载中…",
+    "noMatches": "无匹配结果。",
+    "noPostalCodesText": "该国家/地区不使用邮政编码。",
+    "postalCodeFormatError": "格式不符合要求。",
+    "postalCodeFormatErrorWithExample": "格式不符合要求（例如 {{example}}）。",
+    "postalCodeLabel": "邮政编码",
+    "proofOfAddressHint": "水电账单、银行对账单或租赁合同。",
+    "proofOfAddressLabel": "地址证明",
+    "searchPlaceholder": "搜索…",
+    "selectCountryPlaceholder": "选择国家/地区",
+    "selectOption": "请选择",
+    "selectPlaceholder": "请选择…",
+    "setNationalityFirstPlaceholder": "请先设置国籍",
+    "stateProvinceLabel": "省/州",
+    "stepOf": "第 {{current}} 步，共 {{total}} 步",
+    "streetAddress2Label": "详细地址 2（可选）",
+    "streetAddressLabel": "详细地址",
+    "streetAddressPlaceholder": "示例路 123 号"
+  },
+  "kycWizard": {
+    "backToDashboard": "返回仪表盘",
+    "pendingDescription": "我们已收到您的信息，正在审核中。审核结果确定后将通知您。",
+    "pendingHeading": "认证审核中",
+    "verifiedDescription": "您的身份已通过验证。您现在可以使用转账、卡片和虚拟账户的全部功能。",
+    "verifiedHeading": "认证已通过"
+  },
+  "landing": {
+    "atlas": {
+      "businessLoginCta": "企业登录",
+      "demoCard": "卡片",
+      "demoDeposit": "充值",
+      "demoSend": "转账",
+      "demoTotalBalance": "总余额",
+      "demoTransaction1": "咖啡及其他",
+      "demoTransaction2": "工资发放",
+      "demoTransaction3": "设计服务费",
+      "feature1Desc": "同时持有和转移法币与加密货币，余额始终真实可信。",
+      "feature1Title": "一个余额，覆盖所有货币",
+      "feature2Desc": "选择联系人，获取实时报价，确认——资金无需繁琐手续即可转出。",
+      "feature2Title": "秒级转账",
+      "feature3Desc": "一键开通虚拟卡，同样快速冻结。",
+      "feature3Title": "按需开卡",
+      "feature4Desc": "每一笔交易都在后台记入不可篡改、经过对账的账本。",
+      "feature4Title": "银行级账本",
+      "featuresHeading": "满足您所有资金需求",
+      "featuresSubheading": "没有隐藏费用，没有繁琐菜单——只有真正好用的银行服务。",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "heroBadge": "让资金管理更简单",
+      "heroHeadlineHighlight": "毫不费力。",
+      "heroHeadlinePrefix": "银行服务，可以",
+      "heroSubheadline": "{{productName}} 是一款现代化钱包，让您轻松转账、存款和消费——极致简单，安全可靠。",
+      "logIn": "登录",
+      "openAccountCta": "开设账户",
+      "planBusinessBlurb": "多用户访问、更高限额、专属客服支持。",
+      "planBusinessCta": "联系我们",
+      "planBusinessName": "企业版",
+      "planBusinessPrice": "定制报价",
+      "planPersonalBlurb": "满足个人日常消费与转账需求。",
+      "planPersonalCta": "立即开始",
+      "planPersonalName": "个人版",
+      "planPersonalPrice": "免费",
+      "pricingHeading": "简单透明的定价",
+      "pricingSubheading": "免费开始使用，业务需要更多功能时再升级。",
+      "signUpFree": "免费注册"
+    },
+    "aurora": {
+      "badge": "简单优雅的资金管理",
+      "businessLogin": "企业登录",
+      "demoActionCard": "卡片",
+      "demoActionDeposit": "充值",
+      "demoActionSend": "转账",
+      "demoBalance": "8,942.10 美元",
+      "demoGrowth": "+12.4%",
+      "feature1Desc": "每个钱包、每种货币，始终保持对账一致。",
+      "feature1Title": "一个精美的总余额视图",
+      "feature2Desc": "实时报价，即时确认，无需任何纸质手续。",
+      "feature2Title": "秒级转账",
+      "feature3Desc": "验证通过后立即发放虚拟卡。",
+      "feature3Title": "按需开卡",
+      "feature4Desc": "每一笔交易均已对账，全程可审计。",
+      "feature4Title": "银行级账本",
+      "featuresHeading": "满足您所有资金需求",
+      "featuresSubheading": "没有隐藏费用，没有繁琐菜单——只有真正好用的银行服务。",
+      "heroHeadlineHighlight": "一个精美的整体视图。",
+      "heroHeadlinePrefix": "所有账户，尽收",
+      "heroSubheadline": "{{productName}} 将钱包、付款和卡片整合到一个让人真心愿意打开的仪表盘中。",
+      "logIn": "登录",
+      "openAccount": "开设账户",
+      "signUpFree": "免费注册",
+      "thisMonth": "本月",
+      "totalBalance": "总余额",
+      "vsLastMonth": "较上月"
+    },
+    "meridian": {
+      "eyebrow": "运营管理平台",
+      "featureCardIssuingDesc": "客户验证通过后立即为其发放虚拟卡。",
+      "featureCardIssuingTitle": "卡片发放",
+      "featureComplianceDesc": "KYC 认证、背书与审计追踪，从第一天起就内置到位。",
+      "featureComplianceTitle": "内置合规体系",
+      "featureLedgerDesc": "每个钱包、每种货币，统一对账至单一权威数据源。",
+      "featureLedgerTitle": "统一账本",
+      "featurePayoutsDesc": "只需几步即可完成跨境转账的报价、确认与结算。",
+      "featurePayoutsTitle": "全球付款",
+      "featuresHeading": "满足运营所需的一切",
+      "featuresSubheading": "一个平台，覆盖整个资金流转体系。",
+      "heroHeadline": "像专业运营者一样管理资金流转，而不是靠表格拼凑。",
+      "heroSubheadline": "{{productName}} 为您的团队提供统一的钱包、付款、卡片与合规管理控制台，背后依托可信赖的账本系统。",
+      "logIn": "登录",
+      "openAccountCta": "开设账户",
+      "operatorLoginCta": "运营人员登录",
+      "reconciledDesc": "每一笔已入账交易均采用复式记账、幂等处理，并自动与服务商记录核对。",
+      "reconciledTitle": "默认自动对账",
+      "signUp": "注册",
+      "statCurrenciesLabel": "支持货币",
+      "statPayoutTimeLabel": "平均到账时间",
+      "statUptimeLabel": "系统可用率",
+      "teamsDesc": "为所有者、管理员和运营人员提供基于角色的访问控制，每项操作均有完整审计记录。",
+      "teamsTitle": "专为团队打造"
+    },
+    "nova": {
+      "createAccountCta": "创建您的账户",
+      "ctaHeading": "准备好搭建您自己的支付通道了吗？",
+      "ctaSubheading": "您的客户，您的品牌，您的账本——由 Yativo 提供底层技术支持。",
+      "feature1Desc": "每一分钱都通过不可篡改、可审计的分录记录追踪——绝非简单的余额栏目。",
+      "feature1Title": "复式记账账本",
+      "feature2Desc": "由 Webhook 驱动的记账机制，确保客户余额在资金变动的瞬间保持最新。",
+      "feature2Title": "实时结算",
+      "feature3Desc": "定时任务将您的账本与上游结算数据进行比对，第一时间发现差异。",
+      "feature3Title": "自动对账",
+      "feature4Desc": "法币与加密货币通道统一在一套会计科目下，随时支持全球付款通道。",
+      "feature4Title": "多币种支持",
+      "feature5Desc": "客户与员工会话完全隔离——独立令牌，独立影响范围。",
+      "feature5Title": "双重独立认证体系",
+      "feature6Desc": "KYC 审核、人工调整、付款、卡片与 Webhook——集中于一个控制台。",
+      "feature6Title": "完整后台管理系统",
+      "featuresHeading": "以基础设施的标准构建，而非演示产品",
+      "featuresSubheading": "分销商安全运营真实客户资金所需的一切。",
+      "footerCopyright": "© {{year}} {{productName}}",
+      "getStarted": "立即开始",
+      "heroHeadlineHighlight": "以您自己的品牌运营。",
+      "heroHeadlinePrefix": "金融科技基础设施，",
+      "heroSubheadline": "{{productName}} 为您的企业提供基于真实复式记账账本的白标钱包、付款与卡片平台——部署、加上您的品牌，即可运营属于您自己的金融科技业务。",
+      "openAccountCta": "开设账户",
+      "operatorConsole": "运营控制台",
+      "signIn": "登录",
+      "trustBadge": "账本已验证 · 每小时对账"
+    },
+    "prime": {
+      "balance": "余额",
+      "copyright": "© {{year}} {{productName}}",
+      "dashboardLogin": "仪表盘登录",
+      "feature": {
+        "cardIssuing": {
+          "desc": "客户验证通过后立即为其发放虚拟卡。",
+          "title": "卡片发放"
+        },
+        "compliance": {
+          "desc": "KYC 认证、背书与审计追踪，从第一天起就内置到位。",
+          "title": "内置合规体系"
+        },
+        "ledger": {
+          "desc": "每个钱包、每种货币，统一对账至单一权威数据源。",
+          "title": "统一账本"
+        },
+        "payouts": {
+          "desc": "只需几步即可完成跨境转账的报价、确认与结算。",
+          "title": "全球付款"
+        }
+      },
+      "featuresHeading": "满足运营所需的一切",
+      "heroHeadline": "为互联网打造的支付基础设施。",
+      "heroSubheadline": "{{productName}} 为您提供统一的 API 和仪表盘，管理钱包、付款、卡片与合规事务。",
+      "logIn": "登录",
+      "signUp": "注册",
+      "startNow": "立即开始",
+      "stat": {
+        "deposits": "充值",
+        "payouts": "付款",
+        "refunds": "退款"
+      }
+    }
+  },
+  "login": {
+    "backToHome": "← 返回首页",
+    "backToSignIn": "← 返回登录",
+    "createAccount": "创建账户",
+    "defaultProductName": "白标平台",
+    "emailLabel": "邮箱",
+    "genericError": "无法登录，请核对您的账户信息。",
+    "invalidCodeError": "验证码无效，请重试。",
+    "newHere": "还没有账户？",
+    "passwordLabel": "密码",
+    "signIn": "登录",
+    "signInDescription": "登录您的账户",
+    "signingIn": "登录中…",
+    "verificationCodeLabel": "验证码",
+    "verify": "验证",
+    "verifyDescription": "请输入验证器应用中的 6 位数验证码，或使用备用代码。",
+    "verifyHeading": "验证您的身份",
+    "verifying": "验证中…",
+    "welcomeBack": "欢迎回来"
+  },
+  "nav": {
+    "account": "账户",
+    "atlas": {
+      "contacts": "联系人",
+      "home": "首页",
+      "profile": "个人资料",
+      "send": "转账"
+    },
+    "beneficiaries": "收款人",
+    "cards": "卡片",
+    "cryptoWallets": "加密钱包",
+    "dashboard": "仪表盘",
+    "deposit": "充值",
+    "logout": "退出登录",
+    "portal": "门户",
+    "profileKyc": "个人资料与认证",
+    "section": {
+      "account": "账户",
+      "manage": "管理"
+    },
+    "sendMoney": "转账",
+    "settings": "设置",
+    "virtualAccounts": "虚拟账户",
+    "wallets": "钱包",
+    "whiteLabel": "白标平台"
+  },
+  "profile": {
+    "accountTitle": "账户",
+    "emailLabel": "邮箱",
+    "endorsementsDescription": "部分功能（如本地银行转账或虚拟卡）需要按服务单独完成验证。",
+    "endorsementsLoadError": "无法加载认证信息。",
+    "endorsementsTitle": "服务认证",
+    "heading": "个人资料与身份验证",
+    "identityVerificationTitle": "身份验证",
+    "restartVerification": "重新开始验证",
+    "startVerification": "开始验证",
+    "statusApproved": "您已通过身份验证，可使用转账、卡片与虚拟账户的全部功能。",
+    "statusNotStarted": "在转账、开通虚拟账户或申请卡片之前，需先完成身份验证。",
+    "statusPending": "我们已收到您的信息，正在审核中——审核结果确定后将通知您。",
+    "statusRejected": "您上一次提交的认证未获通过——请在下方重新提交。",
+    "subheading": "管理您的身份信息",
+    "typeLabel": "类型"
+  },
+  "send": {
+    "amountStep": {
+      "amountLabel": "转账金额（{{currency}}）",
+      "amountPlaceholder": "100.00",
+      "debitWalletLabel": "扣款钱包",
+      "prompt": "转账金额",
+      "promptTo": "转给{{name}}的金额",
+      "recipientFallback": "收款人",
+      "willReceive": "确认前我们会准确显示{{recipient}}将收到的金额。",
+      "willReceiveWithCurrency": "确认前我们会准确显示{{recipient}}将收到的 {{currency}} 金额。"
+    },
+    "buttons": {
+      "back": "返回",
+      "confirmAndSend": "确认并转账",
+      "continue": "继续",
+      "getQuote": "获取报价",
+      "requote": "重新报价"
+    },
+    "errors": {
+      "enterAmount": "请输入金额",
+      "fieldRequired": "{{field}}为必填项",
+      "maxLength": "最多 {{max}} 个字符",
+      "minLength": "至少 {{min}} 个字符"
+    },
+    "result": {
+      "payoutId": "付款编号：{{id}}",
+      "payoutSubmitted": "付款已提交",
+      "refreshing": "（刷新中…）",
+      "sendAnother": "再次转账",
+      "statusLabel": "状态：",
+      "viewWallets": "查看钱包"
+    },
+    "review": {
+      "expired": "此报价已过期——请获取新报价以继续。",
+      "expiresIn": "报价将在 {{seconds}} 秒后过期。",
+      "rateLabel": "汇率",
+      "recipientGetsLabel": "收款人到账金额",
+      "toLabel": "收款人",
+      "totalChargedLabel": "合计扣款"
+    },
+    "savedStep0": {
+      "beneficiaryPlaceholder": "选择收款人",
+      "prompt": "您要向谁转账？"
+    },
+    "step0": {
+      "countryLabel": "国家/地区",
+      "countryPlaceholder": "选择国家/地区",
+      "prompt": "您要向谁转账？",
+      "recipientNameLabel": "收款人姓名",
+      "recipientNamePlaceholder": "张三"
+    },
+    "step1": {
+      "countryFallback": "该国家/地区",
+      "methodRange": "每笔转账 {{min}}–{{max}} {{currency}}",
+      "noMethods": "该国家/地区暂无可用的收款方式。",
+      "prompt": "{{country}}的{{recipient}}应如何收款？",
+      "recipientFallback": "该收款人"
+    },
+    "step2": {
+      "noDetailsNeeded": "此收款方式无需填写其他信息。",
+      "prompt": "{{method}}详情",
+      "selectFieldPlaceholder": "选择{{field}}"
+    },
+    "steps": {
+      "amount": "金额",
+      "beneficiary": "收款人",
+      "details": "详情",
+      "method": "方式",
+      "recipient": "收款人",
+      "review": "确认"
+    },
+    "subtitle": "选择国家/地区及收款方式，然后确认金额。",
+    "title": "转账",
+    "toast": {
+      "enterNameAndCountry": "请输入姓名并选择国家/地区以继续",
+      "payoutFailed": "付款失败",
+      "payoutSubmitted": "付款已提交",
+      "payoutSubmittedDescription": "到账后我们会通知您。",
+      "pickBeneficiary": "请选择一位收款人以继续",
+      "pickMethod": "请选择一种收款方式以继续",
+      "quoteFailed": "无法获取报价",
+      "saveRecipientFailed": "无法保存收款人",
+      "tryAgain": "请重试。"
+    },
+    "toggle": {
+      "newRecipient": "新收款人",
+      "savedBeneficiary": "已保存的收款人"
+    }
+  },
+  "settings": {
+    "changePassword": {
+      "confirmPasswordLabel": "确认新密码",
+      "currentPasswordLabel": "当前密码",
+      "description": "请设置一个不与其他平台重复使用的强密码。",
+      "newPasswordLabel": "新密码",
+      "submit": "更新密码",
+      "title": "修改密码",
+      "toastDescription": "当前版本尚未支持修改密码功能。",
+      "toastTitle": "功能暂未开放"
+    },
+    "copiedToClipboard": "已复制到剪贴板",
+    "copyError": "无法复制",
+    "subtitle": "管理您的账户安全",
+    "title": "设置",
+    "twoFactor": {
+      "authenticatorApp": "身份验证器应用",
+      "description": "为您的账户增加一层额外的安全保护。",
+      "disable": {
+        "description": "请确认密码以关闭双重认证。",
+        "error": "无法关闭双重认证。",
+        "passwordLabel": "密码",
+        "submit": "关闭双重认证",
+        "submitting": "正在关闭…",
+        "title": "关闭双重认证"
+      },
+      "enabled": "已启用",
+      "loading": "加载中…",
+      "notConfigured": "尚未配置",
+      "setup": {
+        "backupCodesDescription": "请妥善保存这些代码——每个代码在您无法访问验证器应用时可使用一次登录。系统不会再次显示这些代码。",
+        "backupCodesTitle": "保存您的备用代码",
+        "codeLabel": "6 位数验证码",
+        "continueButton": "继续",
+        "copyAll": "全部复制",
+        "done": "完成",
+        "enableButton": "启用双重认证",
+        "enterCodeTitle": "输入验证码",
+        "manualKeyLabel": "无法扫码？请手动输入此密钥",
+        "qrAlt": "双重认证设置二维码",
+        "scanTitle": "使用验证器应用扫码",
+        "verifyError": "验证码校验失败。",
+        "verifying": "验证中…"
+      },
+      "title": "双重认证",
+      "toast": {
+        "disabled": "双重认证已关闭",
+        "setupError": "无法开始设置"
+      }
+    }
+  },
+  "signup": {
+    "accountTypeLabel": "账户类型",
+    "alreadyHaveAccount": "已有账户？",
+    "business": "企业",
+    "businessNameLabel": "企业名称",
+    "callingCodeAriaLabel": "区号",
+    "countryLabel": "国家/地区",
+    "createAccount": "创建账户",
+    "createYourAccount": "创建您的账户",
+    "creatingAccount": "创建账户中…",
+    "defaultProductName": "白标平台",
+    "emailLabel": "邮箱",
+    "fullNameLabel": "姓名",
+    "genericError": "无法创建您的账户。",
+    "individual": "个人",
+    "passwordLabel": "密码",
+    "phoneNumberLabel": "电话号码",
+    "phonePlaceholder": "5551234567",
+    "selectCountryPlaceholder": "选择您所在的国家/地区",
+    "signIn": "登录",
+    "startSendingDescription": "几分钟内即可开始转账、存款和消费"
+  },
+  "topbar": {
+    "aurora": {
+      "viewProfile": "查看个人资料"
+    },
+    "prime": {
+      "notifications": "通知",
+      "switchToDarkMode": "切换到深色模式",
+      "switchToLightMode": "切换到浅色模式"
+    }
+  },
+  "virtualAccounts": {
+    "accountReady": "虚拟账户已就绪",
+    "addCurrency": "添加货币",
+    "allCurrenciesAdded": "您已为所有可用货币开通了账户。",
+    "copiedToClipboard": "已复制到剪贴板",
+    "copyError": "无法复制",
+    "copyField": "复制{{field}}",
+    "createAccount": "创建账户",
+    "createAccountError": "无法创建账户",
+    "creating": "创建中…",
+    "noAccountsYet": "暂无虚拟账户——请在下方为某种货币开通一个。",
+    "noCurrenciesAvailable": "暂无可用的虚拟账户货币。",
+    "noVerificationNeeded": "无需验证",
+    "requiresVerification": "需要{{endorsement}}认证——请联系客服以开始办理。",
+    "shareDetails": "请将这些信息提供给向您付款的一方。",
+    "startVerification": "开始验证",
+    "subtitle": "专属银行信息，每种货币仅需开通一次，可重复用于每一笔收款。",
+    "title": "虚拟账户",
+    "verificationNote": "部分收款渠道在开通账户前需要完成一次性验证。",
+    "verified": "已验证",
+    "yourAccounts": "您的账户"
+  },
+  "walletBalanceCard": {
+    "pending": "+{{amount}} 待处理",
+    "wallet": "钱包"
+  },
+  "walletDetail": {
+    "allWallets": "所有钱包",
+    "available": "可用余额",
+    "balanceOverTime": "余额变化趋势",
+    "cancel": "取消",
+    "noActivity": "暂无活动记录",
+    "pageOf": "第 {{page}} 页，共 {{totalPages}} 页",
+    "pending": "待处理",
+    "removeDialogDescription": "该钱包余额为零，移除是安全的——如后续该货币仍可用，您可以随时重新添加 {{currencyCode}} 钱包。",
+    "removeDialogTitle": "移除您的 {{currencyCode}} 钱包？",
+    "removeWallet": "移除钱包",
+    "removeWalletError": "无法移除钱包",
+    "removing": "移除中…",
+    "statement": "对账单",
+    "walletRemoved": "钱包已移除",
+    "walletTitle": "{{currencyCode}} 钱包"
+  },
+  "wallets": {
+    "add": "添加",
+    "addCurrencyPlaceholder": "添加货币",
+    "addWalletError": "无法添加钱包",
+    "empty": "暂无钱包。一旦您有余额，钱包将显示在此处。",
+    "subtitle": "您在各货币下的余额",
+    "title": "钱包",
+    "walletAdded": "钱包已添加",
+    "walletLabel": "钱包"
+  }
+}

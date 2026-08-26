@@ -1,5 +1,6 @@
 import { formatMinorAmount } from "@white-label/shared-types";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BalanceChart } from "@/components/charts/BalanceChart";
 import { cn } from "@/lib/utils";
@@ -14,10 +15,12 @@ export function NovaDashboardLayout({
   stats,
   wallets,
   activity,
-  activityTitle = "Recent activity",
+  activityTitle,
   actions,
   isLoading,
 }: DashboardLayoutProps) {
+  const { t } = useTranslation();
+  const resolvedActivityTitle = activityTitle ?? t("dashboardLayout.nova.recentActivity", "Recent activity");
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -44,18 +47,20 @@ export function NovaDashboardLayout({
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-border bg-card/70 p-5 shadow-soft lg:col-span-2">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balance trend</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.nova.balanceTrend", "Balance trend")}</p>
           {isLoading ? (
             <Skeleton className="h-[220px] w-full" />
           ) : chartData && chartData.length > 0 ? (
             <BalanceChart data={chartData} showAxes />
           ) : (
-            <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">No activity yet</div>
+            <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+              {t("dashboardLayout.nova.noActivityYet", "No activity yet")}
+            </div>
           )}
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Wallets</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.nova.wallets", "Wallets")}</p>
           {isLoading ? (
             <>
               <Skeleton className="h-28" />
@@ -68,14 +73,16 @@ export function NovaDashboardLayout({
               ))}
             </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">No wallets yet</div>
+            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+              {t("dashboardLayout.nova.noWalletsYet", "No wallets yet")}
+            </div>
           )}
         </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card/70 shadow-soft">
         <div className="border-b border-border px-5 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{activityTitle}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{resolvedActivityTitle}</p>
         </div>
         {isLoading ? (
           <div className="space-y-2 p-5">
@@ -84,7 +91,7 @@ export function NovaDashboardLayout({
             ))}
           </div>
         ) : activity.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Nothing here yet</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.nova.nothingHereYet", "Nothing here yet")}</div>
         ) : (
           <div className="divide-y divide-border">
             {activity.map((item) => (
