@@ -9,14 +9,12 @@ const settingsSchema = z.object({
   apple: z.object({ enabled: z.boolean(), clientId: z.string(), teamId: z.string(), keyId: z.string(), privateKey: z.string().optional() }),
   facebook: z.object({ enabled: z.boolean(), clientId: z.string(), clientSecret: z.string().optional() }),
   twitter: z.object({ enabled: z.boolean(), clientId: z.string(), clientSecret: z.string().optional() }),
-  passkeys: z.object({ enabled: z.boolean(), rpId: z.string(), rpName: z.string() }),
 });
 type Settings = z.infer<typeof settingsSchema>;
 const empty: Settings = {
   apple: { enabled: false, clientId: "", teamId: "", keyId: "" },
   facebook: { enabled: false, clientId: "" },
   twitter: { enabled: false, clientId: "" },
-  passkeys: { enabled: true, rpId: "", rpName: "" },
 };
 
 function safe(value: Settings) {

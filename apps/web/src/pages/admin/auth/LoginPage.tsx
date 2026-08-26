@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { staffLoginSchema, type StaffLoginInput } from "@white-label/shared-types";
 import { fetchBranding } from "@/theme/branding";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
@@ -13,12 +14,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ApiError } from "@/lib/api-client";
 
 export default function AdminLoginPage() {
-  const { isAuthenticated, isLoading: authLoading, login } = useStaffAuth();
+  const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey } = useStaffAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [passkeySubmitting, setPasskeySubmitting] = useState(false);
 
   const {
     register,
@@ -41,6 +43,20 @@ export default function AdminLoginPage() {
       setError(e instanceof ApiError ? e.message : "Unable to sign in. Check your credentials.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const onPasskeySubmit = async () => {
+    setError(null);
+    setPasskeySubmitting(true);
+    try {
+      await loginWithPasskey();
+      navigate("/admin", { replace: true });
+    } catch (e) {
+      // A cancelled/timed-out browser prompt throws a plain DOMException, not an ApiError.
+      setError(e instanceof ApiError ? e.message : "Couldn't sign in with that passkey.");
+    } finally {
+      setPasskeySubmitting(false);
     }
   };
 
@@ -86,6 +102,24 @@ export default function AdminLoginPage() {
                 {submitting ? "Signing in…" : "Sign in"}
               </Button>
             </form>
+            {browserSupportsWebAuthn() && (
+              <>
+                <div className="my-4 flex items-center gap-3 text-xs text-slate-400">
+                  <div className="h-px flex-1 bg-white/10" />
+                  or
+                  <div className="h-px flex-1 bg-white/10" />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10"
+                  disabled={passkeySubmitting}
+                  onClick={onPasskeySubmit}
+                >
+                  {passkeySubmitting ? "Waiting for passkey…" : "Sign in with a passkey"}
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -39,6 +39,8 @@ import { pagesRoutes } from "./modules/pages/pages.routes.js";
 import { webhookRoutes } from "./webhooks/yativo.routes.js";
 import { adminWebhooksRoutes } from "./webhooks/adminWebhooks.routes.js";
 import { integrationsRoutes } from "./modules/integrations/integrations.routes.js";
+import { staffPasskeysRoutes } from "./modules/passkeys/staffPasskeys.routes.js";
+import { customerPasskeysRoutes } from "./modules/passkeys/customerPasskeys.routes.js";
 
 export async function buildApp() {
   // Fastify's default bodyLimit is 1MB — comfortably exceeded by a KYC submission carrying a
@@ -140,6 +142,8 @@ export async function buildApp() {
   await app.register(webhookRoutes);
   await app.register(adminWebhooksRoutes);
   await app.register(integrationsRoutes);
+  await app.register(staffPasskeysRoutes);
+  await app.register(customerPasskeysRoutes);
 
   return app;
 }

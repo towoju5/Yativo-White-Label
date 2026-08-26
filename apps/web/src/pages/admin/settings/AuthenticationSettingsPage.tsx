@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { BrandingConfig } from "@white-label/shared-types";
+import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
+import { KeyRound, Trash2 } from "lucide-react";
+import type { BrandingConfig, PasskeyDto } from "@white-label/shared-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { fetchBranding } from "@/theme/branding";
@@ -32,11 +35,6 @@ type Config = {
     clientSecretConfigured?: boolean;
     clientSecret?: string;
   };
-  passkeys: {
-    enabled: boolean;
-    rpId: string;
-    rpName: string;
-  };
 };
 
 type ProviderName = "apple" | "facebook" | "twitter";
@@ -45,7 +43,6 @@ const emptyConfig: Config = {
   apple: { enabled: false, clientId: "", teamId: "", keyId: "" },
   facebook: { enabled: false, clientId: "" },
   twitter: { enabled: false, clientId: "" },
-  passkeys: { enabled: true, rpId: "", rpName: "" },
 };
 
 // -----------------------------------------------------------------------------
@@ -89,6 +86,124 @@ function ProviderSection({ name, title, fields, config, onUpdate }: ProviderSect
           />
         </div>
       ))}
+    </section>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Passkeys — manage the currently signed-in staff member's own registered passkeys.
+// -----------------------------------------------------------------------------
+function PasskeysSection() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [addOpen, setAddOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [registering, setRegistering] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  const { data: passkeys, isLoading } = useQuery({
+    queryKey: ["admin", "passkeys"],
+    queryFn: () => staffApi.get<PasskeyDto[]>("/admin/passkeys"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => staffApi.del(`/admin/passkeys/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "passkeys"] }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't remove passkey", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const addPasskey = async () => {
+    setAddError(null);
+    setRegistering(true);
+    try {
+      const options = await staffApi.post<Record<string, unknown>>("/admin/passkeys/register/options");
+      const response = await startRegistration({ optionsJSON: options as unknown as Parameters<typeof startRegistration>[0]["optionsJSON"] });
+      await staffApi.post("/admin/passkeys/register/verify", { response, name: name.trim() || "Passkey" });
+      queryClient.invalidateQueries({ queryKey: ["admin", "passkeys"] });
+      setAddOpen(false);
+      setName("");
+    } catch (e) {
+      // A cancelled prompt or an already-registered authenticator throws a plain DOMException, not an ApiError.
+      setAddError(e instanceof ApiError ? e.message : "Couldn't register that passkey.");
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  return (
+    <section className="space-y-3 rounded-lg border p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-medium">Your passkeys</h2>
+          <p className="text-xs text-muted-foreground">Sign in without a password using Face ID, Touch ID, Windows Hello, or a security key.</p>
+        </div>
+        {browserSupportsWebAuthn() && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setAddError(null);
+              setAddOpen(true);
+            }}
+          >
+            <KeyRound className="h-4 w-4" /> Add a passkey
+          </Button>
+        )}
+      </div>
+
+      {isLoading ? (
+        <p className="text-xs text-muted-foreground">Loading…</p>
+      ) : passkeys && passkeys.length > 0 ? (
+        <ul className="divide-y divide-border rounded-md border">
+          {passkeys.map((p) => (
+            <li key={p.id} className="flex items-center justify-between px-3 py-2 text-sm">
+              <div>
+                <p className="font-medium">{p.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Added {new Date(p.createdAt).toLocaleDateString()}
+                  {p.lastUsedAt ? ` · last used ${new Date(p.lastUsedAt).toLocaleDateString()}` : ""}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => deleteMutation.mutate(p.id)}
+                disabled={deleteMutation.isPending}
+                aria-label={`Remove ${p.name}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-xs text-muted-foreground">No passkeys registered yet.</p>
+      )}
+
+      <Dialog open={addOpen} onOpenChange={(v) => !registering && setAddOpen(v)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add a passkey</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              addPasskey();
+            }}
+          >
+            <div className="space-y-1.5">
+              <Label htmlFor="passkeyName">Name this device</Label>
+              <Input id="passkeyName" autoFocus placeholder="e.g. MacBook Touch ID" value={name} onChange={(e) => setName(e.target.value)} />
+              {addError && <p className="text-xs text-destructive">{addError}</p>}
+            </div>
+            <Button type="submit" className="w-full" disabled={registering}>
+              {registering ? "Waiting for browser…" : "Continue"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
@@ -230,34 +345,7 @@ export default function AuthenticationSettingsPage() {
           onUpdate={(field, value) => update("twitter", field, value)}
         />
 
-        {/* Passkeys Section (matches ProviderSection styling) */}
-        <section className="space-y-3 rounded-lg border p-4">
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={config.passkeys.enabled}
-              onChange={(e) => update("passkeys", "enabled", e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
-            />
-            <h2 className="font-medium">Passkeys</h2>
-          </div>
-          <div className="space-y-1">
-            <Label>Relying-party ID (domain only)</Label>
-            <Input
-              value={config.passkeys.rpId}
-              onChange={(e) => update("passkeys", "rpId", e.target.value)}
-              placeholder="app.example.com"
-            />
-          </div>
-          <div className="space-y-1">
-            <Label>Relying-party name</Label>
-            <Input
-              value={config.passkeys.rpName}
-              onChange={(e) => update("passkeys", "rpName", e.target.value)}
-              placeholder="Your platform"
-            />
-          </div>
-        </section>
+        <PasskeysSection />
       </div>
 
       {/* Save Button */}

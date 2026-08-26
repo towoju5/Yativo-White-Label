@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Customer, CreateCustomerInput, PortalLoginInput, PortalLoginResult } from "@white-label/shared-types";
+import { startAuthentication } from "@simplewebauthn/browser";
+import type { Customer, CreateCustomerInput, PortalLoginInput, PortalLoginResult, PasskeyLoginOptionsResult } from "@white-label/shared-types";
 import { apiFetch, portalApi, portalTokenStore } from "@/lib/api-client";
 
 interface CustomerAuthState {
@@ -8,6 +9,7 @@ interface CustomerAuthState {
   isAuthenticated: boolean;
   /** Returns the raw login result — the caller checks `requiresTwoFactor` and, if true, collects a code and calls verifyTwoFactor with the returned challengeToken. */
   login: (input: PortalLoginInput) => Promise<PortalLoginResult>;
+  loginWithPasskey: () => Promise<void>;
   verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   signup: (input: CreateCustomerInput) => Promise<void>;
   logout: () => Promise<void>;
@@ -54,6 +56,18 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     setUser(me);
   };
 
+  const loginWithPasskey: CustomerAuthState["loginWithPasskey"] = async () => {
+    const { flowId, options } = await apiFetch<PasskeyLoginOptionsResult>("/portal/auth/passkey/login/options", { method: "POST" });
+    const response = await startAuthentication({ optionsJSON: options as unknown as Parameters<typeof startAuthentication>[0]["optionsJSON"] });
+    const { accessToken } = await apiFetch<{ accessToken: string }>("/portal/auth/passkey/login/verify", {
+      method: "POST",
+      body: { flowId, response },
+    });
+    portalTokenStore.set(accessToken);
+    const me = await portalApi.get<Customer>("/portal/auth/me");
+    setUser(me);
+  };
+
   const signup: CustomerAuthState["signup"] = async (input) => {
     const { accessToken } = await apiFetch<{ accessToken: string }>("/portal/auth/signup", { method: "POST", body: input });
     portalTokenStore.set(accessToken);
@@ -71,7 +85,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CustomerAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, verifyTwoFactor, signup, logout }}>
+    <CustomerAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, signup, logout }}>
       {children}
     </CustomerAuthContext.Provider>
   );

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
+import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import {
   staffLoginSchema,
   authTokensSchema,
@@ -11,12 +12,16 @@ import {
   roleSchema,
   createRoleSchema,
   updateRoleSchema,
+  passkeyLoginOptionsResultSchema,
+  verifyPasskeyLoginSchema,
 } from "@white-label/shared-types";
 import {
   registerFirstOwner,
   loginStaff,
   refreshStaffSession,
   logoutStaff,
+  getStaffPasskeyLoginOptions,
+  verifyStaffPasskeyLogin,
   inviteStaff,
   updateStaff,
   deactivateStaff,
@@ -79,6 +84,36 @@ export async function authRoutes(app: FastifyInstance) {
     { schema: { body: staffLoginSchema, response: { 200: authTokensSchema } } },
     async (request, reply) => {
       const { accessToken, refreshToken } = await loginStaff(app.prisma, request.body.email, request.body.password);
+      reply.setCookie(REFRESH_COOKIE, refreshToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/auth",
+        maxAge: parseTtlToMs(env.JWT_REFRESH_TTL) / 1000,
+      });
+      return reply.send({ accessToken });
+    },
+  );
+
+  server.post(
+    "/auth/passkey/login/options",
+    { schema: { response: { 200: passkeyLoginOptionsResultSchema } } },
+    async (_request, reply) => {
+      const result = await getStaffPasskeyLoginOptions(app.redis);
+      return reply.send({ flowId: result.flowId, options: result.options as unknown as Record<string, unknown> });
+    },
+  );
+
+  server.post(
+    "/auth/passkey/login/verify",
+    { schema: { body: verifyPasskeyLoginSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
+    async (request, reply) => {
+      const { accessToken, refreshToken } = await verifyStaffPasskeyLogin(
+        app.prisma,
+        app.redis,
+        request.body.flowId,
+        request.body.response as unknown as AuthenticationResponseJSON,
+      );
       reply.setCookie(REFRESH_COOKIE, refreshToken, {
         httpOnly: true,
         secure: env.NODE_ENV === "production",

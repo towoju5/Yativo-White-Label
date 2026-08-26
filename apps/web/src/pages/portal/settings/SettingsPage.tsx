@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { TwoFactorStatus, TwoFactorSetupResult } from "@white-label/shared-types";
-import { Copy, ShieldAlert, ShieldCheck } from "lucide-react";
+import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
+import type { TwoFactorStatus, TwoFactorSetupResult, PasskeyDto } from "@white-label/shared-types";
+import { Copy, ShieldAlert, ShieldCheck, KeyRound, Trash2 } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,132 @@ import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type SetupStep = "qr" | "confirm" | "backupCodes";
+
+function PasskeysCard() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [addOpen, setAddOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [registering, setRegistering] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  const { data: passkeys, isLoading } = useQuery({
+    queryKey: ["portal", "passkeys"],
+    queryFn: () => portalApi.get<PasskeyDto[]>("/portal/passkeys"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => portalApi.del(`/portal/passkeys/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["portal", "passkeys"] }),
+    onError: (e) =>
+      toast({ variant: "destructive", title: t("settings.passkeys.deleteError", "Couldn't remove passkey"), description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const addPasskey = async () => {
+    setAddError(null);
+    setRegistering(true);
+    try {
+      const options = await portalApi.post<Record<string, unknown>>("/portal/passkeys/register/options");
+      const response = await startRegistration({ optionsJSON: options as unknown as Parameters<typeof startRegistration>[0]["optionsJSON"] });
+      await portalApi.post("/portal/passkeys/register/verify", { response, name: name.trim() || "Passkey" });
+      queryClient.invalidateQueries({ queryKey: ["portal", "passkeys"] });
+      setAddOpen(false);
+      setName("");
+    } catch (e) {
+      // A cancelled prompt or an already-registered authenticator throws a plain DOMException, not an ApiError.
+      setAddError(e instanceof ApiError ? e.message : t("settings.passkeys.addError", "Couldn't register that passkey."));
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base">{t("settings.passkeys.title", "Passkeys")}</CardTitle>
+            <CardDescription>{t("settings.passkeys.description", "Sign in without a password using Face ID, Touch ID, Windows Hello, or a security key.")}</CardDescription>
+          </div>
+          {browserSupportsWebAuthn() && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setAddError(null);
+                setAddOpen(true);
+              }}
+            >
+              <KeyRound className="h-4 w-4" /> {t("settings.passkeys.add", "Add a passkey")}
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-xs text-muted-foreground">{t("settings.twoFactor.loading", "Loading…")}</p>
+        ) : passkeys && passkeys.length > 0 ? (
+          <ul className="divide-y divide-border rounded-md border border-border">
+            {passkeys.map((p) => (
+              <li key={p.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                <div>
+                  <p className="font-medium">{p.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("settings.passkeys.added", "Added {{date}}", { date: new Date(p.createdAt).toLocaleDateString() })}
+                    {p.lastUsedAt ? ` · ${t("settings.passkeys.lastUsed", "last used {{date}}", { date: new Date(p.lastUsedAt).toLocaleDateString() })}` : ""}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-destructive"
+                  onClick={() => deleteMutation.mutate(p.id)}
+                  disabled={deleteMutation.isPending}
+                  aria-label={t("settings.passkeys.remove", "Remove {{name}}", { name: p.name })}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t("settings.passkeys.empty", "No passkeys registered yet.")}</p>
+        )}
+      </CardContent>
+
+      <Dialog open={addOpen} onOpenChange={(v) => !registering && setAddOpen(v)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("settings.passkeys.add", "Add a passkey")}</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              addPasskey();
+            }}
+          >
+            <div className="space-y-1.5">
+              <Label htmlFor="passkeyName">{t("settings.passkeys.nameLabel", "Name this device")}</Label>
+              <Input
+                id="passkeyName"
+                autoFocus
+                placeholder={t("settings.passkeys.namePlaceholder", "e.g. iPhone Face ID")}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              {addError && <p className="text-xs text-destructive">{addError}</p>}
+            </div>
+            <Button type="submit" className="w-full" disabled={registering}>
+              {registering ? t("settings.passkeys.waiting", "Waiting for browser…") : t("settings.passkeys.continue", "Continue")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
 
 export default function PortalSettingsPage() {
   const { t } = useTranslation();
@@ -163,6 +290,8 @@ export default function PortalSettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <PasskeysCard />
 
       <Dialog open={setupOpen} onOpenChange={(v) => !v && closeSetup()}>
         <DialogContent>

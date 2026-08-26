@@ -1,9 +1,13 @@
 import type { PrismaClient, StaffRole } from "@prisma/client";
+import type { Redis } from "ioredis";
+import { randomUUID } from "node:crypto";
+import { generateAuthenticationOptions, verifyAuthenticationResponse, type AuthenticationResponseJSON, type AuthenticatorTransportFuture } from "@simplewebauthn/server";
 import { STAFF_PERMISSIONS, DEFAULT_STAFF_PERMISSIONS, type StaffPermission, type CreateRoleInput, type UpdateRoleInput } from "@white-label/shared-types";
 import { env } from "../../config/env.js";
 import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { signStaffAccessToken } from "../../lib/jwt.js";
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
+import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
 import { UnauthorizedError, ConflictError, ForbiddenError, NotFoundError, AppError } from "../../lib/errors.js";
 
 const staffWithRole = { include: { customRole: true } } as const;
@@ -62,6 +66,55 @@ export async function refreshStaffSession(prisma: PrismaClient, refreshToken: st
 export async function logoutStaff(prisma: PrismaClient, refreshToken: string) {
   const tokenHash = hashRefreshToken(refreshToken);
   await prisma.refreshToken.updateMany({ where: { tokenHash, revokedAt: null }, data: { revokedAt: new Date() } });
+}
+
+const PASSKEY_LOGIN_TTL_SECONDS = 300;
+const passkeyLoginFlowKey = (flowId: string) => `webauthn:login:staff:${flowId}`;
+
+/**
+ * No `allowCredentials` — this is a discoverable-credential ("usernameless") flow: the browser's
+ * own passkey picker shows every staff passkey registered for this RP, so there's no email step.
+ * The challenge is keyed by a random flowId (not a user id) since the user isn't known yet.
+ */
+export async function getStaffPasskeyLoginOptions(redis: Redis) {
+  const options = await generateAuthenticationOptions({ rpID: webauthnRpID, userVerification: "required" });
+  const flowId = randomUUID();
+  await redis.set(passkeyLoginFlowKey(flowId), options.challenge, "EX", PASSKEY_LOGIN_TTL_SECONDS);
+  return { flowId, options };
+}
+
+/** A passkey is a single strong, phishing-resistant, user-verified factor — it stands in for password+2FA together rather than needing a second step on top. */
+export async function verifyStaffPasskeyLogin(prisma: PrismaClient, redis: Redis, flowId: string, response: AuthenticationResponseJSON) {
+  const key = passkeyLoginFlowKey(flowId);
+  const expectedChallenge = await redis.get(key);
+  if (!expectedChallenge) throw new UnauthorizedError("This sign-in attempt expired — please try again");
+  await redis.del(key);
+
+  const passkey = await prisma.staffPasskey.findUnique({ where: { credentialId: response.id }, include: { staffUser: { ...staffWithRole } } });
+  if (!passkey) throw new UnauthorizedError("This passkey isn't registered");
+  if (!passkey.staffUser.isActive) throw new UnauthorizedError("This account has been deactivated");
+
+  const verification = await verifyAuthenticationResponse({
+    response,
+    expectedChallenge,
+    expectedOrigin: webauthnOrigin,
+    expectedRPID: webauthnRpID,
+    credential: {
+      id: passkey.credentialId,
+      publicKey: new Uint8Array(passkey.publicKey),
+      counter: passkey.counter,
+      transports: passkey.transports as AuthenticatorTransportFuture[],
+    },
+  });
+  if (!verification.verified) throw new UnauthorizedError("Couldn't verify this passkey");
+
+  await prisma.staffPasskey.update({
+    where: { id: passkey.id },
+    data: { counter: verification.authenticationInfo.newCounter, lastUsedAt: new Date() },
+  });
+
+  const { accessToken, refreshToken } = await issueSession(prisma, passkey.staffUser);
+  return { user: passkey.staffUser, accessToken, refreshToken };
 }
 
 function generateTempPassword(): string {

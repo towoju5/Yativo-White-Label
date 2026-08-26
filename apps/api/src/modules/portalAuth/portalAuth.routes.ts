@@ -1,7 +1,25 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { portalLoginSchema, createCustomerSchema, authTokensSchema, portalLoginResultSchema, verifyTwoFactorSchema, customerSchema } from "@white-label/shared-types";
-import { signupCustomer, loginCustomer, verifyTwoFactorLogin, refreshCustomerSession, logoutCustomer } from "./portalAuth.service.js";
+import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
+import {
+  portalLoginSchema,
+  createCustomerSchema,
+  authTokensSchema,
+  portalLoginResultSchema,
+  verifyTwoFactorSchema,
+  customerSchema,
+  passkeyLoginOptionsResultSchema,
+  verifyPasskeyLoginSchema,
+} from "@white-label/shared-types";
+import {
+  signupCustomer,
+  loginCustomer,
+  verifyTwoFactorLogin,
+  refreshCustomerSession,
+  logoutCustomer,
+  getCustomerPasskeyLoginOptions,
+  verifyCustomerPasskeyLogin,
+} from "./portalAuth.service.js";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { env } from "../../config/env.js";
 import { parseTtlToMs } from "../../lib/refreshTokens.js";
@@ -65,6 +83,30 @@ export async function portalAuthRoutes(app: FastifyInstance) {
     { schema: { body: verifyTwoFactorSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
     async (request, reply) => {
       const { accessToken, refreshToken } = await verifyTwoFactorLogin(app.prisma, request.body.challengeToken, request.body.code);
+      setRefreshCookie(reply, refreshToken);
+      return reply.send({ accessToken });
+    },
+  );
+
+  server.post(
+    "/portal/auth/passkey/login/options",
+    { schema: { response: { 200: passkeyLoginOptionsResultSchema } } },
+    async (_request, reply) => {
+      const result = await getCustomerPasskeyLoginOptions(app.redis);
+      return reply.send({ flowId: result.flowId, options: result.options as unknown as Record<string, unknown> });
+    },
+  );
+
+  server.post(
+    "/portal/auth/passkey/login/verify",
+    { schema: { body: verifyPasskeyLoginSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
+    async (request, reply) => {
+      const { accessToken, refreshToken } = await verifyCustomerPasskeyLogin(
+        app.prisma,
+        app.redis,
+        request.body.flowId,
+        request.body.response as unknown as AuthenticationResponseJSON,
+      );
       setRefreshCookie(reply, refreshToken);
       return reply.send({ accessToken });
     },

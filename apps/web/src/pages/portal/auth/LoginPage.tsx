@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { portalLoginSchema, type PortalLoginInput } from "@white-label/shared-types";
 import { fetchBranding } from "@/theme/branding";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
@@ -16,12 +17,13 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function PortalLoginPage() {
   const { t } = useTranslation();
-  const { isAuthenticated, isLoading: authLoading, login, verifyTwoFactor } = useCustomerAuth();
+  const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey, verifyTwoFactor } = useCustomerAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [passkeySubmitting, setPasskeySubmitting] = useState(false);
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [code, setCode] = useState("");
 
@@ -50,6 +52,20 @@ export default function PortalLoginPage() {
       setError(e instanceof ApiError ? e.message : t("login.genericError", "Unable to sign in. Check your credentials."));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const onPasskeySubmit = async () => {
+    setError(null);
+    setPasskeySubmitting(true);
+    try {
+      await loginWithPasskey();
+      navigate("/portal", { replace: true });
+    } catch (e) {
+      // A cancelled/timed-out browser prompt throws a plain DOMException, not an ApiError.
+      setError(e instanceof ApiError ? e.message : t("login.passkeyError", "Couldn't sign in with that passkey."));
+    } finally {
+      setPasskeySubmitting(false);
     }
   };
 
@@ -148,6 +164,18 @@ export default function PortalLoginPage() {
                     {submitting ? t("login.signingIn", "Signing in…") : t("login.signIn", "Sign in")}
                   </Button>
                 </form>
+                {browserSupportsWebAuthn() && (
+                  <>
+                    <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="h-px flex-1 bg-border" />
+                      {t("login.or", "or")}
+                      <div className="h-px flex-1 bg-border" />
+                    </div>
+                    <Button type="button" variant="outline" className="w-full" disabled={passkeySubmitting} onClick={onPasskeySubmit}>
+                      {passkeySubmitting ? t("login.passkeyWaiting", "Waiting for passkey…") : t("login.signInWithPasskey", "Sign in with a passkey")}
+                    </Button>
+                  </>
+                )}
                 <p className="mt-4 text-center text-sm text-muted-foreground">
                   {t("login.newHere", "New here?")}{" "}
                   <Link to="/portal/signup" className="font-medium text-primary hover:underline">

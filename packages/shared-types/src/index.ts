@@ -18,5 +18,6 @@ export * from "./deposit.schema.js";
 export * from "./virtualAccount.schema.js";
 export * from "./platformSettings.schema.js";
 export * from "./twoFactor.schema.js";
+export * from "./passkey.schema.js";
 export * from "./page.schema.js";
 export * from "./permissions.js";

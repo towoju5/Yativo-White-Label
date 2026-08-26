@@ -10,24 +10,24 @@ datasource db {
 // ── Reference data ──────────────────────────────────────────────────────
 
 model Currency {
-  code    String  @id @db.Char(3) // ISO 4217 or token symbol, e.g. USD, EUR, USDC
-  decimals Int
-  isFiat  Boolean @default(true)
-  name    String
+  code                  String  @id @db.Char(3) // ISO 4217 or token symbol, e.g. USD, EUR, USDC
+  decimals              Int
+  isFiat                Boolean @default(true)
+  name                  String
   // Populated from Yativo's GET /currencies/all — display-only, never used in ledger math.
-  symbol      String?
-  logoUrl     String?
-  countryCode String?
-  isActive    Boolean @default(true)
+  symbol                String?
+  logoUrl               String?
+  countryCode           String?
+  isActive              Boolean @default(true)
   // Whether a customer may hold a wallet in this currency at all (self-service add, or
   // auto-provisioned under PlatformSettings.walletCurrencyMode = ALL_AUTOMATIC).
   isEnabledForCustomers Boolean @default(false)
 
-  accounts         Account[]
-  wallets          Wallet[]
-  entries          LedgerEntry[]
-  cards            Card[]
-  reports          ReconciliationReport[]
+  accounts           Account[]
+  wallets            Wallet[]
+  entries            LedgerEntry[]
+  cards              Card[]
+  reports            ReconciliationReport[]
   defaultForPlatform PlatformSettings[]
 
   @@map("currencies")
@@ -55,14 +55,14 @@ enum KycRequiredService {
 
 /// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
 model PlatformSettings {
-  id                   Int                @id @default(1)
-  walletCurrencyMode   WalletCurrencyMode @default(DEFAULT_ONLY)
-  defaultCurrencyCode  String             @db.Char(3)
-  defaultCurrency      Currency           @relation(fields: [defaultCurrencyCode], references: [code])
+  id                  Int                  @id @default(1)
+  walletCurrencyMode  WalletCurrencyMode   @default(DEFAULT_ONLY)
+  defaultCurrencyCode String               @db.Char(3)
+  defaultCurrency     Currency             @relation(fields: [defaultCurrencyCode], references: [code])
   // Defaults to every service requiring KYC — matches this app's original hardcoded behavior,
   // so a migration never silently relaxes a security check nobody asked to relax.
-  kycRequiredServices  KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET])
-  updatedAt            DateTime           @updatedAt
+  kycRequiredServices KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET])
+  updatedAt           DateTime             @updatedAt
 
   @@map("platform_settings")
 }
@@ -122,20 +122,20 @@ enum LedgerExternalSource {
 }
 
 model LedgerTransaction {
-  id              String                   @id @default(cuid())
-  type            LedgerTransactionType
-  status          LedgerTransactionStatus  @default(PENDING)
-  idempotencyKey  String                   @unique
-  externalSource  LedgerExternalSource
-  externalRef     String?
-  description     String?
-  metadata        Json?
-  reversalOfId    String?                  @unique
-  reversalOf      LedgerTransaction?       @relation("Reversal", fields: [reversalOfId], references: [id])
-  reversedBy      LedgerTransaction?       @relation("Reversal")
-  createdAt       DateTime                 @default(now())
-  postedAt        DateTime?
-  reversedAt       DateTime?
+  id             String                  @id @default(cuid())
+  type           LedgerTransactionType
+  status         LedgerTransactionStatus @default(PENDING)
+  idempotencyKey String                  @unique
+  externalSource LedgerExternalSource
+  externalRef    String?
+  description    String?
+  metadata       Json?
+  reversalOfId   String?                 @unique
+  reversalOf     LedgerTransaction?      @relation("Reversal", fields: [reversalOfId], references: [id])
+  reversedBy     LedgerTransaction?      @relation("Reversal")
+  createdAt      DateTime                @default(now())
+  postedAt       DateTime?
+  reversedAt     DateTime?
 
   entries LedgerEntry[]
   payout  Payout?
@@ -153,16 +153,16 @@ enum EntryDirection {
 // Immutable journal lines. Never updated after insert — corrections are new
 // offsetting transactions (see reverseTransaction / settlePendingTransaction).
 model LedgerEntry {
-  id            String                @id @default(cuid())
+  id            String            @id @default(cuid())
   transactionId String
-  transaction   LedgerTransaction     @relation(fields: [transactionId], references: [id])
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
   accountId     String
-  account       Account               @relation(fields: [accountId], references: [id])
+  account       Account           @relation(fields: [accountId], references: [id])
   direction     EntryDirection
   amountMinor   BigInt
-  currencyCode  String                @db.Char(3)
-  currency      Currency              @relation(fields: [currencyCode], references: [code])
-  createdAt     DateTime              @default(now())
+  currencyCode  String            @db.Char(3)
+  currency      Currency          @relation(fields: [currencyCode], references: [code])
+  createdAt     DateTime          @default(now())
 
   @@index([transactionId])
   @@index([accountId, createdAt])
@@ -173,16 +173,16 @@ model LedgerEntry {
 // the source of truth; this is updated transactionally alongside it and
 // periodically re-derived by the reconciliation job to catch drift.
 model Wallet {
-  id                    String   @id @default(cuid())
-  customerId            String
-  customer              Customer @relation(fields: [customerId], references: [id])
-  currencyCode          String   @db.Char(3)
-  currency              Currency @relation(fields: [currencyCode], references: [code])
-  accountId             String   @unique
-  account               Account  @relation(fields: [accountId], references: [id])
-  cachedAvailableMinor  BigInt   @default(0)
-  cachedPendingMinor    BigInt   @default(0)
-  cacheUpdatedAt        DateTime @default(now())
+  id                   String   @id @default(cuid())
+  customerId           String
+  customer             Customer @relation(fields: [customerId], references: [id])
+  currencyCode         String   @db.Char(3)
+  currency             Currency @relation(fields: [currencyCode], references: [code])
+  accountId            String   @unique
+  account              Account  @relation(fields: [accountId], references: [id])
+  cachedAvailableMinor BigInt   @default(0)
+  cachedPendingMinor   BigInt   @default(0)
+  cacheUpdatedAt       DateTime @default(now())
 
   @@unique([customerId, currencyCode])
   @@map("wallets")
@@ -208,34 +208,34 @@ enum KycStatus {
 }
 
 model Customer {
-  id               String         @id @default(cuid())
-  type             CustomerType   @default(INDIVIDUAL)
-  fullName         String?
-  businessName     String?
-  email            String         @unique
-  passwordHash     String
-  emailVerifiedAt  DateTime?
-  lastLoginAt      DateTime?
-  status           CustomerStatus @default(ACTIVE)
-  kycStatus        KycStatus      @default(NOT_STARTED)
-  yativoCustomerId String?
-  phone            String?
+  id                        String         @id @default(cuid())
+  type                      CustomerType   @default(INDIVIDUAL)
+  fullName                  String?
+  businessName              String?
+  email                     String         @unique
+  passwordHash              String
+  emailVerifiedAt           DateTime?
+  lastLoginAt               DateTime?
+  status                    CustomerStatus @default(ACTIVE)
+  kycStatus                 KycStatus      @default(NOT_STARTED)
+  yativoCustomerId          String?
+  phone                     String?
   /// ISO 3166-1 alpha-3, e.g. "USA" — collected at KYC submission time, required by Yativo's customer + KYC APIs.
-  countryCode      String?
-  kycSubmissionId  String?
-  kycSubmittedAt   DateTime?
+  countryCode               String?
+  kycSubmissionId           String?
+  kycSubmittedAt            DateTime?
   /// Set once POST /customer/virtual/cards/activate has been called for this customer — the card
   /// issuer requires that exactly once before their first card, and the guide doesn't document it
   /// as safely repeatable, so this avoids calling it again on every card issuance.
-  cardsActivatedAt DateTime?
+  cardsActivatedAt          DateTime?
   /// Base32 TOTP secret — only set once 2FA setup is confirmed (see /portal/2fa/enable). The
   /// pending, unconfirmed secret from /portal/2fa/setup lives in Redis, not here, until confirmed.
-  twoFactorEnabled      Boolean  @default(false)
-  twoFactorSecret       String?
+  twoFactorEnabled          Boolean        @default(false)
+  twoFactorSecret           String?
   /// bcrypt hashes of one-time recovery codes — each is removed from the array once used.
-  twoFactorBackupCodeHashes String[] @default([])
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  twoFactorBackupCodeHashes String[]       @default([])
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
 
   wallets       Wallet[]
   accounts      Account[]
@@ -243,6 +243,7 @@ model Customer {
   cards         Card[]
   refreshTokens CustomerRefreshToken[]
   payouts       Payout[]
+  passkeys      CustomerPasskey[]
 
   @@map("customers")
 }
@@ -260,6 +261,28 @@ model CustomerRefreshToken {
   @@map("customer_refresh_tokens")
 }
 
+/// A WebAuthn credential (passkey) registered for passwordless portal login. counter=0 forever is
+/// normal for authenticators that don't implement a signature counter (most platform passkeys) —
+/// verifyAuthenticationResponse tolerates that; it only rejects a counter that goes *backwards*.
+model CustomerPasskey {
+  id           String    @id @default(cuid())
+  customerId   String
+  customer     Customer  @relation(fields: [customerId], references: [id])
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      Int       @default(0)
+  transports   String[]
+  deviceType   String
+  backedUp     Boolean   @default(false)
+  /// User-chosen label so they can tell devices apart in Settings — e.g. "MacBook Touch ID".
+  name         String
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([customerId])
+  @@map("customer_passkeys")
+}
+
 // ── Staff (the reseller's own back-office team — admin auth) ────────────
 
 enum StaffRole {
@@ -269,24 +292,25 @@ enum StaffRole {
 }
 
 model StaffUser {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String      @id @default(cuid())
+  email         String      @unique
   passwordHash  String
-  role          StaffRole @default(STAFF)
+  role          StaffRole   @default(STAFF)
   // OWNER/ADMIN always retain full access regardless of this — it only narrows the STAFF tier.
   // Null means "no custom role assigned yet", which falls back to a fixed, backward-compatible
   // default permission set (see DEFAULT_STAFF_PERMISSIONS) rather than losing access outright.
   customRoleId  String?
-  customRole    Role?      @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
-  isActive      Boolean   @default(true)
+  customRole    Role?       @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
+  isActive      Boolean     @default(true)
   deactivatedAt DateTime?
   invitedById   String?
-  invitedBy     StaffUser? @relation("Invites", fields: [invitedById], references: [id])
+  invitedBy     StaffUser?  @relation("Invites", fields: [invitedById], references: [id])
   invited       StaffUser[] @relation("Invites")
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime    @default(now())
 
   refreshTokens RefreshToken[]
   apiKeys       ApiKey[]
+  passkeys      StaffPasskey[]
 
   @@map("staff_users")
 }
@@ -345,18 +369,38 @@ model RefreshToken {
   @@map("staff_refresh_tokens")
 }
 
+/// A WebAuthn credential (passkey) registered for passwordless staff login. See CustomerPasskey's
+/// doc comment for the counter=0 note — same authenticator behavior applies here.
+model StaffPasskey {
+  id           String    @id @default(cuid())
+  staffUserId  String
+  staffUser    StaffUser @relation(fields: [staffUserId], references: [id])
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      Int       @default(0)
+  transports   String[]
+  deviceType   String
+  backedUp     Boolean   @default(false)
+  name         String
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([staffUserId])
+  @@map("staff_passkeys")
+}
+
 // ── Payments infrastructure ──────────────────────────────────────────────
 
 model Beneficiary {
-  id                  String   @id @default(cuid())
+  id                  String    @id @default(cuid())
   customerId          String
-  customer            Customer @relation(fields: [customerId], references: [id])
+  customer            Customer  @relation(fields: [customerId], references: [id])
   name                String
   type                String
   yativoBeneficiaryId String?
   details             Json
   archivedAt          DateTime?
-  createdAt           DateTime @default(now())
+  createdAt           DateTime  @default(now())
 
   payouts Payout[]
 
@@ -365,17 +409,17 @@ model Beneficiary {
 }
 
 model Payout {
-  id            String            @id @default(cuid())
-  customerId    String
-  customer      Customer          @relation(fields: [customerId], references: [id])
-  beneficiaryId String
-  beneficiary   Beneficiary       @relation(fields: [beneficiaryId], references: [id])
-  currencyCode  String            @db.Char(3)
-  amountMinor   BigInt
-  transactionId String            @unique
-  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
+  id             String            @id @default(cuid())
+  customerId     String
+  customer       Customer          @relation(fields: [customerId], references: [id])
+  beneficiaryId  String
+  beneficiary    Beneficiary       @relation(fields: [beneficiaryId], references: [id])
+  currencyCode   String            @db.Char(3)
+  amountMinor    BigInt
+  transactionId  String            @unique
+  transaction    LedgerTransaction @relation(fields: [transactionId], references: [id])
   yativoPayoutId String?
-  createdAt     DateTime          @default(now())
+  createdAt      DateTime          @default(now())
 
   @@index([customerId])
   @@map("payouts")
@@ -419,15 +463,15 @@ enum WebhookProcessingStatus {
 }
 
 model WebhookEvent {
-  id               String                   @id @default(cuid())
-  provider         String                   @default("YATIVO")
-  externalEventId  String                   @unique
+  id               String                  @id @default(cuid())
+  provider         String                  @default("YATIVO")
+  externalEventId  String                  @unique
   eventType        String
   payload          Json
   signatureValid   Boolean
-  processingStatus WebhookProcessingStatus  @default(PENDING)
+  processingStatus WebhookProcessingStatus @default(PENDING)
   errorMessage     String?
-  receivedAt       DateTime                 @default(now())
+  receivedAt       DateTime                @default(now())
   processedAt      DateTime?
 
   @@index([eventType])
@@ -441,27 +485,27 @@ enum ReconciliationStatus {
 }
 
 model ReconciliationReport {
-  id            String                @id @default(cuid())
-  currencyCode  String                @db.Char(3)
-  currency      Currency              @relation(fields: [currencyCode], references: [code])
+  id            String               @id @default(cuid())
+  currencyCode  String               @db.Char(3)
+  currency      Currency             @relation(fields: [currencyCode], references: [code])
   accountType   AccountType
   expectedMinor BigInt
   actualMinor   BigInt
   deltaMinor    BigInt
   status        ReconciliationStatus
-  createdAt     DateTime              @default(now())
+  createdAt     DateTime             @default(now())
 
   @@map("reconciliation_reports")
 }
 
 model ApiKey {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  keyHash     String     @unique
+  keyHash     String    @unique
   last4       String
   createdById String
-  createdBy   StaffUser  @relation(fields: [createdById], references: [id])
-  createdAt   DateTime   @default(now())
+  createdBy   StaffUser @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
   revokedAt   DateTime?
 
   @@map("api_keys")

@@ -696,7 +696,11 @@
     "verifyDescription": "Enter the 6-digit code from your authenticator app, or backup code.",
     "verifyHeading": "Verify say na you",
     "verifying": "We dey verify…",
-    "welcomeBack": "Welcome back"
+    "welcomeBack": "Welcome back",
+    "or": "or",
+    "passkeyWaiting": "We dey wait for your passkey…",
+    "signInWithPasskey": "Sign in with passkey",
+    "passkeyError": "We no fit sign you in with that passkey."
   },
   "nav": {
     "account": "Account",
@@ -879,6 +883,21 @@
         "disabled": "We don disable two-factor authentication",
         "setupError": "We no fit start setup"
       }
+    },
+    "passkeys": {
+      "title": "Passkeys",
+      "description": "Sign in without password — use Face ID, Touch ID, Windows Hello, or security key.",
+      "add": "Add passkey",
+      "empty": "No passkey dey registered yet.",
+      "added": "You add am {{date}}",
+      "lastUsed": "you use am last {{date}}",
+      "remove": "Remove {{name}}",
+      "nameLabel": "Give this device name",
+      "namePlaceholder": "e.g. iPhone Face ID",
+      "continue": "Continue",
+      "waiting": "We dey wait for browser…",
+      "addError": "We no fit register that passkey.",
+      "deleteError": "We no fit remove passkey"
     }
   },
   "signup": {
