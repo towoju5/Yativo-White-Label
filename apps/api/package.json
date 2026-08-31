@@ -12,7 +12,8 @@
     "test": "vitest run",
     "prisma:seed": "tsx prisma/seed.ts",
     "reset-staff-password": "tsx scripts/resetStaffPassword.ts",
-    "bootstrap-platform-settings": "tsx scripts/bootstrapPlatformSettings.ts"
+    "bootstrap-platform-settings": "tsx scripts/bootstrapPlatformSettings.ts",
+    "backfill-ledger-entry-balances": "tsx scripts/backfillLedgerEntryBalances.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -37,7 +38,7 @@
     "jose": "^6.2.10",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^9.0.5",
-    "puppeteer": "^25.9.0",
+    "pdfkit": "^0.20.2",
     "qrcode": "^1.5.4",
     "sanitize-html": "^2.17.7",
     "winston": "^3.19.0",
@@ -48,6 +49,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.0",
     "@types/nodemailer": "^8.0.1",
+    "@types/pdfkit": "^0.17.6",
     "@types/qrcode": "^1.5.6",
     "@types/sanitize-html": "^2.16.1",
     "prisma": "^5.20.0",

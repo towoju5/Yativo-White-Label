@@ -153,16 +153,24 @@ enum EntryDirection {
 // Immutable journal lines. Never updated after insert — corrections are new
 // offsetting transactions (see reverseTransaction / settlePendingTransaction).
 model LedgerEntry {
-  id            String            @id @default(cuid())
-  transactionId String
-  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id])
-  accountId     String
-  account       Account           @relation(fields: [accountId], references: [id])
-  direction     EntryDirection
-  amountMinor   BigInt
-  currencyCode  String            @db.Char(3)
-  currency      Currency          @relation(fields: [currencyCode], references: [code])
-  createdAt     DateTime          @default(now())
+  id                 String            @id @default(cuid())
+  transactionId      String
+  transaction        LedgerTransaction @relation(fields: [transactionId], references: [id])
+  accountId          String
+  account            Account           @relation(fields: [accountId], references: [id])
+  direction          EntryDirection
+  amountMinor        BigInt
+  currencyCode       String            @db.Char(3)
+  currency           Currency          @relation(fields: [currencyCode], references: [code])
+  // The account's own posted balance immediately before/after this entry, recorded once at
+  // insert time inside the same row-locked transaction that posts it — never recomputed later.
+  // A PENDING entry doesn't move the posted balance, so before == after for it. This is what
+  // makes statement history immune to a transaction's status changing later on (settlement,
+  // reversal): unlike replaying history filtered by *current* status, these numbers are frozen
+  // at the moment they were true.
+  balanceBeforeMinor BigInt            @default(0)
+  balanceAfterMinor  BigInt            @default(0)
+  createdAt          DateTime          @default(now())
 
   @@index([transactionId])
   @@index([accountId, createdAt])

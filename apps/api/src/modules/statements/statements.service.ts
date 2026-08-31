@@ -1,10 +1,11 @@
 import type { PrismaClient } from "@prisma/client";
-import puppeteer from "puppeteer";
+import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
 import type { StatementDocument, StatementFormat } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
 import { getWalletStatementForRange } from "../wallets/wallets.service.js";
 import { NotFoundError } from "../../lib/errors.js";
+import logger from "../../lib/logger.js";
 
 /** Loads the customer's own wallet + currency and builds the Statement of Account document for [dateFrom, dateTo]. Scoped to the requesting customer — never another customer's wallet. */
 export async function buildStatementDocument(prisma: PrismaClient, customerId: string, walletId: string, dateFrom: Date, dateTo: Date): Promise<StatementDocument> {
@@ -53,20 +54,33 @@ function toNumber(amountMinor: string, decimals: number): number {
   return Number(amountMinor) / 10 ** decimals;
 }
 
-function escapeHtml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+/** Best-effort logo fetch — a broken/unreachable admin-set logo URL must never break statement generation. */
+async function fetchLogoBuffer(logoUrl: string): Promise<Buffer | null> {
+  try {
+    const res = await fetch(logoUrl, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return null;
+    return Buffer.from(await res.arrayBuffer());
+  } catch (err) {
+    logger.warn({ err, logoUrl }, "Couldn't fetch branding logo for statement PDF — falling back to text");
+    return null;
+  }
 }
 
-/**
- * Builds the printable statement page. Dynamic text (customer name, transaction descriptions) is
- * always customer-authored or system-generated — escaped here because this HTML is handed to a
- * real headless browser for PDF rendering, where an unescaped <script> would actually execute.
- */
-function renderStatementHtml(doc: StatementDocument, opts: StatementRenderOptions): string {
-  const accent = opts.primaryColor && /^#[0-9a-fA-F]{6}$/.test(opts.primaryColor) ? opts.primaryColor : "#4f46e5";
-  const productName = escapeHtml(opts.productName);
-  const customerName = escapeHtml(opts.customerName);
-  const accountLabel = escapeHtml(opts.accountLabel);
+const PAGE_MARGIN = 40;
+const CONTENT_WIDTH = 595.28 - PAGE_MARGIN * 2; // A4 width in points, minus margins
+const COLS = { date: 0, desc: 95, type: 275, debit: 350, credit: 420, balance: 490 };
+const COL_WIDTHS = { date: 90, desc: 175, type: 70, debit: 65, credit: 65, balance: 65 };
+const TABLE_BOTTOM = 780;
+
+function hexToRgb(hex: string): [number, number, number] {
+  const clean = hex.replace("#", "");
+  return [parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16)];
+}
+
+export async function renderStatementPdf(doc: StatementDocument, opts: StatementRenderOptions): Promise<Buffer> {
+  const accentHex = opts.primaryColor && /^#[0-9a-fA-F]{6}$/.test(opts.primaryColor) ? opts.primaryColor : "#4f46e5";
+  const accent = hexToRgb(accentHex);
+  const logoBuffer = opts.logoUrl ? await fetchLogoBuffer(opts.logoUrl) : null;
 
   let totalDebitMinor = 0n;
   let totalCreditMinor = 0n;
@@ -82,179 +96,128 @@ function renderStatementHtml(doc: StatementDocument, opts: StatementRenderOption
     }
   }
 
-  const rows = doc.lines
-    .map(
-      (line) => `
-        <tr>
-          <td class="col-date">${escapeHtml(new Date(line.date).toLocaleString())}</td>
-          <td class="col-desc">${escapeHtml(line.description)}</td>
-          <td class="col-type">${escapeHtml(humanizeType(line.type))}</td>
-          <td class="col-amt">${line.direction === "DEBIT" ? `<span class="debit-amt">${escapeHtml(formatMinorAmount(line.amountMinor, doc.decimals))}</span>` : `<span class="dash">&ndash;</span>`}</td>
-          <td class="col-amt">${line.direction === "CREDIT" ? `<span class="credit-amt">${escapeHtml(formatMinorAmount(line.amountMinor, doc.decimals))}</span>` : `<span class="dash">&ndash;</span>`}</td>
-          <td class="col-amt">${escapeHtml(formatMinorAmount(line.balanceAfterMinor, doc.decimals))}</td>
-        </tr>`,
-    )
-    .join("");
+  const pdf = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
+  const chunks: Buffer[] = [];
+  pdf.on("data", (chunk) => chunks.push(chunk));
+  const result = new Promise<Buffer>((resolve) => pdf.on("end", () => resolve(Buffer.concat(chunks))));
 
-  const logo = opts.logoUrl
-    ? `<img src="${escapeHtml(opts.logoUrl)}" alt="${productName}">`
-    : `<span class="brand-name">${productName}</span>`;
-
-  return `<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Statement of Account</title>
-<style>
-  :root {
-    --bg: #eef0f3;
-    --card-bg: #ffffff;
-    --border: #e6e8ec;
-    --text: #1a1d29;
-    --muted: #8a90a2;
-    --credit: #16a34a;
-    --debit: #1a1d29;
-    --header-bg: #f7f8fa;
-    --accent: ${accent};
+  // --- Header: the logo, made as prominent as the page allows (full content width, generous
+  // height) rather than a small corner icon — falls back to the product name as bold text. ---
+  if (logoBuffer) {
+    try {
+      pdf.image(logoBuffer, PAGE_MARGIN, pdf.y, { fit: [CONTENT_WIDTH, 90], align: "center", valign: "center" });
+      pdf.y += 96;
+    } catch (err) {
+      logger.warn({ err }, "Couldn't render fetched logo image — falling back to text");
+      pdf.font("Helvetica-Bold").fontSize(22).fillColor(accentHex).text(opts.productName, { align: "center" });
+      pdf.moveDown(0.3);
+    }
+  } else {
+    pdf.font("Helvetica-Bold").fontSize(22).fillColor(accentHex).text(opts.productName, { align: "center" });
+    pdf.moveDown(0.3);
   }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0;
-    background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-  .page { max-width: 1000px; margin: 0 auto; padding: 32px 20px 48px; }
-  .brand-row { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 8px; }
-  .brand-row img { height: 36px; }
-  .brand-name { font-size: 18px; font-weight: 700; color: var(--accent); }
-  .statement-title { text-align: center; font-size: 26px; font-weight: 700; margin: 4px 0 6px; }
-  .generated-sub { text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 24px; }
-  .statement-card {
-    background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
-    padding: 22px 26px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(20,20,30,0.03);
-  }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-  .info-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-  .info-value { font-size: 13.5px; font-weight: 600; }
-  .section-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  .section-head h2 { font-size: 16px; font-weight: 700; margin: 0; }
-  .section-head .period { font-size: 12.5px; color: var(--muted); }
-  .summary-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 18px; column-gap: 20px;
-    padding-bottom: 20px; border-bottom: 1px dashed var(--border);
-  }
-  .summary-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-  .summary-value { font-size: 15px; font-weight: 700; }
-  .table-wrap { overflow-x: auto; margin-top: 18px; border: 1px solid var(--border); border-radius: 8px; }
-  table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 12px; }
-  thead th {
-    background: var(--header-bg); text-align: left; font-weight: 600; color: #4b5163;
-    padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap;
-  }
-  tbody td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tbody tr:last-child td { border-bottom: none; }
-  .col-date { white-space: nowrap; color: #4b5163; }
-  .col-desc { min-width: 220px; color: #333744; }
-  .col-type { white-space: nowrap; color: #4b5163; }
-  .col-amt { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
-  .credit-amt { color: var(--credit); font-weight: 600; }
-  .debit-amt { color: var(--debit); }
-  .dash { color: #b8bcc6; }
-  .empty { text-align: center; color: var(--muted); padding: 24px; }
-  .doc-footer { text-align: center; color: var(--muted); font-size: 11px; margin-top: 24px; }
-</style>
-</head>
-<body>
-<div class="page">
-  <div class="brand-row">${logo}</div>
-  <div class="statement-title">Statement of Account</div>
-  <div class="generated-sub">Generated on ${escapeHtml(new Date().toLocaleString())}</div>
 
-  <section class="statement-card">
-    <div class="info-grid">
-      <div>
-        <div class="info-label">Account Holder</div>
-        <div class="info-value">${customerName}</div>
-      </div>
-      <div>
-        <div class="info-label">Account</div>
-        <div class="info-value">${accountLabel}</div>
-      </div>
-      <div>
-        <div class="info-label">Statement Period</div>
-        <div class="info-value">${escapeHtml(new Date(doc.dateFrom).toLocaleDateString())} &ndash; ${escapeHtml(new Date(doc.dateTo).toLocaleDateString())}</div>
-      </div>
-    </div>
-  </section>
+  pdf.font("Helvetica-Bold").fontSize(18).fillColor("#111827").text("Statement of Account", { align: "center" });
+  pdf.font("Helvetica").fontSize(9).fillColor("#8a90a2").text(`Generated on ${new Date().toLocaleString()}`, { align: "center" });
+  pdf.moveDown(1);
 
-  <section class="statement-card">
-    <div class="section-head">
-      <h2>${accountLabel}</h2>
-      <span class="period">Period: ${escapeHtml(new Date(doc.dateFrom).toLocaleDateString())} &ndash; ${escapeHtml(new Date(doc.dateTo).toLocaleDateString())}</span>
-    </div>
-    <div class="summary-grid">
-      <div>
-        <div class="summary-label">Opening Balance</div>
-        <div class="summary-value">${escapeHtml(fmt(doc, doc.openingBalanceMinor))}</div>
-      </div>
-      <div>
-        <div class="summary-label">Total Debit</div>
-        <div class="summary-value">${escapeHtml(fmt(doc, totalDebitMinor.toString()))}</div>
-      </div>
-      <div>
-        <div class="summary-label">Debit Count</div>
-        <div class="summary-value">${debitCount}</div>
-      </div>
-      <div>
-        <div class="summary-label">Closing Balance (current)</div>
-        <div class="summary-value">${escapeHtml(fmt(doc, doc.closingBalanceMinor))}</div>
-      </div>
-      <div>
-        <div class="summary-label">Total Credit</div>
-        <div class="summary-value credit-amt">${escapeHtml(fmt(doc, totalCreditMinor.toString()))}</div>
-      </div>
-      <div>
-        <div class="summary-label">Credit Count</div>
-        <div class="summary-value">${creditCount}</div>
-      </div>
-    </div>
+  // --- Account info card ---
+  const infoBoxY = pdf.y;
+  const infoBoxHeight = 56;
+  pdf.roundedRect(PAGE_MARGIN, infoBoxY, CONTENT_WIDTH, infoBoxHeight, 6).fillAndStroke("#ffffff", "#e6e8ec");
+  const infoColWidth = CONTENT_WIDTH / 3;
+  const infoCols: [string, string][] = [
+    ["Account Holder", opts.customerName],
+    ["Account", opts.accountLabel],
+    ["Statement Period", `${new Date(doc.dateFrom).toLocaleDateString()} – ${new Date(doc.dateTo).toLocaleDateString()}`],
+  ];
+  infoCols.forEach(([label, value], i) => {
+    const x = PAGE_MARGIN + 16 + i * infoColWidth;
+    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, infoBoxY + 12, { width: infoColWidth - 24 });
+    pdf.font("Helvetica-Bold").fontSize(11).fillColor("#1a1d29").text(value, x, infoBoxY + 26, { width: infoColWidth - 24 });
+  });
+  pdf.y = infoBoxY + infoBoxHeight + 16;
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Type</th>
-            <th>Debit (${escapeHtml(doc.currencyCode)})</th>
-            <th>Credit (${escapeHtml(doc.currencyCode)})</th>
-            <th>Balance After (${escapeHtml(doc.currencyCode)})</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${doc.lines.length > 0 ? rows : `<tr><td colspan="6" class="empty">No transactions in this period.</td></tr>`}
-        </tbody>
-      </table>
-    </div>
-  </section>
+  // --- Summary card ---
+  const summaryY = pdf.y;
+  const summaryHeight = 90;
+  pdf.roundedRect(PAGE_MARGIN, summaryY, CONTENT_WIDTH, summaryHeight, 6).fillAndStroke("#ffffff", "#e6e8ec");
+  pdf.font("Helvetica-Bold").fontSize(12).fillColor("#1a1d29").text(opts.accountLabel, PAGE_MARGIN + 16, summaryY + 14);
 
-  <div class="doc-footer">This is a system-generated statement from ${productName}.</div>
-</div>
-</body>
-</html>`;
-}
+  const tiles: [string, string, [number, number, number] | null][] = [
+    ["Opening Balance", fmt(doc, doc.openingBalanceMinor), null],
+    ["Total Debit", fmt(doc, totalDebitMinor.toString()), null],
+    ["Debit Count", String(debitCount), null],
+    ["Closing Balance (current)", fmt(doc, doc.closingBalanceMinor), null],
+    ["Total Credit", fmt(doc, totalCreditMinor.toString()), [22, 163, 74]],
+    ["Credit Count", String(creditCount), null],
+  ];
+  const tileColWidth = CONTENT_WIDTH / 3;
+  tiles.forEach(([label, value, color], i) => {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const x = PAGE_MARGIN + 16 + col * tileColWidth;
+    const y = summaryY + 36 + row * 28;
+    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, y, { width: tileColWidth - 24 });
+    pdf.font("Helvetica-Bold").fontSize(11).fillColor(color ? `rgb(${color[0]},${color[1]},${color[2]})` : "#1a1d29").text(value, x, y + 12, { width: tileColWidth - 24 });
+  });
+  pdf.y = summaryY + summaryHeight + 16;
 
-export async function renderStatementPdf(doc: StatementDocument, opts: StatementRenderOptions): Promise<Buffer> {
-  const html = renderStatementHtml(doc, opts);
-  const browser = await puppeteer.launch({ args: ["--no-sandbox", "--disable-setuid-sandbox"] });
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "load" });
-    const buffer = await page.pdf({ format: "A4", margin: { top: "20px", bottom: "20px", left: "16px", right: "16px" }, printBackground: true });
-    return Buffer.from(buffer);
-  } finally {
-    await browser.close();
+  // --- Transaction table ---
+  function drawTableHeader() {
+    const y = pdf.y;
+    pdf.rect(PAGE_MARGIN, y, CONTENT_WIDTH, 22).fill("#f7f8fa");
+    pdf.font("Helvetica-Bold").fontSize(8).fillColor("#4b5163");
+    pdf.text("DATE", PAGE_MARGIN + COLS.date + 6, y + 7, { width: COL_WIDTHS.date - 6 });
+    pdf.text("DESCRIPTION", PAGE_MARGIN + COLS.desc, y + 7, { width: COL_WIDTHS.desc });
+    pdf.text("TYPE", PAGE_MARGIN + COLS.type, y + 7, { width: COL_WIDTHS.type });
+    pdf.text(`DEBIT`, PAGE_MARGIN + COLS.debit, y + 7, { width: COL_WIDTHS.debit, align: "right" });
+    pdf.text(`CREDIT`, PAGE_MARGIN + COLS.credit, y + 7, { width: COL_WIDTHS.credit, align: "right" });
+    pdf.text(`BALANCE`, PAGE_MARGIN + COLS.balance, y + 7, { width: COL_WIDTHS.balance, align: "right" });
+    pdf.moveTo(PAGE_MARGIN, y + 22).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + 22).strokeColor("#e6e8ec").stroke();
+    pdf.y = y + 22 + 6;
   }
+
+  drawTableHeader();
+
+  if (doc.lines.length === 0) {
+    pdf.font("Helvetica").fontSize(9).fillColor("#8a90a2").text("No transactions in this period.", PAGE_MARGIN, pdf.y, { width: CONTENT_WIDTH, align: "center" });
+  }
+
+  for (const line of doc.lines) {
+    if (pdf.y > TABLE_BOTTOM) {
+      pdf.addPage();
+      pdf.y = PAGE_MARGIN;
+      drawTableHeader();
+    }
+    const y = pdf.y;
+    const rowHeight = 18;
+    pdf.font("Helvetica").fontSize(8).fillColor("#4b5163");
+    pdf.text(new Date(line.date).toLocaleString(), PAGE_MARGIN + COLS.date, y, { width: COL_WIDTHS.date });
+    pdf.fillColor("#333744").text(line.description, PAGE_MARGIN + COLS.desc, y, { width: COL_WIDTHS.desc });
+    pdf.fillColor("#4b5163").text(humanizeType(line.type), PAGE_MARGIN + COLS.type, y, { width: COL_WIDTHS.type });
+    pdf.fillColor(line.direction === "DEBIT" ? "#1a1d29" : "#b8bcc6").text(
+      line.direction === "DEBIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–",
+      PAGE_MARGIN + COLS.debit,
+      y,
+      { width: COL_WIDTHS.debit, align: "right" },
+    );
+    pdf.fillColor(line.direction === "CREDIT" ? "rgb(22,163,74)" : "#b8bcc6").text(
+      line.direction === "CREDIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–",
+      PAGE_MARGIN + COLS.credit,
+      y,
+      { width: COL_WIDTHS.credit, align: "right" },
+    );
+    pdf.fillColor("#1a1d29").text(formatMinorAmount(line.balanceAfterMinor, doc.decimals), PAGE_MARGIN + COLS.balance, y, { width: COL_WIDTHS.balance, align: "right" });
+    pdf.moveTo(PAGE_MARGIN, y + rowHeight).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + rowHeight).strokeColor("#f0f1f3").stroke();
+    pdf.y = y + rowHeight + 2;
+  }
+
+  pdf.moveDown(1);
+  pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(`This is a system-generated statement from ${opts.productName}.`, PAGE_MARGIN, pdf.y, { width: CONTENT_WIDTH, align: "center" });
+
+  pdf.end();
+  return result;
 }
 
 export async function renderStatementExcel(doc: StatementDocument, opts: StatementRenderOptions): Promise<Buffer> {

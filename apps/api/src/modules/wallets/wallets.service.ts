@@ -1,9 +1,8 @@
 import type { PrismaClient, Account, AccountType } from "@prisma/client";
 import { randomUUID } from "node:crypto";
-import { ACCOUNT_NORMAL_BALANCE } from "../ledger/types.js";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../ledger/accounts.js";
-import { getAvailableBalance, getPendingHold } from "../ledger/balances.js";
+import { getAvailableBalance, getPendingHold, getPostedBalance } from "../ledger/balances.js";
 import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import { NotFoundError, AppError } from "../../lib/errors.js";
 import logger from "../../lib/logger.js";
@@ -72,57 +71,43 @@ export async function listCustomerWallets(prisma: PrismaClient, customerId: stri
 }
 
 /**
- * Full ledger statement for one account, newest-first, each line carrying a
- * running balance. Walks every entry for the account in chronological order
- * to compute the running balance, then paginates from the end (newest
- * first) — simplest-correct approach per the plan, not the most optimized.
+ * Full ledger statement for one account, newest-first, each line carrying the balance recorded
+ * at the moment it was actually posted (see LedgerEntry.balanceAfterMinor / postTransactionInTx)
+ * — not recomputed here. Recomputing by replaying history filtered on each transaction's
+ * *current* status was the old approach, and it was wrong: a transaction's status can change
+ * after the fact (settled, reversed), which retroactively corrupts every row between the
+ * original event and that later change. Reading the frozen, point-in-time value avoids that
+ * entirely.
  */
 export async function getWalletStatement(
   prisma: PrismaClient,
   accountId: string,
-  accountType: AccountType,
+  _accountType: AccountType,
   page: number,
   pageSize: number,
 ) {
   const total = await prisma.ledgerEntry.count({ where: { accountId } });
 
-  const ascending = await prisma.ledgerEntry.findMany({
+  const entries = await prisma.ledgerEntry.findMany({
     where: { accountId },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
     include: { transaction: true },
   });
 
-  const normal = ACCOUNT_NORMAL_BALANCE[accountType];
-  let running = 0n;
-  const withRunning = ascending.map((entry) => {
-    // Only a POSTED transaction's entries actually move the posted balance —
-    // matching getPostedBalance's semantics exactly. A PENDING transaction's
-    // entry only ever contributed to the "pending hold" total (never the
-    // posted balance), and a REVERSED transaction's entry, by definition,
-    // never had (or no longer has) a posted effect either way — so neither
-    // should advance the running total here. Their rows still appear in the
-    // statement (for visibility, with their own status badge) but the
-    // running balance simply carries over unchanged.
-    if (entry.transaction.status === "POSTED") {
-      running += entry.direction === normal ? entry.amountMinor : -entry.amountMinor;
-    }
-    return {
-      entryId: entry.id,
-      transactionId: entry.transactionId,
-      transactionType: entry.transaction.type,
-      status: entry.transaction.status,
-      direction: entry.direction,
-      amountMinor: entry.amountMinor.toString(),
-      currencyCode: entry.currencyCode,
-      description: entry.transaction.description,
-      runningBalanceMinor: running.toString(),
-      createdAt: entry.createdAt.toISOString(),
-    };
-  });
-
-  const descending = withRunning.reverse();
-  const start = (page - 1) * pageSize;
-  const items = descending.slice(start, start + pageSize);
+  const items = entries.map((entry) => ({
+    entryId: entry.id,
+    transactionId: entry.transactionId,
+    transactionType: entry.transaction.type,
+    status: entry.transaction.status,
+    direction: entry.direction,
+    amountMinor: entry.amountMinor.toString(),
+    currencyCode: entry.currencyCode,
+    description: entry.transaction.description,
+    runningBalanceMinor: entry.balanceAfterMinor.toString(),
+    createdAt: entry.createdAt.toISOString(),
+  }));
 
   return { items, total, page, pageSize };
 }
@@ -139,50 +124,34 @@ const MAX_STATEMENT_LINES = 5000;
  * customer expects "closing balance" to mean on a statement they're pulling right now.
  */
 export async function getWalletStatementForRange(prisma: PrismaClient, accountId: string, accountType: AccountType, dateFrom: Date, dateTo: Date) {
-  const ascending = await prisma.ledgerEntry.findMany({
-    where: { accountId },
-    orderBy: { createdAt: "asc" },
-    include: { transaction: true },
-  });
-
-  const normal = ACCOUNT_NORMAL_BALANCE[accountType];
-  let running = 0n;
-  let openingBalanceMinor = 0n;
-  const lines: {
-    date: string;
-    description: string;
-    type: string;
-    status: string;
-    direction: "DEBIT" | "CREDIT";
-    amountMinor: string;
-    balanceAfterMinor: string;
-  }[] = [];
-
-  for (const entry of ascending) {
-    if (entry.transaction.status === "POSTED") {
-      running += entry.direction === normal ? entry.amountMinor : -entry.amountMinor;
-    }
-    if (entry.createdAt < dateFrom) {
-      openingBalanceMinor = running;
-      continue;
-    }
-    if (entry.createdAt > dateTo) continue;
-    lines.push({
-      date: entry.createdAt.toISOString(),
-      description: entry.transaction.description ?? entry.transaction.type,
-      type: entry.transaction.type,
-      status: entry.transaction.status,
-      direction: entry.direction,
-      amountMinor: entry.amountMinor.toString(),
-      balanceAfterMinor: running.toString(),
-    });
+  const rangeCount = await prisma.ledgerEntry.count({ where: { accountId, createdAt: { gte: dateFrom, lte: dateTo } } });
+  if (rangeCount > MAX_STATEMENT_LINES) {
+    throw new AppError(`This range has ${rangeCount} transactions — narrow it to at most ${MAX_STATEMENT_LINES} to export.`, 400, "STATEMENT_TOO_LARGE");
   }
 
-  if (lines.length > MAX_STATEMENT_LINES) {
-    throw new AppError(`This range has ${lines.length} transactions — narrow it to at most ${MAX_STATEMENT_LINES} to export.`, 400, "STATEMENT_TOO_LARGE");
-  }
+  const [priorEntry, entries, closingBalanceMinor] = await Promise.all([
+    // The opening balance is simply whatever the balance already was right before this range
+    // started — the last entry's frozen "after" value, not a replay.
+    prisma.ledgerEntry.findFirst({ where: { accountId, createdAt: { lt: dateFrom } }, orderBy: { createdAt: "desc" } }),
+    prisma.ledgerEntry.findMany({
+      where: { accountId, createdAt: { gte: dateFrom, lte: dateTo } },
+      orderBy: { createdAt: "asc" },
+      include: { transaction: true },
+    }),
+    getPostedBalance(prisma, accountId, accountType),
+  ]);
 
-  return { openingBalanceMinor: openingBalanceMinor.toString(), closingBalanceMinor: running.toString(), lines };
+  const lines = entries.map((entry) => ({
+    date: entry.createdAt.toISOString(),
+    description: entry.transaction.description ?? entry.transaction.type,
+    type: entry.transaction.type,
+    status: entry.transaction.status,
+    direction: entry.direction,
+    amountMinor: entry.amountMinor.toString(),
+    balanceAfterMinor: entry.balanceAfterMinor.toString(),
+  }));
+
+  return { openingBalanceMinor: (priorEntry?.balanceAfterMinor ?? 0n).toString(), closingBalanceMinor: closingBalanceMinor.toString(), lines };
 }
 
 /**
