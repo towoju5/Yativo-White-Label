@@ -33,11 +33,26 @@ function getTransporter(): Transporter | null {
   return transporter;
 }
 
-export async function sendMail(opts: { to: string; subject: string; html: string }): Promise<void> {
+export type MailAttachment = { filename: string; contentBase64: string; contentType: string };
+
+export async function sendMail(opts: {
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+  attachments?: MailAttachment[];
+}): Promise<void> {
   const t = getTransporter();
   if (!t) {
     logger.warn({ to: opts.to, subject: opts.subject }, "SMTP isn't configured (SMTP_HOST unset) — email not sent");
     return;
   }
-  await t.sendMail({ from: smtpConfig.fromAddress, to: opts.to, subject: opts.subject, html: opts.html });
+  await t.sendMail({
+    from: smtpConfig.fromAddress,
+    to: opts.to,
+    subject: opts.subject,
+    html: opts.html,
+    replyTo: opts.replyTo,
+    attachments: opts.attachments?.map((a) => ({ filename: a.filename, content: Buffer.from(a.contentBase64, "base64"), contentType: a.contentType })),
+  });
 }

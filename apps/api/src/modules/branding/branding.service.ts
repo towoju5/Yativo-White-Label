@@ -12,6 +12,8 @@ export function brandingToDto(config: BrandingConfig) {
     accentColor: config.accentColor,
     supportEmail: config.supportEmail,
     adminLoginPath: config.adminLoginPath,
+    liveChatEnabled: config.liveChatEnabled,
+    liveChatCode: config.liveChatCode,
     updatedAt: config.updatedAt.toISOString(),
   };
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings } from "lucide-react";
+import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { PrimeSidebar, type NavSection } from "./Sidebar";
 import { PrimeTopbar } from "./Topbar";
@@ -20,6 +20,8 @@ export function PrimePortalShell({ children }: { children: ReactNode }) {
         { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
         { to: "/portal/crypto", label: t("nav.cryptoWallets", "Crypto wallets"), icon: Coins },
         { to: "/portal/virtual-accounts", label: t("nav.virtualAccounts", "Virtual accounts"), icon: Landmark },
+        { to: "/portal/transactions", label: t("nav.transactions", "Transactions"), icon: History },
+        { to: "/portal/statements", label: t("nav.statements", "Statements"), icon: FileText },
       ],
     },
     {
@@ -28,6 +30,7 @@ export function PrimePortalShell({ children }: { children: ReactNode }) {
         { to: "/portal/beneficiaries", label: t("nav.beneficiaries", "Beneficiaries"), icon: Users },
         { to: "/portal/cards", label: t("nav.cards", "Cards"), icon: CreditCard },
         { to: "/portal/profile", label: t("nav.profileKyc", "Profile & KYC"), icon: UserCheck },
+        { to: "/portal/support", label: t("nav.support", "Support"), icon: LifeBuoy },
         { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
       ],
     },

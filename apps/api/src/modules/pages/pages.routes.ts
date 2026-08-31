@@ -9,6 +9,7 @@ import {
   getStaticPageById,
   getPublishedPageBySlug,
   listFooterPages,
+  listSupportPages,
   createStaticPage,
   updateStaticPage,
   deleteStaticPage,
@@ -23,6 +24,12 @@ export async function pagesRoutes(app: FastifyInstance) {
     "/pages/footer",
     { schema: { response: { 200: z.array(staticPageSummarySchema) } } },
     async (_request, reply) => reply.send(await listFooterPages(app.prisma)),
+  );
+
+  server.get(
+    "/pages/support",
+    { schema: { response: { 200: z.array(staticPageSummarySchema) } } },
+    async (_request, reply) => reply.send(await listSupportPages(app.prisma)),
   );
 
   server.get(

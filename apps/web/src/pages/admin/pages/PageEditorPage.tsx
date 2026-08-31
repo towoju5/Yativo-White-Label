@@ -36,6 +36,7 @@ export default function PageEditorPage() {
   const [contentHtml, setContentHtml] = useState("");
   const [isPublished, setIsPublished] = useState(true);
   const [showInFooter, setShowInFooter] = useState(true);
+  const [showInSupport, setShowInSupport] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const pageQuery = useQuery({
@@ -51,6 +52,7 @@ export default function PageEditorPage() {
       setContentHtml(pageQuery.data.contentHtml);
       setIsPublished(pageQuery.data.isPublished);
       setShowInFooter(pageQuery.data.showInFooter);
+      setShowInSupport(pageQuery.data.showInSupport);
     }
   }, [pageQuery.data]);
 
@@ -58,7 +60,7 @@ export default function PageEditorPage() {
   const isSystem = page?.kind === "SYSTEM";
 
   const createMutation = useMutation({
-    mutationFn: () => staffApi.post<StaticPage>("/admin/pages", { slug, title, contentHtml, isPublished, showInFooter }),
+    mutationFn: () => staffApi.post<StaticPage>("/admin/pages", { slug, title, contentHtml, isPublished, showInFooter, showInSupport }),
     onSuccess: (created) => {
       toast({ title: "Page created" });
       queryClient.invalidateQueries({ queryKey: ["admin", "pages"] });
@@ -68,7 +70,7 @@ export default function PageEditorPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: () => staffApi.patch<StaticPage>(`/admin/pages/${id}`, { title, contentHtml, isPublished, showInFooter }),
+    mutationFn: () => staffApi.patch<StaticPage>(`/admin/pages/${id}`, { title, contentHtml, isPublished, showInFooter, showInSupport }),
     onSuccess: () => {
       toast({ title: "Page saved" });
       queryClient.invalidateQueries({ queryKey: ["admin", "pages"] });
@@ -170,6 +172,10 @@ export default function PageEditorPage() {
             <label className="flex items-center gap-2.5 text-sm">
               <Switch checked={showInFooter} onCheckedChange={setShowInFooter} />
               Show link in footer
+            </label>
+            <label className="flex items-center gap-2.5 text-sm">
+              <Switch checked={showInSupport} onCheckedChange={setShowInSupport} />
+              Show in support page (FAQ)
             </label>
           </div>
         </CardContent>

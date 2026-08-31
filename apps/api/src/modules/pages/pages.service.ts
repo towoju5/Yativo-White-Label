@@ -37,6 +37,7 @@ function toDto(p: StaticPage) {
     kind: p.kind,
     isPublished: p.isPublished,
     showInFooter: p.showInFooter,
+    showInSupport: p.showInSupport,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };
@@ -70,6 +71,16 @@ export async function listFooterPages(prisma: PrismaClient) {
   return pages;
 }
 
+/** Portal Support page's FAQ/help list — published pages the admin curated for it, title + slug only. */
+export async function listSupportPages(prisma: PrismaClient) {
+  const pages = await prisma.staticPage.findMany({
+    where: { isPublished: true, showInSupport: true },
+    orderBy: { createdAt: "asc" },
+    select: { slug: true, title: true },
+  });
+  return pages;
+}
+
 export async function createStaticPage(prisma: PrismaClient, input: CreateStaticPageInput) {
   const existing = await prisma.staticPage.findUnique({ where: { slug: input.slug } });
   if (existing) throw new AppError(`A page with slug "${input.slug}" already exists.`, 409, "SLUG_TAKEN");
@@ -82,6 +93,7 @@ export async function createStaticPage(prisma: PrismaClient, input: CreateStatic
       kind: "CUSTOM",
       isPublished: input.isPublished,
       showInFooter: input.showInFooter,
+      showInSupport: input.showInSupport,
     },
   });
   return toDto(page);
@@ -98,6 +110,7 @@ export async function updateStaticPage(prisma: PrismaClient, id: string, input: 
       contentHtml: input.contentHtml !== undefined ? sanitizePageHtml(input.contentHtml) : undefined,
       isPublished: input.isPublished,
       showInFooter: input.showInFooter,
+      showInSupport: input.showInSupport,
     },
   });
   return toDto(page);

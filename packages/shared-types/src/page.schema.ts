@@ -12,6 +12,7 @@ export const staticPageSchema = z.object({
   kind: staticPageKindSchema,
   isPublished: z.boolean(),
   showInFooter: z.boolean(),
+  showInSupport: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -36,6 +37,7 @@ export const createStaticPageSchema = z.object({
   contentHtml: z.string().max(500_000),
   isPublished: z.boolean().default(true),
   showInFooter: z.boolean().default(true),
+  showInSupport: z.boolean().default(false),
 });
 export type CreateStaticPageInput = z.infer<typeof createStaticPageSchema>;
 
@@ -44,5 +46,6 @@ export const updateStaticPageSchema = z.object({
   contentHtml: z.string().max(500_000).optional(),
   isPublished: z.boolean().optional(),
   showInFooter: z.boolean().optional(),
+  showInSupport: z.boolean().optional(),
 });
 export type UpdateStaticPageInput = z.infer<typeof updateStaticPageSchema>;

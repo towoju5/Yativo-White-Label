@@ -136,6 +136,9 @@ export default function PortalWalletDetailPage() {
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm">{t("walletDetail.statement", "Statement")}</CardTitle>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to={`/portal/statements?walletId=${walletId}`}>{t("walletDetail.viewFullStatement", "View full statement / export")}</Link>
+            </Button>
             <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>

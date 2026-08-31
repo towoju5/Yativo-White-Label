@@ -127,6 +127,61 @@ export async function getWalletStatement(
   return { items, total, page, pageSize };
 }
 
+const MAX_STATEMENT_LINES = 5000;
+
+/**
+ * Statement of Account for one date range — same running-balance walk as getWalletStatement
+ * (every entry from account genesis, in order, so the running balance is correct), but returns
+ * the opening balance (as of just before dateFrom), the closing balance (as of dateTo), and only
+ * the rows that fall inside [dateFrom, dateTo]. Used for the exportable/emailable statement
+ * rather than the paginated on-screen one.
+ */
+export async function getWalletStatementForRange(prisma: PrismaClient, accountId: string, accountType: AccountType, dateFrom: Date, dateTo: Date) {
+  const ascending = await prisma.ledgerEntry.findMany({
+    where: { accountId, createdAt: { lte: dateTo } },
+    orderBy: { createdAt: "asc" },
+    include: { transaction: true },
+  });
+
+  const normal = ACCOUNT_NORMAL_BALANCE[accountType];
+  let running = 0n;
+  let openingBalanceMinor = 0n;
+  const lines: {
+    date: string;
+    description: string;
+    type: string;
+    status: string;
+    direction: "DEBIT" | "CREDIT";
+    amountMinor: string;
+    balanceAfterMinor: string;
+  }[] = [];
+
+  for (const entry of ascending) {
+    if (entry.transaction.status === "POSTED") {
+      running += entry.direction === normal ? entry.amountMinor : -entry.amountMinor;
+    }
+    if (entry.createdAt < dateFrom) {
+      openingBalanceMinor = running;
+      continue;
+    }
+    lines.push({
+      date: entry.createdAt.toISOString(),
+      description: entry.transaction.description ?? entry.transaction.type,
+      type: entry.transaction.type,
+      status: entry.transaction.status,
+      direction: entry.direction,
+      amountMinor: entry.amountMinor.toString(),
+      balanceAfterMinor: running.toString(),
+    });
+  }
+
+  if (lines.length > MAX_STATEMENT_LINES) {
+    throw new AppError(`This range has ${lines.length} transactions — narrow it to at most ${MAX_STATEMENT_LINES} to export.`, 400, "STATEMENT_TOO_LARGE");
+  }
+
+  return { openingBalanceMinor: openingBalanceMinor.toString(), closingBalanceMinor: running.toString(), lines };
+}
+
 /**
  * Full detail for one transaction — the "view details / print receipt" screen. Scoped to
  * transactions that touch at least one of the customer's own accounts (any DEPOSIT, PAYOUT, FEE,

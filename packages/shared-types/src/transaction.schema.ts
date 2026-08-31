@@ -57,6 +57,55 @@ export const statementLineSchema = z.object({
 });
 export type StatementLine = z.infer<typeof statementLineSchema>;
 
+/** Combined "Transaction history" row — customer-scoped, so (unlike the admin list item) it never carries another customer's identity or a platform-side account type. */
+export const customerTransactionListItemSchema = ledgerTransactionSchema.extend({
+  amountMinor: minorAmountSchema.nullable(),
+  currencyCode: currencyCodeSchema.nullable(),
+  direction: z.enum(ENTRY_DIRECTIONS).nullable(),
+});
+export type CustomerTransactionListItem = z.infer<typeof customerTransactionListItemSchema>;
+
+/** One row of a Statement of Account export/email — every row carries its own credit/debit direction plus the running balance immediately after it. */
+export const statementDocumentLineSchema = z.object({
+  date: z.string(),
+  description: z.string(),
+  type: z.enum(LEDGER_TRANSACTION_TYPES),
+  status: z.enum(LEDGER_TRANSACTION_STATUSES),
+  direction: z.enum(ENTRY_DIRECTIONS),
+  amountMinor: minorAmountSchema,
+  balanceAfterMinor: minorAmountSchema,
+});
+export type StatementDocumentLine = z.infer<typeof statementDocumentLineSchema>;
+
+export const statementDocumentSchema = z.object({
+  currencyCode: currencyCodeSchema,
+  decimals: z.number(),
+  dateFrom: z.string(),
+  dateTo: z.string(),
+  openingBalanceMinor: minorAmountSchema,
+  closingBalanceMinor: minorAmountSchema,
+  lines: z.array(statementDocumentLineSchema),
+});
+export type StatementDocument = z.infer<typeof statementDocumentSchema>;
+
+export const STATEMENT_FORMATS = ["PDF", "EXCEL"] as const;
+export const statementFormatSchema = z.enum(STATEMENT_FORMATS);
+export type StatementFormat = z.infer<typeof statementFormatSchema>;
+
+export const exportStatementQuerySchema = z.object({
+  format: statementFormatSchema,
+  dateFrom: z.string(),
+  dateTo: z.string(),
+});
+export type ExportStatementQuery = z.infer<typeof exportStatementQuerySchema>;
+
+export const emailStatementSchema = z.object({
+  format: statementFormatSchema,
+  dateFrom: z.string(),
+  dateTo: z.string(),
+});
+export type EmailStatementInput = z.infer<typeof emailStatementSchema>;
+
 /** One entry on a transaction detail, scoped to the customer's own account only (a platform-side counter-account like SUSPENSE_PENDING is never shown to the customer). */
 export const transactionDetailEntrySchema = z.object({
   accountType: z.string(),

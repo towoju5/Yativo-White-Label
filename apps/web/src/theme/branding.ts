@@ -11,6 +11,8 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   accentColor: "#22d3ee",
   supportEmail: null,
   adminLoginPath: "/admin/login",
+  liveChatEnabled: false,
+  liveChatCode: null,
   updatedAt: new Date().toISOString(),
 };
 
@@ -26,6 +28,15 @@ export async function fetchBranding(): Promise<BrandingConfig> {
 export async function fetchFooterPages(): Promise<StaticPageSummary[]> {
   try {
     return await publicApi.get<StaticPageSummary[]>("/pages/footer");
+  } catch {
+    return [];
+  }
+}
+
+/** Published pages flagged to appear on the portal Support page as FAQ/help links. */
+export async function fetchSupportPages(): Promise<StaticPageSummary[]> {
+  try {
+    return await publicApi.get<StaticPageSummary[]>("/pages/support");
   } catch {
     return [];
   }

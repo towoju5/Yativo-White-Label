@@ -34,6 +34,59 @@ function toListItem(tx: TxWithEntries) {
   };
 }
 
+function toCustomerListItem(tx: TxWithEntries, customerId: string) {
+  const customerEntry = tx.entries.find((e) => e.account.customerId === customerId) ?? null;
+
+  return {
+    id: tx.id,
+    type: tx.type,
+    status: tx.status,
+    idempotencyKey: tx.idempotencyKey,
+    externalSource: tx.externalSource,
+    externalRef: tx.externalRef,
+    description: tx.description,
+    metadata: (tx.metadata as Record<string, unknown> | null) ?? null,
+    reversalOfId: tx.reversalOfId,
+    createdAt: tx.createdAt.toISOString(),
+    postedAt: tx.postedAt?.toISOString() ?? null,
+    reversedAt: tx.reversedAt?.toISOString() ?? null,
+    amountMinor: customerEntry ? customerEntry.amountMinor.toString() : null,
+    currencyCode: customerEntry ? customerEntry.currencyCode : null,
+    direction: customerEntry ? customerEntry.direction : null,
+  };
+}
+
+/** Combined "Transaction history" — every transaction touching any of the customer's own accounts, across all wallets/currencies. Never exposes another customer's identity or a platform-side account. */
+export async function listTransactionsForCustomer(
+  prisma: PrismaClient,
+  customerId: string,
+  filters: { type?: LedgerTransactionType; status?: LedgerTransactionStatus; currencyCode?: string; dateFrom?: Date; dateTo?: Date },
+  page: number,
+  pageSize: number,
+) {
+  const where: Prisma.LedgerTransactionWhereInput = {
+    entries: { some: { account: { customerId }, ...(filters.currencyCode ? { currencyCode: filters.currencyCode } : {}) } },
+    ...(filters.type ? { type: filters.type } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.dateFrom || filters.dateTo
+      ? { createdAt: { ...(filters.dateFrom ? { gte: filters.dateFrom } : {}), ...(filters.dateTo ? { lte: filters.dateTo } : {}) } }
+      : {}),
+  };
+
+  const [total, transactions] = await Promise.all([
+    prisma.ledgerTransaction.count({ where }),
+    prisma.ledgerTransaction.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { entries: { include: { account: { include: { customer: true } } } } },
+    }),
+  ]);
+
+  return { items: transactions.map((tx) => toCustomerListItem(tx, customerId)), total, page, pageSize };
+}
+
 export async function listLedgerTransactions(
   prisma: PrismaClient,
   filters: { type?: LedgerTransactionType; status?: LedgerTransactionStatus; customerId?: string; currencyCode?: string },

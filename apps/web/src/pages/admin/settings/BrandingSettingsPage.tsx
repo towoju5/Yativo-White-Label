@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 type Draft = Omit<UpdateBrandingInput, "templateId"> & { templateId: BrandingConfig["templateId"] };
@@ -70,6 +72,8 @@ export default function BrandingSettingsPage() {
         secondaryColor: data.secondaryColor,
         accentColor: data.accentColor,
         supportEmail: data.supportEmail,
+        liveChatEnabled: data.liveChatEnabled,
+        liveChatCode: data.liveChatCode,
       });
     }
   }, [data, draft]);
@@ -222,6 +226,42 @@ export default function BrandingSettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Live chat</CardTitle>
+          <CardDescription>
+            Paste a live-chat provider's embed snippet (e.g. tawk.to, Crisp, Intercom) and it's injected into the customer portal. Trusted, unsanitized — only owners and admins can set this.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2.5">
+            <Switch
+              checked={draft.liveChatEnabled ?? false}
+              onCheckedChange={(checked) => setDraft((d) => (d ? { ...d, liveChatEnabled: checked } : d))}
+            />
+            <Label>Enable live chat on the portal</Label>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="liveChatCode">Embed snippet</Label>
+            <Textarea
+              id="liveChatCode"
+              rows={8}
+              className="font-mono text-xs"
+              placeholder={'<script type="text/javascript">\n  // provider embed code\n</script>'}
+              value={draft.liveChatCode ?? ""}
+              onChange={(e) => setDraft((d) => (d ? { ...d, liveChatCode: e.target.value || null } : d))}
+            />
+          </div>
+          <Button
+            onClick={() => saveMutation.mutate(draft)}
+            disabled={!canEdit || saveMutation.isPending}
+            title={canEdit ? undefined : "Only owners and admins can change branding"}
+          >
+            <Save className="h-4 w-4" /> {saveMutation.isPending ? "Saving…" : "Save branding"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

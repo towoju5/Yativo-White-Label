@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings } from "lucide-react";
+import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { AtlasTopbar, type NavItem } from "./Topbar";
@@ -16,9 +16,12 @@ export function AtlasPortalShell({ children }: { children: ReactNode }) {
     { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
     { to: "/portal/crypto", label: t("nav.cryptoWallets", "Crypto wallets"), icon: Coins },
     { to: "/portal/virtual-accounts", label: t("nav.virtualAccounts", "Virtual accounts"), icon: Landmark },
+    { to: "/portal/transactions", label: t("nav.transactions", "Transactions"), icon: History },
+    { to: "/portal/statements", label: t("nav.statements", "Statements"), icon: FileText },
     { to: "/portal/beneficiaries", label: t("nav.atlas.contacts", "Contacts"), icon: Users },
     { to: "/portal/cards", label: t("nav.cards", "Cards"), icon: CreditCard },
     { to: "/portal/profile", label: t("nav.atlas.profile", "Profile"), icon: UserCheck },
+    { to: "/portal/support", label: t("nav.support", "Support"), icon: LifeBuoy },
     { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
   ];
 

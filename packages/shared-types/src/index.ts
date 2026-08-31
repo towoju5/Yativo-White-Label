@@ -22,3 +22,4 @@ export * from "./passkey.schema.js";
 export * from "./notifications.schema.js";
 export * from "./page.schema.js";
 export * from "./permissions.js";
+export * from "./support.schema.js";

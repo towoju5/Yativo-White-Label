@@ -23,6 +23,10 @@ export const brandingConfigSchema = z.object({
   accentColor: hexColor,
   supportEmail: z.string().email().nullable(),
   adminLoginPath: adminLoginPathSchema,
+  // Raw admin-pasted embed snippet (e.g. tawk.to) — OWNER/ADMIN-only, not sanitized like
+  // StaticPage content, since a chat widget needs a real <script> tag to function.
+  liveChatEnabled: z.boolean(),
+  liveChatCode: z.string().nullable(),
   updatedAt: z.string(),
 });
 export type BrandingConfig = z.infer<typeof brandingConfigSchema>;

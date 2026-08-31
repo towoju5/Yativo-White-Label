@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import {
   adminTransactionListItemSchema,
+  customerTransactionListItemSchema,
   paginationQuerySchema,
   paginatedResponseSchema,
   transactionDetailSchema,
@@ -13,7 +14,7 @@ import {
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
-import { listLedgerTransactions, adminSettleTransaction, adminReverseTransaction } from "./transactions.service.js";
+import { listLedgerTransactions, listTransactionsForCustomer, adminSettleTransaction, adminReverseTransaction } from "./transactions.service.js";
 import { getTransactionDetailForCustomer } from "../wallets/wallets.service.js";
 
 const adjustBodySchema = z.object({ reason: z.string().min(1, "A reason is required") });
@@ -25,8 +26,29 @@ const listQuerySchema = paginationQuerySchema.extend({
   currencyCode: currencyCodeSchema.optional(),
 });
 
+const portalListQuerySchema = paginationQuerySchema.extend({
+  type: z.enum(LEDGER_TRANSACTION_TYPES).optional(),
+  status: z.enum(LEDGER_TRANSACTION_STATUSES).optional(),
+  currencyCode: currencyCodeSchema.optional(),
+  dateFrom: z.coerce.date().optional(),
+  dateTo: z.coerce.date().optional(),
+});
+
 export async function transactionsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
+
+  server.get(
+    "/portal/transactions",
+    {
+      preHandler: requireCustomerAuth,
+      schema: { querystring: portalListQuerySchema, response: { 200: paginatedResponseSchema(customerTransactionListItemSchema) } },
+    },
+    async (request, reply) => {
+      const { page, pageSize, type, status, currencyCode, dateFrom, dateTo } = request.query;
+      const result = await listTransactionsForCustomer(app.prisma, request.customer!.sub, { type, status, currencyCode, dateFrom, dateTo }, page, pageSize);
+      return reply.send(result);
+    },
+  );
 
   server.get(
     "/portal/transactions/:id",

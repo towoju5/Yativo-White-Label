@@ -45,6 +45,8 @@ import { platformIntegrationsRoutes } from "./modules/integrations/platformInteg
 import { staffPasskeysRoutes } from "./modules/passkeys/staffPasskeys.routes.js";
 import { customerPasskeysRoutes } from "./modules/passkeys/customerPasskeys.routes.js";
 import { notificationsRoutes } from "./modules/notifications/notifications.routes.js";
+import { statementsRoutes } from "./modules/statements/statements.routes.js";
+import { supportRoutes } from "./modules/support/support.routes.js";
 
 export async function buildApp() {
   // Fastify's default bodyLimit is 1MB — comfortably exceeded by a KYC submission carrying a
@@ -152,6 +154,8 @@ export async function buildApp() {
   await app.register(staffPasskeysRoutes);
   await app.register(customerPasskeysRoutes);
   await app.register(notificationsRoutes);
+  await app.register(statementsRoutes);
+  await app.register(supportRoutes);
 
   return app;
 }

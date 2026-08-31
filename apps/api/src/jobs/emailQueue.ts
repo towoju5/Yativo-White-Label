@@ -1,9 +1,10 @@
 import { Queue } from "bullmq";
 import { createBullConnection } from "./connection.js";
+import type { MailAttachment } from "../lib/mailer.js";
 
 export const EMAIL_QUEUE_NAME = "email-notifications";
 
-export type EmailJobData = { to: string; subject: string; html: string };
+export type EmailJobData = { to: string; subject: string; html: string; replyTo?: string; attachments?: MailAttachment[] };
 
 let queue: Queue<EmailJobData> | null = null;
 

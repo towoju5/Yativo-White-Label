@@ -185,6 +185,26 @@ export const portalApi = {
   del: <T>(path: string) => apiFetch<T>(path, { auth: "portal", method: "DELETE" }),
 };
 
+/** Binary downloads (statement PDF/Excel exports) — apiFetch only ever parses JSON responses, so this bypasses it and returns the raw Blob instead. */
+export async function portalDownload(path: string, query?: ApiFetchOptions["query"]): Promise<Blob> {
+  const token = portalTokenStore.get();
+  const res = await fetch(buildUrl(path, query), {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: "include",
+  });
+  if (!res.ok) {
+    let message = res.statusText || "Request failed";
+    try {
+      const body = await res.json();
+      if (body && typeof body === "object" && "message" in body) message = String((body as { message: unknown }).message);
+    } catch {
+      // non-JSON error body — keep the statusText fallback
+    }
+    throw new ApiError(message, res.status, null);
+  }
+  return res.blob();
+}
+
 export const publicApi = {
   get: <T>(path: string, query?: ApiFetchOptions["query"]) => apiFetch<T>(path, { auth: "none", query }),
   post: <T>(path: string, body?: unknown) => apiFetch<T>(path, { auth: "none", method: "POST", body }),

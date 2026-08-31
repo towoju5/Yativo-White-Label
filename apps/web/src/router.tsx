@@ -13,6 +13,9 @@ import PortalSignupPage from "@/pages/portal/auth/SignupPage";
 import PortalDashboardPage from "@/pages/portal/dashboard/DashboardPage";
 import PortalWalletsPage from "@/pages/portal/wallets/WalletsPage";
 import PortalWalletDetailPage from "@/pages/portal/wallets/WalletDetailPage";
+import PortalTransactionsPage from "@/pages/portal/transactions/TransactionsPage";
+import StatementsPage from "@/pages/portal/statements/StatementsPage";
+import SupportPage from "@/pages/portal/support/SupportPage";
 import SendMoneyPage from "@/pages/portal/send/SendMoneyPage";
 import DepositPage from "@/pages/portal/deposit/DepositPage";
 import PortalCryptoWalletsPage from "@/pages/portal/crypto/CryptoWalletsPage";
@@ -83,6 +86,9 @@ export function createRouter(adminLoginPath: string) {
               { index: true, element: <PortalDashboardPage /> },
               { path: "wallets", element: <PortalWalletsPage /> },
               { path: "wallets/:walletId", element: <PortalWalletDetailPage /> },
+              { path: "transactions", element: <PortalTransactionsPage /> },
+              { path: "statements", element: <StatementsPage /> },
+              { path: "support", element: <SupportPage /> },
               { path: "send", element: <SendMoneyPage /> },
               { path: "deposit", element: <DepositPage /> },
               { path: "crypto", element: <PortalCryptoWalletsPage /> },
