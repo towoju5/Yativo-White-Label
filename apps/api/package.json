@@ -11,7 +11,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "prisma:seed": "tsx prisma/seed.ts",
-    "reset-staff-password": "tsx scripts/resetStaffPassword.ts"
+    "reset-staff-password": "tsx scripts/resetStaffPassword.ts",
+    "bootstrap-platform-settings": "tsx scripts/bootstrapPlatformSettings.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

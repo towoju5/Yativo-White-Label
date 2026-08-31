@@ -3,7 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { verifyYativoSignature, yativoWebhookEnvelopeSchema } from "@white-label/yativo-sdk";
-import { env } from "../config/env.js";
+import { yativoWebhookConfig } from "../lib/integrationRuntimeConfig.js";
 import logger from "../lib/logger.js";
 import { enqueueWebhookEvent } from "../jobs/queue.js";
 
@@ -28,7 +28,7 @@ export async function webhookRoutes(app: FastifyInstance) {
       const signatureHeader = request.headers[YATIVO_SIGNATURE_HEADER];
       const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
 
-      if (!signature || !verifyYativoSignature(rawBody, signature, env.YATIVO_WEBHOOK_SECRET)) {
+      if (!signature || !verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret)) {
         logger.warn("Rejected Yativo webhook with invalid or missing signature");
         return reply.code(400).send({ message: "Invalid signature" });
       }

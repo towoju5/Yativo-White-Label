@@ -12,6 +12,7 @@ import { AppError } from "./lib/errors.js";
 import { buildCorsOriginCheck } from "./lib/cors.js";
 import { prismaPlugin } from "./plugins/prisma.js";
 import { redisPlugin } from "./plugins/redis.js";
+import { loadIntegrationSettingsFromDb } from "./lib/integrationRuntimeConfig.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { portalAuthRoutes } from "./modules/portalAuth/portalAuth.routes.js";
 import { brandingRoutes } from "./modules/branding/branding.routes.js";
@@ -39,6 +40,7 @@ import { pagesRoutes } from "./modules/pages/pages.routes.js";
 import { webhookRoutes } from "./webhooks/yativo.routes.js";
 import { adminWebhooksRoutes } from "./webhooks/adminWebhooks.routes.js";
 import { integrationsRoutes } from "./modules/integrations/integrations.routes.js";
+import { platformIntegrationsRoutes } from "./modules/integrations/platformIntegrations.routes.js";
 import { staffPasskeysRoutes } from "./modules/passkeys/staffPasskeys.routes.js";
 import { customerPasskeysRoutes } from "./modules/passkeys/customerPasskeys.routes.js";
 import { notificationsRoutes } from "./modules/notifications/notifications.routes.js";
@@ -75,6 +77,7 @@ export async function buildApp() {
 
   await app.register(prismaPlugin);
   await app.register(redisPlugin);
+  await loadIntegrationSettingsFromDb(app.prisma);
 
   app.setErrorHandler((error: FastifyError | AppError | YativoApiError, _request, reply) => {
     if (error instanceof AppError) {
@@ -143,6 +146,7 @@ export async function buildApp() {
   await app.register(webhookRoutes);
   await app.register(adminWebhooksRoutes);
   await app.register(integrationsRoutes);
+  await app.register(platformIntegrationsRoutes);
   await app.register(staffPasskeysRoutes);
   await app.register(customerPasskeysRoutes);
   await app.register(notificationsRoutes);

@@ -41,6 +41,7 @@ import PageEditorPage from "@/pages/admin/pages/PageEditorPage";
 import BrandingSettingsPage from "@/pages/admin/settings/BrandingSettingsPage";
 import ApiKeysSettingsPage from "@/pages/admin/settings/ApiKeysSettingsPage";
 import WalletCurrenciesSettingsPage from "@/pages/admin/settings/WalletCurrenciesSettingsPage";
+import IntegrationsSettingsPage from "@/pages/admin/settings/IntegrationsSettingsPage";
 import VerificationSettingsPage from "@/pages/admin/settings/VerificationSettingsPage";
 import AuthenticationSettingsPage from "@/pages/admin/settings/AuthenticationSettingsPage";
 import NotificationSettingsPage from "@/pages/admin/settings/NotificationSettingsPage";
@@ -126,6 +127,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "settings/api-keys", element: <ApiKeysSettingsPage /> },
               { path: "settings/wallet-currencies", element: <WalletCurrenciesSettingsPage /> },
               { path: "settings/verification", element: <VerificationSettingsPage /> },
+              { path: "settings/integrations", element: <IntegrationsSettingsPage /> },
               { path: "settings/authentication", element: <AuthenticationSettingsPage /> },
               { path: "settings/notifications", element: <NotificationSettingsPage /> },
               { path: "settings/email-templates", element: <EmailTemplatesSettingsPage /> },

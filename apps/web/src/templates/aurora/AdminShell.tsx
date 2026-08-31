@@ -19,6 +19,7 @@ import {
   Fingerprint,
   Bell,
   Mail,
+  Plug,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { AuroraSidebar, type NavSection } from "./Sidebar";
@@ -60,6 +61,7 @@ const sections: NavSection[] = [
       { to: "/admin/settings/email-templates", label: "Email templates", icon: Mail },
       { to: "/admin/settings/wallet-currencies", label: "Wallet currencies", icon: Landmark },
       { to: "/admin/settings/verification", label: "Verification", icon: ShieldCheck },
+      { to: "/admin/settings/integrations", label: "Integrations", icon: Plug },
     ],
   },
 ];

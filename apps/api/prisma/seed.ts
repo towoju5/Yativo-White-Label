@@ -2,48 +2,12 @@ import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/lib/passwords.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../src/modules/ledger/accounts.js";
 import { postTransaction } from "../src/modules/ledger/postTransaction.js";
+import { bootstrapPlatformData } from "./bootstrapPlatformData.js";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Matches the currencies Yativo can actually issue deposit virtual accounts for
-  // (GET /business/virtual-account/currencies-and-endorsements) — needed so payouts/cards/deposits
-  // in these currencies can resolve decimals locally instead of throwing on an unseeded currency.
-  const currencies = [
-    { code: "USD", decimals: 2, name: "US Dollar" },
-    { code: "EUR", decimals: 2, name: "Euro" },
-    { code: "GBP", decimals: 2, name: "British Pound" },
-    { code: "MXN", decimals: 2, name: "Mexican Peso" },
-    { code: "COP", decimals: 2, name: "Colombian Peso" },
-    { code: "BRL", decimals: 2, name: "Brazilian Real" },
-    { code: "ARS", decimals: 2, name: "Argentine Peso" },
-    { code: "PEN", decimals: 2, name: "Peruvian Sol" },
-    { code: "CLP", decimals: 0, name: "Chilean Peso" },
-  ];
-  for (const c of currencies) {
-    // USD enabled out of the box (it's also the default wallet currency below); the rest start
-    // disabled — an admin opts them in from Settings → Wallet currencies once they're ready.
-    // `update` also sets isEnabledForCustomers for USD specifically so re-running this seed
-    // against a database where these rows already existed (e.g. from before that column was
-    // added) still converges to the right state, instead of leaving it at the column default.
-    await prisma.currency.upsert({
-      where: { code: c.code },
-      update: c.code === "USD" ? { isEnabledForCustomers: true } : {},
-      create: { ...c, isFiat: true, isEnabledForCustomers: c.code === "USD" },
-    });
-  }
-
-  await prisma.platformSettings.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1, walletCurrencyMode: "DEFAULT_ONLY", defaultCurrencyCode: "USD" },
-  });
-
-  await prisma.brandingConfig.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1 },
-  });
+  await bootstrapPlatformData(prisma);
 
   const owner = await prisma.staffUser.upsert({
     where: { email: "owner@example.com" },
