@@ -6,6 +6,7 @@ import { ArrowLeft, FileQuestion } from "lucide-react";
 import { publicApi, ApiError } from "@/lib/api-client";
 import { fetchBranding } from "@/theme/branding";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function StaticPageView() {
   const { slug = "" } = useParams<{ slug: string }>();
@@ -29,13 +30,15 @@ export default function StaticPageView() {
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
             {branding?.logoUrl ? (
-              <img src={branding.logoUrl} alt="" className="h-7 w-7 rounded-md object-cover" />
+              <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
             ) : (
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-                {productName.slice(0, 1)}
-              </div>
+              <>
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+                  {productName.slice(0, 1)}
+                </div>
+                <span className="font-heading text-sm font-semibold">{productName}</span>
+              </>
             )}
-            <span className="font-heading text-sm font-semibold">{productName}</span>
           </Link>
           <Link to="/" className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-3.5 w-3.5" /> Back home

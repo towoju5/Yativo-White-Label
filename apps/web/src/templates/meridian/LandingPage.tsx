@@ -5,6 +5,7 @@ import { ArrowRight, Send, CreditCard, ShieldCheck, Wallet, Activity, Users } fr
 import { fetchBranding, fetchFooterPages } from "@/theme/branding";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function MeridianLandingPage() {
@@ -48,13 +49,15 @@ export function MeridianLandingPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
             {branding?.logoUrl ? (
-              <img src={branding.logoUrl} alt="" className="h-7 w-7 rounded-md object-cover" />
+              <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
             ) : (
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-                {productName.slice(0, 1)}
-              </div>
+              <>
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
+                  {productName.slice(0, 1)}
+                </div>
+                <span className="font-heading text-base font-semibold tracking-tight">{productName}</span>
+              </>
             )}
-            <span className="font-heading text-base font-semibold tracking-tight">{productName}</span>
           </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />

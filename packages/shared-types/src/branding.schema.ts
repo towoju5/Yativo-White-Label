@@ -16,6 +16,10 @@ export const adminLoginPathSchema = z
 export const brandingConfigSchema = z.object({
   productName: z.string().min(1),
   logoUrl: z.string().url().nullable(),
+  // Optional dedicated logo for dark mode. When unset, logoUrl is reused for both modes,
+  // optionally CSS-inverted via logoInvertOnDark.
+  logoUrlDark: z.string().url().nullable(),
+  logoInvertOnDark: z.boolean(),
   faviconUrl: z.string().url().nullable(),
   templateId: z.enum(TEMPLATE_IDS),
   primaryColor: hexColor,

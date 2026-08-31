@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { createCustomerSchema, type Country, type CreateCustomerInput } from "@white-label/shared-types";
 import { fetchBranding } from "@/theme/branding";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,10 +65,16 @@ export default function PortalSignupPage() {
       </div>
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
-            {(branding?.productName ?? "W").slice(0, 1)}
-          </div>
-          <span className="font-heading text-lg font-semibold">{branding?.productName ?? t("signup.defaultProductName", "White Label")}</span>
+          {branding?.logoUrl ? (
+            <BrandLogo branding={branding} className="h-10 w-10 rounded-xl object-cover" />
+          ) : (
+            <>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
+                {(branding?.productName ?? "W").slice(0, 1)}
+              </div>
+              <span className="font-heading text-lg font-semibold">{branding?.productName ?? t("signup.defaultProductName", "White Label")}</span>
+            </>
+          )}
         </div>
         <Card>
           <CardHeader>

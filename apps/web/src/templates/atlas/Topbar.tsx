@@ -8,6 +8,7 @@ import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,13 +43,15 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-2">
           {branding?.logoUrl ? (
-            <img src={branding.logoUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+            <BrandLogo branding={branding} className="h-8 w-8 rounded-full object-cover" />
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
-              {productName.slice(0, 1)}
-            </div>
+            <>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
+                {productName.slice(0, 1)}
+              </div>
+              <span className="font-heading text-base font-semibold tracking-tight">{productName}</span>
+            </>
           )}
-          <span className="font-heading text-base font-semibold tracking-tight">{productName}</span>
         </div>
 
         <nav className="scrollbar-thin hidden max-w-xl items-center gap-1 overflow-x-auto rounded-full border border-border bg-card/60 p-1 lg:flex">

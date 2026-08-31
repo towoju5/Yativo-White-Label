@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export interface NavItem {
   to: string;
@@ -34,13 +35,15 @@ export function NovaSidebar({ sections, userLabel, userSubLabel, onLogout }: Sid
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-card/60 backdrop-blur-xl lg:flex">
       <div className="flex h-16 items-center gap-2 border-b border-border px-5">
         {branding?.logoUrl ? (
-          <img src={branding.logoUrl} alt="" className="h-7 w-7 rounded-md object-cover" />
+          <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
         ) : (
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
-            {(branding?.productName ?? "W").slice(0, 1)}
-          </div>
+          <>
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
+              {(branding?.productName ?? "W").slice(0, 1)}
+            </div>
+            <span className="truncate font-heading text-sm font-semibold tracking-tight">{branding?.productName ?? t("nav.whiteLabel", "White Label")}</span>
+          </>
         )}
-        <span className="truncate font-heading text-sm font-semibold tracking-tight">{branding?.productName ?? t("nav.whiteLabel", "White Label")}</span>
       </div>
 
       <nav className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">

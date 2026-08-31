@@ -5,6 +5,7 @@ import { ArrowRight, Wallet, Send, CreditCard, ShieldCheck } from "lucide-react"
 import { fetchBranding, fetchFooterPages } from "@/theme/branding";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function PrimeLandingPage() {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
@@ -40,10 +41,16 @@ export function PrimeLandingPage() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground">
-              {productName.slice(0, 1)}
-            </div>
-            <span className="text-sm font-semibold tracking-tight">{productName}</span>
+            {branding?.logoUrl ? (
+              <BrandLogo branding={branding} className="h-6 w-6 rounded object-cover" />
+            ) : (
+              <>
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground">
+                  {productName.slice(0, 1)}
+                </div>
+                <span className="text-sm font-semibold tracking-tight">{productName}</span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />

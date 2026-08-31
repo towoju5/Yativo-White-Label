@@ -512,21 +512,25 @@ model ApiKey {
 }
 
 model BrandingConfig {
-  id              Int      @id @default(1)
-  productName     String   @default("White Label")
-  logoUrl         String?
-  faviconUrl      String?
-  templateId      String   @default("nova")
-  primaryColor    String   @default("#6366f1")
-  secondaryColor  String   @default("#0ea5e9")
-  accentColor     String   @default("#22d3ee")
-  supportEmail    String?
-  adminLoginPath  String   @default("/admin/login")
+  id               Int      @id @default(1)
+  productName      String   @default("White Label")
+  logoUrl          String?
+  // Optional dedicated logo for dark mode. When unset, logoUrl is reused for both modes,
+  // optionally CSS-inverted via logoInvertOnDark below.
+  logoUrlDark      String?
+  logoInvertOnDark Boolean  @default(false)
+  faviconUrl       String?
+  templateId       String   @default("nova")
+  primaryColor     String   @default("#6366f1")
+  secondaryColor   String   @default("#0ea5e9")
+  accentColor      String   @default("#22d3ee")
+  supportEmail     String?
+  adminLoginPath   String   @default("/admin/login")
   // Raw admin-pasted embed snippet (e.g. tawk.to) — OWNER/ADMIN-only, deliberately not sanitized
   // like StaticPage.contentHtml since a chat widget needs a real <script> tag to run.
-  liveChatEnabled Boolean  @default(false)
-  liveChatCode    String?  @db.Text
-  updatedAt       DateTime @updatedAt
+  liveChatEnabled  Boolean  @default(false)
+  liveChatCode     String?  @db.Text
+  updatedAt        DateTime @updatedAt
 
   @@map("branding_config")
 }

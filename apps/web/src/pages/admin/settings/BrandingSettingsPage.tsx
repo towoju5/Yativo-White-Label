@@ -66,6 +66,8 @@ export default function BrandingSettingsPage() {
       setDraft({
         productName: data.productName,
         logoUrl: data.logoUrl,
+        logoUrlDark: data.logoUrlDark,
+        logoInvertOnDark: data.logoInvertOnDark,
         faviconUrl: data.faviconUrl,
         templateId: data.templateId,
         primaryColor: data.primaryColor,
@@ -177,7 +179,26 @@ export default function BrandingSettingsPage() {
                 value={draft.logoUrl ?? ""}
                 onChange={(e) => setDraft((d) => (d ? { ...d, logoUrl: e.target.value || null } : d))}
               />
+              <p className="text-xs text-muted-foreground">Once set, the logo replaces the product name text everywhere it's shown.</p>
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="logoUrlDark">Logo URL (dark mode)</Label>
+              <Input
+                id="logoUrlDark"
+                placeholder="https://… (optional — leave blank to reuse the logo above)"
+                value={draft.logoUrlDark ?? ""}
+                onChange={(e) => setDraft((d) => (d ? { ...d, logoUrlDark: e.target.value || null } : d))}
+              />
+            </div>
+            {!draft.logoUrlDark && (
+              <div className="flex items-center gap-2.5">
+                <Switch
+                  checked={draft.logoInvertOnDark ?? false}
+                  onCheckedChange={(checked) => setDraft((d) => (d ? { ...d, logoInvertOnDark: checked } : d))}
+                />
+                <Label>Invert the logo's colors in dark mode</Label>
+              </div>
+            )}
             <div className="grid gap-4 sm:grid-cols-3">
               <ColorField label="Primary" value={draft.primaryColor ?? "#6366f1"} onChange={(v) => setDraft((d) => (d ? { ...d, primaryColor: v } : d))} />
               <ColorField

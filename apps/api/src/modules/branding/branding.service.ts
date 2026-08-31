@@ -5,6 +5,8 @@ export function brandingToDto(config: BrandingConfig) {
   return {
     productName: config.productName,
     logoUrl: config.logoUrl,
+    logoUrlDark: config.logoUrlDark,
+    logoInvertOnDark: config.logoInvertOnDark,
     faviconUrl: config.faviconUrl,
     templateId: config.templateId as "nova" | "atlas",
     primaryColor: config.primaryColor,

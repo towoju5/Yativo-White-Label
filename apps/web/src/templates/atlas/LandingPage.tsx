@@ -5,6 +5,7 @@ import { ArrowRight, Send, CreditCard, ShieldCheck, Wallet, Sparkles } from "luc
 import { fetchBranding, fetchFooterPages } from "@/theme/branding";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function AtlasLandingPage() {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
@@ -29,10 +30,16 @@ export function AtlasLandingPage() {
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
-              {productName.slice(0, 1)}
-            </div>
-            <span className="font-heading text-base font-semibold">{productName}</span>
+            {branding?.logoUrl ? (
+              <BrandLogo branding={branding} className="h-8 w-8 rounded-full object-cover" />
+            ) : (
+              <>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
+                  {productName.slice(0, 1)}
+                </div>
+                <span className="font-heading text-base font-semibold">{productName}</span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />

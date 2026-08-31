@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { fetchBranding, fetchFooterPages } from "@/theme/branding";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const codeSnippet = `POST /portal/payouts
 {
@@ -61,10 +62,16 @@ export function NovaLandingPage() {
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
-              {productName.slice(0, 1)}
-            </div>
-            <span className="font-heading text-sm font-semibold">{productName}</span>
+            {branding?.logoUrl ? (
+              <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
+            ) : (
+              <>
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
+                  {productName.slice(0, 1)}
+                </div>
+                <span className="font-heading text-sm font-semibold">{productName}</span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />

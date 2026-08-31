@@ -4,6 +4,8 @@ import { publicApi } from "@/lib/api-client";
 export const DEFAULT_BRANDING: BrandingConfig = {
   productName: "White Label",
   logoUrl: null,
+  logoUrlDark: null,
+  logoInvertOnDark: false,
   faviconUrl: null,
   templateId: "nova",
   primaryColor: "#6366f1",
