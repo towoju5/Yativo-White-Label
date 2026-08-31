@@ -131,14 +131,16 @@ const MAX_STATEMENT_LINES = 5000;
 
 /**
  * Statement of Account for one date range — same running-balance walk as getWalletStatement
- * (every entry from account genesis, in order, so the running balance is correct), but returns
- * the opening balance (as of just before dateFrom), the closing balance (as of dateTo), and only
- * the rows that fall inside [dateFrom, dateTo]. Used for the exportable/emailable statement
- * rather than the paginated on-screen one.
+ * (every entry from account genesis, in order, so the running balance — and each row's "balance
+ * after" — is correct). Returns the opening balance (as of just before dateFrom) and only the
+ * rows that fall inside [dateFrom, dateTo]. The closing balance is deliberately NOT "balance as
+ * of dateTo" — it's the account's current posted balance at the moment the statement is
+ * requested (the walk continues past dateTo through every entry that exists), matching what a
+ * customer expects "closing balance" to mean on a statement they're pulling right now.
  */
 export async function getWalletStatementForRange(prisma: PrismaClient, accountId: string, accountType: AccountType, dateFrom: Date, dateTo: Date) {
   const ascending = await prisma.ledgerEntry.findMany({
-    where: { accountId, createdAt: { lte: dateTo } },
+    where: { accountId },
     orderBy: { createdAt: "asc" },
     include: { transaction: true },
   });
@@ -164,6 +166,7 @@ export async function getWalletStatementForRange(prisma: PrismaClient, accountId
       openingBalanceMinor = running;
       continue;
     }
+    if (entry.createdAt > dateTo) continue;
     lines.push({
       date: entry.createdAt.toISOString(),
       description: entry.transaction.description ?? entry.transaction.type,
