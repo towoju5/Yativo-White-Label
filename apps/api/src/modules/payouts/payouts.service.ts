@@ -3,6 +3,7 @@ import type { Payout, PrismaClient, LedgerExternalSource } from "@prisma/client"
 import type { CreatePayoutInput } from "@white-label/shared-types";
 import { env } from "../../config/env.js";
 import { yativoClient } from "../../lib/yativoClient.js";
+import { enqueuePayoutStatusPoll } from "../../jobs/payoutPollQueue.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { NotFoundError, InsufficientFundsError, AppError } from "../../lib/errors.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
@@ -209,6 +210,11 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
     // scaffold testable end-to-end locally without standing up a webhook receiver. In
     // sandbox/live mode this block never runs — settlement happens via the real webhook.
     await settlePayoutCompleted(prisma, { ...payout, amountMinor }, { externalSource: "SYSTEM" });
+  } else {
+    // Fallback safety net alongside the webhook: re-checks this payout's live status with
+    // Yativo every 10-20 min (backing off up to 16x) for up to 15 attempts, in case the
+    // `payout.completed`/`payout.failed` webhook never arrives. See payoutPoll.worker.ts.
+    await enqueuePayoutStatusPoll(payout.id, 1);
   }
 
   payout = await prisma.payout.findUniqueOrThrow({ where: { id: payout.id }, include: { transaction: true } });
