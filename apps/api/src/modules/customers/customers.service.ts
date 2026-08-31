@@ -1,6 +1,6 @@
 import type { PrismaClient, KycStatus, CustomerStatus } from "@prisma/client";
 import { AppError, NotFoundError } from "../../lib/errors.js";
-import { tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
+import { ensureYativoCustomer, tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { listCustomerWallets } from "../wallets/wallets.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
@@ -110,6 +110,19 @@ export async function rejectKyc(prisma: PrismaClient, customerId: string, reason
   const updated = await prisma.customer.update({ where: { id: customerId }, data: { kycStatus: "REJECTED" } });
   await sendNotificationEmail(prisma, "KYC_REJECTED", customerId, { reason });
   return updated;
+}
+
+/**
+ * Manual counterpart to tryEnsureYativoCustomer for an admin who wants to explicitly retry —
+ * e.g. after fixing a bad phone/country on the customer's record, or Yativo having been down
+ * when the automatic checkpoints (signup, login, KYC approval) last ran. Unlike the "try" variant,
+ * failures propagate as a real error so the admin sees exactly why it didn't work.
+ */
+export async function resubmitCustomerToYativo(prisma: PrismaClient, customerId: string) {
+  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+  if (!customer) throw new NotFoundError("Customer");
+  await ensureYativoCustomer(prisma, customer);
+  return prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
 }
 
 export async function freezeCustomer(prisma: PrismaClient, customerId: string) {

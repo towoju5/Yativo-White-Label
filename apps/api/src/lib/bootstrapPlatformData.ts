@@ -5,8 +5,10 @@ import type { PrismaClient } from "@prisma/client";
  * data, no Yativo calls. `getPlatformSettings()` does a plain `findUnique` (no create-on-read,
  * unlike BrandingConfig) and throws NotFoundError if this row is missing, and that function is
  * called from signup, wallet operations, and card/payout issuance — so a database that only ever
- * ran `prisma migrate deploy` is missing this until something creates it. Only prisma/seed.ts
- * (via this function) and scripts/bootstrapPlatformSettings.ts create it; nothing else does.
+ * ran `prisma migrate deploy` is missing this until something creates it. Called automatically at
+ * API boot (see app.ts) so a deployed environment self-heals on its next restart with no manual
+ * script run required; prisma/seed.ts and scripts/bootstrapPlatformSettings.ts also call this
+ * directly for local/manual use.
  */
 export async function bootstrapPlatformData(prisma: PrismaClient): Promise<void> {
   // Matches the currencies Yativo can actually issue deposit virtual accounts for

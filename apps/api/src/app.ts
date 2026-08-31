@@ -13,6 +13,7 @@ import { buildCorsOriginCheck } from "./lib/cors.js";
 import { prismaPlugin } from "./plugins/prisma.js";
 import { redisPlugin } from "./plugins/redis.js";
 import { loadIntegrationSettingsFromDb } from "./lib/integrationRuntimeConfig.js";
+import { bootstrapPlatformData } from "./lib/bootstrapPlatformData.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { portalAuthRoutes } from "./modules/portalAuth/portalAuth.routes.js";
 import { brandingRoutes } from "./modules/branding/branding.routes.js";
@@ -77,6 +78,7 @@ export async function buildApp() {
 
   await app.register(prismaPlugin);
   await app.register(redisPlugin);
+  await bootstrapPlatformData(app.prisma);
   await loadIntegrationSettingsFromDb(app.prisma);
 
   app.setErrorHandler((error: FastifyError | AppError | YativoApiError, _request, reply) => {

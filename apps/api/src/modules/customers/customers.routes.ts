@@ -26,6 +26,7 @@ import {
   rejectKyc,
   freezeCustomer,
   unfreezeCustomer,
+  resubmitCustomerToYativo,
   customerToDto,
 } from "./customers.service.js";
 import { getWalletForCustomer, getWalletStatement, adjustWallet } from "../wallets/wallets.service.js";
@@ -163,6 +164,18 @@ export async function customersRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const customer = await unfreezeCustomer(app.prisma, request.params.id);
+      return reply.send(customerToDto(customer));
+    },
+  );
+
+  server.post(
+    "/admin/customers/:id/yativo/resubmit",
+    {
+      preHandler: [requireStaffAuth, requirePermission("customers.write")],
+      schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      const customer = await resubmitCustomerToYativo(app.prisma, request.params.id);
       return reply.send(customerToDto(customer));
     },
   );

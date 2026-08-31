@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { bootstrapPlatformData } from "../prisma/bootstrapPlatformData.js";
+import { bootstrapPlatformData } from "../src/lib/bootstrapPlatformData.js";
 
 const prisma = new PrismaClient();
 

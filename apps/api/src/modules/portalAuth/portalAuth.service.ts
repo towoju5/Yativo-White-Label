@@ -9,9 +9,8 @@ import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { UnauthorizedError, ConflictError } from "../../lib/errors.js";
-import { ensureCustomerWalletAccount } from "../ledger/accounts.js";
 import { ensureYativoCustomer, tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
-import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
+import { provisionDefaultWallets, tryProvisionDefaultWallets } from "../wallets/wallets.service.js";
 import { verifyTotp } from "../../lib/totp.js";
 import logger from "../../lib/logger.js";
 import type { CreateCustomerInput } from "@white-label/shared-types";
@@ -61,15 +60,7 @@ export async function signupCustomer(prisma: PrismaClient, input: CreateCustomer
   // Wallet currency policy is admin-controlled (see modules/platformSettings): every customer
   // always gets defaultCurrencyCode, and ALL_AUTOMATIC additionally provisions every other
   // enabled currency up front rather than waiting for a self-service add or a deposit.
-  const settings = await getPlatformSettings(prisma);
-  await ensureCustomerWalletAccount(prisma, customer.id, settings.defaultCurrencyCode);
-  if (settings.walletCurrencyMode === "ALL_AUTOMATIC") {
-    const enabledCurrencies = await prisma.currency.findMany({ where: { isEnabledForCustomers: true } });
-    for (const currency of enabledCurrencies) {
-      if (currency.code === settings.defaultCurrencyCode) continue;
-      await ensureCustomerWalletAccount(prisma, customer.id, currency.code);
-    }
-  }
+  await provisionDefaultWallets(prisma, customer.id);
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
   await sendNotificationEmail(prisma, "WELCOME", customer.id, {});
@@ -96,6 +87,7 @@ export async function loginCustomer(prisma: PrismaClient, email: string, passwor
   // for anyone who reached a usable state without going through a KYC submission (see
   // tryEnsureYativoCustomer's doc comment). Best-effort: never blocks login.
   await tryEnsureYativoCustomer(prisma, customer);
+  await tryProvisionDefaultWallets(prisma, customer.id);
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
   return { requiresTwoFactor: false as const, customer, accessToken, refreshToken };
@@ -135,6 +127,7 @@ export async function verifyTwoFactorLogin(prisma: PrismaClient, challengeToken:
 
   await prisma.customer.update({ where: { id: customer.id }, data: { lastLoginAt: new Date() } });
   await tryEnsureYativoCustomer(prisma, customer);
+  await tryProvisionDefaultWallets(prisma, customer.id);
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
   return { customer, accessToken, refreshToken, usedBackupCode };
@@ -208,6 +201,7 @@ export async function verifyCustomerPasskeyLogin(prisma: PrismaClient, redis: Re
   });
   await prisma.customer.update({ where: { id: passkey.customer.id }, data: { lastLoginAt: new Date() } });
   await tryEnsureYativoCustomer(prisma, passkey.customer);
+  await tryProvisionDefaultWallets(prisma, passkey.customer.id);
 
   const { accessToken, refreshToken } = await issueSession(prisma, passkey.customer.id);
   return { customer: passkey.customer, accessToken, refreshToken };

@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/lib/passwords.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../src/modules/ledger/accounts.js";
 import { postTransaction } from "../src/modules/ledger/postTransaction.js";
-import { bootstrapPlatformData } from "./bootstrapPlatformData.js";
+import { bootstrapPlatformData } from "../src/lib/bootstrapPlatformData.js";
 
 const prisma = new PrismaClient();
 

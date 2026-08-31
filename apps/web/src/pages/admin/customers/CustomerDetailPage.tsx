@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Customer, StatementLine, WalletBalance, CustomerEndorsement, Beneficiary } from "@white-label/shared-types";
 import { formatCurrencyAmount } from "@white-label/shared-types";
-import { ArrowLeft, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon } from "lucide-react";
+import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
@@ -114,6 +114,15 @@ export default function CustomerDetailPage() {
     onError: (e) => toast({ variant: "destructive", title: "Action failed", description: e instanceof ApiError ? e.message : undefined }),
   });
 
+  const resubmitYativoMutation = useMutation({
+    mutationFn: () => staffApi.post(`/admin/customers/${customerId}/yativo/resubmit`),
+    onSuccess: () => {
+      toast({ title: "Customer registered with Yativo" });
+      invalidate();
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't register with Yativo", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
   const [adjustDirection, setAdjustDirection] = useState<"CREDIT" | "DEBIT">("CREDIT");
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjustReason, setAdjustReason] = useState("");
@@ -195,6 +204,11 @@ export default function CustomerDetailPage() {
                 </DialogContent>
               </Dialog>
             </>
+          )}
+          {!customer.yativoCustomerId && (
+            <Button size="sm" variant="outline" onClick={() => resubmitYativoMutation.mutate()} disabled={resubmitYativoMutation.isPending}>
+              <RefreshCw className={resubmitYativoMutation.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"} /> Resubmit to Yativo
+            </Button>
           )}
           <Button size="sm" variant="outline" onClick={() => freezeMutation.mutate()} disabled={freezeMutation.isPending}>
             {customer.status === "FROZEN" ? (

@@ -6,6 +6,7 @@ import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../ledger/ac
 import { getAvailableBalance, getPendingHold } from "../ledger/balances.js";
 import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import { NotFoundError, AppError } from "../../lib/errors.js";
+import logger from "../../lib/logger.js";
 
 export function walletToDto(wallet: {
   id: string;
@@ -26,6 +27,39 @@ export function walletToDto(wallet: {
     pendingMinor: wallet.cachedPendingMinor.toString(),
     updatedAt: wallet.cacheUpdatedAt.toISOString(),
   };
+}
+
+/**
+ * Brings a customer's wallets up to what signup provisions — the platform's default currency,
+ * plus every other enabled currency under ALL_AUTOMATIC mode. No-ops if they already hold at
+ * least one wallet, so this never re-adds a currency a customer deliberately removed themselves.
+ */
+export async function provisionDefaultWallets(prisma: PrismaClient, customerId: string): Promise<void> {
+  const hasWallet = await prisma.wallet.findFirst({ where: { customerId } });
+  if (hasWallet) return;
+
+  const settings = await getPlatformSettings(prisma);
+  await ensureCustomerWalletAccount(prisma, customerId, settings.defaultCurrencyCode);
+  if (settings.walletCurrencyMode === "ALL_AUTOMATIC") {
+    const enabledCurrencies = await prisma.currency.findMany({ where: { isEnabledForCustomers: true } });
+    for (const currency of enabledCurrencies) {
+      if (currency.code === settings.defaultCurrencyCode) continue;
+      await ensureCustomerWalletAccount(prisma, customerId, currency.code);
+    }
+  }
+}
+
+/**
+ * Self-healing checkpoint for a customer who reached a usable state with zero wallets — e.g. one
+ * who signed up while platform_settings hadn't been bootstrapped yet, so signup's own wallet
+ * provisioning never ran. Best-effort: never blocks login.
+ */
+export async function tryProvisionDefaultWallets(prisma: PrismaClient, customerId: string): Promise<void> {
+  try {
+    await provisionDefaultWallets(prisma, customerId);
+  } catch (err) {
+    logger.warn({ err, customerId }, "Could not auto-provision default wallet for customer");
+  }
 }
 
 export async function listCustomerWallets(prisma: PrismaClient, customerId: string) {
