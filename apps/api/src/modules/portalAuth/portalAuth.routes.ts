@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
+import type { PortalPermission } from "@white-label/shared-types";
 import {
   portalLoginSchema,
   createCustomerSchema,
@@ -24,6 +25,7 @@ import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { env } from "../../config/env.js";
 import { parseTtlToMs } from "../../lib/refreshTokens.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 
 const REFRESH_COOKIE = "portal_refresh_token";
 
@@ -135,8 +137,21 @@ export async function portalAuthRoutes(app: FastifyInstance) {
     "/portal/auth/me",
     { preHandler: requireCustomerAuth, schema: { response: { 200: customerSchema } } },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
-      return reply.send(toDto(customer));
+      const claims = request.customer!;
+      const businessCustomerId = resolveEffectiveCustomerId(claims);
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: businessCustomerId } });
+
+      if (claims.principalType === "member") {
+        const member = await app.prisma.customerTeamMember.findUniqueOrThrow({ where: { id: claims.sub } });
+        return reply.send({
+          ...toDto(customer),
+          principalType: "member",
+          permissions: (claims.permissions ?? []) as PortalPermission[],
+          memberEmail: member.email,
+          memberFullName: member.fullName,
+        });
+      }
+      return reply.send({ ...toDto(customer), principalType: "owner" });
     },
   );
 }

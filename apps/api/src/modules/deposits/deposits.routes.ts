@@ -4,6 +4,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { depositCountrySchema, depositMethodSchema, createDepositSchema, depositResultSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { ensureCustomerWalletAccount } from "../ledger/accounts.js";
@@ -44,7 +45,7 @@ export async function depositsRoutes(app: FastifyInstance) {
       schema: { body: createDepositSchema, response: { 200: depositResultSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       await requireKycApprovedForService(app.prisma, "DEPOSIT", customer);
 
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);

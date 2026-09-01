@@ -10,6 +10,7 @@ import {
   addWalletCurrencySchema,
 } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
   listCustomerWallets,
@@ -27,7 +28,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
     "/portal/wallets",
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(walletBalanceSchema) } } },
     async (request, reply) => {
-      const wallets = await listCustomerWallets(app.prisma, request.customer!.sub);
+      const wallets = await listCustomerWallets(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(wallets);
     },
   );
@@ -36,7 +37,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
     "/portal/wallets/currencies",
     { preHandler: requireCustomerAuth, schema: { response: { 200: portalWalletCurrencyOptionsSchema } } },
     async (request, reply) => {
-      const options = await getPortalWalletCurrencyOptions(app.prisma, request.customer!.sub);
+      const options = await getPortalWalletCurrencyOptions(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(options);
     },
   );
@@ -48,7 +49,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
       schema: { body: addWalletCurrencySchema, response: { 200: walletBalanceSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
-      const wallet = await addCustomerWalletCurrency(app.prisma, request.customer!.sub, request.body.currencyCode);
+      const wallet = await addCustomerWalletCurrency(app.prisma, resolveEffectiveCustomerId(request.customer!), request.body.currencyCode);
       return reply.send(wallet);
     },
   );
@@ -60,7 +61,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 204: z.void(), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
-      await deleteCustomerWallet(app.prisma, request.customer!.sub, request.params.id);
+      await deleteCustomerWallet(app.prisma, resolveEffectiveCustomerId(request.customer!), request.params.id);
       return reply.code(204).send();
     },
   );
@@ -76,7 +77,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const wallet = await getWalletForCustomer(app.prisma, request.customer!.sub, request.params.id);
+      const wallet = await getWalletForCustomer(app.prisma, resolveEffectiveCustomerId(request.customer!), request.params.id);
       const result = await getWalletStatement(app.prisma, wallet.accountId, wallet.account.type, request.query.page, request.query.pageSize);
       return reply.send(result);
     },

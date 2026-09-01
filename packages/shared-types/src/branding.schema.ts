@@ -21,6 +21,9 @@ export const brandingConfigSchema = z.object({
   logoUrlDark: z.string().url().nullable(),
   logoInvertOnDark: z.boolean(),
   faviconUrl: z.string().url().nullable(),
+  // Official stamp/seal image printed on generated statements — set via the multipart upload
+  // endpoint (POST /admin/branding/stamp-upload), never pasted as a raw URL like logoUrl.
+  stampUrl: z.string().url().nullable(),
   templateId: z.enum(TEMPLATE_IDS),
   primaryColor: hexColor,
   secondaryColor: hexColor,

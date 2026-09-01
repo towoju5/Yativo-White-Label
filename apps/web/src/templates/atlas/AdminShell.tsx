@@ -20,6 +20,7 @@ import {
   Bell,
   Mail,
   Plug,
+  HardDrive,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { AtlasTopbar, type NavItem } from "./Topbar";
@@ -45,6 +46,7 @@ const items: NavItem[] = [
   { to: "/admin/settings/wallet-currencies", label: "Wallet currencies", icon: Landmark },
   { to: "/admin/settings/verification", label: "Verification", icon: ShieldCheck },
   { to: "/admin/settings/integrations", label: "Integrations", icon: Plug },
+  { to: "/admin/settings/storage", label: "Storage", icon: HardDrive },
 ];
 
 export function AtlasAdminShell({ children }: { children: ReactNode }) {

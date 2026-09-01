@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createPayoutSchema, payoutSchema, payoutStatusSchema, paginationQuerySchema, paginatedResponseSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { createPortalPayout, listPortalPayouts, getLivePayoutStatus } from "./payouts.service.js";
 
@@ -16,7 +17,7 @@ export async function portalPayoutsRoutes(app: FastifyInstance) {
       schema: { body: createPayoutSchema, response: { 200: payoutSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
-      const payout = await createPortalPayout(app.prisma, request.customer!.sub, request.body);
+      const payout = await createPortalPayout(app.prisma, resolveEffectiveCustomerId(request.customer!), request.body);
       return reply.send(payout);
     },
   );
@@ -28,7 +29,7 @@ export async function portalPayoutsRoutes(app: FastifyInstance) {
       schema: { querystring: paginationQuerySchema, response: { 200: paginatedResponseSchema(payoutSchema) } },
     },
     async (request, reply) => {
-      const result = await listPortalPayouts(app.prisma, request.customer!.sub, request.query.page, request.query.pageSize);
+      const result = await listPortalPayouts(app.prisma, resolveEffectiveCustomerId(request.customer!), request.query.page, request.query.pageSize);
       return reply.send(result);
     },
   );
@@ -40,7 +41,7 @@ export async function portalPayoutsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 200: payoutStatusSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const status = await getLivePayoutStatus(app.prisma, request.customer!.sub, request.params.id);
+      const status = await getLivePayoutStatus(app.prisma, resolveEffectiveCustomerId(request.customer!), request.params.id);
       return reply.send(status);
     },
   );

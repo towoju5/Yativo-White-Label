@@ -1,7 +1,7 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { BrandingConfig, UpdateBrandingInput } from "@white-label/shared-types";
-import { Check, Save } from "lucide-react";
+import { Check, Save, Stamp, Upload } from "lucide-react";
 import { fetchBranding, hexToHslTriplet } from "@/theme/branding";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
@@ -87,6 +87,20 @@ export default function BrandingSettingsPage() {
       queryClient.setQueryData(["branding"], updated);
     },
     onError: (e) => toast({ variant: "destructive", title: "Couldn't save branding", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const stampFileInputRef = useRef<HTMLInputElement>(null);
+  const stampUploadMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return staffApi.post<BrandingConfig>("/admin/branding/stamp-upload", formData);
+    },
+    onSuccess: (updated) => {
+      toast({ title: "Stamp uploaded" });
+      queryClient.setQueryData(["branding"], updated);
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't upload stamp", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   if (isLoading || !draft) {
@@ -247,6 +261,47 @@ export default function BrandingSettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Stamp / seal</CardTitle>
+          <CardDescription>An official stamp printed on generated statements of account, alongside the verification QR code.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-muted/40">
+              {data?.stampUrl ? (
+                <img src={data.stampUrl} alt="Statement stamp" className="h-full w-full object-contain p-2" />
+              ) : (
+                <Stamp className="h-6 w-6 text-muted-foreground" />
+              )}
+            </div>
+            <div className="space-y-2">
+              <input
+                ref={stampFileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) stampUploadMutation.mutate(file);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => stampFileInputRef.current?.click()}
+                disabled={!canEdit || stampUploadMutation.isPending}
+                title={canEdit ? undefined : "Only owners and admins can change branding"}
+              >
+                <Upload className="h-4 w-4" /> {stampUploadMutation.isPending ? "Uploading…" : data?.stampUrl ? "Replace stamp" : "Upload stamp"}
+              </Button>
+              <p className="text-xs text-muted-foreground">PNG, JPEG, WEBP, or SVG. A transparent PNG works best.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

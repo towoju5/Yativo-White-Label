@@ -23,3 +23,6 @@ export * from "./notifications.schema.js";
 export * from "./page.schema.js";
 export * from "./permissions.js";
 export * from "./support.schema.js";
+export * from "./storage.schema.js";
+export * from "./portalPermissions.js";
+export * from "./customerTeam.schema.js";

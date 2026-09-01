@@ -1,7 +1,8 @@
-import type { PrismaClient } from "@prisma/client";
+import type { CustomerTeamMember, PrismaClient } from "@prisma/client";
 import type { Redis } from "ioredis";
 import { randomUUID } from "node:crypto";
 import { generateAuthenticationOptions, verifyAuthenticationResponse, type AuthenticationResponseJSON, type AuthenticatorTransportFuture } from "@simplewebauthn/server";
+import { PORTAL_PERMISSIONS } from "@white-label/shared-types";
 import { env } from "../../config/env.js";
 import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { signPortalAccessToken, signPortal2faChallengeToken, verifyPortal2faChallengeToken } from "../../lib/jwt.js";
@@ -20,6 +21,26 @@ async function issueSession(prisma: PrismaClient, customerId: string) {
   const { token: refreshToken, tokenHash } = generateRefreshToken();
   await prisma.customerRefreshToken.create({
     data: { customerId, tokenHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
+  });
+  return { accessToken, refreshToken };
+}
+
+/** A team member's effective permission set — ADMIN gets everything, mirroring the staff-side OWNER/ADMIN bypass. */
+function effectiveMemberPermissions(member: CustomerTeamMember): string[] {
+  return member.role === "ADMIN" ? [...PORTAL_PERMISSIONS] : member.permissions;
+}
+
+async function issueMemberSession(prisma: PrismaClient, member: CustomerTeamMember) {
+  const accessToken = signPortalAccessToken({
+    sub: member.id,
+    principalType: "member",
+    businessCustomerId: member.businessCustomerId,
+    role: member.role === "ADMIN" ? "ADMIN" : "MEMBER",
+    permissions: effectiveMemberPermissions(member),
+  });
+  const { token: refreshToken, tokenHash } = generateRefreshToken();
+  await prisma.customerTeamRefreshToken.create({
+    data: { memberId: member.id, tokenHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
   });
   return { accessToken, refreshToken };
 }
@@ -69,7 +90,19 @@ export async function signupCustomer(prisma: PrismaClient, input: CreateCustomer
 
 export async function loginCustomer(prisma: PrismaClient, email: string, password: string) {
   const customer = await prisma.customer.findUnique({ where: { email } });
-  if (!customer || !(await verifyPassword(password, customer.passwordHash))) {
+  if (!customer) {
+    // Not a business account owner — check whether this is an invited team member's own login
+    // before giving up. A pending (not-yet-accepted) invite has no passwordHash, so it can never
+    // pass verifyPassword and correctly falls through to the generic "invalid" error below.
+    const member = await prisma.customerTeamMember.findUnique({ where: { email } });
+    if (!member?.passwordHash || !(await verifyPassword(password, member.passwordHash))) {
+      throw new UnauthorizedError("Invalid email or password");
+    }
+    if (!member.isActive) throw new UnauthorizedError("This account has been deactivated — contact your business administrator");
+    const { accessToken, refreshToken } = await issueMemberSession(prisma, member);
+    return { requiresTwoFactor: false as const, principalType: "member" as const, member, accessToken, refreshToken };
+  }
+  if (!(await verifyPassword(password, customer.passwordHash))) {
     throw new UnauthorizedError("Invalid email or password");
   }
   if (customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
@@ -90,7 +123,7 @@ export async function loginCustomer(prisma: PrismaClient, email: string, passwor
   await tryProvisionDefaultWallets(prisma, customer.id);
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
-  return { requiresTwoFactor: false as const, customer, accessToken, refreshToken };
+  return { requiresTwoFactor: false as const, principalType: "owner" as const, customer, accessToken, refreshToken };
 }
 
 /** Redeems a login's 2FA challenge token for a real session — accepts either a live 6-digit TOTP code or a one-time backup code (removed from the account once used). */
@@ -135,24 +168,35 @@ export async function verifyTwoFactorLogin(prisma: PrismaClient, challengeToken:
 
 export async function refreshCustomerSession(prisma: PrismaClient, refreshToken: string) {
   const tokenHash = hashRefreshToken(refreshToken);
+
   const existing = await prisma.customerRefreshToken.findUnique({ where: { tokenHash }, include: { customer: true } });
-  if (!existing || existing.revokedAt || existing.expiresAt < new Date()) {
-    throw new UnauthorizedError("Invalid or expired refresh token");
+  if (existing) {
+    if (existing.revokedAt || existing.expiresAt < new Date()) throw new UnauthorizedError("Invalid or expired refresh token");
+    await prisma.customerRefreshToken.update({ where: { id: existing.id }, data: { revokedAt: new Date() } });
+    const { token: newRefreshToken, tokenHash: newHash } = generateRefreshToken();
+    await prisma.customerRefreshToken.create({
+      data: { customerId: existing.customerId, tokenHash: newHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
+    });
+    const accessToken = signPortalAccessToken({ sub: existing.customer.id });
+    return { accessToken, refreshToken: newRefreshToken };
   }
 
-  await prisma.customerRefreshToken.update({ where: { id: existing.id }, data: { revokedAt: new Date() } });
-  const { token: newRefreshToken, tokenHash: newHash } = generateRefreshToken();
-  await prisma.customerRefreshToken.create({
-    data: { customerId: existing.customerId, tokenHash: newHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
-  });
-
-  const accessToken = signPortalAccessToken({ sub: existing.customer.id });
-  return { customer: existing.customer, accessToken, refreshToken: newRefreshToken };
+  // Not a business owner's refresh token — check the team-member table before giving up.
+  const memberToken = await prisma.customerTeamRefreshToken.findUnique({ where: { tokenHash }, include: { member: true } });
+  if (!memberToken || memberToken.revokedAt || memberToken.expiresAt < new Date()) {
+    throw new UnauthorizedError("Invalid or expired refresh token");
+  }
+  if (!memberToken.member.isActive) throw new UnauthorizedError("This account has been deactivated — contact your business administrator");
+  await prisma.customerTeamRefreshToken.update({ where: { id: memberToken.id }, data: { revokedAt: new Date() } });
+  return issueMemberSession(prisma, memberToken.member);
 }
 
 export async function logoutCustomer(prisma: PrismaClient, refreshToken: string) {
   const tokenHash = hashRefreshToken(refreshToken);
-  await prisma.customerRefreshToken.updateMany({ where: { tokenHash, revokedAt: null }, data: { revokedAt: new Date() } });
+  await Promise.all([
+    prisma.customerRefreshToken.updateMany({ where: { tokenHash, revokedAt: null }, data: { revokedAt: new Date() } }),
+    prisma.customerTeamRefreshToken.updateMany({ where: { tokenHash, revokedAt: null }, data: { revokedAt: new Date() } }),
+  ]);
 }
 
 const PASSKEY_LOGIN_TTL_SECONDS = 300;

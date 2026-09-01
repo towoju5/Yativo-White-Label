@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
+import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, UserCog, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
@@ -9,6 +9,7 @@ export function AtlasPortalShell({ children }: { children: ReactNode }) {
   const { user, logout } = useCustomerAuth();
   const { t } = useTranslation();
   const name = user?.fullName ?? user?.businessName ?? user?.email ?? t("nav.account", "Account");
+  const canManageTeam = user?.type === "BUSINESS" && (user.principalType !== "member" || (user.permissions?.includes("team.manage") ?? false));
 
   const items: NavItem[] = [
     { to: "/portal", label: t("nav.atlas.home", "Home"), icon: LayoutDashboard, end: true },
@@ -23,6 +24,7 @@ export function AtlasPortalShell({ children }: { children: ReactNode }) {
     { to: "/portal/cards", label: t("nav.cards", "Cards"), icon: CreditCard },
     { to: "/portal/profile", label: t("nav.atlas.profile", "Profile"), icon: UserCheck },
     { to: "/portal/support", label: t("nav.support", "Support"), icon: LifeBuoy },
+    ...(canManageTeam ? [{ to: "/portal/team", label: t("nav.team", "Team"), icon: UserCog }] : []),
     { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
   ];
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
+import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, UserCog, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AuroraSidebar, type NavSection } from "./Sidebar";
@@ -12,6 +12,7 @@ export function AuroraPortalShell({ children }: { children: ReactNode }) {
   const { user, logout } = useCustomerAuth();
   const { t } = useTranslation();
   const name = user?.fullName ?? user?.businessName ?? user?.email ?? t("nav.account", "Account");
+  const canManageTeam = user?.type === "BUSINESS" && (user.principalType !== "member" || (user.permissions?.includes("team.manage") ?? false));
 
   const sections: NavSection[] = [
     {
@@ -34,6 +35,7 @@ export function AuroraPortalShell({ children }: { children: ReactNode }) {
         { to: "/portal/cards", label: t("nav.cards", "Cards"), icon: CreditCard },
         { to: "/portal/profile", label: t("nav.profileKyc", "Profile & KYC"), icon: UserCheck },
         { to: "/portal/support", label: t("nav.support", "Support"), icon: LifeBuoy },
+        ...(canManageTeam ? [{ to: "/portal/team", label: t("nav.team", "Team"), icon: UserCog }] : []),
         { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
       ],
     },

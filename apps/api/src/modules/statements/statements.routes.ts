@@ -5,10 +5,13 @@ import type { BrandingConfig } from "@white-label/shared-types";
 import { z } from "zod";
 import { exportStatementQuerySchema, emailStatementSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
 import { getBranding } from "../branding/branding.service.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
+import { env } from "../../config/env.js";
+import { signStatementToken } from "../../lib/statementVerification.js";
 import { buildStatementDocument, renderStatementPdf, renderStatementExcel, statementFilename, statementContentType } from "./statements.service.js";
 
 async function renderDocument(
@@ -27,12 +30,16 @@ async function renderDocument(
 
   const doc = await buildStatementDocument(prisma, customer.id, walletId, dateFrom, dateTo);
   const accountLabel = `${wallet.currencyCode} Wallet`;
+  const verifyToken = signStatementToken({ walletId, dateFrom: doc.dateFrom, dateTo: doc.dateTo });
   const renderOpts = {
     productName: branding.productName,
     logoUrl: branding.logoUrl,
     primaryColor: branding.primaryColor,
     accountLabel,
     customerName: customer.fullName ?? customer.businessName ?? customer.email,
+    supportEmail: branding.supportEmail,
+    stampUrl: branding.stampUrl,
+    verifyUrl: `${env.WEB_APP_URL}/verify-statement/${verifyToken}`,
   };
   const buffer = format === "PDF" ? await renderStatementPdf(doc, renderOpts) : await renderStatementExcel(doc, renderOpts);
   return { doc, buffer };
@@ -48,7 +55,7 @@ export async function statementsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), querystring: exportStatementQuerySchema, response: { 200: z.any(), 404: errorResponseSchema, 400: errorResponseSchema } },
     },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       const branding = await getBranding(app.prisma);
       const { format, dateFrom, dateTo } = request.query;
       const { doc, buffer } = await renderDocument(app.prisma, customer, request.params.id, format, new Date(dateFrom), new Date(dateTo), branding);
@@ -70,7 +77,7 @@ export async function statementsRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       const branding = await getBranding(app.prisma);
       const { format, dateFrom, dateTo } = request.body;
       const { doc, buffer } = await renderDocument(app.prisma, customer, request.params.id, format, new Date(dateFrom), new Date(dateTo), branding);

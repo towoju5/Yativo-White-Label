@@ -20,6 +20,7 @@ export const STAFF_PERMISSIONS = [
   "reconciliation.manage",
   "api_keys.manage",
   "team.manage",
+  "storage.manage",
 ] as const;
 
 export const staffPermissionSchema = z.enum(STAFF_PERMISSIONS);
@@ -35,7 +36,8 @@ export const PERMISSION_CATALOG: { key: StaffPermission; label: string; group: s
   { key: "reconciliation.manage", label: "Run reconciliation", group: "Operations", description: "Trigger a reconciliation run." },
   { key: "api_keys.manage", label: "Manage API keys", group: "Platform", description: "Create or revoke platform API keys." },
   { key: "team.manage", label: "Manage team & roles", group: "Platform", description: "Invite, edit, deactivate, or remove staff; create and edit custom roles." },
+  { key: "storage.manage", label: "Manage asset storage", group: "Platform", description: "Choose and configure the storage backend used for uploaded assets (local disk, S3, Bunny, etc.)." },
 ];
 
-/** What an unassigned STAFF-tier account can do today — every permission except team.manage, which is new and was never something plain staff could do. */
-export const DEFAULT_STAFF_PERMISSIONS: StaffPermission[] = STAFF_PERMISSIONS.filter((p) => p !== "team.manage");
+/** What an unassigned STAFF-tier account can do today — every permission except team.manage and storage.manage, which are new and were never something plain staff could do. */
+export const DEFAULT_STAFF_PERMISSIONS: StaffPermission[] = STAFF_PERMISSIONS.filter((p) => p !== "team.manage" && p !== "storage.manage");

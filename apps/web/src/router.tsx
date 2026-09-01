@@ -7,9 +7,12 @@ import { RouteErrorBoundary } from "@/components/errors/RouteErrorBoundary";
 
 import LandingPage from "@/pages/marketing/LandingPage";
 import StaticPageView from "@/pages/marketing/StaticPageView";
+import VerifyStatementPage from "@/pages/public/VerifyStatementPage";
 
 import PortalLoginPage from "@/pages/portal/auth/LoginPage";
 import PortalSignupPage from "@/pages/portal/auth/SignupPage";
+import AcceptInvitePage from "@/pages/portal/auth/AcceptInvitePage";
+import PortalTeamPage from "@/pages/portal/team/TeamPage";
 import PortalDashboardPage from "@/pages/portal/dashboard/DashboardPage";
 import PortalWalletsPage from "@/pages/portal/wallets/WalletsPage";
 import PortalWalletDetailPage from "@/pages/portal/wallets/WalletDetailPage";
@@ -49,6 +52,7 @@ import VerificationSettingsPage from "@/pages/admin/settings/VerificationSetting
 import AuthenticationSettingsPage from "@/pages/admin/settings/AuthenticationSettingsPage";
 import NotificationSettingsPage from "@/pages/admin/settings/NotificationSettingsPage";
 import EmailTemplatesSettingsPage from "@/pages/admin/settings/EmailTemplatesSettingsPage";
+import StorageSettingsPage from "@/pages/admin/settings/StorageSettingsPage";
 
 export function createRouter(adminLoginPath: string) {
   return createBrowserRouter([
@@ -58,9 +62,11 @@ export function createRouter(adminLoginPath: string) {
     errorElement: <RouteErrorBoundary />,
     children: [
       { path: "/", element: <LandingPage /> },
+      { path: "/verify-statement/:token", element: <VerifyStatementPage /> },
 
       { path: "/portal/login", element: <PortalLoginPage /> },
       { path: "/portal/signup", element: <PortalSignupPage /> },
+      { path: "/portal/accept-invite", element: <AcceptInvitePage /> },
       {
         path: "/portal/verify",
         element: (
@@ -97,6 +103,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "cards", element: <PortalCardsPage /> },
               { path: "profile", element: <ProfilePage /> },
               { path: "settings", element: <PortalSettingsPage /> },
+              { path: "team", element: <PortalTeamPage /> },
             ],
           },
         ],
@@ -137,6 +144,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "settings/authentication", element: <AuthenticationSettingsPage /> },
               { path: "settings/notifications", element: <NotificationSettingsPage /> },
               { path: "settings/email-templates", element: <EmailTemplatesSettingsPage /> },
+              { path: "settings/storage", element: <StorageSettingsPage /> },
             ],
           },
         ],

@@ -7,6 +7,7 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   logoUrlDark: null,
   logoInvertOnDark: false,
   faviconUrl: null,
+  stampUrl: null,
   templateId: "nova",
   primaryColor: "#6366f1",
   secondaryColor: "#0ea5e9",

@@ -8,7 +8,23 @@ export type StaffAccessClaims = {
   /** The effective permission set at issue time — see resolveStaffPermissions(). Only meaningful for STAFF; OWNER/ADMIN bypass permission checks by role alone. */
   permissions: string[];
 };
-export type PortalAccessClaims = { sub: string; aud: "portal" };
+/**
+ * `sub` is the Customer id for the business owner's own login, or the CustomerTeamMember id for
+ * an invited team member's login. `principalType`/`businessCustomerId`/`permissions` are optional
+ * so a token issued before team members existed keeps working: every consumer treats a missing
+ * `principalType` as `"owner"` with `sub` as the customer id — today's exact behavior — so no
+ * portal user is forced to re-login when this rolls out. See requirePortalPermission() and
+ * resolveEffectiveCustomerId() for how the two principal types are told apart at request time.
+ */
+export type PortalAccessClaims = {
+  sub: string;
+  aud: "portal";
+  principalType?: "owner" | "member";
+  businessCustomerId?: string;
+  /** Only meaningful for a member token — ADMIN bypasses `permissions` entirely, same as OWNER. */
+  role?: "ADMIN" | "MEMBER";
+  permissions?: string[];
+};
 
 export function signStaffAccessToken(payload: Omit<StaffAccessClaims, "aud">): string {
   return jwt.sign({ ...payload, aud: "admin" }, env.JWT_ACCESS_SECRET, {

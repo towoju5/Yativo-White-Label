@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type SetupStep = "qr" | "confirm" | "backupCodes";
@@ -146,6 +147,10 @@ export default function PortalSettingsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useCustomerAuth();
+  // A team member has their own login but no 2FA/passkey backend of their own yet (out of scope
+  // for this pass) — hide these sections rather than show a broken card that 404s on every request.
+  const isOwner = user?.principalType !== "member";
 
   const [setupOpen, setSetupOpen] = useState(false);
   const [setupStep, setSetupStep] = useState<SetupStep>("qr");
@@ -161,6 +166,7 @@ export default function PortalSettingsPage() {
   const statusQuery = useQuery({
     queryKey: ["portal", "2fa", "status"],
     queryFn: () => portalApi.get<TwoFactorStatus>("/portal/2fa/status"),
+    enabled: isOwner,
   });
 
   const setupMutation = useMutation({
@@ -263,35 +269,39 @@ export default function PortalSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            {enabled ? <ShieldCheck className="h-4 w-4 text-success" /> : <ShieldAlert className="h-4 w-4 text-primary" />}
-            <CardTitle className="text-base">{t("settings.twoFactor.title", "Two-factor authentication")}</CardTitle>
-          </div>
-          <CardDescription>{t("settings.twoFactor.description", "Add an extra layer of security to your account.")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between rounded-lg border border-border p-4">
-            <div>
-              <p className="text-sm font-medium">{t("settings.twoFactor.authenticatorApp", "Authenticator app")}</p>
-              <p className="text-xs text-muted-foreground">
-                {statusQuery.isLoading ? t("settings.twoFactor.loading", "Loading…") : enabled ? t("settings.twoFactor.enabled", "Enabled") : t("settings.twoFactor.notConfigured", "Not yet configured")}
-              </p>
-            </div>
-            <Switch
-              checked={enabled}
-              disabled={statusQuery.isLoading || setupMutation.isPending}
-              onCheckedChange={(v) => {
-                if (v) setupMutation.mutate();
-                else setDisableOpen(true);
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {isOwner && (
+        <>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                {enabled ? <ShieldCheck className="h-4 w-4 text-success" /> : <ShieldAlert className="h-4 w-4 text-primary" />}
+                <CardTitle className="text-base">{t("settings.twoFactor.title", "Two-factor authentication")}</CardTitle>
+              </div>
+              <CardDescription>{t("settings.twoFactor.description", "Add an extra layer of security to your account.")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                <div>
+                  <p className="text-sm font-medium">{t("settings.twoFactor.authenticatorApp", "Authenticator app")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {statusQuery.isLoading ? t("settings.twoFactor.loading", "Loading…") : enabled ? t("settings.twoFactor.enabled", "Enabled") : t("settings.twoFactor.notConfigured", "Not yet configured")}
+                  </p>
+                </div>
+                <Switch
+                  checked={enabled}
+                  disabled={statusQuery.isLoading || setupMutation.isPending}
+                  onCheckedChange={(v) => {
+                    if (v) setupMutation.mutate();
+                    else setDisableOpen(true);
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-      <PasskeysCard />
+          <PasskeysCard />
+        </>
+      )}
 
       <Dialog open={setupOpen} onOpenChange={(v) => !v && closeSetup()}>
         <DialogContent>

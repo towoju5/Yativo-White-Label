@@ -252,8 +252,63 @@ model Customer {
   refreshTokens CustomerRefreshToken[]
   payouts       Payout[]
   passkeys      CustomerPasskey[]
+  teamMembers   CustomerTeamMember[] @relation("TeamMembers")
 
   @@map("customers")
+}
+
+// ── Business team members — additional logins scoped to a BUSINESS-type Customer's own data,
+// with a per-member permission set. See requirePortalPermission() and resolveEffectiveCustomerId()
+// in the API for how a member's actions resolve to the owning business's records. ─────────────
+
+enum CustomerTeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model CustomerTeamMember {
+  id                 String           @id @default(cuid())
+  businessCustomerId String
+  businessCustomer   Customer         @relation("TeamMembers", fields: [businessCustomerId], references: [id])
+  email              String           @unique
+  passwordHash       String?
+  fullName           String
+  // OWNER/ADMIN always retain full access to the business's data regardless of `permissions` —
+  // it only narrows the MEMBER tier (see requirePortalPermission()).
+  role               CustomerTeamRole @default(MEMBER)
+  // Keys validated against the fixed catalog in shared-types (PORTAL_PERMISSIONS) at the service
+  // layer, not by a DB constraint. Defaults to none — least-privilege, unlike staff's default.
+  permissions        String[]         @default([])
+  isActive           Boolean          @default(true)
+  deactivatedAt      DateTime?
+  invitedById        String?
+  /// Set once the invite is accepted and a password chosen — null means the invite is still pending.
+  invitedAt          DateTime         @default(now())
+  acceptedAt         DateTime?
+  inviteTokenHash    String?          @unique
+  inviteExpiresAt    DateTime?
+  twoFactorEnabled   Boolean          @default(false)
+  twoFactorSecret    String?
+  createdAt          DateTime         @default(now())
+
+  refreshTokens CustomerTeamRefreshToken[]
+
+  @@index([businessCustomerId])
+  @@map("customer_team_members")
+}
+
+model CustomerTeamRefreshToken {
+  id        String             @id @default(cuid())
+  memberId  String
+  member    CustomerTeamMember @relation(fields: [memberId], references: [id])
+  tokenHash String             @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime           @default(now())
+
+  @@index([memberId])
+  @@map("customer_team_refresh_tokens")
 }
 
 model CustomerRefreshToken {
@@ -528,6 +583,8 @@ model BrandingConfig {
   logoUrlDark      String?
   logoInvertOnDark Boolean  @default(false)
   faviconUrl       String?
+  // Official stamp/seal image printed on generated statements (see statements.service.ts).
+  stampUrl         String?
   templateId       String   @default("nova")
   primaryColor     String   @default("#6366f1")
   secondaryColor   String   @default("#0ea5e9")

@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createSupportTicketSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { submitSupportTicket } from "./support.service.js";
 
@@ -16,7 +17,7 @@ export async function supportRoutes(app: FastifyInstance) {
       schema: { body: createSupportTicketSchema, response: { 200: z.object({ submitted: z.boolean() }), 409: errorResponseSchema } },
     },
     async (request, reply) => {
-      await submitSupportTicket(app.prisma, request.customer!.sub, request.body);
+      await submitSupportTicket(app.prisma, resolveEffectiveCustomerId(request.customer!), request.body);
       return reply.send({ submitted: true });
     },
   );

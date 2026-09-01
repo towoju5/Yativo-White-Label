@@ -10,6 +10,7 @@ import {
   beneficiaryFormFieldSchema,
 } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
   listBeneficiaries,
@@ -65,7 +66,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
     "/portal/beneficiaries",
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(beneficiarySchema) } } },
     async (request, reply) => {
-      const beneficiaries = await listBeneficiaries(app.prisma, request.customer!.sub);
+      const beneficiaries = await listBeneficiaries(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(beneficiaries);
     },
   );
@@ -74,7 +75,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
     "/portal/beneficiaries",
     { preHandler: requireCustomerAuth, schema: { body: createBeneficiarySchema, response: { 200: beneficiarySchema } } },
     async (request, reply) => {
-      const beneficiary = await createBeneficiary(app.prisma, request.customer!.sub, request.body);
+      const beneficiary = await createBeneficiary(app.prisma, resolveEffectiveCustomerId(request.customer!), request.body);
       return reply.send(beneficiary);
     },
   );
@@ -86,7 +87,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 200: beneficiarySchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const beneficiary = await getBeneficiary(app.prisma, request.params.id, request.customer!.sub);
+      const beneficiary = await getBeneficiary(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(beneficiary);
     },
   );
@@ -98,7 +99,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), body: updateBeneficiarySchema, response: { 200: beneficiarySchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const beneficiary = await updateBeneficiary(app.prisma, request.customer!.sub, request.params.id, request.body);
+      const beneficiary = await updateBeneficiary(app.prisma, resolveEffectiveCustomerId(request.customer!), request.params.id, request.body);
       return reply.send(beneficiary);
     },
   );
@@ -110,7 +111,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 204: z.void(), 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      await archiveBeneficiary(app.prisma, request.customer!.sub, request.params.id);
+      await archiveBeneficiary(app.prisma, resolveEffectiveCustomerId(request.customer!), request.params.id);
       return reply.code(204).send();
     },
   );

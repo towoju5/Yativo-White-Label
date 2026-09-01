@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { virtualAccountSchema, virtualAccountCurrencySchema, createVirtualAccountSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
@@ -21,7 +22,7 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
     "/portal/virtual-accounts/currencies",
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(virtualAccountCurrencySchema) } } },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       await requireKycApprovedForService(app.prisma, "VIRTUAL_ACCOUNT", customer);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
 
@@ -51,7 +52,7 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
     "/portal/virtual-accounts",
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(virtualAccountSchema) } } },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       await requireKycApprovedForService(app.prisma, "VIRTUAL_ACCOUNT", customer);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
       const accounts = await yativoClient.fiat.virtualAccounts.listForCustomer(yativoCustomerId);
@@ -66,7 +67,7 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
       schema: { body: createVirtualAccountSchema, response: { 200: virtualAccountSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       await requireKycApprovedForService(app.prisma, "VIRTUAL_ACCOUNT", customer);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
 

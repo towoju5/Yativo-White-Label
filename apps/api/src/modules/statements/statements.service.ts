@@ -3,6 +3,7 @@ import path from "node:path";
 import type { PrismaClient } from "@prisma/client";
 import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
+import qrcode from "qrcode";
 import type { StatementDocument, StatementFormat } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
 import { getWalletStatementForRange } from "../wallets/wallets.service.js";
@@ -45,10 +46,24 @@ export type StatementRenderOptions = {
   primaryColor?: string | null;
   accountLabel: string;
   customerName: string;
+  /** Reseller support contact, folded into the regulatory disclosure footer. */
+  supportEmail?: string | null;
+  /** Admin-uploaded stamp/seal image, printed in the footer next to the verification QR code. */
+  stampUrl?: string | null;
+  /** Public verification-page URL encoded into the footer QR code, when present. */
+  verifyUrl?: string | null;
 };
 
 function humanizeType(type: string): string {
   return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** The Lead Bank / FDIC statement disclosure — required on every generated statement. */
+function buildDisclosureText(supportEmail: string | null | undefined): string {
+  const contactClause = supportEmail
+    ? ` by contacting Yativo SPA. at ${supportEmail}. Please include your account number when writing to us.`
+    : " by contacting Yativo SPA. Please include your account number when writing to us.";
+  return `Checking account provided by Lead Bank., Member FDIC. Please review your statement and promptly report any inaccuracies or discrepancies to Lead Bank.${contactClause}`;
 }
 
 function fmt(doc: StatementDocument, amountMinor: string): string {
@@ -60,14 +75,14 @@ function toNumber(amountMinor: string, decimals: number): number {
   return Number(amountMinor) / 10 ** decimals;
 }
 
-/** Best-effort logo fetch — a broken/unreachable admin-set logo URL must never break statement generation. */
-async function fetchLogoBuffer(logoUrl: string): Promise<Buffer | null> {
+/** Best-effort image fetch (logo or stamp) — a broken/unreachable admin-set URL must never break statement generation. */
+async function fetchImageBuffer(url: string): Promise<Buffer | null> {
   try {
-    const res = await fetch(logoUrl, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
     return Buffer.from(await res.arrayBuffer());
   } catch (err) {
-    logger.warn({ err, logoUrl }, "Couldn't fetch branding logo for statement PDF — falling back to text");
+    logger.warn({ err, url }, "Couldn't fetch a branding image for the statement — omitting it");
     return null;
   }
 }
@@ -105,8 +120,8 @@ const PAGE_MARGIN = 44;
 const PAGE_HEIGHT = 841.89; // A4 in points
 const PAGE_WIDTH = 595.28;
 const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
-const FOOTER_BAND_HEIGHT = 34; // reserved at the bottom of every page for the running footer
-const PAGE_BOTTOM = PAGE_HEIGHT - PAGE_MARGIN - FOOTER_BAND_HEIGHT;
+const STAMP_QR_SIZE = 40;
+const STAMP_QR_GAP = 6;
 
 // Column widths sum to exactly CONTENT_WIDTH — date-only (no time) keeps that column narrow and
 // gives the description column the room a real description needs before truncating awkwardly.
@@ -129,7 +144,17 @@ function shortDate(iso: string): string {
 
 export async function renderStatementPdf(doc: StatementDocument, opts: StatementRenderOptions): Promise<Buffer> {
   const accentHex = opts.primaryColor && /^#[0-9a-fA-F]{6}$/.test(opts.primaryColor) ? opts.primaryColor : "#4f46e5";
-  const logoBuffer = opts.logoUrl ? await fetchLogoBuffer(opts.logoUrl) : null;
+  const logoBuffer = opts.logoUrl ? await fetchImageBuffer(opts.logoUrl) : null;
+  const stampBuffer = opts.stampUrl ? await fetchImageBuffer(opts.stampUrl) : null;
+  let qrBuffer: Buffer | null = null;
+  if (opts.verifyUrl) {
+    try {
+      qrBuffer = await qrcode.toBuffer(opts.verifyUrl, { type: "png", margin: 0, width: 160 });
+    } catch (err) {
+      logger.warn({ err }, "Couldn't generate the statement verification QR code — omitting it");
+    }
+  }
+  const disclosureText = buildDisclosureText(opts.supportEmail);
 
   let totalDebitMinor = 0n;
   let totalCreditMinor = 0n;
@@ -145,6 +170,19 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
   const chunks: Buffer[] = [];
   pdf.on("data", (chunk) => chunks.push(chunk));
   const result = new Promise<Buffer>((resolve) => pdf.on("end", () => resolve(Buffer.concat(chunks))));
+
+  // --- Footer band height: grows to fit the regulatory disclosure text (which varies with
+  // supportEmail's length) and/or the stamp+QR images, but never shrinks below the original
+  // fixed footer's height. Computed once, up front, so the pagination check below (which decides
+  // whether a transaction row fits before PAGE_BOTTOM) stays correct for every page. ---
+  const rightBlockWidth = (stampBuffer ? STAMP_QR_SIZE : 0) + (qrBuffer ? STAMP_QR_SIZE : 0) + (stampBuffer && qrBuffer ? STAMP_QR_GAP : 0);
+  const footerTextWidth = CONTENT_WIDTH - (rightBlockWidth > 0 ? rightBlockWidth + 14 : 0);
+  pdf.font("Inter-regular").fontSize(6.5);
+  const disclosureHeight = pdf.heightOfString(disclosureText, { width: footerTextWidth, lineGap: 0.5 });
+  const textBlockHeight = 8 + disclosureHeight + 4 + 12 + 6;
+  const imageBlockHeight = rightBlockWidth > 0 ? 6 + STAMP_QR_SIZE + 6 : 0;
+  const FOOTER_BAND_HEIGHT = Math.max(34, textBlockHeight, imageBlockHeight);
+  const PAGE_BOTTOM = PAGE_HEIGHT - PAGE_MARGIN - FOOTER_BAND_HEIGHT;
 
   function label(text: string, x: number, y: number, width: number, align: "left" | "right" = "left") {
     pdf.font("Inter-semibold").fontSize(7).fillColor(MUTED).text(text.toUpperCase(), x, y, { width, align, characterSpacing: 0.5 });
@@ -278,16 +316,37 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
     pdf.y = y + rowHeight;
   });
 
-  // --- Running footer on every page: disclaimer + page numbers, stamped now that the total
-  // page count is known (bufferPages above holds every page open until we do this). ---
-  const footerY = PAGE_HEIGHT - PAGE_MARGIN - 18;
+  // --- Running footer on every page: regulatory disclosure, disclaimer + page numbers, and the
+  // stamp/QR verification block — stamped now that the total page count is known (bufferPages
+  // above holds every page open until we do this). ---
+  const footerTop = PAGE_HEIGHT - PAGE_MARGIN - FOOTER_BAND_HEIGHT;
   const { count } = pdf.bufferedPageRange();
   for (let i = 0; i < count; i++) {
     pdf.switchToPage(i);
-    pdf.moveTo(PAGE_MARGIN, footerY - 10).lineTo(PAGE_MARGIN + CONTENT_WIDTH, footerY - 10).strokeColor(HAIRLINE).stroke();
-    pdf.font("Inter-regular").fontSize(7.5).fillColor(MUTED);
-    pdf.text(`This is a system-generated statement from ${opts.productName}.`, PAGE_MARGIN, footerY, { width: CONTENT_WIDTH * 0.7, lineBreak: false });
-    pdf.text(`Page ${i + 1} of ${count}`, PAGE_MARGIN, footerY, { width: CONTENT_WIDTH, align: "right", lineBreak: false });
+    pdf.moveTo(PAGE_MARGIN, footerTop).lineTo(PAGE_MARGIN + CONTENT_WIDTH, footerTop).strokeColor(HAIRLINE).stroke();
+
+    pdf.font("Inter-regular").fontSize(6.5).fillColor(MUTED).text(disclosureText, PAGE_MARGIN, footerTop + 8, { width: footerTextWidth, lineGap: 0.5 });
+
+    const lineY = footerTop + FOOTER_BAND_HEIGHT - 14;
+    pdf.font("Inter-regular").fontSize(7).fillColor(MUTED);
+    pdf.text(`This is a system-generated statement from ${opts.productName}.`, PAGE_MARGIN, lineY, { width: footerTextWidth, lineBreak: false });
+    pdf.text(`Page ${i + 1} of ${count}`, PAGE_MARGIN, lineY, { width: footerTextWidth, align: "right", lineBreak: false });
+
+    if (rightBlockWidth > 0) {
+      let imgX = PAGE_MARGIN + CONTENT_WIDTH - rightBlockWidth;
+      const imgY = footerTop + 6;
+      if (stampBuffer) {
+        try {
+          pdf.image(stampBuffer, imgX, imgY, { fit: [STAMP_QR_SIZE, STAMP_QR_SIZE] });
+        } catch (err) {
+          logger.warn({ err }, "Couldn't render the branding stamp image — omitting it");
+        }
+        imgX += STAMP_QR_SIZE + STAMP_QR_GAP;
+      }
+      if (qrBuffer) {
+        pdf.image(qrBuffer, imgX, imgY, { fit: [STAMP_QR_SIZE, STAMP_QR_SIZE] });
+      }
+    }
   }
 
   pdf.end();
@@ -367,6 +426,13 @@ export async function renderStatementExcel(doc: StatementDocument, opts: Stateme
     row.getCell("credit").font = { size: 9.5, color: { argb: "FF15803D" }, bold: true };
     row.getCell("balance").font = { size: 9.5, color: { argb: "FF14161F" }, bold: true };
   });
+
+  sheet.addRow([]);
+  const disclosureRow = sheet.addRow([buildDisclosureText(opts.supportEmail)]);
+  sheet.mergeCells(disclosureRow.number, 1, disclosureRow.number, lastCol);
+  disclosureRow.getCell(1).font = { size: 8, color: { argb: "FF8B90A0" } };
+  disclosureRow.getCell(1).alignment = { wrapText: true, vertical: "top" };
+  disclosureRow.height = 30;
 
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);

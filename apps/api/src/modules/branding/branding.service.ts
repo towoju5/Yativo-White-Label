@@ -8,6 +8,7 @@ export function brandingToDto(config: BrandingConfig) {
     logoUrlDark: config.logoUrlDark,
     logoInvertOnDark: config.logoInvertOnDark,
     faviconUrl: config.faviconUrl,
+    stampUrl: config.stampUrl,
     templateId: config.templateId as "nova" | "atlas",
     primaryColor: config.primaryColor,
     secondaryColor: config.secondaryColor,

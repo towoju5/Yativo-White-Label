@@ -46,6 +46,16 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   EMAIL_FROM_ADDRESS: z.string().email().default("no-reply@example.com"),
+
+  // Local-disk asset storage (see lib/storage/local.provider.ts). Deliberately an env var, not an
+  // admin-editable setting — a free-text filesystem path in the admin UI would let an admin write
+  // uploads anywhere on disk. Defaults to a directory inside the API app if unset.
+  STORAGE_LOCAL_DIR: z.string().optional(),
+
+  // Signs the opaque statement-verification token embedded in a statement's QR code (see
+  // lib/statementVerification.ts). Deliberately separate from the JWT secrets so it can be
+  // rotated independently — it's a long-lived, low-sensitivity signature, not a session credential.
+  STATEMENT_VERIFY_SECRET: z.string().min(16),
 });
 
 export const env = envSchema.parse(process.env);

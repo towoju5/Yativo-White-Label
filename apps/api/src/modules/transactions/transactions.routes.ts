@@ -13,6 +13,7 @@ import {
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { listLedgerTransactions, listTransactionsForCustomer, adminSettleTransaction, adminReverseTransaction } from "./transactions.service.js";
 import { getTransactionDetailForCustomer } from "../wallets/wallets.service.js";
@@ -45,7 +46,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const { page, pageSize, type, status, currencyCode, dateFrom, dateTo } = request.query;
-      const result = await listTransactionsForCustomer(app.prisma, request.customer!.sub, { type, status, currencyCode, dateFrom, dateTo }, page, pageSize);
+      const result = await listTransactionsForCustomer(app.prisma, resolveEffectiveCustomerId(request.customer!), { type, status, currencyCode, dateFrom, dateTo }, page, pageSize);
       return reply.send(result);
     },
   );
@@ -57,7 +58,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 200: transactionDetailSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const detail = await getTransactionDetailForCustomer(app.prisma, request.customer!.sub, request.params.id);
+      const detail = await getTransactionDetailForCustomer(app.prisma, resolveEffectiveCustomerId(request.customer!), request.params.id);
       return reply.send(detail);
     },
   );

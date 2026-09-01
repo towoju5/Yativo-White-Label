@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { quoteRequestSchema, quoteSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.service.js";
@@ -28,7 +29,7 @@ export async function quotesRoutes(app: FastifyInstance) {
       const { beneficiaryId, debitCurrency, sendAmount } = request.body;
 
       const beneficiary = await app.prisma.beneficiary.findFirst({
-        where: { id: beneficiaryId, customerId: request.customer!.sub, archivedAt: null },
+        where: { id: beneficiaryId, customerId: resolveEffectiveCustomerId(request.customer!), archivedAt: null },
       });
       if (!beneficiary) throw new NotFoundError("Beneficiary");
       const { gatewayId, currency: payoutCurrency } = getBeneficiaryGatewayInfo(beneficiary);

@@ -11,6 +11,7 @@ import {
   setAirlinePaymentsSchema,
 } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
   issueCard,
@@ -34,7 +35,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards",
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(cardSchema) } } },
     async (request, reply) => {
-      const cards = await listPortalCards(app.prisma, request.customer!.sub);
+      const cards = await listPortalCards(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(cards);
     },
   );
@@ -43,7 +44,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards",
     { preHandler: requireCustomerAuth, schema: { body: portalIssueCardSchema, response: { 200: cardSchema, 409: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await issueCard(app.prisma, request.customer!.sub, BigInt(request.body.amountMinor));
+      const card = await issueCard(app.prisma, resolveEffectiveCustomerId(request.customer!), BigInt(request.body.amountMinor));
       return reply.send(card);
     },
   );
@@ -52,7 +53,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id",
     { preHandler: requireCustomerAuth, schema: { params: idParam, response: { 200: cardDetailSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await getCardDetail(app.prisma, request.params.id, request.customer!.sub);
+      const card = await getCardDetail(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(card);
     },
   );
@@ -63,7 +64,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/reveal",
     { preHandler: requireCustomerAuth, schema: { params: idParam, response: { 200: cardRevealSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
-      const reveal = await revealCard(app.prisma, request.params.id, request.customer!.sub);
+      const reveal = await revealCard(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(reveal);
     },
   );
@@ -72,7 +73,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/transactions",
     { preHandler: requireCustomerAuth, schema: { params: idParam, response: { 200: z.array(cardTransactionSchema), 404: errorResponseSchema } } },
     async (request, reply) => {
-      const transactions = await listCardTransactions(app.prisma, request.params.id, request.customer!.sub);
+      const transactions = await listCardTransactions(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(transactions);
     },
   );
@@ -81,7 +82,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/topup",
     { preHandler: requireCustomerAuth, schema: { params: idParam, body: cardAmountSchema, response: { 200: cardSchema, 409: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await topupCard(app.prisma, request.params.id, BigInt(request.body.amountMinor), request.customer!.sub);
+      const card = await topupCard(app.prisma, request.params.id, BigInt(request.body.amountMinor), resolveEffectiveCustomerId(request.customer!));
       return reply.send(card);
     },
   );
@@ -90,7 +91,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/withdraw",
     { preHandler: requireCustomerAuth, schema: { params: idParam, body: cardAmountSchema, response: { 200: cardSchema, 409: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await withdrawFromCard(app.prisma, request.params.id, BigInt(request.body.amountMinor), request.customer!.sub);
+      const card = await withdrawFromCard(app.prisma, request.params.id, BigInt(request.body.amountMinor), resolveEffectiveCustomerId(request.customer!));
       return reply.send(card);
     },
   );
@@ -99,7 +100,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/freeze",
     { preHandler: requireCustomerAuth, schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await freezeCard(app.prisma, request.params.id, request.customer!.sub);
+      const card = await freezeCard(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(card);
     },
   );
@@ -108,7 +109,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/unfreeze",
     { preHandler: requireCustomerAuth, schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await unfreezeCard(app.prisma, request.params.id, request.customer!.sub);
+      const card = await unfreezeCard(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(card);
     },
   );
@@ -117,7 +118,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/airline-payments",
     { preHandler: requireCustomerAuth, schema: { params: idParam, body: setAirlinePaymentsSchema, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await setCardAirlinePayments(app.prisma, request.params.id, request.body.enabled, request.customer!.sub);
+      const card = await setCardAirlinePayments(app.prisma, request.params.id, request.body.enabled, resolveEffectiveCustomerId(request.customer!));
       return reply.send(card);
     },
   );
@@ -128,7 +129,7 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     "/portal/cards/:id/terminate",
     { preHandler: requireCustomerAuth, schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
-      const card = await terminateCard(app.prisma, request.params.id, request.customer!.sub);
+      const card = await terminateCard(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(card);
     },
   );

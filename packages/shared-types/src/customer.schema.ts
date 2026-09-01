@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CUSTOMER_STATUSES, CUSTOMER_TYPES, KYC_STATUSES } from "./enums.js";
+import { portalPermissionSchema } from "./portalPermissions.js";
 
 export const customerSchema = z.object({
   id: z.string(),
@@ -12,6 +13,13 @@ export const customerSchema = z.object({
   yativoCustomerId: z.string().nullable(),
   twoFactorEnabled: z.boolean(),
   createdAt: z.string(),
+  // Every field above describes the BUSINESS account being operated on. These describe the
+  // authenticated principal itself, and are present only when it's an invited team member rather
+  // than the account owner — see resolveEffectiveCustomerId()/isPortalOwnerLevel() in the API.
+  principalType: z.enum(["owner", "member"]).optional(),
+  permissions: z.array(portalPermissionSchema).optional(),
+  memberEmail: z.string().email().optional(),
+  memberFullName: z.string().optional(),
 });
 export type Customer = z.infer<typeof customerSchema>;
 
