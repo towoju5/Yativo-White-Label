@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
 import { cn } from "@/lib/utils";
 
 function defaultDateFrom(): string {
@@ -187,31 +188,51 @@ function StatementPreview({ walletId, range, decimals, currencyCode }: { walletI
         ) : lines.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{t("statements.empty", "No transactions in this period")}</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("statements.date", "Date")}</TableHead>
-                <TableHead>{t("statements.description", "Description")}</TableHead>
-                <TableHead>{t("statements.direction", "Credit/Debit")}</TableHead>
-                <TableHead className="text-right">{t("statements.amount", "Amount")}</TableHead>
-                <TableHead className="text-right">{t("statements.balanceAfter", "Balance after")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("statements.date", "Date")}</TableHead>
+                    <TableHead>{t("statements.description", "Description")}</TableHead>
+                    <TableHead>{t("statements.direction", "Credit/Debit")}</TableHead>
+                    <TableHead className="text-right">{t("statements.amount", "Amount")}</TableHead>
+                    <TableHead className="text-right">{t("statements.balanceAfter", "Balance after")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {lines.map((line) => (
+                    <TableRow key={line.entryId}>
+                      <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(line.createdAt).toLocaleString()}</TableCell>
+                      <TableCell className="max-w-[220px] truncate">{line.description ?? line.transactionType}</TableCell>
+                      <TableCell className={line.direction === "CREDIT" ? "text-success" : "text-foreground"}>{line.direction === "CREDIT" ? t("statements.credit", "Credit") : t("statements.debit", "Debit")}</TableCell>
+                      <TableCell className={cn("text-right font-mono", line.direction === "CREDIT" ? "text-success" : "text-foreground")}>
+                        {line.direction === "CREDIT" ? "+" : "-"}
+                        {formatMinorAmount(line.amountMinor, decimals)} {currencyCode}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-muted-foreground">{line.runningBalanceMinor !== undefined ? formatMinorAmount(line.runningBalanceMinor, decimals) : "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="rounded-lg border border-border sm:hidden">
               {lines.map((line) => (
-                <TableRow key={line.entryId}>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(line.createdAt).toLocaleString()}</TableCell>
-                  <TableCell className="max-w-[220px] truncate">{line.description ?? line.transactionType}</TableCell>
-                  <TableCell className={line.direction === "CREDIT" ? "text-success" : "text-foreground"}>{line.direction === "CREDIT" ? t("statements.credit", "Credit") : t("statements.debit", "Debit")}</TableCell>
-                  <TableCell className={cn("text-right font-mono", line.direction === "CREDIT" ? "text-success" : "text-foreground")}>
-                    {line.direction === "CREDIT" ? "+" : "-"}
-                    {formatMinorAmount(line.amountMinor, decimals)} {currencyCode}
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-muted-foreground">{line.runningBalanceMinor !== undefined ? formatMinorAmount(line.runningBalanceMinor, decimals) : "—"}</TableCell>
-                </TableRow>
+                <TransactionCardRow
+                  key={line.entryId}
+                  date={line.createdAt}
+                  description={line.description ?? line.transactionType}
+                  type={line.direction === "CREDIT" ? t("statements.credit", "Credit") : t("statements.debit", "Debit")}
+                  direction={line.direction}
+                  amountMinor={line.amountMinor}
+                  decimals={decimals}
+                  currencyCode={currencyCode}
+                  balanceMinor={line.runningBalanceMinor}
+                />
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

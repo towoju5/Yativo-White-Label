@@ -86,44 +86,62 @@ export function EndorsementsTable({
     }
   };
 
+  const renderAction = (e: CustomerEndorsement) =>
+    e.status === "approved" ? (
+      <span className="text-muted-foreground">—</span>
+    ) : e.hostedKycUrl ? (
+      <Button variant="ghost" size="sm" onClick={() => setViewing({ url: e.hostedKycUrl!, service: e.service })}>
+        View <ExternalLink className="h-3.5 w-3.5" />
+      </Button>
+    ) : onGenerateLink ? (
+      <Button variant="ghost" size="sm" disabled={generatingService === e.service} onClick={() => handleGenerate(e.service)}>
+        {generatingService === e.service ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Generate link"}
+      </Button>
+    ) : (
+      <span className="text-muted-foreground">—</span>
+    );
+
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Service</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Last updated</TableHead>
-            <TableHead className="text-right">Verification link</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {merged.map((e) => (
-            <TableRow key={e.service}>
-              <TableCell className="font-medium">{formatServiceName(e.service)}</TableCell>
-              <TableCell>
-                <Badge variant={ENDORSEMENT_VARIANT[e.status] ?? "secondary"}>{formatServiceName(e.status)}</Badge>
-              </TableCell>
-              <TableCell className="text-muted-foreground">{e.updated ?? "—"}</TableCell>
-              <TableCell className="text-right">
-                {e.status === "approved" ? (
-                  <span className="text-muted-foreground">—</span>
-                ) : e.hostedKycUrl ? (
-                  <Button variant="ghost" size="sm" onClick={() => setViewing({ url: e.hostedKycUrl!, service: e.service })}>
-                    View <ExternalLink className="h-3.5 w-3.5" />
-                  </Button>
-                ) : onGenerateLink ? (
-                  <Button variant="ghost" size="sm" disabled={generatingService === e.service} onClick={() => handleGenerate(e.service)}>
-                    {generatingService === e.service ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Generate link"}
-                  </Button>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </TableCell>
+      <div className="hidden sm:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Service</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Last updated</TableHead>
+              <TableHead className="text-right">Verification link</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {merged.map((e) => (
+              <TableRow key={e.service}>
+                <TableCell className="font-medium">{formatServiceName(e.service)}</TableCell>
+                <TableCell>
+                  <Badge variant={ENDORSEMENT_VARIANT[e.status] ?? "secondary"}>{formatServiceName(e.status)}</Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{e.updated ?? "—"}</TableCell>
+                <TableCell className="text-right">{renderAction(e)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="grid gap-3 sm:hidden">
+        {merged.map((e) => (
+          <div key={e.service} className="rounded-lg border border-border bg-card p-4 shadow-soft">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium">{formatServiceName(e.service)}</p>
+              <Badge variant={ENDORSEMENT_VARIANT[e.status] ?? "secondary"}>{formatServiceName(e.status)}</Badge>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground">{e.updated ?? "—"}</span>
+              {renderAction(e)}
+            </div>
+          </div>
+        ))}
+      </div>
 
       <Dialog open={!!viewing} onOpenChange={(v) => !v && setViewing(null)}>
         <DialogContent className="max-w-3xl overflow-hidden p-0 sm:max-h-[85vh]">

@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TransactionDetailDialog } from "@/components/wallet/TransactionDetailDialog";
+import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
@@ -135,41 +136,60 @@ export default function PortalTransactionsPage() {
         </div>
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("transactions.date", "Date")}</TableHead>
-                <TableHead>{t("transactions.description", "Description")}</TableHead>
-                <TableHead>{t("transactions.type", "Type")}</TableHead>
-                <TableHead>{t("transactions.status", "Status")}</TableHead>
-                <TableHead className="text-right">{t("transactions.amount", "Amount")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.items.map((tx) => (
-                <TableRow key={tx.id} className="cursor-pointer" onClick={() => setSelectedTransactionId(tx.id)}>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</TableCell>
-                  <TableCell className="max-w-[260px] truncate">{tx.description ?? tx.type}</TableCell>
-                  <TableCell className="text-xs uppercase text-muted-foreground">{tx.type}</TableCell>
-                  <TableCell>
-                    <Badge variant={STATUS_VARIANT[tx.status] ?? "secondary"}>{tx.status}</Badge>
-                  </TableCell>
-                  <TableCell
-                    className={cn("text-right font-mono", tx.direction === "CREDIT" ? "text-success" : tx.direction === "DEBIT" ? "text-foreground" : "text-muted-foreground")}
-                  >
-                    {tx.amountMinor !== null && tx.amountMinor !== undefined ? (
-                      <>
-                        {tx.direction === "CREDIT" ? "+" : tx.direction === "DEBIT" ? "-" : ""}
-                        {formatMinorAmount(tx.amountMinor, 2)} {tx.currencyCode ?? ""}
-                      </>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("transactions.date", "Date")}</TableHead>
+                  <TableHead>{t("transactions.description", "Description")}</TableHead>
+                  <TableHead>{t("transactions.type", "Type")}</TableHead>
+                  <TableHead>{t("transactions.status", "Status")}</TableHead>
+                  <TableHead className="text-right">{t("transactions.amount", "Amount")}</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {data.items.map((tx) => (
+                  <TableRow key={tx.id} className="cursor-pointer" onClick={() => setSelectedTransactionId(tx.id)}>
+                    <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</TableCell>
+                    <TableCell className="max-w-[260px] truncate">{tx.description ?? tx.type}</TableCell>
+                    <TableCell className="text-xs uppercase text-muted-foreground">{tx.type}</TableCell>
+                    <TableCell>
+                      <Badge variant={STATUS_VARIANT[tx.status] ?? "secondary"}>{tx.status}</Badge>
+                    </TableCell>
+                    <TableCell
+                      className={cn("text-right font-mono", tx.direction === "CREDIT" ? "text-success" : tx.direction === "DEBIT" ? "text-foreground" : "text-muted-foreground")}
+                    >
+                      {tx.amountMinor !== null && tx.amountMinor !== undefined ? (
+                        <>
+                          {tx.direction === "CREDIT" ? "+" : tx.direction === "DEBIT" ? "-" : ""}
+                          {formatMinorAmount(tx.amountMinor, 2)} {tx.currencyCode ?? ""}
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="rounded-lg border border-border sm:hidden">
+            {data.items.map((tx) => (
+              <TransactionCardRow
+                key={tx.id}
+                date={tx.createdAt}
+                description={tx.description ?? tx.type}
+                type={tx.type}
+                status={tx.status}
+                direction={tx.direction}
+                amountMinor={tx.amountMinor}
+                currencyCode={tx.currencyCode ?? ""}
+                onClick={() => setSelectedTransactionId(tx.id)}
+              />
+            ))}
+          </div>
+
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
               <ChevronLeft className="h-4 w-4" />

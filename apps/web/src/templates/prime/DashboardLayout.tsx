@@ -108,48 +108,76 @@ export function PrimeDashboardLayout({
           ) : activity.length === 0 ? (
             <div className="p-8 text-center text-sm text-muted-foreground">{t("dashboardLayout.prime.nothingHereYet", "Nothing here yet")}</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[34rem] table-fixed text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.description", "Description")}</th>
-                    <th className="w-28 px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.status", "Status")}</th>
-                    <th className="w-44 px-4 py-2 text-right text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.amount", "Amount")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {activity.map((item) => (
-                    <tr key={item.id} className="transition-colors hover:bg-muted/40">
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <div
-                            className={cn(
-                              "flex h-6 w-6 shrink-0 items-center justify-center rounded-md",
-                              item.direction === "CREDIT" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
-                            )}
-                          >
-                            {item.direction === "CREDIT" ? <ArrowDownLeft className="h-3.5 w-3.5" /> : <ArrowUpRight className="h-3.5 w-3.5" />}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="truncate font-medium">{item.title}</p>
-                            {item.subtitle && <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <StatusBadge status={item.status} />
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <span className={cn("font-mono tabular-nums", item.direction === "CREDIT" ? "text-success" : "text-foreground")}>
-                          {item.direction === "CREDIT" ? "+" : "-"}
-                          {formatMinorAmount(item.amountMinor, item.decimals)} {item.currencyCode}
-                        </span>
-                      </td>
+            <>
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full min-w-[34rem] table-fixed text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.description", "Description")}</th>
+                      <th className="w-28 px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.status", "Status")}</th>
+                      <th className="w-44 px-4 py-2 text-right text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.prime.amount", "Amount")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {activity.map((item) => (
+                      <tr key={item.id} className="transition-colors hover:bg-muted/40">
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className={cn(
+                                "flex h-6 w-6 shrink-0 items-center justify-center rounded-md",
+                                item.direction === "CREDIT" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
+                              )}
+                            >
+                              {item.direction === "CREDIT" ? <ArrowDownLeft className="h-3.5 w-3.5" /> : <ArrowUpRight className="h-3.5 w-3.5" />}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium">{item.title}</p>
+                              {item.subtitle && <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <StatusBadge status={item.status} />
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          <span className={cn("font-mono tabular-nums", item.direction === "CREDIT" ? "text-success" : "text-foreground")}>
+                            {item.direction === "CREDIT" ? "+" : "-"}
+                            {formatMinorAmount(item.amountMinor, item.decimals)} {item.currencyCode}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="divide-y divide-border sm:hidden">
+                {activity.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 px-4 py-3 text-sm">
+                    <div
+                      className={cn(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
+                        item.direction === "CREDIT" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {item.direction === "CREDIT" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{item.title}</p>
+                      {item.subtitle && <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>}
+                      <div className="mt-1">
+                        <StatusBadge status={item.status} />
+                      </div>
+                    </div>
+                    <span className={cn("shrink-0 font-mono text-xs tabular-nums", item.direction === "CREDIT" ? "text-success" : "text-foreground")}>
+                      {item.direction === "CREDIT" ? "+" : "-"}
+                      {formatMinorAmount(item.amountMinor, item.decimals)} {item.currencyCode}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -399,39 +399,72 @@ export default function BeneficiariesPage() {
           <p className="text-sm text-muted-foreground">{t("beneficiaries.empty", "No beneficiaries yet. Add one to start sending money.")}</p>
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("beneficiaries.table.name", "Name")}</TableHead>
-              <TableHead>{t("beneficiaries.table.currency", "Currency")}</TableHead>
-              <TableHead>{t("beneficiaries.table.added", "Added")}</TableHead>
-              <TableHead className="text-right">{t("beneficiaries.table.actions", "Actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <>
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("beneficiaries.table.name", "Name")}</TableHead>
+                  <TableHead>{t("beneficiaries.table.currency", "Currency")}</TableHead>
+                  <TableHead>{t("beneficiaries.table.added", "Added")}</TableHead>
+                  <TableHead className="text-right">{t("beneficiaries.table.actions", "Actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((b) => (
+                  <TableRow key={b.id} className="cursor-pointer" onClick={() => setSelected(b)}>
+                    <TableCell className="font-medium">{b.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{typeof b.details.currency === "string" ? b.details.currency : b.type.replace("_", " ")}</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{new Date(b.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRemoving(b);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="grid gap-3 sm:hidden">
             {data.map((b) => (
-              <TableRow key={b.id} className="cursor-pointer" onClick={() => setSelected(b)}>
-                <TableCell className="font-medium">{b.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{typeof b.details.currency === "string" ? b.details.currency : b.type.replace("_", " ")}</Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{new Date(b.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setRemoving(b);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+              <div
+                key={b.id}
+                className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 shadow-soft active:bg-muted/40"
+                onClick={() => setSelected(b)}
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{b.name}</p>
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <Badge variant="outline">{typeof b.details.currency === "string" ? b.details.currency : b.type.replace("_", " ")}</Badge>
+                    <span className="text-xs text-muted-foreground">{new Date(b.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRemoving(b);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+        </>
       )}
 
       <BeneficiaryDetailSheet
