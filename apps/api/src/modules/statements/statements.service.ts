@@ -21,15 +21,19 @@ export async function buildStatementDocument(prisma: PrismaClient, customerId: s
     dateTo: dateTo.toISOString(),
     openingBalanceMinor,
     closingBalanceMinor,
-    lines: lines.map((l) => ({
-      date: l.date,
-      description: l.description,
-      type: l.type as StatementDocument["lines"][number]["type"],
-      status: l.status as StatementDocument["lines"][number]["status"],
-      direction: l.direction,
-      amountMinor: l.amountMinor,
-      balanceAfterMinor: l.balanceAfterMinor,
-    })),
+    // Newest first — matches the on-screen statement/transaction history convention. The
+    // opening/closing balances above are unaffected; this only reorders the display rows.
+    lines: lines
+      .map((l) => ({
+        date: l.date,
+        description: l.description,
+        type: l.type as StatementDocument["lines"][number]["type"],
+        status: l.status as StatementDocument["lines"][number]["status"],
+        direction: l.direction,
+        amountMinor: l.amountMinor,
+        balanceAfterMinor: l.balanceAfterMinor,
+      }))
+      .reverse(),
   };
 }
 
@@ -67,19 +71,27 @@ async function fetchLogoBuffer(logoUrl: string): Promise<Buffer | null> {
 }
 
 const PAGE_MARGIN = 40;
-const CONTENT_WIDTH = 595.28 - PAGE_MARGIN * 2; // A4 width in points, minus margins
-const COLS = { date: 0, desc: 95, type: 275, debit: 350, credit: 420, balance: 490 };
-const COL_WIDTHS = { date: 90, desc: 175, type: 70, debit: 65, credit: 65, balance: 65 };
-const TABLE_BOTTOM = 780;
+const PAGE_HEIGHT = 841.89; // A4 in points
+const CONTENT_WIDTH = 595.28 - PAGE_MARGIN * 2;
+const FOOTER_BAND_HEIGHT = 34; // reserved at the bottom of every page for the running footer
+const PAGE_BOTTOM = PAGE_HEIGHT - PAGE_MARGIN - FOOTER_BAND_HEIGHT;
 
-function hexToRgb(hex: string): [number, number, number] {
-  const clean = hex.replace("#", "");
-  return [parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16)];
-}
+// Column widths sum to exactly CONTENT_WIDTH so the table never runs past the right margin.
+const COL_WIDTHS = { date: 78, desc: 175, type: 62, debit: 65, credit: 65, balance: 70 };
+const COLS = {
+  date: 0,
+  desc: COL_WIDTHS.date,
+  type: COL_WIDTHS.date + COL_WIDTHS.desc,
+  debit: COL_WIDTHS.date + COL_WIDTHS.desc + COL_WIDTHS.type,
+  credit: COL_WIDTHS.date + COL_WIDTHS.desc + COL_WIDTHS.type + COL_WIDTHS.debit,
+  balance: COL_WIDTHS.date + COL_WIDTHS.desc + COL_WIDTHS.type + COL_WIDTHS.debit + COL_WIDTHS.credit,
+};
+const CELL_PADDING_X = 5;
+const ROW_MIN_HEIGHT = 20;
+const ROW_PADDING_Y = 6;
 
 export async function renderStatementPdf(doc: StatementDocument, opts: StatementRenderOptions): Promise<Buffer> {
   const accentHex = opts.primaryColor && /^#[0-9a-fA-F]{6}$/.test(opts.primaryColor) ? opts.primaryColor : "#4f46e5";
-  const accent = hexToRgb(accentHex);
   const logoBuffer = opts.logoUrl ? await fetchLogoBuffer(opts.logoUrl) : null;
 
   let totalDebitMinor = 0n;
@@ -96,10 +108,17 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
     }
   }
 
-  const pdf = new PDFDocument({ size: "A4", margin: PAGE_MARGIN });
+  // bufferPages lets us go back and stamp "Page X of Y" on every page once the total is known —
+  // pdfkit streams pages out as they're finished, so that number isn't available any earlier.
+  const pdf = new PDFDocument({ size: "A4", margin: PAGE_MARGIN, bufferPages: true });
   const chunks: Buffer[] = [];
   pdf.on("data", (chunk) => chunks.push(chunk));
   const result = new Promise<Buffer>((resolve) => pdf.on("end", () => resolve(Buffer.concat(chunks))));
+
+  /** A thin colored rule used as a masthead accent and as a left-border callout on cards. */
+  function accentRule(x: number, y: number, width: number, height: number) {
+    pdf.rect(x, y, width, height).fill(accentHex);
+  }
 
   // --- Header: the logo, made as prominent as the page allows (full content width, generous
   // height) rather than a small corner icon — falls back to the product name as bold text. ---
@@ -119,12 +138,15 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
 
   pdf.font("Helvetica-Bold").fontSize(18).fillColor("#111827").text("Statement of Account", { align: "center" });
   pdf.font("Helvetica").fontSize(9).fillColor("#8a90a2").text(`Generated on ${new Date().toLocaleString()}`, { align: "center" });
-  pdf.moveDown(1);
+  pdf.moveDown(0.6);
+  accentRule(PAGE_MARGIN, pdf.y, CONTENT_WIDTH, 2.5);
+  pdf.y += 18;
 
-  // --- Account info card ---
+  // --- Account info card (colored left-border callout, matching a bank statement's masthead) ---
   const infoBoxY = pdf.y;
   const infoBoxHeight = 56;
   pdf.roundedRect(PAGE_MARGIN, infoBoxY, CONTENT_WIDTH, infoBoxHeight, 6).fillAndStroke("#ffffff", "#e6e8ec");
+  accentRule(PAGE_MARGIN, infoBoxY, 3, infoBoxHeight);
   const infoColWidth = CONTENT_WIDTH / 3;
   const infoCols: [string, string][] = [
     ["Account Holder", opts.customerName],
@@ -132,89 +154,119 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
     ["Statement Period", `${new Date(doc.dateFrom).toLocaleDateString()} – ${new Date(doc.dateTo).toLocaleDateString()}`],
   ];
   infoCols.forEach(([label, value], i) => {
-    const x = PAGE_MARGIN + 16 + i * infoColWidth;
-    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, infoBoxY + 12, { width: infoColWidth - 24 });
-    pdf.font("Helvetica-Bold").fontSize(11).fillColor("#1a1d29").text(value, x, infoBoxY + 26, { width: infoColWidth - 24 });
+    const x = PAGE_MARGIN + 20 + i * infoColWidth;
+    if (i > 0) pdf.moveTo(x - 10, infoBoxY + 12).lineTo(x - 10, infoBoxY + infoBoxHeight - 12).strokeColor("#e6e8ec").stroke();
+    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, infoBoxY + 13, { width: infoColWidth - 28 });
+    pdf.font("Helvetica-Bold").fontSize(11).fillColor("#1a1d29").text(value, x, infoBoxY + 27, { width: infoColWidth - 28, ellipsis: true });
   });
   pdf.y = infoBoxY + infoBoxHeight + 16;
 
   // --- Summary card ---
   const summaryY = pdf.y;
-  const summaryHeight = 90;
+  const summaryHeight = 96;
   pdf.roundedRect(PAGE_MARGIN, summaryY, CONTENT_WIDTH, summaryHeight, 6).fillAndStroke("#ffffff", "#e6e8ec");
-  pdf.font("Helvetica-Bold").fontSize(12).fillColor("#1a1d29").text(opts.accountLabel, PAGE_MARGIN + 16, summaryY + 14);
+  accentRule(PAGE_MARGIN, summaryY, 3, summaryHeight);
+  pdf.font("Helvetica-Bold").fontSize(12).fillColor("#1a1d29").text(opts.accountLabel, PAGE_MARGIN + 20, summaryY + 15);
+  pdf
+    .moveTo(PAGE_MARGIN + 16, summaryY + 34)
+    .lineTo(PAGE_MARGIN + CONTENT_WIDTH - 16, summaryY + 34)
+    .strokeColor("#f0f1f3")
+    .stroke();
 
-  const tiles: [string, string, [number, number, number] | null][] = [
+  const tiles: [string, string, string | null][] = [
     ["Opening Balance", fmt(doc, doc.openingBalanceMinor), null],
     ["Total Debit", fmt(doc, totalDebitMinor.toString()), null],
     ["Debit Count", String(debitCount), null],
     ["Closing Balance (current)", fmt(doc, doc.closingBalanceMinor), null],
-    ["Total Credit", fmt(doc, totalCreditMinor.toString()), [22, 163, 74]],
+    ["Total Credit", fmt(doc, totalCreditMinor.toString()), "#16a34a"],
     ["Credit Count", String(creditCount), null],
   ];
   const tileColWidth = CONTENT_WIDTH / 3;
   tiles.forEach(([label, value, color], i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    const x = PAGE_MARGIN + 16 + col * tileColWidth;
-    const y = summaryY + 36 + row * 28;
-    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, y, { width: tileColWidth - 24 });
-    pdf.font("Helvetica-Bold").fontSize(11).fillColor(color ? `rgb(${color[0]},${color[1]},${color[2]})` : "#1a1d29").text(value, x, y + 12, { width: tileColWidth - 24 });
+    const x = PAGE_MARGIN + 20 + col * tileColWidth;
+    const y = summaryY + 44 + row * 26;
+    if (col > 0) pdf.moveTo(x - 10, summaryY + 40).lineTo(x - 10, summaryY + summaryHeight - 10).strokeColor("#f0f1f3").stroke();
+    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, y, { width: tileColWidth - 28 });
+    pdf.font("Helvetica-Bold").fontSize(11).fillColor(color ?? "#1a1d29").text(value, x, y + 12, { width: tileColWidth - 28, ellipsis: true });
   });
   pdf.y = summaryY + summaryHeight + 16;
 
   // --- Transaction table ---
+  const HEADER_HEIGHT = 24;
+
   function drawTableHeader() {
     const y = pdf.y;
-    pdf.rect(PAGE_MARGIN, y, CONTENT_WIDTH, 22).fill("#f7f8fa");
+    pdf.rect(PAGE_MARGIN, y, CONTENT_WIDTH, HEADER_HEIGHT).fill("#f7f8fa");
     pdf.font("Helvetica-Bold").fontSize(8).fillColor("#4b5163");
-    pdf.text("DATE", PAGE_MARGIN + COLS.date + 6, y + 7, { width: COL_WIDTHS.date - 6 });
-    pdf.text("DESCRIPTION", PAGE_MARGIN + COLS.desc, y + 7, { width: COL_WIDTHS.desc });
-    pdf.text("TYPE", PAGE_MARGIN + COLS.type, y + 7, { width: COL_WIDTHS.type });
-    pdf.text(`DEBIT`, PAGE_MARGIN + COLS.debit, y + 7, { width: COL_WIDTHS.debit, align: "right" });
-    pdf.text(`CREDIT`, PAGE_MARGIN + COLS.credit, y + 7, { width: COL_WIDTHS.credit, align: "right" });
-    pdf.text(`BALANCE`, PAGE_MARGIN + COLS.balance, y + 7, { width: COL_WIDTHS.balance, align: "right" });
-    pdf.moveTo(PAGE_MARGIN, y + 22).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + 22).strokeColor("#e6e8ec").stroke();
-    pdf.y = y + 22 + 6;
+    const textY = y + 8;
+    pdf.text("DATE", PAGE_MARGIN + COLS.date + CELL_PADDING_X, textY, { width: COL_WIDTHS.date - CELL_PADDING_X });
+    pdf.text("DESCRIPTION", PAGE_MARGIN + COLS.desc + CELL_PADDING_X, textY, { width: COL_WIDTHS.desc - CELL_PADDING_X });
+    pdf.text("TYPE", PAGE_MARGIN + COLS.type + CELL_PADDING_X, textY, { width: COL_WIDTHS.type - CELL_PADDING_X });
+    pdf.text("DEBIT", PAGE_MARGIN + COLS.debit, textY, { width: COL_WIDTHS.debit - CELL_PADDING_X, align: "right" });
+    pdf.text("CREDIT", PAGE_MARGIN + COLS.credit, textY, { width: COL_WIDTHS.credit - CELL_PADDING_X, align: "right" });
+    pdf.text("BALANCE", PAGE_MARGIN + COLS.balance, textY, { width: COL_WIDTHS.balance - CELL_PADDING_X, align: "right" });
+    pdf.moveTo(PAGE_MARGIN, y + HEADER_HEIGHT).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + HEADER_HEIGHT).strokeColor("#e6e8ec").stroke();
+    pdf.y = y + HEADER_HEIGHT;
   }
 
   drawTableHeader();
 
   if (doc.lines.length === 0) {
-    pdf.font("Helvetica").fontSize(9).fillColor("#8a90a2").text("No transactions in this period.", PAGE_MARGIN, pdf.y, { width: CONTENT_WIDTH, align: "center" });
+    pdf.font("Helvetica").fontSize(9).fillColor("#8a90a2").text("No transactions in this period.", PAGE_MARGIN, pdf.y + 12, { width: CONTENT_WIDTH, align: "center" });
+    pdf.y += 40;
   }
 
-  for (const line of doc.lines) {
-    if (pdf.y > TABLE_BOTTOM) {
+  doc.lines.forEach((line, i) => {
+    pdf.font("Helvetica").fontSize(8);
+    const descWidth = COL_WIDTHS.desc - CELL_PADDING_X * 2;
+    const descHeight = pdf.heightOfString(line.description, { width: descWidth });
+    const rowHeight = Math.max(ROW_MIN_HEIGHT, descHeight + ROW_PADDING_Y);
+
+    if (pdf.y + rowHeight > PAGE_BOTTOM) {
       pdf.addPage();
       pdf.y = PAGE_MARGIN;
       drawTableHeader();
     }
-    const y = pdf.y;
-    const rowHeight = 18;
-    pdf.font("Helvetica").fontSize(8).fillColor("#4b5163");
-    pdf.text(new Date(line.date).toLocaleString(), PAGE_MARGIN + COLS.date, y, { width: COL_WIDTHS.date });
-    pdf.fillColor("#333744").text(line.description, PAGE_MARGIN + COLS.desc, y, { width: COL_WIDTHS.desc });
-    pdf.fillColor("#4b5163").text(humanizeType(line.type), PAGE_MARGIN + COLS.type, y, { width: COL_WIDTHS.type });
-    pdf.fillColor(line.direction === "DEBIT" ? "#1a1d29" : "#b8bcc6").text(
-      line.direction === "DEBIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–",
-      PAGE_MARGIN + COLS.debit,
-      y,
-      { width: COL_WIDTHS.debit, align: "right" },
-    );
-    pdf.fillColor(line.direction === "CREDIT" ? "rgb(22,163,74)" : "#b8bcc6").text(
-      line.direction === "CREDIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–",
-      PAGE_MARGIN + COLS.credit,
-      y,
-      { width: COL_WIDTHS.credit, align: "right" },
-    );
-    pdf.fillColor("#1a1d29").text(formatMinorAmount(line.balanceAfterMinor, doc.decimals), PAGE_MARGIN + COLS.balance, y, { width: COL_WIDTHS.balance, align: "right" });
-    pdf.moveTo(PAGE_MARGIN, y + rowHeight).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + rowHeight).strokeColor("#f0f1f3").stroke();
-    pdf.y = y + rowHeight + 2;
-  }
 
-  pdf.moveDown(1);
-  pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(`This is a system-generated statement from ${opts.productName}.`, PAGE_MARGIN, pdf.y, { width: CONTENT_WIDTH, align: "center" });
+    const y = pdf.y;
+    if (i % 2 === 1) pdf.rect(PAGE_MARGIN, y, CONTENT_WIDTH, rowHeight).fill("#fafbfc");
+
+    const textY = y + ROW_PADDING_Y / 2;
+    pdf.font("Helvetica").fontSize(8).fillColor("#4b5163");
+    pdf.text(new Date(line.date).toLocaleString(), PAGE_MARGIN + COLS.date + CELL_PADDING_X, textY, { width: COL_WIDTHS.date - CELL_PADDING_X });
+    pdf.fillColor("#333744").text(line.description, PAGE_MARGIN + COLS.desc + CELL_PADDING_X, textY, { width: descWidth });
+    pdf.fillColor("#4b5163").text(humanizeType(line.type), PAGE_MARGIN + COLS.type + CELL_PADDING_X, textY, { width: COL_WIDTHS.type - CELL_PADDING_X });
+    pdf
+      .fillColor(line.direction === "DEBIT" ? "#1a1d29" : "#b8bcc6")
+      .text(line.direction === "DEBIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–", PAGE_MARGIN + COLS.debit, textY, {
+        width: COL_WIDTHS.debit - CELL_PADDING_X,
+        align: "right",
+      });
+    pdf
+      .fillColor(line.direction === "CREDIT" ? "#16a34a" : "#b8bcc6")
+      .text(line.direction === "CREDIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–", PAGE_MARGIN + COLS.credit, textY, {
+        width: COL_WIDTHS.credit - CELL_PADDING_X,
+        align: "right",
+      });
+    pdf.fillColor("#1a1d29").text(formatMinorAmount(line.balanceAfterMinor, doc.decimals), PAGE_MARGIN + COLS.balance, textY, { width: COL_WIDTHS.balance - CELL_PADDING_X, align: "right" });
+
+    pdf.moveTo(PAGE_MARGIN, y + rowHeight).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + rowHeight).strokeColor("#f0f1f3").stroke();
+    pdf.y = y + rowHeight;
+  });
+
+  // --- Running footer on every page: disclaimer + page numbers, stamped now that the total
+  // page count is known (bufferPages above holds every page open until we do this). ---
+  const footerY = PAGE_HEIGHT - PAGE_MARGIN - 18;
+  const { count } = pdf.bufferedPageRange();
+  for (let i = 0; i < count; i++) {
+    pdf.switchToPage(i);
+    pdf.moveTo(PAGE_MARGIN, footerY - 8).lineTo(PAGE_MARGIN + CONTENT_WIDTH, footerY - 8).strokeColor("#e6e8ec").stroke();
+    pdf.font("Helvetica").fontSize(7.5).fillColor("#8a90a2");
+    pdf.text(`This is a system-generated statement from ${opts.productName}.`, PAGE_MARGIN, footerY, { width: CONTENT_WIDTH * 0.7, lineBreak: false });
+    pdf.text(`Page ${i + 1} of ${count}`, PAGE_MARGIN, footerY, { width: CONTENT_WIDTH, align: "right", lineBreak: false });
+  }
 
   pdf.end();
   return result;
