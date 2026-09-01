@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import type { PrismaClient } from "@prisma/client";
 import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
@@ -70,25 +72,60 @@ async function fetchLogoBuffer(logoUrl: string): Promise<Buffer | null> {
   }
 }
 
-const PAGE_MARGIN = 40;
+// ── Typography ──────────────────────────────────────────────────────────────
+// Inter, embedded from the static TTFs in ../../../assets/fonts. A real typeface reads as a
+// designed document; PDFKit's built-in Helvetica reads as a library default, which is exactly
+// the "ugly" a bank-grade statement can't afford. (fontkit's WOFF2 subsetter chokes on Inter's
+// glyph set — TrueType outlines side-step that entirely, hence TTF rather than the more common
+// @fontsource woff2 distribution.)
+const ASSETS_DIR = fileURLToPath(new URL("../../../assets", import.meta.url));
+const FONT_FILES = { regular: "Regular", medium: "Medium", semibold: "SemiBold", bold: "Bold" } as const;
+type FontWeight = keyof typeof FONT_FILES;
+
+function interFontPath(weight: FontWeight): string {
+  return path.join(ASSETS_DIR, "fonts", `Inter-${FONT_FILES[weight]}.ttf`);
+}
+
+function registerFonts(pdf: PDFKit.PDFDocument) {
+  for (const weight of Object.keys(FONT_FILES) as FontWeight[]) {
+    pdf.registerFont(`Inter-${weight}`, interFontPath(weight));
+  }
+}
+
+// ── Palette (neutral ink + muted grays; the brand color is used sparingly, as an accent — not a
+// loud masthead — the way a printed bank statement uses its brand mark) ──
+const INK = "#14161f";
+const SUBTLE = "#4b5060";
+const MUTED = "#8b90a0";
+const HAIRLINE = "#e4e6ec";
+const PANEL_BG = "#f8f9fb";
+const POSITIVE = "#15803d";
+
+const PAGE_MARGIN = 44;
 const PAGE_HEIGHT = 841.89; // A4 in points
-const CONTENT_WIDTH = 595.28 - PAGE_MARGIN * 2;
+const PAGE_WIDTH = 595.28;
+const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
 const FOOTER_BAND_HEIGHT = 34; // reserved at the bottom of every page for the running footer
 const PAGE_BOTTOM = PAGE_HEIGHT - PAGE_MARGIN - FOOTER_BAND_HEIGHT;
 
-// Column widths sum to exactly CONTENT_WIDTH so the table never runs past the right margin.
-const COL_WIDTHS = { date: 78, desc: 175, type: 62, debit: 65, credit: 65, balance: 70 };
+// Column widths sum to exactly CONTENT_WIDTH — date-only (no time) keeps that column narrow and
+// gives the description column the room a real description needs before truncating awkwardly.
+const COL_WIDTHS = { date: 64, desc: 197, type: 62, debit: 66, credit: 66, balance: 52 };
 const COLS = {
   date: 0,
-  desc: COL_WIDTHS.date,
-  type: COL_WIDTHS.date + COL_WIDTHS.desc,
-  debit: COL_WIDTHS.date + COL_WIDTHS.desc + COL_WIDTHS.type,
-  credit: COL_WIDTHS.date + COL_WIDTHS.desc + COL_WIDTHS.type + COL_WIDTHS.debit,
-  balance: COL_WIDTHS.date + COL_WIDTHS.desc + COL_WIDTHS.type + COL_WIDTHS.debit + COL_WIDTHS.credit,
+  desc: 64,
+  type: 64 + 197,
+  debit: 64 + 197 + 62,
+  credit: 64 + 197 + 62 + 66,
+  balance: 64 + 197 + 62 + 66 + 66,
 };
-const CELL_PADDING_X = 5;
-const ROW_MIN_HEIGHT = 20;
-const ROW_PADDING_Y = 6;
+const CELL_PADDING_X = 6;
+const ROW_MIN_HEIGHT = 22;
+const ROW_PADDING_Y = 8;
+
+function shortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+}
 
 export async function renderStatementPdf(doc: StatementDocument, opts: StatementRenderOptions): Promise<Buffer> {
   const accentHex = opts.primaryColor && /^#[0-9a-fA-F]{6}$/.test(opts.primaryColor) ? opts.primaryColor : "#4f46e5";
@@ -96,130 +133,110 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
 
   let totalDebitMinor = 0n;
   let totalCreditMinor = 0n;
-  let debitCount = 0;
-  let creditCount = 0;
   for (const line of doc.lines) {
-    if (line.direction === "DEBIT") {
-      totalDebitMinor += BigInt(line.amountMinor);
-      debitCount++;
-    } else {
-      totalCreditMinor += BigInt(line.amountMinor);
-      creditCount++;
-    }
+    if (line.direction === "DEBIT") totalDebitMinor += BigInt(line.amountMinor);
+    else totalCreditMinor += BigInt(line.amountMinor);
   }
 
   // bufferPages lets us go back and stamp "Page X of Y" on every page once the total is known —
   // pdfkit streams pages out as they're finished, so that number isn't available any earlier.
   const pdf = new PDFDocument({ size: "A4", margin: PAGE_MARGIN, bufferPages: true });
+  registerFonts(pdf);
   const chunks: Buffer[] = [];
   pdf.on("data", (chunk) => chunks.push(chunk));
   const result = new Promise<Buffer>((resolve) => pdf.on("end", () => resolve(Buffer.concat(chunks))));
 
-  /** A thin colored rule used as a masthead accent and as a left-border callout on cards. */
-  function accentRule(x: number, y: number, width: number, height: number) {
-    pdf.rect(x, y, width, height).fill(accentHex);
+  function label(text: string, x: number, y: number, width: number, align: "left" | "right" = "left") {
+    pdf.font("Inter-semibold").fontSize(7).fillColor(MUTED).text(text.toUpperCase(), x, y, { width, align, characterSpacing: 0.5 });
   }
 
-  // --- Header: the logo, made as prominent as the page allows (full content width, generous
-  // height) rather than a small corner icon — falls back to the product name as bold text. ---
+  // --- Masthead: logo/wordmark at a restrained size on the left, the statement title and its
+  // date range on the right — the layout of a printed bank statement's letterhead, not a poster. ---
+  const headTop = pdf.y;
   if (logoBuffer) {
     try {
-      pdf.image(logoBuffer, PAGE_MARGIN, pdf.y, { fit: [CONTENT_WIDTH, 90], align: "center", valign: "center" });
-      pdf.y += 96;
+      pdf.image(logoBuffer, PAGE_MARGIN, headTop, { fit: [180, 34] });
     } catch (err) {
       logger.warn({ err }, "Couldn't render fetched logo image — falling back to text");
-      pdf.font("Helvetica-Bold").fontSize(22).fillColor(accentHex).text(opts.productName, { align: "center" });
-      pdf.moveDown(0.3);
+      pdf.font("Inter-bold").fontSize(15).fillColor(accentHex).text(opts.productName, PAGE_MARGIN, headTop, { width: 260 });
     }
   } else {
-    pdf.font("Helvetica-Bold").fontSize(22).fillColor(accentHex).text(opts.productName, { align: "center" });
-    pdf.moveDown(0.3);
+    pdf.font("Inter-bold").fontSize(15).fillColor(accentHex).text(opts.productName, PAGE_MARGIN, headTop, { width: 260 });
   }
 
-  pdf.font("Helvetica-Bold").fontSize(18).fillColor("#111827").text("Statement of Account", { align: "center" });
-  pdf.font("Helvetica").fontSize(9).fillColor("#8a90a2").text(`Generated on ${new Date().toLocaleString()}`, { align: "center" });
-  pdf.moveDown(0.6);
-  accentRule(PAGE_MARGIN, pdf.y, CONTENT_WIDTH, 2.5);
-  pdf.y += 18;
+  pdf.font("Inter-bold").fontSize(13).fillColor(INK).text("Statement of Account", PAGE_MARGIN, headTop + 2, { width: CONTENT_WIDTH, align: "right" });
+  pdf
+    .font("Inter-regular")
+    .fontSize(8.5)
+    .fillColor(SUBTLE)
+    .text(`${shortDate(doc.dateFrom)} – ${shortDate(doc.dateTo)}`, PAGE_MARGIN, headTop + 18, { width: CONTENT_WIDTH, align: "right" });
 
-  // --- Account info card (colored left-border callout, matching a bank statement's masthead) ---
-  const infoBoxY = pdf.y;
-  const infoBoxHeight = 56;
-  pdf.roundedRect(PAGE_MARGIN, infoBoxY, CONTENT_WIDTH, infoBoxHeight, 6).fillAndStroke("#ffffff", "#e6e8ec");
-  accentRule(PAGE_MARGIN, infoBoxY, 3, infoBoxHeight);
+  pdf.y = headTop + 44;
+  pdf.moveTo(PAGE_MARGIN, pdf.y).lineTo(PAGE_MARGIN + CONTENT_WIDTH, pdf.y).lineWidth(1).strokeColor(INK).stroke();
+  pdf.y += 20;
+
+  // --- Account details: three plain columns, no boxed card — a real letterhead states these
+  // facts, it doesn't put them in a UI widget. ---
+  const infoY = pdf.y;
   const infoColWidth = CONTENT_WIDTH / 3;
   const infoCols: [string, string][] = [
     ["Account Holder", opts.customerName],
     ["Account", opts.accountLabel],
-    ["Statement Period", `${new Date(doc.dateFrom).toLocaleDateString()} – ${new Date(doc.dateTo).toLocaleDateString()}`],
+    ["Currency", doc.currencyCode],
   ];
-  infoCols.forEach(([label, value], i) => {
-    const x = PAGE_MARGIN + 20 + i * infoColWidth;
-    if (i > 0) pdf.moveTo(x - 10, infoBoxY + 12).lineTo(x - 10, infoBoxY + infoBoxHeight - 12).strokeColor("#e6e8ec").stroke();
-    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, infoBoxY + 13, { width: infoColWidth - 28 });
-    pdf.font("Helvetica-Bold").fontSize(11).fillColor("#1a1d29").text(value, x, infoBoxY + 27, { width: infoColWidth - 28, ellipsis: true });
+  infoCols.forEach(([text, value], i) => {
+    const x = PAGE_MARGIN + i * infoColWidth;
+    label(text, x, infoY, infoColWidth - 12);
+    pdf.font("Inter-semibold").fontSize(10.5).fillColor(INK).text(value, x, infoY + 12, { width: infoColWidth - 12, ellipsis: true });
   });
-  pdf.y = infoBoxY + infoBoxHeight + 16;
+  pdf.y = infoY + 38;
 
-  // --- Summary card ---
+  // --- Balance summary bar: one even row of four tiles inside a single panel — Opening, Money
+  // In, Money Out, Closing — the numbers a statement summary actually leads with. ---
   const summaryY = pdf.y;
-  const summaryHeight = 96;
-  pdf.roundedRect(PAGE_MARGIN, summaryY, CONTENT_WIDTH, summaryHeight, 6).fillAndStroke("#ffffff", "#e6e8ec");
-  accentRule(PAGE_MARGIN, summaryY, 3, summaryHeight);
-  pdf.font("Helvetica-Bold").fontSize(12).fillColor("#1a1d29").text(opts.accountLabel, PAGE_MARGIN + 20, summaryY + 15);
-  pdf
-    .moveTo(PAGE_MARGIN + 16, summaryY + 34)
-    .lineTo(PAGE_MARGIN + CONTENT_WIDTH - 16, summaryY + 34)
-    .strokeColor("#f0f1f3")
-    .stroke();
-
-  const tiles: [string, string, string | null][] = [
-    ["Opening Balance", fmt(doc, doc.openingBalanceMinor), null],
-    ["Total Debit", fmt(doc, totalDebitMinor.toString()), null],
-    ["Debit Count", String(debitCount), null],
-    ["Closing Balance (current)", fmt(doc, doc.closingBalanceMinor), null],
-    ["Total Credit", fmt(doc, totalCreditMinor.toString()), "#16a34a"],
-    ["Credit Count", String(creditCount), null],
+  const summaryHeight = 62;
+  pdf.roundedRect(PAGE_MARGIN, summaryY, CONTENT_WIDTH, summaryHeight, 8).fill(PANEL_BG);
+  const tiles: [string, string, string][] = [
+    ["Opening Balance", fmt(doc, doc.openingBalanceMinor), INK],
+    ["Money In", `+${fmt(doc, totalCreditMinor.toString())}`, POSITIVE],
+    ["Money Out", totalDebitMinor > 0n ? `-${fmt(doc, totalDebitMinor.toString())}` : fmt(doc, "0"), INK],
+    ["Closing Balance", fmt(doc, doc.closingBalanceMinor), INK],
   ];
-  const tileColWidth = CONTENT_WIDTH / 3;
-  tiles.forEach(([label, value, color], i) => {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
-    const x = PAGE_MARGIN + 20 + col * tileColWidth;
-    const y = summaryY + 44 + row * 26;
-    if (col > 0) pdf.moveTo(x - 10, summaryY + 40).lineTo(x - 10, summaryY + summaryHeight - 10).strokeColor("#f0f1f3").stroke();
-    pdf.font("Helvetica").fontSize(8).fillColor("#8a90a2").text(label.toUpperCase(), x, y, { width: tileColWidth - 28 });
-    pdf.font("Helvetica-Bold").fontSize(11).fillColor(color ?? "#1a1d29").text(value, x, y + 12, { width: tileColWidth - 28, ellipsis: true });
+  const tileColWidth = CONTENT_WIDTH / 4;
+  tiles.forEach(([text, value, color], i) => {
+    const x = PAGE_MARGIN + 18 + i * tileColWidth;
+    if (i > 0) pdf.moveTo(PAGE_MARGIN + i * tileColWidth, summaryY + 14).lineTo(PAGE_MARGIN + i * tileColWidth, summaryY + summaryHeight - 14).strokeColor(HAIRLINE).stroke();
+    label(text, x, summaryY + 16, tileColWidth - 26);
+    pdf.font("Inter-bold").fontSize(12).fillColor(color).text(value, x, summaryY + 30, { width: tileColWidth - 26, ellipsis: true });
   });
-  pdf.y = summaryY + summaryHeight + 16;
+  pdf.y = summaryY + summaryHeight + 26;
 
   // --- Transaction table ---
   const HEADER_HEIGHT = 24;
 
   function drawTableHeader() {
     const y = pdf.y;
-    pdf.rect(PAGE_MARGIN, y, CONTENT_WIDTH, HEADER_HEIGHT).fill("#f7f8fa");
-    pdf.font("Helvetica-Bold").fontSize(8).fillColor("#4b5163");
+    pdf.moveTo(PAGE_MARGIN, y).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y).strokeColor(INK).lineWidth(1).stroke();
     const textY = y + 8;
-    pdf.text("DATE", PAGE_MARGIN + COLS.date + CELL_PADDING_X, textY, { width: COL_WIDTHS.date - CELL_PADDING_X });
-    pdf.text("DESCRIPTION", PAGE_MARGIN + COLS.desc + CELL_PADDING_X, textY, { width: COL_WIDTHS.desc - CELL_PADDING_X });
-    pdf.text("TYPE", PAGE_MARGIN + COLS.type + CELL_PADDING_X, textY, { width: COL_WIDTHS.type - CELL_PADDING_X });
-    pdf.text("DEBIT", PAGE_MARGIN + COLS.debit, textY, { width: COL_WIDTHS.debit - CELL_PADDING_X, align: "right" });
-    pdf.text("CREDIT", PAGE_MARGIN + COLS.credit, textY, { width: COL_WIDTHS.credit - CELL_PADDING_X, align: "right" });
-    pdf.text("BALANCE", PAGE_MARGIN + COLS.balance, textY, { width: COL_WIDTHS.balance - CELL_PADDING_X, align: "right" });
-    pdf.moveTo(PAGE_MARGIN, y + HEADER_HEIGHT).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + HEADER_HEIGHT).strokeColor("#e6e8ec").stroke();
+    label("Date", PAGE_MARGIN + COLS.date + CELL_PADDING_X, textY, COL_WIDTHS.date - CELL_PADDING_X);
+    label("Description", PAGE_MARGIN + COLS.desc + CELL_PADDING_X, textY, COL_WIDTHS.desc - CELL_PADDING_X);
+    label("Type", PAGE_MARGIN + COLS.type + CELL_PADDING_X, textY, COL_WIDTHS.type - CELL_PADDING_X);
+    label("Debit", PAGE_MARGIN + COLS.debit, textY, COL_WIDTHS.debit - CELL_PADDING_X, "right");
+    label("Credit", PAGE_MARGIN + COLS.credit, textY, COL_WIDTHS.credit - CELL_PADDING_X, "right");
+    label("Balance", PAGE_MARGIN + COLS.balance, textY, COL_WIDTHS.balance - CELL_PADDING_X, "right");
+    pdf.moveTo(PAGE_MARGIN, y + HEADER_HEIGHT).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + HEADER_HEIGHT).strokeColor(HAIRLINE).stroke();
     pdf.y = y + HEADER_HEIGHT;
   }
 
   drawTableHeader();
 
   if (doc.lines.length === 0) {
-    pdf.font("Helvetica").fontSize(9).fillColor("#8a90a2").text("No transactions in this period.", PAGE_MARGIN, pdf.y + 12, { width: CONTENT_WIDTH, align: "center" });
+    pdf.font("Inter-regular").fontSize(9).fillColor(MUTED).text("No transactions in this period.", PAGE_MARGIN, pdf.y + 14, { width: CONTENT_WIDTH, align: "center" });
     pdf.y += 40;
   }
 
   doc.lines.forEach((line, i) => {
-    pdf.font("Helvetica").fontSize(8);
+    pdf.font("Inter-regular").fontSize(8.5);
     const descWidth = COL_WIDTHS.desc - CELL_PADDING_X * 2;
     const descHeight = pdf.heightOfString(line.description, { width: descWidth });
     const rowHeight = Math.max(ROW_MIN_HEIGHT, descHeight + ROW_PADDING_Y);
@@ -231,28 +248,33 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
     }
 
     const y = pdf.y;
-    if (i % 2 === 1) pdf.rect(PAGE_MARGIN, y, CONTENT_WIDTH, rowHeight).fill("#fafbfc");
+    if (i % 2 === 1) pdf.rect(PAGE_MARGIN, y, CONTENT_WIDTH, rowHeight).fill(PANEL_BG);
 
     const textY = y + ROW_PADDING_Y / 2;
-    pdf.font("Helvetica").fontSize(8).fillColor("#4b5163");
-    pdf.text(new Date(line.date).toLocaleString(), PAGE_MARGIN + COLS.date + CELL_PADDING_X, textY, { width: COL_WIDTHS.date - CELL_PADDING_X });
-    pdf.fillColor("#333744").text(line.description, PAGE_MARGIN + COLS.desc + CELL_PADDING_X, textY, { width: descWidth });
-    pdf.fillColor("#4b5163").text(humanizeType(line.type), PAGE_MARGIN + COLS.type + CELL_PADDING_X, textY, { width: COL_WIDTHS.type - CELL_PADDING_X });
+    pdf.font("Inter-regular").fontSize(8.5).fillColor(SUBTLE);
+    pdf.text(shortDate(line.date), PAGE_MARGIN + COLS.date + CELL_PADDING_X, textY, { width: COL_WIDTHS.date - CELL_PADDING_X });
+    pdf.font("Inter-medium").fillColor(INK).text(line.description, PAGE_MARGIN + COLS.desc + CELL_PADDING_X, textY, { width: descWidth });
+    pdf.font("Inter-regular").fillColor(SUBTLE).text(humanizeType(line.type), PAGE_MARGIN + COLS.type + CELL_PADDING_X, textY, { width: COL_WIDTHS.type - CELL_PADDING_X });
     pdf
-      .fillColor(line.direction === "DEBIT" ? "#1a1d29" : "#b8bcc6")
+      .font("Inter-semibold")
+      .fillColor(line.direction === "DEBIT" ? INK : "#c4c7d1")
       .text(line.direction === "DEBIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–", PAGE_MARGIN + COLS.debit, textY, {
         width: COL_WIDTHS.debit - CELL_PADDING_X,
         align: "right",
       });
     pdf
-      .fillColor(line.direction === "CREDIT" ? "#16a34a" : "#b8bcc6")
+      .font("Inter-semibold")
+      .fillColor(line.direction === "CREDIT" ? POSITIVE : "#c4c7d1")
       .text(line.direction === "CREDIT" ? formatMinorAmount(line.amountMinor, doc.decimals) : "–", PAGE_MARGIN + COLS.credit, textY, {
         width: COL_WIDTHS.credit - CELL_PADDING_X,
         align: "right",
       });
-    pdf.fillColor("#1a1d29").text(formatMinorAmount(line.balanceAfterMinor, doc.decimals), PAGE_MARGIN + COLS.balance, textY, { width: COL_WIDTHS.balance - CELL_PADDING_X, align: "right" });
+    pdf
+      .font("Inter-medium")
+      .fillColor(INK)
+      .text(formatMinorAmount(line.balanceAfterMinor, doc.decimals), PAGE_MARGIN + COLS.balance, textY, { width: COL_WIDTHS.balance - CELL_PADDING_X, align: "right" });
 
-    pdf.moveTo(PAGE_MARGIN, y + rowHeight).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + rowHeight).strokeColor("#f0f1f3").stroke();
+    pdf.moveTo(PAGE_MARGIN, y + rowHeight).lineTo(PAGE_MARGIN + CONTENT_WIDTH, y + rowHeight).strokeColor(HAIRLINE).stroke();
     pdf.y = y + rowHeight;
   });
 
@@ -262,8 +284,8 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
   const { count } = pdf.bufferedPageRange();
   for (let i = 0; i < count; i++) {
     pdf.switchToPage(i);
-    pdf.moveTo(PAGE_MARGIN, footerY - 8).lineTo(PAGE_MARGIN + CONTENT_WIDTH, footerY - 8).strokeColor("#e6e8ec").stroke();
-    pdf.font("Helvetica").fontSize(7.5).fillColor("#8a90a2");
+    pdf.moveTo(PAGE_MARGIN, footerY - 10).lineTo(PAGE_MARGIN + CONTENT_WIDTH, footerY - 10).strokeColor(HAIRLINE).stroke();
+    pdf.font("Inter-regular").fontSize(7.5).fillColor(MUTED);
     pdf.text(`This is a system-generated statement from ${opts.productName}.`, PAGE_MARGIN, footerY, { width: CONTENT_WIDTH * 0.7, lineBreak: false });
     pdf.text(`Page ${i + 1} of ${count}`, PAGE_MARGIN, footerY, { width: CONTENT_WIDTH, align: "right", lineBreak: false });
   }
@@ -272,39 +294,78 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
   return result;
 }
 
+const EXCEL_HEADER_FILL: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF14161F" } };
+const EXCEL_STRIPE_FILL: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8F9FB" } };
+const EXCEL_THIN_BORDER: Partial<ExcelJS.Borders> = { bottom: { style: "thin", color: { argb: "FFE4E6EC" } } };
+
 export async function renderStatementExcel(doc: StatementDocument, opts: StatementRenderOptions): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = opts.productName;
-  const sheet = workbook.addWorksheet("Statement");
+  workbook.created = new Date();
+  const sheet = workbook.addWorksheet("Statement", { views: [{ state: "frozen", ySplit: 9 }] });
 
-  sheet.addRow([opts.productName]);
-  sheet.addRow(["Statement of Account"]);
-  sheet.addRow([`Account Holder: ${opts.customerName}`]);
-  sheet.addRow([`Account: ${opts.accountLabel} (${doc.currencyCode})`]);
-  sheet.addRow([`Period: ${new Date(doc.dateFrom).toLocaleDateString()} - ${new Date(doc.dateTo).toLocaleDateString()}`]);
-  sheet.addRow([`Opening balance: ${fmt(doc, doc.openingBalanceMinor)}`]);
-  sheet.addRow([`Closing balance (current): ${fmt(doc, doc.closingBalanceMinor)}`]);
-  sheet.addRow([]);
+  // No `header` on these — ExcelJS's `worksheet.columns` setter writes each column's `header`
+  // straight into row 1 the moment it's assigned, which would jump the header row ahead of the
+  // letterhead below. The header row is added manually, in its intended position, instead.
+  const columns = [
+    { header: "Date", key: "date", width: 14 },
+    { header: "Description", key: "description", width: 42 },
+    { header: "Type", key: "type", width: 16 },
+    { header: "Direction", key: "direction", width: 12 },
+    { header: "Credit", key: "credit", width: 16 },
+    { header: "Debit", key: "debit", width: 16 },
+    { header: "Balance", key: "balance", width: 16 },
+  ];
+  sheet.columns = columns.map(({ key, width }) => ({ key, width }));
 
-  const headerRow = sheet.addRow(["Date", "Description", "Type", "Direction", "Credit", "Debit", "Balance after"]);
-  headerRow.font = { bold: true };
-
-  for (const line of doc.lines) {
-    const amount = toNumber(line.amountMinor, doc.decimals);
-    const balance = toNumber(line.balanceAfterMinor, doc.decimals);
-    sheet.addRow([
-      new Date(line.date).toLocaleString(),
-      line.description,
-      humanizeType(line.type),
-      line.direction === "CREDIT" ? "Credit" : "Debit",
-      line.direction === "CREDIT" ? amount : null,
-      line.direction === "DEBIT" ? amount : null,
-      balance,
-    ]);
+  // --- Letterhead block (rows 1-7): merged title rows read like a document header rather than
+  // stray text dropped in column A. ---
+  const lastCol = columns.length;
+  function mergedTitleRow(text: string, opts2?: { bold?: boolean; size?: number; color?: string }) {
+    const row = sheet.addRow([text]);
+    sheet.mergeCells(row.number, 1, row.number, lastCol);
+    row.getCell(1).font = { name: "Calibri", bold: opts2?.bold ?? false, size: opts2?.size ?? 11, color: { argb: opts2?.color ?? "FF14161F" } };
+    return row;
   }
 
-  sheet.columns.forEach((col) => {
-    col.width = 20;
+  mergedTitleRow(opts.productName, { bold: true, size: 16, color: "FF14161F" });
+  mergedTitleRow("Statement of Account", { size: 11, color: "FF4B5060" });
+  sheet.addRow([]);
+  mergedTitleRow(`Account holder: ${opts.customerName}`);
+  mergedTitleRow(`Account: ${opts.accountLabel} (${doc.currencyCode})`);
+  mergedTitleRow(`Period: ${shortDate(doc.dateFrom)} – ${shortDate(doc.dateTo)}`);
+  mergedTitleRow(`Opening balance: ${fmt(doc, doc.openingBalanceMinor)}    Closing balance: ${fmt(doc, doc.closingBalanceMinor)}`, { bold: true });
+  sheet.addRow([]);
+
+  const headerRow = sheet.addRow(columns.map((c) => c.header));
+  headerRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 10 };
+    cell.fill = EXCEL_HEADER_FILL;
+    cell.alignment = { vertical: "middle", horizontal: colNumber >= 5 ? "right" : "left" };
+  });
+  headerRow.height = 20;
+
+  doc.lines.forEach((line, i) => {
+    const row = sheet.addRow({
+      date: shortDate(line.date),
+      description: line.description,
+      type: humanizeType(line.type),
+      direction: line.direction === "CREDIT" ? "Credit" : "Debit",
+      credit: line.direction === "CREDIT" ? toNumber(line.amountMinor, doc.decimals) : null,
+      debit: line.direction === "DEBIT" ? toNumber(line.amountMinor, doc.decimals) : null,
+      balance: toNumber(line.balanceAfterMinor, doc.decimals),
+    });
+    row.eachCell((cell, colNumber) => {
+      cell.font = { size: 9.5, color: { argb: "FF14161F" } };
+      cell.border = EXCEL_THIN_BORDER;
+      if (colNumber >= 5) {
+        cell.numFmt = "#,##0.00";
+        cell.alignment = { horizontal: "right" };
+      }
+      if (i % 2 === 1) cell.fill = EXCEL_STRIPE_FILL;
+    });
+    row.getCell("credit").font = { size: 9.5, color: { argb: "FF15803D" }, bold: true };
+    row.getCell("balance").font = { size: 9.5, color: { argb: "FF14161F" }, bold: true };
   });
 
   const buffer = await workbook.xlsx.writeBuffer();
