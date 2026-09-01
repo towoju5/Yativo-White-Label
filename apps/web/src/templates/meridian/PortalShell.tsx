@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { MeridianSidebar, type NavSection } from "./Sidebar";
 import { MeridianTopbar } from "./Topbar";
 
@@ -41,8 +42,9 @@ export function MeridianPortalShell({ children }: { children: ReactNode }) {
       <MeridianSidebar sections={sections} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MeridianTopbar sections={sections} productName={t("nav.portal", "Portal")} onLogout={logout} />
-        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-6 pb-24 lg:pb-6">{children}</main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }

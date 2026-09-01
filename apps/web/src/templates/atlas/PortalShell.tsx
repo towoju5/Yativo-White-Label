@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AtlasTopbar, type NavItem } from "./Topbar";
 
 export function AtlasPortalShell({ children }: { children: ReactNode }) {
@@ -28,7 +29,8 @@ export function AtlasPortalShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <AtlasTopbar items={items} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 lg:pb-10 lg:pt-10">{children}</main>
+      <MobileBottomNav />
     </div>
   );
 }

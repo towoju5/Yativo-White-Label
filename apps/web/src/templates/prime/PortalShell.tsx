@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PrimeSidebar, type NavSection } from "./Sidebar";
 import { PrimeTopbar } from "./Topbar";
 
@@ -41,10 +42,11 @@ export function PrimePortalShell({ children }: { children: ReactNode }) {
       <PrimeSidebar sections={sections} />
       <div className="flex min-w-0 flex-1 flex-col">
         <PrimeTopbar sections={sections} productName={t("nav.portal", "Portal")} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 pb-24 lg:pb-6">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }

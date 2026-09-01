@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AuroraSidebar, type NavSection } from "./Sidebar";
 import { AuroraTopbar } from "./Topbar";
 
@@ -43,8 +44,9 @@ export function AuroraPortalShell({ children }: { children: ReactNode }) {
       <AuroraSidebar sections={sections} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} profileTo={PROFILE_PATH} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AuroraTopbar sections={sections} productName={t("nav.portal", "Portal")} userLabel={name} onLogout={logout} profileTo={PROFILE_PATH} />
-        <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 pb-24 lg:pb-6">{children}</main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }

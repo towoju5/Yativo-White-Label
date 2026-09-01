@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, Settings, History, FileText, LifeBuoy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { NovaSidebar, type NavSection } from "./Sidebar";
 import { NovaTopbar } from "./Topbar";
 
@@ -41,10 +42,11 @@ export function NovaPortalShell({ children }: { children: ReactNode }) {
       <NovaSidebar sections={sections} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <NovaTopbar sections={sections} productName={t("nav.portal", "Portal")} />
-        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        <main className="flex-1 overflow-y-auto px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pb-8 lg:pt-8">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }
