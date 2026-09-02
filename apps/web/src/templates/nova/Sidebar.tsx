@@ -35,7 +35,7 @@ export function NovaSidebar({ sections, userLabel, userSubLabel, onLogout }: Sid
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-card/60 backdrop-blur-xl lg:flex">
       <div className="flex h-16 items-center gap-2 border-b border-border px-5">
         {branding?.logoUrl ? (
-          <BrandLogo branding={branding} className="h-6 w-10 rounded-md object-cover" />
+the           <BrandLogo branding={branding} className="h-6 w-10 rounded-md object-cover" />
         ) : (
           <>
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">

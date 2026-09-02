@@ -53,10 +53,17 @@ const envSchema = z.object({
   STORAGE_LOCAL_DIR: z.string().optional(),
 
   // Signs the opaque statement-verification token embedded in a statement's QR code (see
-  // lib/statementVerification.ts). Deliberately separate from the JWT secrets so it can be
-  // rotated independently — it's a long-lived, low-sensitivity signature, not a session credential.
-  STATEMENT_VERIFY_SECRET: z.string().min(16),
+  // lib/statementVerification.ts). Optional so deploying this feature never requires a new env
+  // var just to boot — falls back to CREDENTIAL_ENCRYPTION_KEY (already required everywhere this
+  // app runs) below. Set this explicitly in production if you want it rotatable independently of
+  // that key.
+  STATEMENT_VERIFY_SECRET: z.string().min(16).optional(),
 });
 
-export const env = envSchema.parse(process.env);
+const parsedEnv = envSchema.parse(process.env);
+
+export const env = {
+  ...parsedEnv,
+  STATEMENT_VERIFY_SECRET: parsedEnv.STATEMENT_VERIFY_SECRET ?? parsedEnv.CREDENTIAL_ENCRYPTION_KEY,
+};
 export type Env = typeof env;
