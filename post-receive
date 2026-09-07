@@ -38,6 +38,7 @@
 # Every step below is the same idempotent pattern as deploy.sh, so a push that
 # fails partway through is safe to just fix and push again.
 
+
 set -euo pipefail
 
 WORK_TREE="/opt/yativo-white-label"   # <-- the existing deployed codebase
