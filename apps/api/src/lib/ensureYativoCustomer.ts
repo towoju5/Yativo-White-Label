@@ -21,8 +21,9 @@ export async function ensureYativoCustomer(
   prisma: PrismaClient,
   customer: Customer,
   overrides?: { phone?: string; countryIso3?: string },
+  options?: { force?: boolean },
 ): Promise<string> {
-  if (customer.yativoCustomerId) return customer.yativoCustomerId;
+  if (customer.yativoCustomerId && !options?.force) return customer.yativoCustomerId;
 
   const phone = overrides?.phone ?? customer.phone;
   const countryIso3 = overrides?.countryIso3 ?? customer.countryCode;
@@ -79,4 +80,16 @@ export async function tryEnsureYativoCustomer(prisma: PrismaClient, customer: Cu
   } catch (err) {
     logger.warn({ err, customerId: customer.id }, "Could not auto-register customer with Yativo");
   }
+}
+
+/**
+ * True when `err` is Yativo telling us the customer id we hold no longer resolves on their side
+ * (e.g. their record was purged or never fully provisioned). Distinct from every other 4xx —
+ * callers use this to decide whether recreating the customer via `ensureYativoCustomer(..., {
+ * force: true })` and retrying is a sane recovery, as opposed to surfacing the error as-is.
+ */
+export function isYativoCustomerNotFound(err: unknown): boolean {
+  if (!(err instanceof YativoApiError)) return false;
+  const message = parseYativoErrorMessage(err.upstreamBody)?.toLowerCase();
+  return message?.includes("customer not found") ?? false;
 }

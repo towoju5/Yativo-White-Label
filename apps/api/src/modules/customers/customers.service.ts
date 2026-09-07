@@ -1,9 +1,10 @@
-import type { PrismaClient, KycStatus, CustomerStatus } from "@prisma/client";
+import type { PrismaClient, KycStatus, CustomerStatus, Customer } from "@prisma/client";
 import { AppError, NotFoundError } from "../../lib/errors.js";
-import { ensureYativoCustomer, tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
+import { ensureYativoCustomer, tryEnsureYativoCustomer, isYativoCustomerNotFound } from "../../lib/ensureYativoCustomer.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { listCustomerWallets } from "../wallets/wallets.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
+import logger from "../../lib/logger.js";
 
 export function customerToDto(customer: {
   id: string;
@@ -66,6 +67,17 @@ export async function getCustomerDetail(prisma: PrismaClient, customerId: string
   return { ...customerToDto(customer), wallets };
 }
 
+/**
+ * If Yativo no longer recognizes a stored yativoCustomerId (their record was purged, or it was
+ * never fully provisioned on their side), re-provisions the customer and returns the fresh id.
+ * Only called after the caller's own request against the stored id has already 404'd, so this
+ * never masks any other kind of failure.
+ */
+async function resubmitAfterCustomerNotFound(prisma: PrismaClient, customer: Customer) {
+  logger.warn({ customerId: customer.id, yativoCustomerId: customer.yativoCustomerId }, "Yativo customer not found — auto-resubmitting");
+  return ensureYativoCustomer(prisma, customer, undefined, { force: true });
+}
+
 /** Live from Yativo — the endorsement checklist isn't cached locally, so this always reflects Yativo's current view (see fiat/customers.ts's `get()`). */
 export async function getCustomerEndorsements(prisma: PrismaClient, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
@@ -73,8 +85,15 @@ export async function getCustomerEndorsements(prisma: PrismaClient, customerId: 
   if (!customer.yativoCustomerId) {
     throw new AppError("This customer isn't registered on Yativo yet — no endorsement data is available.", 409, "NOT_REGISTERED");
   }
-  const { endorsements } = await yativoClient.fiat.customers.get(customer.yativoCustomerId);
-  return endorsements;
+  try {
+    const { endorsements } = await yativoClient.fiat.customers.get(customer.yativoCustomerId);
+    return endorsements;
+  } catch (err) {
+    if (!isYativoCustomerNotFound(err)) throw err;
+    const yativoCustomerId = await resubmitAfterCustomerNotFound(prisma, customer);
+    const { endorsements } = await yativoClient.fiat.customers.get(yativoCustomerId);
+    return endorsements;
+  }
 }
 
 /** Generates a fresh hosted verification link for one endorsement — see fiat/customers.ts's regenerateEndorsementLink for why this can't just come from getCustomerEndorsements above. */
@@ -84,7 +103,13 @@ export async function regenerateCustomerEndorsementLink(prisma: PrismaClient, cu
   if (!customer.yativoCustomerId) {
     throw new AppError("This customer isn't registered on Yativo yet — no endorsement data is available.", 409, "NOT_REGISTERED");
   }
-  return yativoClient.fiat.customers.regenerateEndorsementLink(customer.yativoCustomerId, service);
+  try {
+    return await yativoClient.fiat.customers.regenerateEndorsementLink(customer.yativoCustomerId, service);
+  } catch (err) {
+    if (!isYativoCustomerNotFound(err)) throw err;
+    const yativoCustomerId = await resubmitAfterCustomerNotFound(prisma, customer);
+    return yativoClient.fiat.customers.regenerateEndorsementLink(yativoCustomerId, service);
+  }
 }
 
 export async function approveKyc(prisma: PrismaClient, customerId: string) {
@@ -121,7 +146,9 @@ export async function rejectKyc(prisma: PrismaClient, customerId: string, reason
 export async function resubmitCustomerToYativo(prisma: PrismaClient, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
-  await ensureYativoCustomer(prisma, customer);
+  // force: true — an admin hitting this explicitly wants a fresh attempt even when a
+  // yativoCustomerId is already on file (e.g. it's stale/orphaned on Yativo's side).
+  await ensureYativoCustomer(prisma, customer, undefined, { force: true });
   return prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
 }
 
