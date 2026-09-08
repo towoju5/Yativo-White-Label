@@ -98,42 +98,83 @@ export async function webhookRoutes(app: FastifyInstance) {
     { schema: { response: { 200: z.object({ status: z.string() }), 400: z.object({ message: z.string() }) } } },
     async (request, reply) => {
       const rawBody = request.body as Buffer;
-      const signatureHeader = request.headers[YATIVO_SIGNATURE_HEADER];
+      // Checked in this order in case Yativo's actual header casing/name ever drifts from the
+      // guide (`Signature`) — Fastify lowercases every incoming header name, so these are the
+      // exact keys to look for regardless of how Yativo capitalizes it on the wire. The legacy
+      // `x-yativo-signature` name is kept as a last-resort fallback purely so a delivery using it
+      // still gets *recorded* (as invalid, most likely) instead of silently vanishing.
+      const signatureHeader = request.headers[YATIVO_SIGNATURE_HEADER] ?? request.headers["x-signature"] ?? request.headers["x-yativo-signature"];
       const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
-
-      if (!signature || !verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret)) {
-        logger.warn("Rejected Yativo webhook with invalid or missing signature");
-        return reply.code(400).send({ message: "Invalid signature" });
-      }
+      const signatureValid = !!signature && verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret);
 
       let parsedBody: unknown;
+      let parseError = false;
       try {
         parsedBody = JSON.parse(rawBody.toString("utf8"));
       } catch {
-        return reply.code(400).send({ message: "Malformed webhook payload" });
+        parseError = true;
       }
 
-      const classified = classifyIncomingWebhook(parsedBody);
-      if (!classified) {
-        logger.warn({ body: parsedBody }, "Unrecognized Yativo webhook shape — not the standard envelope, gift card, or virtualcard.* shape");
-        return reply.code(400).send({ message: "Unrecognized webhook shape" });
+      const classified = !parseError && signatureValid ? classifyIncomingWebhook(parsedBody) : null;
+
+      // Every inbound request gets a row — signature failures and unrecognized shapes included.
+      // A rejected delivery that's silently dropped is indistinguishable from one that never
+      // arrived at all, which makes "why isn't this showing up" impossible to answer from inside
+      // this app; recording it here (marked signatureValid: false / processingStatus: FAILED)
+      // is what actually lets that question get answered from the admin Webhooks page.
+      let eventType: string;
+      let payload: Record<string, unknown>;
+      let failureReason: string | null = null;
+
+      if (!signatureValid) {
+        failureReason = signature ? "Invalid signature" : "Missing signature header";
+        eventType = "_rejected.invalid_signature";
+        payload = { headers: request.headers, body: parseError ? rawBody.toString("utf8").slice(0, 5000) : parsedBody };
+      } else if (parseError) {
+        failureReason = "Malformed JSON body";
+        eventType = "_rejected.malformed_json";
+        payload = { headers: request.headers, body: rawBody.toString("utf8").slice(0, 5000) };
+      } else if (!classified) {
+        failureReason = "Unrecognized webhook shape";
+        eventType = "_rejected.unrecognized_shape";
+        payload = (parsedBody as Record<string, unknown>) ?? {};
+      } else {
+        eventType = classified.eventType;
+        payload = classified.payload;
       }
 
-      const { eventType, payload } = classified;
-      const externalEventId = deriveExternalEventId(eventType, payload);
+      const externalEventId = classified
+        ? deriveExternalEventId(eventType, payload)
+        : `${eventType}:${failureReason}:${createHash("sha256").update(rawBody).digest("hex")}`;
 
       let event;
       try {
         event = await app.prisma.webhookEvent.create({
-          data: { externalEventId, eventType, payload: payload as Prisma.InputJsonValue, signatureValid: true },
+          data: {
+            externalEventId,
+            eventType,
+            payload: payload as Prisma.InputJsonValue,
+            signatureValid,
+            processingStatus: failureReason ? "FAILED" : "PENDING",
+            errorMessage: failureReason,
+            processedAt: failureReason ? new Date() : null,
+          },
         });
       } catch (err) {
         if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
           // Duplicate delivery of an eventId we've already recorded — idempotent no-op,
-          // do not re-enqueue or reprocess.
+          // do not re-enqueue or reprocess. Response shape must match this route's declared
+          // schema per status code (400 -> { message }, 200 -> { status }) or Fastify itself
+          // 500s trying to serialize the reply.
+          if (failureReason) return reply.code(400).send({ message: failureReason });
           return reply.code(200).send({ status: "duplicate" });
         }
         throw err;
+      }
+
+      if (failureReason) {
+        logger.warn({ eventId: event.id, eventType, failureReason }, "Rejected Yativo webhook — recorded, not processed");
+        return reply.code(400).send({ message: failureReason });
       }
 
       await enqueueWebhookEvent(event.id);
