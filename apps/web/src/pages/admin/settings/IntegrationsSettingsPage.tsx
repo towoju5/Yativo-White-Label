@@ -25,6 +25,8 @@ type Config = {
     webhookUrl: string;
   };
   smtp: {
+    mode: "sendmail" | "smtp";
+    sendmailPath: string;
     host: string;
     port: number;
     secure: boolean;
@@ -47,6 +49,8 @@ const emptyConfig: Config = {
     webhookUrl: "",
   },
   smtp: {
+    mode: "sendmail",
+    sendmailPath: "",
     host: "",
     port: 587,
     secure: false,
@@ -224,51 +228,82 @@ export default function IntegrationsSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Email (SMTP)</CardTitle>
-          <CardDescription>Where transactional emails are sent from.</CardDescription>
+          <CardTitle className="text-base">Email</CardTitle>
+          <CardDescription>Where and how transactional emails are sent.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="smtpHost">Host</Label>
-              <Input id="smtpHost" value={config.smtp.host} onChange={(e) => updateSmtp("host", e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="smtpPort">Port</Label>
-              <Input id="smtpPort" type="number" value={config.smtp.port} onChange={(e) => updateSmtp("port", Number(e.target.value))} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="smtpFrom">From address</Label>
-              <Input id="smtpFrom" value={config.smtp.fromAddress} onChange={(e) => updateSmtp("fromAddress", e.target.value)} />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="emailMode">Transport</Label>
+            <Select value={config.smtp.mode} onValueChange={(v) => updateSmtp("mode", v)}>
+              <SelectTrigger className="w-64" id="emailMode">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sendmail">Sendmail (local binary)</SelectItem>
+                <SelectItem value="smtp">SMTP</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="smtpUser">Username</Label>
-              <Input id="smtpUser" value={config.smtp.user} onChange={(e) => updateSmtp("user", e.target.value)} />
+              <Label htmlFor="smtpFrom">From address</Label>
+              <Input id="smtpFrom" value={config.smtp.fromAddress} onChange={(e) => updateSmtp("fromAddress", e.target.value)} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="smtpPassword">Password</Label>
-              <Input
-                id="smtpPassword"
-                type="password"
-                placeholder={secretHint(config.smtp.passwordConfigured)}
-                value={config.smtp.password ?? ""}
-                onChange={(e) => updateSmtp("password", e.target.value)}
-              />
-            </div>
-            <div className="flex items-end gap-2 pb-2">
-              <input
-                id="smtpSecure"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300"
-                checked={config.smtp.secure}
-                onChange={(e) => updateSmtp("secure", e.target.checked)}
-              />
-              <Label htmlFor="smtpSecure">Use TLS (secure)</Label>
-            </div>
+            {config.smtp.mode === "sendmail" && (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="sendmailPath">Sendmail binary path (optional)</Label>
+                <Input
+                  id="sendmailPath"
+                  placeholder="sendmail"
+                  value={config.smtp.sendmailPath}
+                  onChange={(e) => updateSmtp("sendmailPath", e.target.value)}
+                />
+              </div>
+            )}
           </div>
+
+          {config.smtp.mode === "smtp" && (
+            <>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="smtpHost">Host</Label>
+                  <Input id="smtpHost" value={config.smtp.host} onChange={(e) => updateSmtp("host", e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="smtpPort">Port</Label>
+                  <Input id="smtpPort" type="number" value={config.smtp.port} onChange={(e) => updateSmtp("port", Number(e.target.value))} />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="smtpUser">Username</Label>
+                  <Input id="smtpUser" value={config.smtp.user} onChange={(e) => updateSmtp("user", e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="smtpPassword">Password</Label>
+                  <Input
+                    id="smtpPassword"
+                    type="password"
+                    placeholder={secretHint(config.smtp.passwordConfigured)}
+                    value={config.smtp.password ?? ""}
+                    onChange={(e) => updateSmtp("password", e.target.value)}
+                  />
+                </div>
+                <div className="flex items-end gap-2 pb-2">
+                  <input
+                    id="smtpSecure"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300"
+                    checked={config.smtp.secure}
+                    onChange={(e) => updateSmtp("secure", e.target.checked)}
+                  />
+                  <Label htmlFor="smtpSecure">Use TLS (secure)</Label>
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

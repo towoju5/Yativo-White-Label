@@ -21,6 +21,8 @@ export type IntegrationSettings = {
     webhookSecret: string;
   };
   smtp: {
+    mode: "sendmail" | "smtp";
+    sendmailPath: string;
     host: string;
     port: number;
     secure: boolean;
@@ -49,6 +51,8 @@ export function applyIntegrationSettings(settings: IntegrationSettings): void {
   yativoWebhookConfig.secret = settings.yativo.webhookSecret;
 
   Object.assign(smtpConfig, {
+    mode: settings.smtp.mode,
+    sendmailPath: settings.smtp.sendmailPath || undefined,
     host: settings.smtp.host || undefined,
     port: settings.smtp.port,
     secure: settings.smtp.secure,
@@ -118,6 +122,8 @@ export async function syncWebhookSecretIfRotated(prisma: PrismaClient): Promise<
             webhookSecret: env.YATIVO_WEBHOOK_SECRET,
           },
           smtp: {
+            mode: env.EMAIL_MODE,
+            sendmailPath: env.SENDMAIL_PATH ?? "",
             host: env.SMTP_HOST ?? "",
             port: env.SMTP_PORT,
             secure: env.SMTP_SECURE,

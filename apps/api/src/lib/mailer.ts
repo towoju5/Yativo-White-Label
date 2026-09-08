@@ -2,8 +2,12 @@ import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "../config/env.js";
 import logger from "./logger.js";
 
-/** Mutable — updated in place by integrationRuntimeConfig.ts when the admin saves SMTP settings. Defaults from env at boot. */
+export type MailMode = "sendmail" | "smtp";
+
+/** Mutable — updated in place by integrationRuntimeConfig.ts when the admin saves email settings. Defaults from env at boot. */
 export const smtpConfig = {
+  mode: env.EMAIL_MODE as MailMode,
+  sendmailPath: env.SENDMAIL_PATH,
   host: env.SMTP_HOST,
   port: env.SMTP_PORT,
   secure: env.SMTP_SECURE,
@@ -19,17 +23,20 @@ export function resetTransporter(): void {
   transporter = null;
 }
 
-/** Returns null (rather than throwing) when SMTP isn't configured, so email sending degrades to a logged no-op instead of crashing whatever business flow triggered it. */
+/** Returns null (rather than throwing) when the selected mode isn't usable — only possible for "smtp" with no host set — so email sending degrades to a logged no-op instead of crashing whatever business flow triggered it. "sendmail" mode never returns null here since there's no config to validate up front; a missing/broken `sendmail` binary instead surfaces as a thrown error from t.sendMail(). */
 function getTransporter(): Transporter | null {
-  if (!smtpConfig.host) return null;
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: smtpConfig.host,
-      port: smtpConfig.port,
-      secure: smtpConfig.secure,
-      auth: smtpConfig.user ? { user: smtpConfig.user, pass: smtpConfig.password } : undefined,
-    });
+  if (transporter) return transporter;
+  if (smtpConfig.mode === "sendmail") {
+    transporter = nodemailer.createTransport({ sendmail: true, newline: "unix", path: smtpConfig.sendmailPath || "sendmail" });
+    return transporter;
   }
+  if (!smtpConfig.host) return null;
+  transporter = nodemailer.createTransport({
+    host: smtpConfig.host,
+    port: smtpConfig.port,
+    secure: smtpConfig.secure,
+    auth: smtpConfig.user ? { user: smtpConfig.user, pass: smtpConfig.password } : undefined,
+  });
   return transporter;
 }
 
@@ -39,7 +46,8 @@ export type MailAttachment = { filename: string; contentBase64: string; contentT
 export async function sendMail(opts: {
   to: string;
   subject: string;
-  html: string;
+  html?: string;
+  text?: string;
   replyTo?: string;
   attachments?: MailAttachment[];
 }): Promise<boolean> {
@@ -53,8 +61,12 @@ export async function sendMail(opts: {
     to: opts.to,
     subject: opts.subject,
     html: opts.html,
+    text: opts.text,
     replyTo: opts.replyTo,
     attachments: opts.attachments?.map((a) => ({ filename: a.filename, content: Buffer.from(a.contentBase64, "base64"), contentType: a.contentType })),
   });
   return true;
 }
+
+/** Alias for sendMail matching the common `sendEmail({ to, subject, text, html })` shape. */
+export const sendEmail = sendMail;

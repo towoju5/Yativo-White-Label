@@ -38,8 +38,14 @@ const envSchema = z.object({
   WEB_APP_URL: z.string().url(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 
-  // Transactional email — all optional. Unset SMTP_HOST means email sending no-ops (logged, not
-  // thrown), so an environment without mail configured never breaks the flows that trigger it.
+  // Transactional email. EMAIL_MODE picks the transport: "sendmail" (default) pipes through the
+  // local sendmail-compatible binary — no credentials needed, works out of the box wherever
+  // postfix/sendmail is installed; "smtp" relays via the SMTP_* settings below. Both the mode and
+  // every setting here can be overridden at runtime from the admin UI (Settings → Integrations),
+  // which is why they're all optional — an environment without either configured just no-ops
+  // email sending (logged, not thrown) instead of breaking the flows that trigger it.
+  EMAIL_MODE: z.enum(["sendmail", "smtp"]).default("sendmail"),
+  SENDMAIL_PATH: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_SECURE: z.coerce.boolean().default(false),

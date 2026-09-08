@@ -9,7 +9,7 @@ import {
   emailNotificationTypeSchema,
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
-import { sendMail } from "../../lib/mailer.js";
+import { sendMail, smtpConfig } from "../../lib/mailer.js";
 import { AppError } from "../../lib/errors.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
@@ -111,15 +111,15 @@ export async function notificationsRoutes(app: FastifyInstance) {
       try {
         sent = await sendMail({ to, subject: `[Test] ${subject}`, html });
       } catch (err) {
-        // sendMail throws the real nodemailer/SMTP error (bad host, auth failure, timeout,
-        // TLS mismatch, etc.) — surfaced here instead of falling through to app.ts's generic
-        // catch-all, which would otherwise hide it behind an opaque "Internal server error"
-        // with no way for an admin to tell what's actually wrong with their SMTP settings.
+        // sendMail throws the real nodemailer/transport error (bad host, auth failure, timeout,
+        // TLS mismatch, missing sendmail binary, etc.) — surfaced here instead of falling through
+        // to app.ts's generic catch-all, which would otherwise hide it behind an opaque "Internal
+        // server error" with no way for an admin to tell what's actually wrong with their email settings.
         const detail = err instanceof Error ? err.message : String(err);
-        throw new AppError(`Couldn't send via SMTP: ${detail}`, 502, "SMTP_SEND_FAILED");
+        throw new AppError(`Couldn't send via ${smtpConfig.mode}: ${detail}`, 502, "EMAIL_SEND_FAILED");
       }
       if (!sent) {
-        throw new AppError("SMTP isn't configured yet — set a host under Settings → Integrations first.", 409, "SMTP_NOT_CONFIGURED");
+        throw new AppError("SMTP isn't configured yet — set a host under Settings → Integrations first.", 409, "EMAIL_NOT_CONFIGURED");
       }
 
       return reply.code(204).send();

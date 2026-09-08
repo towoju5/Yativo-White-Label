@@ -19,6 +19,8 @@ const settingsSchema = z.object({
     webhookSecret: z.string().optional().default(""),
   }),
   smtp: z.object({
+    mode: z.enum(["sendmail", "smtp"]).default("sendmail"),
+    sendmailPath: z.string().optional().default(""),
     host: z.string().optional().default(""),
     port: z.coerce.number().default(587),
     secure: z.boolean().default(false),
@@ -41,6 +43,8 @@ const envDefaults: Settings = {
     webhookSecret: env.YATIVO_WEBHOOK_SECRET,
   },
   smtp: {
+    mode: env.EMAIL_MODE,
+    sendmailPath: env.SENDMAIL_PATH ?? "",
     host: env.SMTP_HOST ?? "",
     port: env.SMTP_PORT,
     secure: env.SMTP_SECURE,
