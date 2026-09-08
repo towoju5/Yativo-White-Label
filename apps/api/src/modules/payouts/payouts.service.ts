@@ -11,6 +11,7 @@ import { postTransaction } from "../ledger/postTransaction.js";
 import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js";
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
+import { getEffectiveFee } from "../pricing/pricing.service.js";
 import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
@@ -83,7 +84,7 @@ async function toSinglePayoutDto(prisma: PrismaClient, payout: PayoutWithTransac
 export async function settlePayoutCompleted(
   prisma: PrismaClient,
   payout: { id: string; customerId: string; currencyCode: string; amountMinor: bigint; transactionId: string },
-  opts: { externalSource: LedgerExternalSource; feeMinor?: bigint },
+  opts: { externalSource: LedgerExternalSource; upstreamFeeMinor?: bigint },
 ) {
   const walletAccount = await prisma.account.findFirstOrThrow({
     where: { type: "CUSTOMER_WALLET", customerId: payout.customerId, currencyCode: payout.currencyCode },
@@ -100,7 +101,10 @@ export async function settlePayoutCompleted(
     { type: "PAYOUT", externalSource: opts.externalSource, description: `Payout ${payout.id} settled` },
   );
 
-  if (opts.feeMinor && opts.feeMinor > 0n) {
+  // Our own platform fee — computed from admin-configured pricing, optionally on top of Yativo's
+  // own reported fee (opts.upstreamFeeMinor), never charged as Yativo's number directly.
+  const feeMinor = await getEffectiveFee(prisma, "PAYOUT", payout.customerId, payout.amountMinor, opts.upstreamFeeMinor ?? 0n);
+  if (feeMinor > 0n) {
     const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", payout.currencyCode);
     await postTransaction(prisma, {
       type: "FEE",
@@ -109,8 +113,8 @@ export async function settlePayoutCompleted(
       externalSource: opts.externalSource,
       description: `Payout fee for ${payout.id}`,
       lines: [
-        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: opts.feeMinor, currencyCode: payout.currencyCode },
-        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: opts.feeMinor, currencyCode: payout.currencyCode },
+        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: payout.currencyCode },
+        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: payout.currencyCode },
       ],
     });
   }

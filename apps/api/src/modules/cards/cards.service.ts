@@ -9,7 +9,10 @@ import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js"
 import { reverseTransaction } from "../ledger/reverseTransaction.js";
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
+import { getEffectiveFee } from "../pricing/pricing.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
+import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
+import { majorToMinor } from "../../lib/money.js";
 import logger from "../../lib/logger.js";
 
 const CARD_CURRENCY = "USD";
@@ -71,8 +74,9 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
   const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId, currencyCode: CARD_CURRENCY } });
   if (!walletAccount) throw new NotFoundError("Wallet");
 
+  const feeMinor = await getEffectiveFee(prisma, "CARD_CREATE", customerId, amountMinor);
   const available = await getAvailableBalance(prisma, walletAccount.id, "CUSTOMER_WALLET");
-  if (available < amountMinor) throw new InsufficientFundsError(walletAccount.id);
+  if (available < amountMinor + feeMinor) throw new InsufficientFundsError(walletAccount.id);
 
   const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", CARD_CURRENCY);
   const suspense = await ensurePlatformAccount(prisma, "SUSPENSE_PENDING", CARD_CURRENCY);
@@ -109,6 +113,21 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
     ],
     { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Card funding settled` },
   );
+
+  if (feeMinor > 0n) {
+    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", CARD_CURRENCY);
+    await postTransaction(prisma, {
+      type: "FEE",
+      status: "POSTED",
+      idempotencyKey: `fee:card-create:${cardId}`,
+      externalSource: "SYSTEM",
+      description: `Card creation fee for ${cardId}`,
+      lines: [
+        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+      ],
+    });
+  }
 
   // Best-effort: last4 is purely a display nicety, so a failure here shouldn't fail card creation
   // — the card was already successfully issued and funded on Yativo's side at this point.
@@ -204,8 +223,9 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
   const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId: card.customerId, currencyCode: CARD_CURRENCY } });
   if (!walletAccount) throw new NotFoundError("Wallet");
 
+  const feeMinor = await getEffectiveFee(prisma, "CARD_FUND", card.customerId, amountMinor);
   const available = await getAvailableBalance(prisma, walletAccount.id, "CUSTOMER_WALLET");
-  if (available < amountMinor) throw new InsufficientFundsError(walletAccount.id);
+  if (available < amountMinor + feeMinor) throw new InsufficientFundsError(walletAccount.id);
 
   const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", CARD_CURRENCY);
   const suspense = await ensurePlatformAccount(prisma, "SUSPENSE_PENDING", CARD_CURRENCY);
@@ -241,6 +261,21 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
     { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Card top-up settled` },
   );
 
+  if (feeMinor > 0n) {
+    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", CARD_CURRENCY);
+    await postTransaction(prisma, {
+      type: "FEE",
+      status: "POSTED",
+      idempotencyKey: `fee:card-topup:${topupId}`,
+      externalSource: "SYSTEM",
+      description: `Card top-up fee for ${card.id}`,
+      lines: [
+        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+      ],
+    });
+  }
+
   return cardToDto(card);
 }
 
@@ -258,8 +293,39 @@ export async function withdrawFromCard(prisma: PrismaClient, cardId: string, amo
   const currency = await prisma.currency.findUniqueOrThrow({ where: { code: CARD_CURRENCY } });
   const amount = Number(amountMinor) / 10 ** currency.decimals;
 
-  const result = await yativoClient.fiat.cards.withdraw({ cardId: card.yativoCardId!, amount, idempotencyKey: randomUUID() });
+  const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId: card.customerId, currencyCode: CARD_CURRENCY } });
+  if (!walletAccount) throw new NotFoundError("Wallet");
+
+  // Pre-flight check against our own configured fee only — the markup component (if any) depends
+  // on Yativo's own reported fee below, which isn't known until after the withdrawal call.
+  const estimatedFeeMinor = await getEffectiveFee(prisma, "CARD_WITHDRAW", card.customerId, amountMinor);
+  const available = await getAvailableBalance(prisma, walletAccount.id, "CUSTOMER_WALLET");
+  if (available < estimatedFeeMinor) throw new InsufficientFundsError(walletAccount.id);
+
+  const withdrawalId = randomUUID();
+  const result = await yativoClient.fiat.cards.withdraw({ cardId: card.yativoCardId!, amount, idempotencyKey: withdrawalId });
   logger.info({ cardId: card.id, requestedAmount: amount, response: result.raw }, "Card withdrawal submitted — wallet credit not auto-posted, see reconciliation");
+
+  const upstreamFeeMinor = (() => {
+    const parsed = parseYativoFeeString(result.feeAmount);
+    return parsed !== undefined ? majorToMinor(parsed, currency.decimals) : 0n;
+  })();
+  const feeMinor = await getEffectiveFee(prisma, "CARD_WITHDRAW", card.customerId, amountMinor, upstreamFeeMinor);
+  if (feeMinor > 0n) {
+    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", CARD_CURRENCY);
+    await postTransaction(prisma, {
+      type: "FEE",
+      status: "POSTED",
+      idempotencyKey: `fee:card-withdraw:${withdrawalId}`,
+      externalSource: "SYSTEM",
+      description: `Card withdrawal fee for ${card.id}`,
+      lines: [
+        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+      ],
+    });
+  }
+
   return cardToDto(card);
 }
 

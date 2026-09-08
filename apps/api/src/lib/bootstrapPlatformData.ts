@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, PricingServiceType } from "@prisma/client";
 
 /**
  * The minimum a fresh database needs before ANY customer-facing request works — no test/demo
@@ -48,4 +48,14 @@ export async function bootstrapPlatformData(prisma: PrismaClient): Promise<void>
     update: {},
     create: { id: 1 },
   });
+
+  // Free (zero-fee, standalone) until an admin sets real pricing from Settings → Pricing.
+  const pricingServices: PricingServiceType[] = ["PAYIN", "PAYOUT", "VIRTUAL_ACCOUNT_DEPOSIT", "CARD_CREATE", "CARD_FUND", "CARD_WITHDRAW"];
+  for (const service of pricingServices) {
+    await prisma.pricingDefault.upsert({
+      where: { service },
+      update: {},
+      create: { service },
+    });
+  }
 }

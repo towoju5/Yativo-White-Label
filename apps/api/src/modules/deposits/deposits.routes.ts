@@ -11,6 +11,8 @@ import { ensureCustomerWalletAccount } from "../ledger/accounts.js";
 import { env } from "../../config/env.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
+import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
+import { majorToMinor } from "../../lib/money.js";
 
 // Native gateway pay-ins only (country → method → wallet + amount → initiate) — for
 // long-lived bank-transfer receiving accounts, see modules/virtualAccounts instead.
@@ -65,6 +67,24 @@ export async function depositsRoutes(app: FastifyInstance) {
       // an unsupported currency), and the deposit.confirmed webhook already creates it lazily
       // on completion (see webhooks/handlers/deposit.handler.ts) if this doesn't run first.
       await ensureCustomerWalletAccount(app.prisma, customer.id, request.body.walletCurrencyCode);
+
+      // Recorded so the deposit.confirmed webhook can recognize this as a payin (as opposed to an
+      // unsolicited virtual-account transfer, which never hits this route) and, when pricing is
+      // set to markup, add the platform's fee on top of what Yativo itself quoted here —
+      // `transactionFee`/`exchangeRate` are human-readable strings ("3.4 MXN", "1 USD = 17.2 MXN"),
+      // so this parse is best-effort and never blocks the deposit if it fails.
+      if (result.depositId) {
+        let yativoFeeMinor: bigint | null = null;
+        const feeMajor = parseYativoFeeString(result.transactionFee);
+        const rate = parseYativoFeeString(result.exchangeRate);
+        if (feeMajor !== undefined && rate !== undefined && rate > 0) {
+          const walletCurrency = await app.prisma.currency.findUnique({ where: { code: request.body.walletCurrencyCode } });
+          if (walletCurrency) yativoFeeMinor = majorToMinor(feeMajor / rate, walletCurrency.decimals);
+        }
+        await app.prisma.deposit.create({
+          data: { customerId: customer.id, currencyCode: request.body.walletCurrencyCode, yativoDepositId: result.depositId, yativoFeeMinor },
+        });
+      }
 
       return reply.send(result);
     },

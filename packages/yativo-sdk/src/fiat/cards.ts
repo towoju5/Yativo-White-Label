@@ -284,8 +284,11 @@ export function createCardsResource(ctx: YativoContext) {
      * but validation checks `cardId`, so this is the safe one to send. A termination-style fee
      * is deducted before the net amount is credited back to the wallet; the exact net amount
      * isn't documented, so `raw` is the only reliable place to look for it until confirmed live.
+     * `feeAmount` below is a best-effort guess at the field name Yativo uses for that fee in this
+     * response (tries `fee_amount` then `fee`) — unverified against a live response, same spirit
+     * as this function's other "not confirmed live" caveats. Callers should treat it as advisory.
      */
-    async withdraw(input: { cardId: string; amount: number; idempotencyKey: string }): Promise<{ raw: Record<string, unknown> }> {
+    async withdraw(input: { cardId: string; amount: number; idempotencyKey: string }): Promise<{ feeAmount?: string; raw: Record<string, unknown> }> {
       const res = await ctx.request({
         baseUrl: ctx.config.fiatBaseUrl,
         path: "/customer/virtual/cards/withdraw",
@@ -297,7 +300,9 @@ export function createCardsResource(ctx: YativoContext) {
       });
       // Given list's response turned out to carry PAN/CVV despite the guide saying only getCard
       // does, this response is stripped defensively too before callers (e.g. logging) touch it.
-      return { raw: stripSensitive(res as Record<string, unknown>) };
+      const raw = stripSensitive(res as Record<string, unknown>);
+      const feeCandidate = raw.fee_amount ?? raw.fee;
+      return { feeAmount: feeCandidate !== undefined && feeCandidate !== null ? String(feeCandidate) : undefined, raw };
     },
 
     /** ⚠️ Confirmed live: this endpoint's raw response also carries plaintext card_number/cvv per item (see stripSensitive) — the guide only calls that out for getCard(). Already stripped before returning. */

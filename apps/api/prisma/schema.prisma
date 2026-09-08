@@ -245,14 +245,16 @@ model Customer {
   createdAt                 DateTime       @default(now())
   updatedAt                 DateTime       @updatedAt
 
-  wallets       Wallet[]
-  accounts      Account[]
-  beneficiaries Beneficiary[]
-  cards         Card[]
-  refreshTokens CustomerRefreshToken[]
-  payouts       Payout[]
-  passkeys      CustomerPasskey[]
-  teamMembers   CustomerTeamMember[] @relation("TeamMembers")
+  wallets          Wallet[]
+  accounts         Account[]
+  beneficiaries    Beneficiary[]
+  cards            Card[]
+  refreshTokens    CustomerRefreshToken[]
+  payouts          Payout[]
+  passkeys         CustomerPasskey[]
+  teamMembers      CustomerTeamMember[] @relation("TeamMembers")
+  pricingOverrides PricingOverride[]
+  deposits         Deposit[]
 
   @@map("customers")
 }
@@ -668,4 +670,73 @@ model StaticPage {
   updatedAt     DateTime       @updatedAt
 
   @@map("static_pages")
+}
+
+// ── Admin-configurable pricing ──────────────────────────────────────────
+
+enum PricingServiceType {
+  PAYIN
+  PAYOUT
+  VIRTUAL_ACCOUNT_DEPOSIT
+  CARD_CREATE
+  CARD_FUND
+  CARD_WITHDRAW
+}
+
+enum FeeType {
+  FIXED
+  PERCENTAGE
+  COMBINED
+}
+
+enum PricingMode {
+  STANDALONE // our fee only, regardless of what Yativo charges
+  MARKUP // our fee added on top of Yativo's own reported fee (0 where Yativo reports none)
+}
+
+/// One row per PricingServiceType, seeded by bootstrapPlatformData — the platform-wide fee applied when a customer has no override for that service.
+model PricingDefault {
+  service          PricingServiceType @id
+  feeType          FeeType            @default(FIXED)
+  pricingMode      PricingMode        @default(STANDALONE)
+  fixedAmountMinor BigInt             @default(0)
+  percentageBps    Int                @default(0)
+  updatedAt        DateTime           @updatedAt
+
+  @@map("pricing_defaults")
+}
+
+/// A per-customer fee override for one service — takes precedence over PricingDefault for that (customer, service) pair.
+model PricingOverride {
+  id               String             @id @default(cuid())
+  customerId       String
+  customer         Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  service          PricingServiceType
+  feeType          FeeType            @default(FIXED)
+  pricingMode      PricingMode        @default(STANDALONE)
+  fixedAmountMinor BigInt             @default(0)
+  percentageBps    Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([customerId, service])
+  @@map("pricing_overrides")
+}
+
+/// Records a payin (native gateway deposit) at initiation time, so the deposit.confirmed webhook
+/// can tell a payin apart from an unsolicited virtual-account transfer (same webhook, same payload
+/// shape, no other distinguishing field exists), and so Yativo's own quoted fee — only available
+/// at initiation time, in a human-readable string — survives to when the webhook settles it.
+model Deposit {
+  id              String   @id @default(cuid())
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  currencyCode    String
+  yativoDepositId String   @unique
+  /// Best-effort parse of Yativo's quoted transaction_fee, converted to this deposit's wallet
+  /// currency minor units via the quoted exchange_rate — null if parsing failed or Yativo omitted it.
+  yativoFeeMinor  BigInt?
+  createdAt       DateTime @default(now())
+
+  @@map("deposits")
 }

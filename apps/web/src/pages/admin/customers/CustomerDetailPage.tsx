@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Customer, StatementLine, WalletBalance, CustomerEndorsement, Beneficiary } from "@white-label/shared-types";
+import type { Customer, StatementLine, WalletBalance, CustomerEndorsement, Beneficiary, CustomerPricingRule, UpsertPricingOverrideInput } from "@white-label/shared-types";
 import { formatCurrencyAmount } from "@white-label/shared-types";
-import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon } from "lucide-react";
+import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon, DollarSign, RotateCcw, Pencil } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
@@ -18,8 +18,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { WalletStatementTable } from "@/components/wallet/WalletStatementTable";
 import { EndorsementsTable } from "@/components/endorsements/EndorsementsTable";
+import { PricingRuleDialog, SERVICE_LABELS, FEE_TYPE_LABELS, PRICING_MODE_LABELS, formatFeeSummary } from "@/pages/admin/settings/PricingSettingsPage";
 
 interface CustomerDetailResponse extends Customer {
   wallets?: WalletBalance[];
@@ -78,6 +80,34 @@ export default function CustomerDetailPage() {
     queryKey: ["admin", "customers", customerId, "beneficiaries"],
     queryFn: () => staffApi.get<Beneficiary[]>(`/admin/customers/${customerId}/beneficiaries`),
     enabled: !!customerId,
+  });
+
+  const pricingQuery = useQuery({
+    queryKey: ["admin", "customers", customerId, "pricing"],
+    queryFn: () => staffApi.get<CustomerPricingRule[]>(`/admin/customers/${customerId}/pricing`),
+    enabled: !!customerId,
+  });
+  const [editingPricing, setEditingPricing] = useState<CustomerPricingRule | null>(null);
+  const invalidatePricing = () => queryClient.invalidateQueries({ queryKey: ["admin", "customers", customerId, "pricing"] });
+
+  const upsertPricingMutation = useMutation({
+    mutationFn: ({ service, input }: { service: CustomerPricingRule["service"]; input: UpsertPricingOverrideInput }) =>
+      staffApi.put(`/admin/customers/${customerId}/pricing/${service}`, input),
+    onSuccess: () => {
+      toast({ title: "Custom pricing saved" });
+      invalidatePricing();
+      setEditingPricing(null);
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't save custom pricing", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const resetPricingMutation = useMutation({
+    mutationFn: (service: CustomerPricingRule["service"]) => staffApi.del(`/admin/customers/${customerId}/pricing/${service}`),
+    onSuccess: () => {
+      toast({ title: "Reverted to default pricing" });
+      invalidatePricing();
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't reset pricing", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const invalidate = () => {
@@ -358,6 +388,76 @@ export default function CustomerDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm">Custom pricing</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {pricingQuery.isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-10" />
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Fee</TableHead>
+                  <TableHead>Pricing mode</TableHead>
+                  <TableHead className="w-24" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(pricingQuery.data ?? []).map((rule) => (
+                  <TableRow key={rule.service}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-1.5">
+                        {SERVICE_LABELS[rule.service]}
+                        <Badge variant={rule.source === "OVERRIDE" ? "success" : "outline"}>{rule.source === "OVERRIDE" ? "Custom" : "Default"}</Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {FEE_TYPE_LABELS[rule.feeType]} — {formatFeeSummary(rule)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{PRICING_MODE_LABELS[rule.pricingMode]}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" aria-label={`Edit ${SERVICE_LABELS[rule.service]} pricing`} onClick={() => setEditingPricing(rule)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      {rule.source === "OVERRIDE" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Reset ${SERVICE_LABELS[rule.service]} pricing to default`}
+                          onClick={() => resetPricingMutation.mutate(rule.service)}
+                          disabled={resetPricingMutation.isPending}
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <PricingRuleDialog
+        rule={editingPricing}
+        onOpenChange={(v) => !v && setEditingPricing(null)}
+        onSubmit={(input) => editingPricing && upsertPricingMutation.mutate({ service: editingPricing.service, input })}
+        isPending={upsertPricingMutation.isPending}
+        hasUpstreamFee={editingPricing ? editingPricing.service === "PAYOUT" || editingPricing.service === "PAYIN" : false}
+        title={editingPricing ? `Custom pricing — ${SERVICE_LABELS[editingPricing.service]}` : ""}
+      />
     </div>
   );
 }

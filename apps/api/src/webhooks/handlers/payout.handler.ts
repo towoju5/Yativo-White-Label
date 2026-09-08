@@ -14,7 +14,7 @@ export async function handlePayoutCompleted(prisma: PrismaClient, payload: Payou
 
   await settlePayoutCompleted(prisma, payout, {
     externalSource: "YATIVO_WEBHOOK",
-    feeMinor: payload.feeMinor !== undefined ? BigInt(payload.feeMinor) : undefined,
+    upstreamFeeMinor: payload.feeMinor !== undefined ? BigInt(payload.feeMinor) : undefined,
   });
 
   return { status: "PROCESSED" };
