@@ -152,6 +152,45 @@ export const swapCompletedPayloadSchema = z.object({
 });
 export type SwapCompletedPayload = z.infer<typeof swapCompletedPayloadSchema>;
 
+/**
+ * `business_spend_card.*` — the Business Spend Card product (see fiat/spendCards.ts), a separate
+ * card product from the `virtualcard.*` family above. Uses the standard envelope like
+ * deposit/payout events, so no special-casing is needed in classifyIncomingWebhook. Every event's
+ * payload carries at least `card_id`/`customer_id`; `.created` carries the full card object,
+ * `.funded`/`.withdrawn` add `amount`, `.terminated` optionally adds `reason` (set to
+ * "balance_withdrawn_in_full" when it fired automatically off a full withdrawal), and
+ * `.limits_updated` echoes back the `limits` array that was sent.
+ */
+const rawBusinessSpendCardEventSchema = z
+  .object({
+    card_id: z.string(),
+    customer_id: z.string(),
+    amount: z.union([z.string(), z.number()]).optional(),
+    reason: z.string().optional(),
+    limits: z.array(z.record(z.unknown())).optional(),
+  })
+  .passthrough();
+
+export const businessSpendCardEventPayloadSchema = rawBusinessSpendCardEventSchema.transform((d) => ({
+  yativoCardId: d.card_id,
+  yativoCustomerId: d.customer_id,
+  amount: d.amount !== undefined ? String(d.amount) : undefined,
+  reason: d.reason,
+  limits: d.limits,
+}));
+export type BusinessSpendCardEventPayload = z.infer<typeof businessSpendCardEventPayloadSchema>;
+
+export const BUSINESS_SPEND_CARD_EVENT_TYPES = [
+  "business_spend_card.created",
+  "business_spend_card.activated",
+  "business_spend_card.suspended",
+  "business_spend_card.terminated",
+  "business_spend_card.funded",
+  "business_spend_card.withdrawn",
+  "business_spend_card.pin_updated",
+  "business_spend_card.limits_updated",
+] as const;
+
 /** The standard-envelope event types this app recognizes (whether or not it has business logic wired up for all of them yet) — used only for documentation/reference, not for parsing. */
 export const YATIVO_WEBHOOK_EVENT_TYPES = [
   "deposit.created",
@@ -168,5 +207,6 @@ export const YATIVO_WEBHOOK_EVENT_TYPES = [
   "crypto_deposit",
   "giftcard.status_changed",
   "webhook_updated",
+  ...BUSINESS_SPEND_CARD_EVENT_TYPES,
 ] as const;
 export type YativoWebhookEventType = (typeof YATIVO_WEBHOOK_EVENT_TYPES)[number];

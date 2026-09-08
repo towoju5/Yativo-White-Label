@@ -286,6 +286,42 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
       detail: { label: "Amount", value: "{{amount}} {{currency}}" },
     }),
   },
+  BUSINESS_SPEND_CARD_ISSUED: {
+    subject: "Your Business Spend Card is ready — {{productName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "💳",
+      heading: "Business Spend Card Issued",
+      intro: "Your new Business Spend Card is ready to use.",
+      detail: { label: "Card", value: "{{maskedPan}}" },
+    }),
+  },
+  BUSINESS_SPEND_CARD_ACTIVATED: {
+    subject: "Business Spend Card activated — {{productName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "🔓",
+      heading: "Business Spend Card Activated",
+      intro: "Your Business Spend Card has been activated and is ready to use.",
+      detail: { label: "Card", value: "{{maskedPan}}", tone: "success" },
+    }),
+  },
+  BUSINESS_SPEND_CARD_SUSPENDED: {
+    subject: "Business Spend Card suspended — {{productName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "🧊",
+      heading: "Business Spend Card Suspended",
+      intro: "Your Business Spend Card has been suspended. Reactivate it any time from your dashboard.",
+      detail: { label: "Card", value: "{{maskedPan}}", tone: "warning" },
+    }),
+  },
+  BUSINESS_SPEND_CARD_TERMINATED: {
+    subject: "Business Spend Card terminated — {{productName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "🗑️",
+      heading: "Business Spend Card Terminated",
+      intro: "Your Business Spend Card has been permanently closed.",
+      detail: { label: "Card", value: "{{maskedPan}}", tone: "danger" },
+    }),
+  },
   SWAP_COMPLETED: {
     subject: "Currency swap completed — {{productName}}",
     bodyHtml: buildEmailTemplate({
@@ -430,6 +466,7 @@ export async function renderSampleEmail(prisma: PrismaClient, type: EmailNotific
     targetAmount: "92.30",
     targetCurrency: "EUR",
     last4: "4242",
+    maskedPan: "XXXX XXXX XXXX 4242",
     merchant: "Example Store",
     passkeyName: "MacBook Touch ID",
     beneficiaryName: "Jane's Checking Account",

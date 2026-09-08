@@ -181,6 +181,7 @@ export const staffApi = {
 export const portalApi = {
   get: <T>(path: string, query?: ApiFetchOptions["query"]) => apiFetch<T>(path, { auth: "portal", query }),
   post: <T>(path: string, body?: unknown) => apiFetch<T>(path, { auth: "portal", method: "POST", body }),
+  put: <T>(path: string, body?: unknown) => apiFetch<T>(path, { auth: "portal", method: "PUT", body }),
   patch: <T>(path: string, body?: unknown) => apiFetch<T>(path, { auth: "portal", method: "PATCH", body }),
   del: <T>(path: string) => apiFetch<T>(path, { auth: "portal", method: "DELETE" }),
 };

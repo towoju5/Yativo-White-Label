@@ -55,5 +55,8 @@ export type CardStatus = (typeof CARD_STATUSES)[number];
 export const CARD_TYPES = ["VIRTUAL", "PHYSICAL"] as const;
 export type CardType = (typeof CARD_TYPES)[number];
 
+export const BUSINESS_SPEND_CARD_STATUSES = ["ACTIVE", "SUSPENDED", "TERMINATED"] as const;
+export type BusinessSpendCardStatus = (typeof BUSINESS_SPEND_CARD_STATUSES)[number];
+
 export const TEMPLATE_IDS = ["nova", "atlas", "meridian", "prime", "aurora"] as const;
 export type TemplateId = (typeof TEMPLATE_IDS)[number];

@@ -33,6 +33,7 @@ export function AuroraPortalShell({ children }: { children: ReactNode }) {
       items: [
         { to: "/portal/beneficiaries", label: t("nav.beneficiaries", "Beneficiaries"), icon: Users },
         { to: "/portal/cards", label: t("nav.cards", "Cards"), icon: CreditCard },
+        { to: "/portal/business-spend-cards", label: t("nav.businessSpendCards", "Business Spend Cards"), icon: CreditCard },
         { to: "/portal/profile", label: t("nav.profileKyc", "Profile & KYC"), icon: UserCheck },
         { to: "/portal/support", label: t("nav.support", "Support"), icon: LifeBuoy },
         ...(canManageTeam ? [{ to: "/portal/team", label: t("nav.team", "Team"), icon: UserCog }] : []),

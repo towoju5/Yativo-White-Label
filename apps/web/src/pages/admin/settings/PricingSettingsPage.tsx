@@ -31,6 +31,14 @@ export const SERVICE_LABELS: Record<PricingService, string> = {
   CARD_FUND: "Virtual card — fund",
   CARD_WITHDRAW: "Virtual card — withdraw",
   CARD_TERMINATE: "Virtual card — terminate",
+  BUSINESS_SPEND_CARD_CREATE: "Business Spend Card — create",
+  BUSINESS_SPEND_CARD_FUND: "Business Spend Card — fund",
+  BUSINESS_SPEND_CARD_WITHDRAW: "Business Spend Card — withdraw",
+  BUSINESS_SPEND_CARD_TERMINATE: "Business Spend Card — terminate",
+  BUSINESS_SPEND_CARD_ACTIVATE: "Business Spend Card — activate",
+  BUSINESS_SPEND_CARD_SUSPEND: "Business Spend Card — suspend",
+  BUSINESS_SPEND_CARD_PIN_UPDATE: "Business Spend Card — PIN update",
+  BUSINESS_SPEND_CARD_LIMITS_UPDATE: "Business Spend Card — limits update",
 };
 
 // Only PAYIN carries a fee number reported by Yativo itself (quoted at deposit-initiation time) —

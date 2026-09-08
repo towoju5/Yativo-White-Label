@@ -40,6 +40,7 @@ const sections: NavSection[] = [
       { to: "/admin/transactions", label: "Ledger", icon: ArrowLeftRight },
       { to: "/admin/payouts", label: "Payouts", icon: Send },
       { to: "/admin/cards", label: "Cards", icon: CreditCard },
+      { to: "/admin/business-spend-cards", label: "Business Spend Cards", icon: CreditCard },
       { to: "/admin/crypto", label: "Crypto wallets", icon: Coins },
     ],
   },

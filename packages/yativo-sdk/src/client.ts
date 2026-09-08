@@ -10,6 +10,7 @@ import { createPaymentMethodsResource } from "./fiat/paymentMethods.js";
 import { createPayoutsResource } from "./fiat/payouts.js";
 import { createQuotesResource } from "./fiat/quotes.js";
 import { createCardsResource as createFiatCardsResource } from "./fiat/cards.js";
+import { createSpendCardsResource } from "./fiat/spendCards.js";
 import { createGiftCardsResource } from "./fiat/giftCards.js";
 import { createBeneficiariesResource } from "./fiat/beneficiaries.js";
 import { createTransactionsResource } from "./fiat/transactions.js";
@@ -203,6 +204,7 @@ export interface YativoClient {
     payouts: ReturnType<typeof createPayoutsResource>;
     quotes: ReturnType<typeof createQuotesResource>;
     cards: ReturnType<typeof createFiatCardsResource>;
+    spendCards: ReturnType<typeof createSpendCardsResource>;
     giftCards: ReturnType<typeof createGiftCardsResource>;
     beneficiaries: ReturnType<typeof createBeneficiariesResource>;
     transactions: ReturnType<typeof createTransactionsResource>;
@@ -245,6 +247,7 @@ export function createYativoClient(config: YativoConfig): YativoClient {
       payouts: createPayoutsResource(ctx),
       quotes: createQuotesResource(ctx),
       cards: createFiatCardsResource(ctx),
+      spendCards: createSpendCardsResource(ctx),
       giftCards: createGiftCardsResource(ctx),
       beneficiaries: createBeneficiariesResource(ctx),
       transactions: createTransactionsResource(ctx),

@@ -50,12 +50,38 @@ export async function bootstrapPlatformData(prisma: PrismaClient): Promise<void>
   });
 
   // Free (zero-fee, standalone) until an admin sets real pricing from Settings → Pricing.
-  const pricingServices: PricingServiceType[] = ["PAYIN", "PAYOUT", "VIRTUAL_ACCOUNT_DEPOSIT", "CARD_CREATE", "CARD_FUND", "CARD_WITHDRAW", "CARD_TERMINATE"];
+  const pricingServices: PricingServiceType[] = [
+    "PAYIN",
+    "PAYOUT",
+    "VIRTUAL_ACCOUNT_DEPOSIT",
+    "CARD_CREATE",
+    "CARD_FUND",
+    "CARD_WITHDRAW",
+    "CARD_TERMINATE",
+    "BUSINESS_SPEND_CARD_CREATE",
+    "BUSINESS_SPEND_CARD_FUND",
+    "BUSINESS_SPEND_CARD_WITHDRAW",
+    "BUSINESS_SPEND_CARD_TERMINATE",
+    "BUSINESS_SPEND_CARD_ACTIVATE",
+    "BUSINESS_SPEND_CARD_SUSPEND",
+    "BUSINESS_SPEND_CARD_PIN_UPDATE",
+    "BUSINESS_SPEND_CARD_LIMITS_UPDATE",
+  ];
   for (const service of pricingServices) {
+    // Business Spend Card withdrawals aren't free by accident (per the provider's own guide, this
+    // action carries a platform-wide default fee starting at $1.00, admin-adjustable and still
+    // overridable per business from Settings → Pricing) — every other service here still starts
+    // at zero/standalone until an admin sets real pricing. STANDALONE, not MARKUP: unlike the
+    // older card product's withdraw, Yativo's spend-card wallet endpoint never reports its own fee
+    // back to us, so there's nothing to mark a fee up on top of here.
+    const create =
+      service === "BUSINESS_SPEND_CARD_WITHDRAW"
+        ? { service, feeType: "FIXED" as const, pricingMode: "STANDALONE" as const, fixedAmountMinor: 100n }
+        : { service };
     await prisma.pricingDefault.upsert({
       where: { service },
       update: {},
-      create: { service },
+      create,
     });
   }
 }

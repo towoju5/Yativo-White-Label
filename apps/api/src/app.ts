@@ -32,6 +32,8 @@ import { virtualAccountsRoutes } from "./modules/virtualAccounts/virtualAccounts
 import { kycRoutes } from "./modules/kyc/kyc.routes.js";
 import { portalCardsRoutes } from "./modules/cards/portalCards.routes.js";
 import { adminCardsRoutes } from "./modules/cards/adminCards.routes.js";
+import { portalBusinessSpendCardsRoutes } from "./modules/businessSpendCards/portalBusinessSpendCards.routes.js";
+import { adminBusinessSpendCardsRoutes } from "./modules/businessSpendCards/adminBusinessSpendCards.routes.js";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.routes.js";
 import { apiKeysRoutes } from "./modules/apiKeys/apiKeys.routes.js";
 import { reconciliationRoutes } from "./modules/reconciliation/reconciliation.routes.js";
@@ -148,6 +150,8 @@ export async function buildApp() {
   await app.register(kycRoutes);
   await app.register(portalCardsRoutes);
   await app.register(adminCardsRoutes);
+  await app.register(portalBusinessSpendCardsRoutes);
+  await app.register(adminBusinessSpendCardsRoutes);
   await app.register(dashboardRoutes);
   await app.register(apiKeysRoutes);
   await app.register(reconciliationRoutes);

@@ -6,6 +6,7 @@ export * from "./wallet.schema.js";
 export * from "./transaction.schema.js";
 export * from "./payout.schema.js";
 export * from "./card.schema.js";
+export * from "./businessSpendCard.schema.js";
 export * from "./branding.schema.js";
 export * from "./auth.schema.js";
 export * from "./ops.schema.js";

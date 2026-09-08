@@ -1,9 +1,16 @@
 import type { PrismaClient } from "@prisma/client";
-import { depositEventPayloadSchema, payoutEventPayloadSchema, virtualAccountDepositPayloadSchema, virtualCardDeactivatedPayloadSchema } from "@white-label/yativo-sdk";
+import {
+  depositEventPayloadSchema,
+  payoutEventPayloadSchema,
+  virtualAccountDepositPayloadSchema,
+  virtualCardDeactivatedPayloadSchema,
+  businessSpendCardEventPayloadSchema,
+} from "@white-label/yativo-sdk";
 import { handleDepositEvent } from "./handlers/deposit.handler.js";
 import { handlePayoutEvent } from "./handlers/payout.handler.js";
 import { handleVirtualAccountDeposit } from "./handlers/virtualAccountDeposit.handler.js";
 import { handleVirtualCardDeactivated } from "./handlers/card.handler.js";
+import { handleBusinessSpendCardEvent } from "./handlers/businessSpendCard.handler.js";
 import type { WebhookHandlerResult } from "./handlers/result.js";
 
 /** Dispatches a persisted WebhookEvent to the handler for its eventType. Unrecognized event types are IGNORED, not FAILED. */
@@ -23,6 +30,15 @@ export async function dispatchWebhookEvent(
       return handleVirtualAccountDeposit(prisma, virtualAccountDepositPayloadSchema.parse(payload), externalEventId);
     case "virtualcard.deactivated":
       return handleVirtualCardDeactivated(prisma, virtualCardDeactivatedPayloadSchema.parse(payload));
+    case "business_spend_card.created":
+    case "business_spend_card.activated":
+    case "business_spend_card.suspended":
+    case "business_spend_card.terminated":
+    case "business_spend_card.funded":
+    case "business_spend_card.withdrawn":
+    case "business_spend_card.pin_updated":
+    case "business_spend_card.limits_updated":
+      return handleBusinessSpendCardEvent(prisma, eventType, businessSpendCardEventPayloadSchema.parse(payload));
     // Recognized but not yet acted on — recorded (see yativo.routes.ts) so they're visible in the
     // admin webhook log, but this app has no business logic wired up for them today. In particular
     // the other virtualcard.* transaction/topup/withdrawal events are deliberately left unhandled

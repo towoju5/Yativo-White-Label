@@ -4,7 +4,7 @@ export const WALLET_CURRENCY_MODES = ["DEFAULT_ONLY", "SELF_SERVICE", "ALL_AUTOM
 export const walletCurrencyModeSchema = z.enum(WALLET_CURRENCY_MODES);
 export type WalletCurrencyMode = z.infer<typeof walletCurrencyModeSchema>;
 
-export const KYC_REQUIRED_SERVICES = ["DEPOSIT", "VIRTUAL_ACCOUNT", "PAYOUT", "CARD", "BENEFICIARY", "CRYPTO_WALLET"] as const;
+export const KYC_REQUIRED_SERVICES = ["DEPOSIT", "VIRTUAL_ACCOUNT", "PAYOUT", "CARD", "BENEFICIARY", "CRYPTO_WALLET", "BUSINESS_SPEND_CARD"] as const;
 export const kycRequiredServiceSchema = z.enum(KYC_REQUIRED_SERVICES);
 export type KycRequiredService = z.infer<typeof kycRequiredServiceSchema>;
 

@@ -25,6 +25,7 @@ import PortalCryptoWalletsPage from "@/pages/portal/crypto/CryptoWalletsPage";
 import VirtualAccountsPage from "@/pages/portal/virtualAccounts/VirtualAccountsPage";
 import BeneficiariesPage from "@/pages/portal/beneficiaries/BeneficiariesPage";
 import PortalCardsPage from "@/pages/portal/cards/CardsPage";
+import PortalBusinessSpendCardsPage from "@/pages/portal/businessSpendCards/CardsPage";
 import ProfilePage from "@/pages/portal/profile/ProfilePage";
 import PortalSettingsPage from "@/pages/portal/settings/SettingsPage";
 import KycWizardPage from "@/pages/portal/kyc/KycWizardPage";
@@ -37,6 +38,7 @@ import EndorsementsPage from "@/pages/admin/customers/EndorsementsPage";
 import TransactionsPage from "@/pages/admin/transactions/TransactionsPage";
 import AdminPayoutsPage from "@/pages/admin/payouts/PayoutsPage";
 import AdminCardsPage from "@/pages/admin/cards/CardsPage";
+import AdminBusinessSpendCardsPage from "@/pages/admin/businessSpendCards/CardsPage";
 import TeamPage from "@/pages/admin/team/TeamPage";
 import RolesPage from "@/pages/admin/roles/RolesPage";
 import WebhooksPage from "@/pages/admin/webhooks/WebhooksPage";
@@ -102,6 +104,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "virtual-accounts", element: <VirtualAccountsPage /> },
               { path: "beneficiaries", element: <BeneficiariesPage /> },
               { path: "cards", element: <PortalCardsPage /> },
+              { path: "business-spend-cards", element: <PortalBusinessSpendCardsPage /> },
               { path: "profile", element: <ProfilePage /> },
               { path: "settings", element: <PortalSettingsPage /> },
               { path: "team", element: <PortalTeamPage /> },
@@ -130,6 +133,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "transactions", element: <TransactionsPage /> },
               { path: "payouts", element: <AdminPayoutsPage /> },
               { path: "cards", element: <AdminCardsPage /> },
+              { path: "business-spend-cards", element: <AdminBusinessSpendCardsPage /> },
               { path: "team", element: <TeamPage /> },
               { path: "roles", element: <RolesPage /> },
               { path: "webhooks", element: <WebhooksPage /> },

@@ -11,6 +11,7 @@ export * from "./fiat/currencies.js";
 export * from "./fiat/payouts.js";
 export * from "./fiat/quotes.js";
 export * from "./fiat/cards.js";
+export * from "./fiat/spendCards.js";
 export * from "./fiat/giftCards.js";
 export * from "./fiat/beneficiaries.js";
 export * from "./fiat/transactions.js";

@@ -26,6 +26,7 @@ const SERVICE_LABELS: Record<KycRequiredService, { title: string; description: s
   CARD: { title: "Cards", description: "Issuing a new virtual card" },
   BENEFICIARY: { title: "Beneficiaries", description: "Adding a new payout recipient" },
   CRYPTO_WALLET: { title: "Crypto wallets", description: "Generating a crypto deposit address" },
+  BUSINESS_SPEND_CARD: { title: "Business Spend Cards", description: "Issuing a new Business Spend Card" },
 };
 
 export default function VerificationSettingsPage() {

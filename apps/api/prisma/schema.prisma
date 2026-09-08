@@ -51,6 +51,7 @@ enum KycRequiredService {
   CARD
   BENEFICIARY
   CRYPTO_WALLET
+  BUSINESS_SPEND_CARD
 }
 
 // PER_CUSTOMER: every platform customer gets their own Yativo customer_id (created on first use,
@@ -71,7 +72,7 @@ model PlatformSettings {
   defaultCurrency        Currency             @relation(fields: [defaultCurrencyCode], references: [code])
   // Defaults to every service requiring KYC — matches this app's original hardcoded behavior,
   // so a migration never silently relaxes a security check nobody asked to relax.
-  kycRequiredServices    KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET])
+  kycRequiredServices    KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET, BUSINESS_SPEND_CARD])
   yativoCustomerMode     YativoCustomerMode   @default(PER_CUSTOMER)
   // Only meaningful when yativoCustomerMode = POOLED.
   pooledYativoCustomerId String?
@@ -284,6 +285,7 @@ model Customer {
   accounts         Account[]
   beneficiaries    Beneficiary[]
   cards            Card[]
+  businessSpendCards BusinessSpendCard[]
   refreshTokens    CustomerRefreshToken[]
   payouts          Payout[]
   passkeys         CustomerPasskey[]
@@ -554,6 +556,31 @@ model Card {
   @@map("cards")
 }
 
+// ── Business Spend Card — a separate product from Card above (different Yativo product, one
+// cardholder per card, business customers only; see modules/businessSpendCards). Maps to Yativo's
+// own ACTIVE/SUSPEND/FORGET card statuses.
+enum BusinessSpendCardStatus {
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+model BusinessSpendCard {
+  id             String                  @id @default(cuid())
+  customerId     String
+  customer       Customer                @relation(fields: [customerId], references: [id])
+  yativoCardId   String
+  issuanceType   CardTypeEnum            @default(VIRTUAL)
+  status         BusinessSpendCardStatus @default(ACTIVE)
+  maskedPan      String?
+  expirationDate String?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@index([customerId])
+  @@map("business_spend_cards")
+}
+
 // ── Ops / platform ────────────────────────────────────────────────────────
 
 enum WebhookProcessingStatus {
@@ -654,6 +681,10 @@ enum EmailNotificationType {
   CARD_UNFROZEN
   CARD_TERMINATED
   CARD_TRANSACTION
+  BUSINESS_SPEND_CARD_ISSUED
+  BUSINESS_SPEND_CARD_ACTIVATED
+  BUSINESS_SPEND_CARD_SUSPENDED
+  BUSINESS_SPEND_CARD_TERMINATED
   SWAP_COMPLETED
   TWO_FACTOR_ENABLED
   TWO_FACTOR_DISABLED
@@ -719,6 +750,14 @@ enum PricingServiceType {
   CARD_FUND
   CARD_WITHDRAW
   CARD_TERMINATE
+  BUSINESS_SPEND_CARD_CREATE
+  BUSINESS_SPEND_CARD_FUND
+  BUSINESS_SPEND_CARD_WITHDRAW
+  BUSINESS_SPEND_CARD_TERMINATE
+  BUSINESS_SPEND_CARD_ACTIVATE
+  BUSINESS_SPEND_CARD_SUSPEND
+  BUSINESS_SPEND_CARD_PIN_UPDATE
+  BUSINESS_SPEND_CARD_LIMITS_UPDATE
 }
 
 enum FeeType {

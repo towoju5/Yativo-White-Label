@@ -26,6 +26,10 @@ const customerDataSchema = z
     customer_kyc_status: z.string().nullable().optional(),
     kyc_verified_date: z.string().nullable().optional(),
     endorsement: z.array(endorsementSchema).optional(),
+    // Confirmed against the Business Spend Card guide — gates card creation independently of the
+    // virtual_card endorsement above; not used by the older virtual-card product, so this was
+    // never modeled here before.
+    can_create_vc: z.boolean().optional(),
   })
   .passthrough();
 
@@ -43,6 +47,7 @@ export const fiatCustomerSchema = z.object({
   status: z.string(),
   kycStatus: z.string().nullable(),
   kycVerifiedAt: z.string().nullable(),
+  canCreateVc: z.boolean().optional(),
 });
 export type FiatCustomer = z.infer<typeof fiatCustomerSchema> & { endorsements: FiatCustomerEndorsement[] };
 
@@ -66,6 +71,7 @@ function toFiatCustomer(data: z.infer<typeof customerDataSchema>): FiatCustomer 
     status: data.customer_status ?? "active",
     kycStatus: data.customer_kyc_status ?? null,
     kycVerifiedAt: data.kyc_verified_date ?? null,
+    canCreateVc: data.can_create_vc,
     endorsements: (data.endorsement ?? []).map((e) => ({
       service: normalizeServiceName(e.service),
       status: e.status,
