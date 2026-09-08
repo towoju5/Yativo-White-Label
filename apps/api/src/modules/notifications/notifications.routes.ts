@@ -66,11 +66,18 @@ export async function notificationsRoutes(app: FastifyInstance) {
 
   server.post(
     "/admin/settings/email-templates/:type/test",
-    { preHandler: requireStaffAuth, schema: { params: typeParam, response: { 204: z.void() } } },
+    {
+      preHandler: requireStaffAuth,
+      schema: { params: typeParam, body: z.object({ to: z.string().email().optional() }).optional(), response: { 204: z.void() } },
+    },
     async (request, reply) => {
-      const staffUser = await app.prisma.staffUser.findUniqueOrThrow({ where: { id: request.staffUser!.sub } });
+      let to = request.body?.to;
+      if (!to) {
+        const staffUser = await app.prisma.staffUser.findUniqueOrThrow({ where: { id: request.staffUser!.sub } });
+        to = staffUser.email;
+      }
       const { subject, html } = await renderSampleEmail(app.prisma, request.params.type);
-      await sendMail({ to: staffUser.email, subject: `[Test] ${subject}`, html });
+      await sendMail({ to, subject: `[Test] ${subject}`, html });
       return reply.code(204).send();
     },
   );

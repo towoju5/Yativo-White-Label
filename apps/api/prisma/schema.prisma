@@ -53,16 +53,29 @@ enum KycRequiredService {
   CRYPTO_WALLET
 }
 
+// PER_CUSTOMER: every platform customer gets their own Yativo customer_id (created on first use,
+// requires that customer's own phone/country from KYC) — the original, default behavior.
+// POOLED: every platform customer transacts under one admin-provided Yativo customer_id — no
+// per-customer registration or Yativo-side KYC. See ensureYativoCustomer.ts and
+// requireKycApproved.ts for where this is actually enforced.
+enum YativoCustomerMode {
+  PER_CUSTOMER
+  POOLED
+}
+
 /// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
 model PlatformSettings {
-  id                  Int                  @id @default(1)
-  walletCurrencyMode  WalletCurrencyMode   @default(DEFAULT_ONLY)
-  defaultCurrencyCode String               @db.Char(3)
-  defaultCurrency     Currency             @relation(fields: [defaultCurrencyCode], references: [code])
+  id                     Int                  @id @default(1)
+  walletCurrencyMode     WalletCurrencyMode   @default(DEFAULT_ONLY)
+  defaultCurrencyCode    String               @db.Char(3)
+  defaultCurrency        Currency             @relation(fields: [defaultCurrencyCode], references: [code])
   // Defaults to every service requiring KYC — matches this app's original hardcoded behavior,
   // so a migration never silently relaxes a security check nobody asked to relax.
-  kycRequiredServices KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET])
-  updatedAt           DateTime             @updatedAt
+  kycRequiredServices    KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET])
+  yativoCustomerMode     YativoCustomerMode   @default(PER_CUSTOMER)
+  // Only meaningful when yativoCustomerMode = POOLED.
+  pooledYativoCustomerId String?
+  updatedAt              DateTime             @updatedAt
 
   @@map("platform_settings")
 }
@@ -196,6 +209,27 @@ model Wallet {
   @@map("wallets")
 }
 
+/// Local record of a customer's provisioned virtual account (see modules/virtualAccounts).
+/// Primarily exists so the virtual_account.deposit webhook can attribute an incoming deposit to
+/// the right customer via `identifiers` (a JSON blob of every field Yativo returned for this
+/// account at creation time — the specific field naming the account number varies by
+/// country/rail, e.g. accountNumber/iban/clabe/pixKey, so this stores all of them rather than
+/// betting on one) instead of Yativo's customer_id — required once yativoCustomerMode = POOLED
+/// makes customer_id ambiguous (shared by every customer), and a strictly safer lookup even in
+/// PER_CUSTOMER mode.
+model VirtualAccount {
+  id              String   @id @default(cuid())
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  currencyCode    String
+  yativoAccountId String   @unique
+  identifiers     Json
+  createdAt       DateTime @default(now())
+
+  @@index([customerId])
+  @@map("virtual_accounts")
+}
+
 // ── Customers (end users of the reseller — portal auth) ─────────────────
 
 enum CustomerType {
@@ -252,9 +286,10 @@ model Customer {
   refreshTokens    CustomerRefreshToken[]
   payouts          Payout[]
   passkeys         CustomerPasskey[]
-  teamMembers      CustomerTeamMember[] @relation("TeamMembers")
+  teamMembers      CustomerTeamMember[]   @relation("TeamMembers")
   pricingOverrides PricingOverride[]
   deposits         Deposit[]
+  virtualAccounts  VirtualAccount[]
 
   @@map("customers")
 }

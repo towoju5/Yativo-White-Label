@@ -1,5 +1,5 @@
 import type { Currency, PlatformSettings, PrismaClient } from "@prisma/client";
-import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput } from "@white-label/shared-types";
+import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput, UpdateYativoCustomerModeInput } from "@white-label/shared-types";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 
@@ -21,6 +21,8 @@ function settingsToDto(s: PlatformSettings) {
     walletCurrencyMode: s.walletCurrencyMode,
     defaultCurrencyCode: s.defaultCurrencyCode,
     kycRequiredServices: s.kycRequiredServices,
+    yativoCustomerMode: s.yativoCustomerMode,
+    pooledYativoCustomerId: s.pooledYativoCustomerId,
     updatedAt: s.updatedAt.toISOString(),
   };
 }
@@ -65,6 +67,35 @@ export async function updatePlatformSettings(prisma: PrismaClient, input: Update
 export async function updateKycRequirements(prisma: PrismaClient, input: UpdateKycRequirementsInput) {
   const settings = await prisma.platformSettings.update({ where: { id: 1 }, data: { kycRequiredServices: input.kycRequiredServices } });
   return settingsToDto(settings);
+}
+
+/**
+ * Switches between per-customer Yativo registration and one shared, admin-provided customer_id
+ * for everyone (see YativoCustomerMode). `migrateExisting: true` additionally re-points every
+ * customer's yativoCustomerId to the pooled one, including customers who already had their own —
+ * an explicit, opt-in bulk action (never implied by just switching the mode) since it overwrites
+ * data that can't be recovered from this app alone.
+ */
+export async function updateYativoCustomerMode(prisma: PrismaClient, input: UpdateYativoCustomerModeInput) {
+  if (input.mode === "POOLED" && !input.pooledYativoCustomerId) {
+    throw new AppError("A pooled Yativo customer ID is required to enable pooled mode.", 400, "POOLED_YATIVO_CUSTOMER_ID_REQUIRED");
+  }
+
+  const settings = await prisma.platformSettings.update({
+    where: { id: 1 },
+    data: {
+      yativoCustomerMode: input.mode,
+      pooledYativoCustomerId: input.mode === "POOLED" ? input.pooledYativoCustomerId : null,
+    },
+  });
+
+  let migratedCount = 0;
+  if (input.mode === "POOLED" && input.migrateExisting) {
+    const result = await prisma.customer.updateMany({ data: { yativoCustomerId: input.pooledYativoCustomerId } });
+    migratedCount = result.count;
+  }
+
+  return { settings: settingsToDto(settings), migratedCount };
 }
 
 export async function setCurrencyEnabled(prisma: PrismaClient, code: string, isEnabledForCustomers: boolean) {

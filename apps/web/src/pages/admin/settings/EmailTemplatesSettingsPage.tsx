@@ -21,6 +21,7 @@ const GROUPS = Array.from(new Set(EMAIL_NOTIFICATION_CATALOG.map((c) => c.group)
 const SAMPLE_VARS: Record<string, string> = {
   firstName: "Alex",
   productName: "Your Product",
+  supportEmail: "support@example.com",
   reason: "Document image was too blurry to read",
   amount: "250.00",
   currency: "USD",
@@ -47,6 +48,7 @@ export default function EmailTemplatesSettingsPage() {
   const [selectedType, setSelectedType] = useState<EmailNotificationType>(EMAIL_NOTIFICATION_CATALOG[0]!.type);
   const [subject, setSubject] = useState("");
   const [bodyHtml, setBodyHtml] = useState("");
+  const [testEmail, setTestEmail] = useState("");
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ["admin", "email-templates"],
@@ -73,8 +75,8 @@ export default function EmailTemplatesSettingsPage() {
   });
 
   const testMutation = useMutation({
-    mutationFn: () => staffApi.post(`/admin/settings/email-templates/${selectedType}/test`),
-    onSuccess: () => toast({ title: "Test email sent", description: "Check your staff account's inbox." }),
+    mutationFn: () => staffApi.post(`/admin/settings/email-templates/${selectedType}/test`, testEmail ? { to: testEmail } : undefined),
+    onSuccess: () => toast({ title: "Test email sent", description: testEmail ? `Sent to ${testEmail}.` : "Check your staff account's inbox." }),
     onError: (e) => toast({ variant: "destructive", title: "Couldn't send test email", description: e instanceof ApiError ? e.message : undefined }),
   });
 
@@ -126,7 +128,7 @@ export default function EmailTemplatesSettingsPage() {
               {catalogEntry.variables.length > 0 && (
                 <span className="mt-1 block">
                   Available variables:{" "}
-                  {["firstName", "productName", ...catalogEntry.variables].map((v) => (
+                  {["firstName", "productName", "supportEmail", ...catalogEntry.variables].map((v) => (
                     <code key={v} className="mr-1 rounded bg-muted px-1 py-0.5 text-xs">{`{{${v}}}`}</code>
                   ))}
                 </span>
@@ -157,10 +159,19 @@ export default function EmailTemplatesSettingsPage() {
               </TabsContent>
             </Tabs>
 
-            <div className="flex items-center justify-between border-t border-border pt-4">
-              <Button variant="outline" onClick={() => testMutation.mutate()} disabled={testMutation.isPending}>
-                <Send className="h-4 w-4" /> {testMutation.isPending ? "Sending…" : "Send test email"}
-              </Button>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="email"
+                  placeholder="Send to (defaults to your own email)"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  className="w-64"
+                />
+                <Button variant="outline" onClick={() => testMutation.mutate()} disabled={testMutation.isPending}>
+                  <Send className="h-4 w-4" /> {testMutation.isPending ? "Sending…" : "Send test email"}
+                </Button>
+              </div>
               <Button
                 onClick={() => saveMutation.mutate()}
                 disabled={!canEdit || saveMutation.isPending}

@@ -17,13 +17,22 @@ export async function handleVirtualAccountDeposit(prisma: PrismaClient, payload:
   if (payload.status !== "success") {
     return { status: "IGNORED", errorMessage: `Virtual account deposit status is ${payload.status}, not success — no ledger entry posted` };
   }
-  if (!payload.yativoCustomerId) {
-    return { status: "FAILED", errorMessage: "Payload has no customer.customer_id" };
+  // Resolved via the local VirtualAccount record first, not Yativo's customer_id — that lookup is
+  // ambiguous once yativoCustomerMode = POOLED makes customer_id the same for every platform
+  // customer. `identifiers` is searched as text rather than matched on one known key because the
+  // field actually naming the account number in Yativo's own API varies by country/rail.
+  let customer = null as Awaited<ReturnType<typeof prisma.customer.findFirst>>;
+  if (payload.accountNumber) {
+    const matches = await prisma.$queryRaw<{ customerId: string }[]>`
+      SELECT "customerId" FROM virtual_accounts WHERE identifiers::text ILIKE ${"%" + payload.accountNumber + "%"} LIMIT 1
+    `;
+    if (matches[0]) customer = await prisma.customer.findUnique({ where: { id: matches[0].customerId } });
   }
-
-  const customer = await prisma.customer.findFirst({ where: { yativoCustomerId: payload.yativoCustomerId } });
+  if (!customer && payload.yativoCustomerId) {
+    customer = await prisma.customer.findFirst({ where: { yativoCustomerId: payload.yativoCustomerId } });
+  }
   if (!customer) {
-    return { status: "FAILED", errorMessage: `No customer found for yativoCustomerId ${payload.yativoCustomerId}` };
+    return { status: "FAILED", errorMessage: `No customer found for virtual account deposit (account ${payload.accountNumber ?? "unknown"})` };
   }
 
   const currency = await prisma.currency.findUnique({ where: { code: payload.currencyCode } });

@@ -2,6 +2,7 @@ import type { Customer, PrismaClient } from "@prisma/client";
 import { YativoApiError, parseYativoErrorMessage } from "@white-label/yativo-sdk";
 import { AppError } from "./errors.js";
 import { yativoClient } from "./yativoClient.js";
+import { getPlatformSettings } from "../modules/platformSettings/platformSettings.service.js";
 import logger from "./logger.js";
 
 /**
@@ -16,6 +17,11 @@ import logger from "./logger.js";
  * submission flow supply them on first use; everything else relies on
  * `phone`/`countryCode` already being on the Customer row from a prior KYC
  * submission.
+ *
+ * In POOLED mode (PlatformSettings.yativoCustomerMode) every customer is
+ * assigned the same admin-provided customer_id instead — no Yativo API call,
+ * no phone/country requirement. See modules/platformSettings for the toggle
+ * and requireKycApproved.ts for the matching local-KYC bypass.
  */
 export async function ensureYativoCustomer(
   prisma: PrismaClient,
@@ -24,6 +30,17 @@ export async function ensureYativoCustomer(
   options?: { force?: boolean },
 ): Promise<string> {
   if (customer.yativoCustomerId && !options?.force) return customer.yativoCustomerId;
+
+  const settings = await getPlatformSettings(prisma);
+  if (settings.yativoCustomerMode === "POOLED") {
+    if (!settings.pooledYativoCustomerId) {
+      throw new AppError("Pooled Yativo customer mode is on but no customer ID is configured.", 409, "POOLED_YATIVO_CUSTOMER_ID_MISSING");
+    }
+    if (customer.yativoCustomerId !== settings.pooledYativoCustomerId) {
+      await prisma.customer.update({ where: { id: customer.id }, data: { yativoCustomerId: settings.pooledYativoCustomerId } });
+    }
+    return settings.pooledYativoCustomerId;
+  }
 
   const phone = overrides?.phone ?? customer.phone;
   const countryIso3 = overrides?.countryIso3 ?? customer.countryCode;
@@ -74,7 +91,10 @@ export async function ensureYativoCustomer(
  * a Yativo outage here must not block login or KYC approval, so failures are logged and swallowed.
  */
 export async function tryEnsureYativoCustomer(prisma: PrismaClient, customer: Customer): Promise<void> {
-  if (customer.yativoCustomerId || !customer.phone || !customer.countryCode) return;
+  if (customer.yativoCustomerId) return;
+  const settings = await getPlatformSettings(prisma);
+  // POOLED mode needs neither phone nor country — every other path still does.
+  if (settings.yativoCustomerMode !== "POOLED" && (!customer.phone || !customer.countryCode)) return;
   try {
     await ensureYativoCustomer(prisma, customer);
   } catch (err) {

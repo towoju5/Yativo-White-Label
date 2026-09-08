@@ -3,7 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { requirePermission, requireStaffAuth } from "../../middleware/requireStaffAuth.js";
 import { decryptCredential, encryptCredential } from "../../lib/credentialEncryption.js";
-import { applyIntegrationSettings, type IntegrationSettings } from "../../lib/integrationRuntimeConfig.js";
+import { applyIntegrationSettings, syncWebhookSecretIfRotated, type IntegrationSettings } from "../../lib/integrationRuntimeConfig.js";
 import { env } from "../../config/env.js";
 
 const SETTINGS_KEY = "platform-integrations";
@@ -114,6 +114,23 @@ export async function platformIntegrationsRoutes(app: FastifyInstance) {
       ]);
       applyIntegrationSettings(next as IntegrationSettings);
       return reply.send(safe(next));
+    },
+  );
+
+  // Manual fallback for syncWebhookSecretIfRotated's automatic trigger (webhooks/yativo.routes.ts)
+  // — useful right after a rotation whose one-time `webhook_updated` notification already arrived
+  // and was rejected (e.g. before this app knew to check for it), so there's nothing left to
+  // trigger the automatic path until another real event happens to arrive. This pulls the current
+  // secret straight from Yativo's authenticated business-webhook API on demand instead of waiting.
+  server.post(
+    "/admin/settings/integrations/sync-webhook-secret",
+    {
+      preHandler: [requireStaffAuth, requirePermission("api_keys.manage")],
+      schema: { response: { 200: z.object({ rotated: z.boolean() }) } },
+    },
+    async (_request, reply) => {
+      const rotated = await syncWebhookSecretIfRotated(app.prisma);
+      return reply.send({ rotated });
     },
   );
 }

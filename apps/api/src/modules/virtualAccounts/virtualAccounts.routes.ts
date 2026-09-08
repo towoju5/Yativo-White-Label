@@ -91,6 +91,20 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
       }
 
       const account = await yativoClient.fiat.virtualAccounts.getOrCreate(yativoCustomerId, request.body.currency);
+
+      // Recorded locally so the virtual_account.deposit webhook can attribute an incoming deposit
+      // to this customer via account-number matching instead of Yativo's customer_id — required
+      // once yativoCustomerMode = POOLED makes customer_id the same for every customer. `identifiers`
+      // stores the whole flattened response since the field actually naming the account number
+      // varies by country/rail (accountNumber/iban/clabe/pixKey/...).
+      if (account.accountId) {
+        await app.prisma.virtualAccount.upsert({
+          where: { yativoAccountId: account.accountId },
+          update: { identifiers: account },
+          create: { customerId: customer.id, currencyCode: request.body.currency, yativoAccountId: account.accountId, identifiers: account },
+        });
+      }
+
       return reply.send(account);
     },
   );

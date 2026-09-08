@@ -19,9 +19,17 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
     return { status: "IGNORED", errorMessage: `Deposit status is ${payload.status}, not success — no ledger entry posted` };
   }
 
-  const customer = await prisma.customer.findFirst({ where: { yativoCustomerId: payload.yativoCustomerId } });
+  // Resolved via the local Deposit row (recorded at /portal/deposit/initiate) first, not Yativo's
+  // customer_id — that's the only attribution that still works once yativoCustomerMode = POOLED
+  // makes customer_id the same for every platform customer. Falls back to the customer_id lookup
+  // only for a deposit this app never initiated a local record for (shouldn't normally happen for
+  // deposit.created/updated specifically, since every payin goes through that route first).
+  const payinRecord = await prisma.deposit.findUnique({ where: { yativoDepositId: payload.yativoDepositId } });
+  const customer = payinRecord
+    ? await prisma.customer.findUnique({ where: { id: payinRecord.customerId } })
+    : await prisma.customer.findFirst({ where: { yativoCustomerId: payload.yativoCustomerId } });
   if (!customer) {
-    return { status: "FAILED", errorMessage: `No customer found for yativoCustomerId ${payload.yativoCustomerId}` };
+    return { status: "FAILED", errorMessage: `No customer found for deposit ${payload.yativoDepositId}` };
   }
 
   const currency = await prisma.currency.findUnique({ where: { code: payload.currencyCode } });
@@ -48,12 +56,7 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
     ],
   });
 
-  // A previously-recorded local Deposit row (created at /portal/deposit/initiate) is how this app
-  // knows this is a PAYIN — it also carries Yativo's own quoted fee, captured at initiation time,
-  // for markup pricing. There's no such row for an unsolicited virtual-account transfer, but those
-  // arrive as a separate `virtual_account.deposit` event now (see virtualAccountDeposit.handler.ts),
-  // not through this handler at all.
-  const payinRecord = await prisma.deposit.findUnique({ where: { yativoDepositId: payload.yativoDepositId } });
+  // payinRecord also carries Yativo's own quoted fee, captured at initiation time, for markup pricing.
   const upstreamFeeMinor = payinRecord?.yativoFeeMinor ?? 0n;
 
   const feeMinor = await getEffectiveFee(prisma, "PAYIN", customer.id, amountMinor, upstreamFeeMinor);

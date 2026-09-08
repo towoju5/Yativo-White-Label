@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Copy } from "lucide-react";
+import { Copy, RefreshCw } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -95,6 +95,20 @@ export default function IntegrationsSettingsPage() {
     toast({ title: "Copied to clipboard" });
   };
 
+  const syncSecretMutation = useMutation({
+    mutationFn: () => staffApi.post<{ rotated: boolean }>("/admin/settings/integrations/sync-webhook-secret"),
+    onSuccess: ({ rotated }) => {
+      toast({
+        title: rotated ? "Webhook secret updated" : "Already up to date",
+        description: rotated
+          ? "Pulled the current secret from Yativo — signature verification should work again."
+          : "Yativo reports the same secret this app already has configured.",
+      });
+      if (rotated) setConfig((c) => ({ ...c, yativo: { ...c.yativo, webhookSecretConfigured: true } }));
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't sync webhook secret", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -129,6 +143,19 @@ export default function IntegrationsSettingsPage() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">Register this URL on the Yativo dashboard so it can deliver events to this platform.</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Webhook signature</Label>
+            <div>
+              <Button type="button" variant="outline" size="sm" onClick={() => syncSecretMutation.mutate()} disabled={syncSecretMutation.isPending}>
+                <RefreshCw className={syncSecretMutation.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"} /> Sync secret from Yativo
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              If deliveries are failing signature verification (e.g. after rotating the secret on Yativo's dashboard), this pulls the current one
+              directly from Yativo's API and saves it here — no need to copy/paste it manually.
+            </p>
           </div>
 
           <div className="space-y-1.5">

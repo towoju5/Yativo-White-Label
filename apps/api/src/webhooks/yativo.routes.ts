@@ -82,12 +82,13 @@ function deriveExternalEventId(eventType: string, payload: Record<string, unknow
   return `${eventType}:${createHash("sha256").update(JSON.stringify(payload)).digest("hex")}`;
 }
 
-/** True when a body superficially looks like Yativo's `webhook_updated` notification (sent on registration and on every secret rotation) — used only to decide whether it's worth the extra round-trip to Yativo's business API to check for a rotated secret, never to trust the secret it claims directly. */
-function looksLikeWebhookUpdated(body: unknown): boolean {
-  if (typeof body !== "object" || body === null) return false;
-  const record = body as Record<string, unknown>;
-  return record["event.type"] === "webhook_updated" && typeof record.payload === "object" && record.payload !== null && typeof (record.payload as Record<string, unknown>).secret === "string";
-}
+// Throttles how often a signature failure triggers the extra round-trip to Yativo's business API
+// (see syncWebhookSecretIfRotated) — every genuinely-invalid delivery (a stale retry, a stray
+// probe) would otherwise trigger one every single time, forever, for no benefit once the secret is
+// confirmed current. Module-level is fine: this is a per-process cooldown, not a correctness
+// guarantee — worst case on a multi-instance deploy is a few redundant calls, never a missed sync.
+let lastSecretSyncAttemptAt = 0;
+const SECRET_SYNC_COOLDOWN_MS = 30_000;
 
 export async function webhookRoutes(app: FastifyInstance) {
   // `app.register(webhookRoutes)` creates its own encapsulated Fastify context, so this
@@ -123,13 +124,17 @@ export async function webhookRoutes(app: FastifyInstance) {
 
       let signatureValid = !!signature && verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret);
 
-      // A webhook_updated notification failing verification is the one case that's expected on a
-      // legitimate secret rotation (the notification announcing the new secret is itself signed
-      // with that new secret, which we don't have yet) — worth an extra round-trip to Yativo's
-      // authenticated business-webhook API to check, then re-verifying against whatever it confirms.
-      if (!parseError && !signatureValid && signature && looksLikeWebhookUpdated(parsedBody)) {
+      // A well-formed Yativo event failing signature verification is exactly what a secret
+      // rotation looks like from here — not just the one-time webhook_updated notification that
+      // announces it (that message itself is signed with the NEW secret, so it can just as easily
+      // fail this same check and never get a second chance to be seen again). Checked against
+      // classification, not the exact event.type, so this self-heals on whatever real event
+      // happens to arrive next after a rotation, not only if webhook_updated is still pending.
+      const looksGenuine = !parseError && !!signature && classifyIncomingWebhook(parsedBody) !== null;
+      if (!signatureValid && looksGenuine && Date.now() - lastSecretSyncAttemptAt > SECRET_SYNC_COOLDOWN_MS) {
+        lastSecretSyncAttemptAt = Date.now();
         const rotated = await syncWebhookSecretIfRotated(app.prisma);
-        if (rotated) signatureValid = verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret);
+        if (rotated) signatureValid = verifyYativoSignature(rawBody, signature!, yativoWebhookConfig.secret);
       }
 
       const classified = !parseError && signatureValid ? classifyIncomingWebhook(parsedBody) : null;

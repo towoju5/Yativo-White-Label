@@ -30,91 +30,315 @@ export function sanitizeEmailHtml(html: string): string {
   return sanitizeHtml(html, SANITIZE_OPTIONS);
 }
 
-function wrap(bodyInner: string): string {
-  return `<div style="font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #1a1a1a; max-width: 480px; margin: 0 auto; padding: 24px;">
-  <p style="font-size: 17px; font-weight: 600; margin: 0 0 20px;">{{productName}}</p>
-  ${bodyInner}
-  <p style="margin-top: 32px; font-size: 12px; color: #888;">This is an automated message from {{productName}}.</p>
-</div>`;
+type DetailTone = "neutral" | "success" | "warning" | "danger";
+
+const TONE_COLORS: Record<DetailTone, { bg: string; border: string; label: string; value: string }> = {
+  neutral: { bg: "#f3f4f6", border: "#e5e7eb", label: "#6b7280", value: "#111827" },
+  success: { bg: "#f0fdf4", border: "#bbf7d0", label: "#166534", value: "#14532d" },
+  warning: { bg: "#fffbeb", border: "#fde68a", label: "#92400e", value: "#78350f" },
+  danger: { bg: "#fef2f2", border: "#fecaca", label: "#991b1b", value: "#7f1d1d" },
+};
+
+type EmailTemplateSpec = {
+  /** A single emoji, shown in the header's icon circle. */
+  icon: string;
+  /** Header background — [from, to] for a 135deg gradient. */
+  gradient: [string, string];
+  /** Header title, next to the icon. */
+  heading: string;
+  /** First paragraph, right under the "Hi {{firstName}}," greeting. May contain inline HTML (e.g. <strong>). */
+  intro: string;
+  /** Optional colored callout box (e.g. an amount, a reason, a card's last 4). */
+  detail?: { label: string; value: string; tone?: DetailTone };
+  /** Optional paragraph after the detail box — e.g. a call to action in prose, or a reason. */
+  extra?: string;
+  /** Optional button — href may be a mailto: link. */
+  cta?: { label: string; href: string };
+};
+
+/**
+ * Every transactional email shares this table-based layout (required for consistent rendering
+ * across email clients, most of which strip <style> blocks and ignore CSS classes) — a centered
+ * card with a colored icon header, a body with an optional callout box and CTA button, and a
+ * footer. `{{productName}}` and `{{firstName}}` are always available; other vars are per-type,
+ * see EMAIL_NOTIFICATION_CATALOG in shared-types.
+ */
+function buildEmailTemplate(spec: EmailTemplateSpec): string {
+  const [gradFrom, gradTo] = spec.gradient;
+  const tone = TONE_COLORS[spec.detail?.tone ?? "neutral"];
+  const font = "-apple-system, Helvetica, Arial, sans-serif";
+
+  return `<table align="center" style="width: 100%; margin: 0 auto; background-color: #f4f5f7;">
+  <tr>
+    <td align="center" style="padding: 40px 16px;">
+      <table align="center" style="width: 100%; max-width: 480px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <tr>
+          <td style="background: linear-gradient(135deg, ${gradFrom}, ${gradTo}); padding: 28px 32px; text-align: center;">
+            <table align="center" style="margin: 0 auto;">
+              <tr>
+                <td style="width: 48px; height: 48px; background-color: rgba(255,255,255,0.2); border-radius: 50%; text-align: center; vertical-align: middle; line-height: 48px; font-size: 24px;">${spec.icon}</td>
+              </tr>
+            </table>
+            <p style="margin: 12px 0 0; font-family: ${font}; font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.2px;">${spec.heading}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 32px 32px 8px;">
+            <p style="margin: 0 0 4px; font-family: ${font}; font-size: 13px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">{{productName}}</p>
+            <p style="margin: 0 0 20px; font-family: ${font}; font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.3px;">Hi {{firstName}},</p>
+            <p style="margin: 0 0 20px; font-family: ${font}; font-size: 15px; line-height: 1.65; color: #374151;">${spec.intro}</p>
+            ${
+              spec.detail
+                ? `<table style="width: 100%; background-color: ${tone.bg}; border: 1px solid ${tone.border}; border-radius: 8px; margin-bottom: 24px;">
+              <tr>
+                <td style="padding: 16px 20px;">
+                  <table style="width: 100%;">
+                    <tr>
+                      <td style="font-family: ${font}; font-size: 12px; font-weight: 600; color: ${tone.label}; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 6px;">${spec.detail.label}</td>
+                    </tr>
+                    <tr>
+                      <td style="font-family: 'SF Mono', SFMono-Regular, Consolas, monospace; font-size: 14px; font-weight: 600; color: ${tone.value}; word-break: break-all;">${spec.detail.value}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>`
+                : ""
+            }
+            ${spec.extra ? `<p style="margin: 0 0 28px; font-family: ${font}; font-size: 15px; line-height: 1.65; color: #374151;">${spec.extra}</p>` : ""}
+            ${
+              spec.cta
+                ? `<table align="center" style="width: 100%; margin: 0 auto; margin-bottom: 8px;">
+              <tr>
+                <td align="center" style="border-radius: 8px; background-color: ${gradFrom};">
+                  <a href="${spec.cta.href}" target="_blank" style="display: inline-block; padding: 12px 32px; font-family: ${font}; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px; background-color: ${gradFrom};" rel="noopener noreferrer">${spec.cta.label}</a>
+                </td>
+              </tr>
+            </table>`
+                : ""
+            }
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 0 32px;">
+            <table style="width: 100%;">
+              <tr>
+                <td style="border-top: 1px solid #e5e7eb; font-size: 1px; line-height: 1px;">&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 20px 32px 28px; text-align: center;">
+            <p style="margin: 0 0 4px; font-family: ${font}; font-size: 12px; color: #9ca3af; line-height: 1.5;">This is an automated message from {{productName}}.</p>
+            <p style="margin: 0; font-family: ${font}; font-size: 12px; color: #9ca3af; line-height: 1.5;">Please do not reply to this email.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
 }
+
+const CONTACT_SUPPORT_CTA = { label: "Contact Support", href: "mailto:{{supportEmail}}" };
+const CONTACT_SUPPORT_TEXT = "If this wasn't you, <strong>contact support immediately</strong> to secure your account.";
 
 /** Hardcoded fallback used whenever no admin override row exists for a type — see listEmailTemplates/getEffectiveTemplate. */
 const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml: string }> = {
   WELCOME: {
     subject: "Welcome to {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your account is ready. Glad to have you on board.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "👋",
+      gradient: ["#4f46e5", "#6366f1"],
+      heading: "Welcome",
+      intro: "Your account is ready. Glad to have you on board.",
+    }),
   },
   KYC_APPROVED: {
     subject: "You're verified — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your identity verification has been approved. You now have full access to your account.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "✅",
+      gradient: ["#16a34a", "#22c55e"],
+      heading: "Verification Approved",
+      intro: "Your identity verification has been approved. You now have full access to your account.",
+    }),
   },
   KYC_REJECTED: {
     subject: "Action needed on your verification — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>We weren't able to approve your identity verification.</p><p><strong>Reason:</strong> {{reason}}</p><p>Please review and resubmit your details.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "⚠️",
+      gradient: ["#d97706", "#f59e0b"],
+      heading: "Verification Update",
+      intro: "We weren't able to approve your identity verification.",
+      detail: { label: "Reason", value: "{{reason}}", tone: "warning" },
+      extra: "Please review and resubmit your details.",
+    }),
   },
   DEPOSIT_CREATED: {
     subject: "Deposit submitted — {{amount}} {{currency}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>We've received your request to deposit <strong>{{amount}} {{currency}}</strong>. We'll email you again once it's confirmed and available in your wallet.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "⏳",
+      gradient: ["#2563eb", "#3b82f6"],
+      heading: "Deposit Submitted",
+      intro: "We've received your deposit request. We'll email you again once it's confirmed and available in your wallet.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}" },
+    }),
   },
   DEPOSIT_RECEIVED: {
     subject: "Deposit received — {{amount}} {{currency}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>We've received your deposit of <strong>{{amount}} {{currency}}</strong>. It's now available in your wallet.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "💰",
+      gradient: ["#16a34a", "#22c55e"],
+      heading: "Deposit Received",
+      intro: "We've received your deposit. It's now available in your wallet.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "success" },
+    }),
   },
   PAYOUT_CREATED: {
     subject: "Payout submitted — {{amount}} {{currency}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your payout of <strong>{{amount}} {{currency}}</strong> has been submitted and is on its way.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "📤",
+      gradient: ["#2563eb", "#3b82f6"],
+      heading: "Payout Submitted",
+      intro: "Your payout has been submitted and is on its way.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}" },
+    }),
   },
   PAYOUT_COMPLETED: {
     subject: "Payout completed — {{amount}} {{currency}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your payout of <strong>{{amount}} {{currency}}</strong> has completed successfully.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "✅",
+      gradient: ["#16a34a", "#22c55e"],
+      heading: "Payout Completed",
+      intro: "Your payout has completed successfully.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "success" },
+    }),
   },
   PAYOUT_FAILED: {
     subject: "Payout failed — {{amount}} {{currency}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your payout of <strong>{{amount}} {{currency}}</strong> couldn't be completed and the funds have been returned to your wallet.</p><p><strong>Reason:</strong> {{reason}}</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "❌",
+      gradient: ["#dc2626", "#ef4444"],
+      heading: "Payout Failed",
+      intro: "Your payout couldn't be completed and the funds have been returned to your wallet.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "danger" },
+      extra: "<strong>Reason:</strong> {{reason}}",
+    }),
   },
   CARD_ISSUED: {
     subject: "Your new card is ready — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your new virtual card ending in <strong>{{last4}}</strong> is ready to use.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "💳",
+      gradient: ["#7c3aed", "#a855f7"],
+      heading: "Card Issued",
+      intro: "Your new virtual card is ready to use.",
+      detail: { label: "Card", value: "•••• {{last4}}" },
+    }),
   },
   CARD_FROZEN: {
     subject: "Card frozen — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your card ending in <strong>{{last4}}</strong> has been frozen. Unfreeze it any time from your dashboard.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "🧊",
+      gradient: ["#d97706", "#f59e0b"],
+      heading: "Card Frozen",
+      intro: "Your card has been frozen. Unfreeze it any time from your dashboard.",
+      detail: { label: "Card", value: "•••• {{last4}}", tone: "warning" },
+    }),
   },
   CARD_UNFROZEN: {
     subject: "Card unfrozen — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your card ending in <strong>{{last4}}</strong> has been unfrozen and is ready to use again.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "🔓",
+      gradient: ["#16a34a", "#22c55e"],
+      heading: "Card Unfrozen",
+      intro: "Your card has been unfrozen and is ready to use again.",
+      detail: { label: "Card", value: "•••• {{last4}}", tone: "success" },
+    }),
   },
   CARD_TERMINATED: {
     subject: "Card terminated — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your card ending in <strong>{{last4}}</strong> has been permanently closed.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "🗑️",
+      gradient: ["#dc2626", "#ef4444"],
+      heading: "Card Terminated",
+      intro: "Your card has been permanently closed.",
+      detail: { label: "Card", value: "•••• {{last4}}", tone: "danger" },
+    }),
   },
   CARD_TRANSACTION: {
     subject: "Card purchase — {{amount}} {{currency}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>A purchase of <strong>{{amount}} {{currency}}</strong> at {{merchant}} was made on your card.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "🛍️",
+      gradient: ["#2563eb", "#3b82f6"],
+      heading: "Card Purchase",
+      intro: "A purchase was made on your card at {{merchant}}.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}" },
+    }),
   },
   SWAP_COMPLETED: {
     subject: "Currency swap completed — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Your swap of <strong>{{sourceAmount}} {{sourceCurrency}}</strong> to <strong>{{targetAmount}} {{targetCurrency}}</strong> has completed.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "🔄",
+      gradient: ["#0d9488", "#14b8a6"],
+      heading: "Swap Completed",
+      intro: "Your currency swap has completed.",
+      detail: { label: "Converted", value: "{{sourceAmount}} {{sourceCurrency}} → {{targetAmount}} {{targetCurrency}}" },
+    }),
   },
   TWO_FACTOR_ENABLED: {
     subject: "Two-factor authentication enabled — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Two-factor authentication was just turned on for your account. If this wasn't you, contact support immediately.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "🔐",
+      gradient: ["#16a34a", "#22c55e"],
+      heading: "Two-Factor Enabled",
+      intro: "Two-factor authentication was just turned on for your account.",
+      extra: CONTACT_SUPPORT_TEXT,
+      cta: CONTACT_SUPPORT_CTA,
+    }),
   },
   TWO_FACTOR_DISABLED: {
-    subject: "Two-factor authentication disabled — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>Two-factor authentication was just turned off for your account. If this wasn't you, contact support immediately.</p>`),
+    subject: "Security Alert — Two-factor authentication disabled",
+    bodyHtml: buildEmailTemplate({
+      icon: "🛡️",
+      gradient: ["#dc2626", "#ef4444"],
+      heading: "Security Alert",
+      intro: "Two-factor authentication was just turned off for your account.",
+      extra: CONTACT_SUPPORT_TEXT,
+      cta: CONTACT_SUPPORT_CTA,
+    }),
   },
   PASSKEY_ADDED: {
     subject: "New passkey added — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>A new passkey ("{{passkeyName}}") was just added to your account. If this wasn't you, contact support immediately.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "🔑",
+      gradient: ["#16a34a", "#22c55e"],
+      heading: "Passkey Added",
+      intro: "A new passkey was just added to your account. Here are the details:",
+      detail: { label: "Added Passkey", value: '"{{passkeyName}}"', tone: "success" },
+      extra: CONTACT_SUPPORT_TEXT,
+      cta: CONTACT_SUPPORT_CTA,
+    }),
   },
   PASSKEY_REMOVED: {
-    subject: "Passkey removed — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>The passkey "{{passkeyName}}" was just removed from your account. If this wasn't you, contact support immediately.</p>`),
+    subject: "Security Alert — Passkey removed",
+    bodyHtml: buildEmailTemplate({
+      icon: "🛡️",
+      gradient: ["#dc2626", "#ef4444"],
+      heading: "Security Alert",
+      intro: "A passkey was just removed from your account. Here are the details:",
+      detail: { label: "Removed Passkey", value: '"{{passkeyName}}"', tone: "danger" },
+      extra: "If you didn't authorize this change, your account may be compromised. <strong>Contact support immediately</strong> to secure your account.",
+      cta: CONTACT_SUPPORT_CTA,
+    }),
   },
   BENEFICIARY_ADDED: {
     subject: "New beneficiary added — {{productName}}",
-    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>"{{beneficiaryName}}" was just added as a payout beneficiary on your account.</p>`),
+    bodyHtml: buildEmailTemplate({
+      icon: "👤",
+      gradient: ["#2563eb", "#3b82f6"],
+      heading: "Beneficiary Added",
+      intro: '"{{beneficiaryName}}" was just added as a payout beneficiary on your account.',
+    }),
   },
 };
 
@@ -171,6 +395,7 @@ export async function renderSampleEmail(prisma: PrismaClient, type: EmailNotific
   const sampleVars: Record<string, string> = {
     firstName: "Alex",
     productName: branding.productName,
+    supportEmail: branding.supportEmail ?? "support@example.com",
     reason: "Document image was too blurry to read",
     amount: "250.00",
     currency: "USD",
@@ -208,7 +433,7 @@ export async function sendNotificationEmail(
     const template = row ? { subject: row.subject, bodyHtml: row.bodyHtml } : EMAIL_DEFAULTS[type];
 
     const firstName = customer.fullName?.split(" ")[0] || customer.businessName || "there";
-    const allVars = { ...vars, firstName, productName: branding.productName };
+    const allVars = { ...vars, firstName, productName: branding.productName, supportEmail: branding.supportEmail ?? "" };
 
     await enqueueEmail({
       to: customer.email,
