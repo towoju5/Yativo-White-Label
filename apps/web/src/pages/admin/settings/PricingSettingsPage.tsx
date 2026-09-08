@@ -30,6 +30,7 @@ export const SERVICE_LABELS: Record<PricingService, string> = {
   CARD_CREATE: "Virtual card — create",
   CARD_FUND: "Virtual card — fund",
   CARD_WITHDRAW: "Virtual card — withdraw",
+  CARD_TERMINATE: "Virtual card — terminate",
 };
 
 // Only these two services carry a fee number reported by Yativo itself — for the rest, "markup"

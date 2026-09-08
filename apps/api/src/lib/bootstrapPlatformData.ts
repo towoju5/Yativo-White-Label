@@ -50,7 +50,7 @@ export async function bootstrapPlatformData(prisma: PrismaClient): Promise<void>
   });
 
   // Free (zero-fee, standalone) until an admin sets real pricing from Settings → Pricing.
-  const pricingServices: PricingServiceType[] = ["PAYIN", "PAYOUT", "VIRTUAL_ACCOUNT_DEPOSIT", "CARD_CREATE", "CARD_FUND", "CARD_WITHDRAW"];
+  const pricingServices: PricingServiceType[] = ["PAYIN", "PAYOUT", "VIRTUAL_ACCOUNT_DEPOSIT", "CARD_CREATE", "CARD_FUND", "CARD_WITHDRAW", "CARD_TERMINATE"];
   for (const service of pricingServices) {
     await prisma.pricingDefault.upsert({
       where: { service },

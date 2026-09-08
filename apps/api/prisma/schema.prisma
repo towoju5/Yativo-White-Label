@@ -681,6 +681,7 @@ enum PricingServiceType {
   CARD_CREATE
   CARD_FUND
   CARD_WITHDRAW
+  CARD_TERMINATE
 }
 
 enum FeeType {

@@ -379,6 +379,27 @@ export async function terminateCard(prisma: PrismaClient, cardId: string, scopeC
   const card = await findOwnedCard(prisma, cardId, scopeCustomerId);
   await yativoClient.fiat.cards.terminate(card.yativoCardId!, randomUUID());
   const updated = await prisma.card.update({ where: { id: cardId }, data: { status: "CLOSED" } });
+
+  // Closing a card has no principal amount to move — only a FIXED pricing rule has any effect
+  // here (PERCENTAGE/COMBINED compute against amountMinor=0, so they charge nothing extra).
+  const feeMinor = await getEffectiveFee(prisma, "CARD_TERMINATE", card.customerId, 0n);
+  if (feeMinor > 0n) {
+    const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId: card.customerId, currencyCode: CARD_CURRENCY } });
+    if (!walletAccount) throw new NotFoundError("Wallet");
+    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", CARD_CURRENCY);
+    await postTransaction(prisma, {
+      type: "FEE",
+      status: "POSTED",
+      idempotencyKey: `fee:card-terminate:${card.id}`,
+      externalSource: "SYSTEM",
+      description: `Card termination fee for ${card.id}`,
+      lines: [
+        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
+      ],
+    });
+  }
+
   await sendNotificationEmail(prisma, "CARD_TERMINATED", updated.customerId, { last4: updated.last4 });
   return cardToDto(updated);
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { minorAmountSchema } from "./money.js";
 
-export const PRICING_SERVICES = ["PAYIN", "PAYOUT", "VIRTUAL_ACCOUNT_DEPOSIT", "CARD_CREATE", "CARD_FUND", "CARD_WITHDRAW"] as const;
+export const PRICING_SERVICES = ["PAYIN", "PAYOUT", "VIRTUAL_ACCOUNT_DEPOSIT", "CARD_CREATE", "CARD_FUND", "CARD_WITHDRAW", "CARD_TERMINATE"] as const;
 export const pricingServiceSchema = z.enum(PRICING_SERVICES);
 export type PricingService = z.infer<typeof pricingServiceSchema>;
 
