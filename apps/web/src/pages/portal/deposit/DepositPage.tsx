@@ -231,7 +231,21 @@ function NativeDepositCard() {
                     {(result.platformFee ?? result.transactionFee) && (
                       <Row
                         label={t("deposit.dialog.fee", "Fee")}
-                        value={`${result.platformFee ?? result.transactionFee} ${result.walletCurrencyCode ?? ""}`.trim()}
+                        value={
+                          result.platformFee
+                            ? `${result.platformFee} ${result.walletCurrencyCode ?? ""}`.trim() +
+                              (result.platformFeeLocal && result.localCurrency
+                                ? ` (≈ ${result.platformFeeLocal} ${result.localCurrency})`
+                                : "")
+                            : `${result.transactionFee}`
+                        }
+                      />
+                    )}
+                    {result.netReceiveAmount && result.walletCurrencyCode && (
+                      <Row
+                        label={t("deposit.dialog.netReceive", "You'll actually receive (after fee)")}
+                        value={`${result.netReceiveAmount} ${result.walletCurrencyCode}`}
+                        warn={Number(result.netReceiveAmount) < 0}
                       />
                     )}
                     {result.estimatedDelivery && (
@@ -482,11 +496,11 @@ function NativeDepositCard() {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
     <div className="flex items-center justify-between py-2.5 px-3 text-sm">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-mono">{value}</dd>
+      <dd className={cn("font-mono", warn && "font-semibold text-destructive")}>{value}</dd>
     </div>
   );
 }

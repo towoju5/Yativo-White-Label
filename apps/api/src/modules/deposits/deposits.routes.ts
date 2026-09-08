@@ -76,6 +76,8 @@ export async function depositsRoutes(app: FastifyInstance) {
       // `transactionFee`/`exchangeRate` are human-readable strings ("3.4 MXN", "1 USD = 17.2 MXN"),
       // so this parse is best-effort and never blocks the deposit if it fails.
       let platformFee: string | null = null;
+      let platformFeeLocal: string | null = null;
+      let netReceiveAmount: string | null = null;
       if (result.depositId) {
         const walletCurrency = await app.prisma.currency.findUnique({ where: { code: request.body.walletCurrencyCode } });
 
@@ -96,7 +98,22 @@ export async function depositsRoutes(app: FastifyInstance) {
         if (walletCurrency && result.receiveAmount) {
           const receiveAmountMinor = majorToMinor(result.receiveAmount, walletCurrency.decimals);
           const feeMinor = await getEffectiveFee(app.prisma, "PAYIN", customer.id, receiveAmountMinor, yativoFeeMinor ?? 0n);
-          platformFee = (Number(feeMinor) / 10 ** walletCurrency.decimals).toFixed(walletCurrency.decimals);
+          const feeMajorInWallet = Number(feeMinor) / 10 ** walletCurrency.decimals;
+          platformFee = feeMajorInWallet.toFixed(walletCurrency.decimals);
+          // Also shown in the deposit's local/method currency (what the customer is actually
+          // paying with) alongside the wallet-currency figure above — same `rate` Yativo quoted
+          // for this deposit ("1 USD = 1343.3322 NGN"), so it's exactly consistent with "Amount
+          // to pay" above it. Left null if the rate string didn't parse.
+          if (rate !== undefined && rate > 0) {
+            platformFeeLocal = (feeMajorInWallet * rate).toFixed(2);
+          }
+          // `receiveAmount` above is Yativo's own figure — already net of Yativo's own
+          // transactionFee, but NOT of this platform's fee, which is debited from the wallet
+          // separately once the deposit.confirmed webhook lands. This is what will actually
+          // remain in the wallet after that happens; shown as-is (can go negative) since a
+          // misconfigured fee producing a negative net is exactly the kind of thing this should
+          // surface loudly rather than hide.
+          netReceiveAmount = ((Number(receiveAmountMinor - feeMinor)) / 10 ** walletCurrency.decimals).toFixed(walletCurrency.decimals);
         }
       }
 
@@ -108,7 +125,7 @@ export async function depositsRoutes(app: FastifyInstance) {
         currency: request.body.walletCurrencyCode,
       });
 
-      return reply.send({ ...result, platformFee });
+      return reply.send({ ...result, platformFee, platformFeeLocal, netReceiveAmount });
     },
   );
 }

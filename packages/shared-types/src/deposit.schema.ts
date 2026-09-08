@@ -68,6 +68,10 @@ export const depositResultSchema = z.object({
    * See getEffectiveFee — this is the same figure the deposit.confirmed webhook charges.
    */
   platformFee: z.string().nullable(),
+  /** Same fee as `platformFee`, converted to `localCurrency` at the deposit's quoted `exchangeRate` — shown alongside it so the customer sees the fee in the currency they're actually paying with, not just the wallet currency. Null under the same conditions as `platformFee`, plus if the exchange-rate string didn't parse. */
+  platformFeeLocal: z.string().nullable(),
+  /** `receiveAmount` minus `platformFee`, in `walletCurrencyCode` major units — what actually remains in the wallet once the platform's fee posts at settlement. Can be negative if the fee exceeds the deposit; shown as-is rather than hidden, since that's a real (mis)configuration signal, not a display glitch. Null under the same conditions as `platformFee`. */
+  netReceiveAmount: z.string().nullable(),
   estimatedDelivery: z.string().nullable(),
 });
 export type DepositResult = z.infer<typeof depositResultSchema>;
