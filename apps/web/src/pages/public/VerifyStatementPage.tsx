@@ -43,15 +43,8 @@ export default function VerifyStatementPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background px-6 py-16 text-foreground">
-      <Link to="/" className="mb-10 flex items-center gap-2">
-        {branding?.logoUrl ? (
-          <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
-        ) : (
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-            {productName.slice(0, 1)}
-          </div>
-        )}
-        <span className="font-heading text-sm font-semibold">{productName}</span>
+      <Link to="/" className="mb-10">
+        <BrandLogo branding={branding} className="h-7" badgeClassName="rounded-md bg-none bg-primary text-xs" textClassName="text-sm" />
       </Link>
 
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">

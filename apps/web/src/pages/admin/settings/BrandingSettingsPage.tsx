@@ -213,6 +213,16 @@ export default function BrandingSettingsPage() {
                 <Label>Invert the logo's colors in dark mode</Label>
               </div>
             )}
+            <div className="space-y-1.5">
+              <Label htmlFor="faviconUrl">Favicon URL</Label>
+              <Input
+                id="faviconUrl"
+                placeholder="https://… (.ico, .png, or .svg)"
+                value={draft.faviconUrl ?? ""}
+                onChange={(e) => setDraft((d) => (d ? { ...d, faviconUrl: e.target.value || null } : d))}
+              />
+              <p className="text-xs text-muted-foreground">Shown in the browser tab. Leave blank to keep the default icon.</p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <ColorField label="Primary" value={draft.primaryColor ?? "#6366f1"} onChange={(v) => setDraft((d) => (d ? { ...d, primaryColor: v } : d))} />
               <ColorField

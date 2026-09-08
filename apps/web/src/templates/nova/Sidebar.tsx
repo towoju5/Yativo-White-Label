@@ -34,16 +34,7 @@ export function NovaSidebar({ sections, userLabel, userSubLabel, onLogout }: Sid
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-card/60 backdrop-blur-xl lg:flex">
       <div className="flex h-16 items-center gap-2 border-b border-border px-5">
-        {branding?.logoUrl ? (
-          <BrandLogo branding={branding} className="h-6 w-10 rounded-md object-cover" />
-        ) : (
-          <>
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
-              {(branding?.productName ?? "W").slice(0, 1)}
-            </div>
-            <span className="truncate font-heading text-sm font-semibold tracking-tight">{branding?.productName ?? t("nav.whiteLabel", "White Label")}</span>
-          </>
-        )}
+        <BrandLogo branding={branding} className="h-7" badgeClassName="rounded-md text-xs" textClassName="text-sm" />
       </div>
 
       <nav className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">

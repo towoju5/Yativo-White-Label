@@ -47,18 +47,7 @@ export function MeridianLandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2.5">
-            {branding?.logoUrl ? (
-              <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
-            ) : (
-              <>
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-                  {productName.slice(0, 1)}
-                </div>
-                <span className="font-heading text-base font-semibold tracking-tight">{productName}</span>
-              </>
-            )}
-          </div>
+          <BrandLogo branding={branding} className="h-7" badgeClassName="rounded-md bg-none bg-primary text-sm" textClassName="text-base" />
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Link to="/portal/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">

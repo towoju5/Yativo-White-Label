@@ -67,16 +67,7 @@ export default function AdminLoginPage() {
     <div className="dark flex min-h-screen items-center justify-center bg-[#0b1120] px-4">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          {branding?.logoUrl ? (
-            <BrandLogo branding={branding} className="h-10 w-10 rounded-xl object-cover" />
-          ) : (
-            <>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
-                {(branding?.productName ?? "W").slice(0, 1)}
-              </div>
-              <span className="font-heading text-lg font-semibold text-white">{branding?.productName ?? "White Label"} Console</span>
-            </>
-          )}
+          <BrandLogo branding={branding} className="h-10" badgeClassName="rounded-xl text-sm" textClassName="text-lg text-white" />
           <p className="text-xs text-slate-400">Staff &amp; operator access only</p>
         </div>
         <Card className="border-white/10 bg-white/[0.04] text-white backdrop-blur">

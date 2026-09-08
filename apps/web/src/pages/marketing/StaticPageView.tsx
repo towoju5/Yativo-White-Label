@@ -28,17 +28,8 @@ export default function StaticPageView() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            {branding?.logoUrl ? (
-              <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
-            ) : (
-              <>
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-                  {productName.slice(0, 1)}
-                </div>
-                <span className="font-heading text-sm font-semibold">{productName}</span>
-              </>
-            )}
+          <Link to="/">
+            <BrandLogo branding={branding} className="h-7" badgeClassName="rounded-md bg-none bg-primary text-xs" textClassName="text-sm" />
           </Link>
           <Link to="/" className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-3.5 w-3.5" /> Back home

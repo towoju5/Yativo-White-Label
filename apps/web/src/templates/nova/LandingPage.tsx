@@ -61,18 +61,7 @@ export function NovaLandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            {branding?.logoUrl ? (
-              <BrandLogo branding={branding} className="h-7 w-7 rounded-md object-cover" />
-            ) : (
-              <>
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
-                  {productName.slice(0, 1)}
-                </div>
-                <span className="font-heading text-sm font-semibold">{productName}</span>
-              </>
-            )}
-          </div>
+          <BrandLogo branding={branding} className="h-7" badgeClassName="rounded-md text-xs" textClassName="text-sm" />
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Link to="/portal/login" className="text-sm text-muted-foreground hover:text-foreground">

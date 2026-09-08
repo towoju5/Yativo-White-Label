@@ -48,16 +48,12 @@ export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, pro
   return (
     <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col gap-5 bg-muted/30 p-4 lg:flex">
       <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-elevated">
-        {branding?.logoUrl ? (
-          <BrandLogo branding={branding} className="h-8 w-8 rounded-xl object-cover" />
-        ) : (
-          <>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary text-sm font-bold text-white shadow-soft">
-              {(branding?.productName ?? "W").slice(0, 1)}
-            </div>
-            <span className="truncate font-heading text-sm font-semibold tracking-tight">{branding?.productName ?? t("nav.whiteLabel", "White Label")}</span>
-          </>
-        )}
+        <BrandLogo
+          branding={branding}
+          className="h-8"
+          badgeClassName="rounded-xl from-primary to-secondary text-sm text-white shadow-soft"
+          textClassName="text-sm"
+        />
       </div>
 
       <nav className="scrollbar-thin flex-1 space-y-4 overflow-y-auto">

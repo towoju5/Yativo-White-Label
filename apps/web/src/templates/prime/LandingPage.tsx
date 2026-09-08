@@ -40,18 +40,7 @@ export function PrimeLandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            {branding?.logoUrl ? (
-              <BrandLogo branding={branding} className="h-6 w-6 rounded object-cover" />
-            ) : (
-              <>
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground">
-                  {productName.slice(0, 1)}
-                </div>
-                <span className="text-sm font-semibold tracking-tight">{productName}</span>
-              </>
-            )}
-          </div>
+          <BrandLogo branding={branding} className="h-6" badgeClassName="rounded bg-none bg-primary text-xs" textClassName="font-sans text-sm" />
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Link to="/portal/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">

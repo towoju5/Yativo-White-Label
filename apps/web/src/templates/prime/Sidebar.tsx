@@ -30,16 +30,7 @@ export function PrimeSidebar({ sections }: SidebarProps) {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card lg:flex">
       <div className="flex h-14 items-center gap-2 border-b border-border px-4">
-        {branding?.logoUrl ? (
-          <BrandLogo branding={branding} className="h-6 w-6 rounded object-cover" />
-        ) : (
-          <>
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground">
-              {(branding?.productName ?? "W").slice(0, 1)}
-            </div>
-            <span className="truncate text-sm font-semibold tracking-tight">{branding?.productName ?? t("nav.whiteLabel", "White Label")}</span>
-          </>
-        )}
+        <BrandLogo branding={branding} className="h-6" badgeClassName="rounded bg-none bg-primary text-xs" textClassName="font-sans text-sm" />
       </div>
 
       <nav className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">
