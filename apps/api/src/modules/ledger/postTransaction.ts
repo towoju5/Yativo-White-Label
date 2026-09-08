@@ -3,6 +3,7 @@ import { UnbalancedTransactionError, InsufficientFundsError } from "../../lib/er
 import type { EntryLine, PostTransactionInput } from "./types.js";
 import { ACCOUNT_NORMAL_BALANCE } from "./types.js";
 import { refreshWalletCache, getAvailableBalance, getPostedBalance } from "./balances.js";
+import { publishWalletUpdatesForAccounts } from "../../lib/realtime.js";
 
 type Tx = Prisma.TransactionClient;
 
@@ -99,5 +100,9 @@ export async function postTransactionInTx(tx: Tx, input: PostTransactionInput): 
 
 /** Convenience wrapper that opens its own transaction for a single posting. */
 export async function postTransaction(prisma: PrismaClient, input: PostTransactionInput): Promise<LedgerTransaction> {
-  return prisma.$transaction((tx) => postTransactionInTx(tx, input));
+  const transaction = await prisma.$transaction((tx) => postTransactionInTx(tx, input));
+  // Published after commit, never from inside the transaction above — a publish can't be rolled
+  // back the way a DB write can.
+  await publishWalletUpdatesForAccounts(prisma, input.lines.map((l) => l.accountId));
+  return transaction;
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { EMAIL_NOTIFICATION_CATALOG, type EmailTemplateDto, type EmailNotificationType } from "@white-label/shared-types";
-import { Send, Save } from "lucide-react";
+import { Send, Save, RotateCcw } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
+import { fetchBranding } from "@/theme/branding";
 import { useToast } from "@/hooks/use-toast";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -35,8 +36,9 @@ const SAMPLE_VARS: Record<string, string> = {
   beneficiaryName: "Jane's Checking Account",
 };
 
-function renderPreview(template: string): string {
-  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => SAMPLE_VARS[key] ?? match);
+function renderPreview(template: string, extraVars: Record<string, string>): string {
+  const vars = { ...SAMPLE_VARS, ...extraVars };
+  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => vars[key] ?? match);
 }
 
 export default function EmailTemplatesSettingsPage() {
@@ -54,6 +56,19 @@ export default function EmailTemplatesSettingsPage() {
     queryKey: ["admin", "email-templates"],
     queryFn: () => staffApi.get<EmailTemplateDto[]>("/admin/settings/email-templates"),
   });
+
+  // Same query key BrandingSettingsPage uses — shares its cache, so this reflects exactly what a
+  // real send will look like (logo-or-name, and the actual primary/secondary colors) without a
+  // second round trip if that page was already visited this session.
+  const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding });
+  const previewBrandVars: Record<string, string> = {
+    productName: branding?.productName ?? "Your Product",
+    brandColorFrom: branding?.primaryColor ?? "#4f46e5",
+    brandColorTo: branding?.secondaryColor ?? "#6366f1",
+    brandMark: branding?.logoUrl
+      ? `<img src="${branding.logoUrl}" alt="${branding.productName}" style="max-height: 40px; max-width: 240px; width: auto; height: auto; display: inline-block;" />`
+      : `<span style="font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827;">${branding?.productName ?? "Your Product"}</span>`,
+  };
 
   const selected = templates?.find((t) => t.type === selectedType);
   const catalogEntry = EMAIL_NOTIFICATION_CATALOG.find((c) => c.type === selectedType)!;
@@ -74,6 +89,24 @@ export default function EmailTemplatesSettingsPage() {
     onError: (e) => toast({ variant: "destructive", title: "Couldn't save template", description: e instanceof ApiError ? e.message : undefined }),
   });
 
+  const resetMutation = useMutation({
+    mutationFn: () => staffApi.del<EmailTemplateDto>(`/admin/settings/email-templates/${selectedType}`),
+    onSuccess: (reset) => {
+      toast({ title: "Reset to the current default design" });
+      queryClient.setQueryData<EmailTemplateDto[]>(["admin", "email-templates"], (prev) => prev?.map((t) => (t.type === reset.type ? reset : t)));
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't reset template", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const resetAllMutation = useMutation({
+    mutationFn: () => staffApi.post<EmailTemplateDto[]>("/admin/settings/email-templates/reset-all"),
+    onSuccess: (all) => {
+      toast({ title: "All templates reset to the current default design" });
+      queryClient.setQueryData(["admin", "email-templates"], all);
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't reset templates", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
   const testMutation = useMutation({
     mutationFn: () => staffApi.post(`/admin/settings/email-templates/${selectedType}/test`, testEmail ? { to: testEmail } : undefined),
     onSuccess: () => toast({ title: "Test email sent", description: testEmail ? `Sent to ${testEmail}.` : "Check your staff account's inbox." }),
@@ -91,9 +124,24 @@ export default function EmailTemplatesSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">Email templates</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Customize the subject and design of each transactional email.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Email templates</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Customize the subject and design of each transactional email.</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            if (window.confirm("Reset ALL email templates to the current default design? Any customizations you've made will be lost.")) {
+              resetAllMutation.mutate();
+            }
+          }}
+          disabled={!canEdit || resetAllMutation.isPending}
+          title={canEdit ? "Discards every customization and reverts every template to the built-in design" : "Only owners and admins can reset templates"}
+        >
+          <RotateCcw className="h-4 w-4" /> Reset all to default
+        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
@@ -153,7 +201,7 @@ export default function EmailTemplatesSettingsPage() {
                 <iframe
                   title="Email preview"
                   sandbox=""
-                  srcDoc={`<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#f4f4f5;padding:24px 0;">${renderPreview(bodyHtml)}</body></html>`}
+                  srcDoc={`<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#f4f4f5;padding:24px 0;">${renderPreview(bodyHtml, previewBrandVars)}</body></html>`}
                   className="min-h-[360px] w-full rounded-lg border border-border bg-white"
                 />
               </TabsContent>
@@ -172,13 +220,27 @@ export default function EmailTemplatesSettingsPage() {
                   <Send className="h-4 w-4" /> {testMutation.isPending ? "Sending…" : "Send test email"}
                 </Button>
               </div>
-              <Button
-                onClick={() => saveMutation.mutate()}
-                disabled={!canEdit || saveMutation.isPending}
-                title={canEdit ? undefined : "Only owners and admins can edit email templates"}
-              >
-                <Save className="h-4 w-4" /> {saveMutation.isPending ? "Saving…" : "Save template"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (window.confirm(`Reset "${catalogEntry.label}" to the current default design? Any customization will be lost.`)) {
+                      resetMutation.mutate();
+                    }
+                  }}
+                  disabled={!canEdit || resetMutation.isPending}
+                  title={canEdit ? undefined : "Only owners and admins can reset templates"}
+                >
+                  <RotateCcw className="h-4 w-4" /> Reset to default
+                </Button>
+                <Button
+                  onClick={() => saveMutation.mutate()}
+                  disabled={!canEdit || saveMutation.isPending}
+                  title={canEdit ? undefined : "Only owners and admins can edit email templates"}
+                >
+                  <Save className="h-4 w-4" /> {saveMutation.isPending ? "Saving…" : "Save template"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

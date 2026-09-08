@@ -4,6 +4,7 @@ import helmet from "@fastify/helmet";
 import cookie from "@fastify/cookie";
 import rateLimit from "@fastify/rate-limit";
 import multipart from "@fastify/multipart";
+import websocket from "@fastify/websocket";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { YativoApiError, parseYativoErrorMessage } from "@white-label/yativo-sdk";
 import { env } from "./config/env.js";
@@ -15,6 +16,7 @@ import { redisPlugin } from "./plugins/redis.js";
 import { loadIntegrationSettingsFromDb } from "./lib/integrationRuntimeConfig.js";
 import { loadStorageSettingsFromDb } from "./lib/storage/storageRuntimeConfig.js";
 import { bootstrapPlatformData } from "./lib/bootstrapPlatformData.js";
+import { realtimeRoutes } from "./modules/realtime/realtime.routes.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { portalAuthRoutes } from "./modules/portalAuth/portalAuth.routes.js";
 import { brandingRoutes } from "./modules/branding/branding.routes.js";
@@ -84,6 +86,7 @@ export async function buildApp() {
     },
   });
 
+  await app.register(websocket);
   await app.register(prismaPlugin);
   await app.register(redisPlugin);
   await bootstrapPlatformData(app.prisma);
@@ -168,6 +171,7 @@ export async function buildApp() {
   await app.register(storageSettingsRoutes);
   await app.register(localAssetsRoutes);
   await app.register(customerTeamRoutes);
+  await app.register(realtimeRoutes);
 
   return app;
 }

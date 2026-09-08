@@ -8,6 +8,7 @@ import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useWatchCustomerWallet } from "@/hooks/useRealtimeWallets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ export default function CustomerDetailPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const canAdjust = user?.role === "OWNER" || user?.role === "ADMIN";
+  useWatchCustomerWallet(customerId);
 
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");

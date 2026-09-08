@@ -33,6 +33,7 @@ const portalListQuerySchema = paginationQuerySchema.extend({
   currencyCode: currencyCodeSchema.optional(),
   dateFrom: z.coerce.date().optional(),
   dateTo: z.coerce.date().optional(),
+  search: z.string().min(1).max(200).optional(),
 });
 
 export async function transactionsRoutes(app: FastifyInstance) {
@@ -45,8 +46,8 @@ export async function transactionsRoutes(app: FastifyInstance) {
       schema: { querystring: portalListQuerySchema, response: { 200: paginatedResponseSchema(customerTransactionListItemSchema) } },
     },
     async (request, reply) => {
-      const { page, pageSize, type, status, currencyCode, dateFrom, dateTo } = request.query;
-      const result = await listTransactionsForCustomer(app.prisma, resolveEffectiveCustomerId(request.customer!), { type, status, currencyCode, dateFrom, dateTo }, page, pageSize);
+      const { page, pageSize, type, status, currencyCode, dateFrom, dateTo, search } = request.query;
+      const result = await listTransactionsForCustomer(app.prisma, resolveEffectiveCustomerId(request.customer!), { type, status, currencyCode, dateFrom, dateTo, search }, page, pageSize);
       return reply.send(result);
     },
   );

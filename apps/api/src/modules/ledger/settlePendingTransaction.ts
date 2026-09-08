@@ -3,6 +3,7 @@ import { reverseTransactionInTx } from "./reverseTransaction.js";
 import { postTransactionInTx } from "./postTransaction.js";
 import type { EntryLine } from "./types.js";
 import type { LedgerTransactionType, LedgerExternalSource } from "@prisma/client";
+import { publishWalletUpdatesForAccounts } from "../../lib/realtime.js";
 
 /**
  * Atomically releases a PENDING hold and posts the final settled
@@ -16,7 +17,7 @@ export async function settlePendingTransaction(
   finalLines: EntryLine[],
   opts: { type: LedgerTransactionType; externalSource: LedgerExternalSource; externalRef?: string; description?: string },
 ): Promise<LedgerTransaction> {
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     await reverseTransactionInTx(tx, pendingTransactionId, "settled");
 
     return postTransactionInTx(tx, {
@@ -30,4 +31,8 @@ export async function settlePendingTransaction(
       lines: finalLines,
     });
   });
+
+  const touchedAccountIds = [...new Set(finalLines.map((l) => l.accountId))];
+  await publishWalletUpdatesForAccounts(prisma, touchedAccountIds);
+  return result;
 }

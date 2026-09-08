@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient, LedgerTransaction } from "@prisma/client";
 import { NotFoundError } from "../../lib/errors.js";
 import { postTransactionInTx } from "./postTransaction.js";
 import { refreshWalletCache } from "./balances.js";
+import { publishWalletUpdatesForAccounts } from "../../lib/realtime.js";
 
 type Tx = Prisma.TransactionClient;
 
@@ -71,5 +72,10 @@ export async function reverseTransactionInTx(tx: Tx, transactionId: string, reas
 }
 
 export async function reverseTransaction(prisma: PrismaClient, transactionId: string, reason: string): Promise<LedgerTransaction> {
-  return prisma.$transaction((tx) => reverseTransactionInTx(tx, transactionId, reason));
+  const result = await prisma.$transaction((tx) => reverseTransactionInTx(tx, transactionId, reason));
+  // The original entries' account set is the same one affected either way (a PENDING release or
+  // a POSTED reversal) — queried fresh (post-commit) rather than threading it out of the tx above.
+  const entries = await prisma.ledgerEntry.findMany({ where: { transactionId }, select: { accountId: true } });
+  await publishWalletUpdatesForAccounts(prisma, entries.map((e) => e.accountId));
+  return result;
 }

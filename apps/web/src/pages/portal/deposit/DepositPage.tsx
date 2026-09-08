@@ -20,7 +20,7 @@ import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
 export default function DepositPage() {
   const { t } = useTranslation();
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("deposit.title", "Deposit")}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
@@ -28,26 +28,28 @@ export default function DepositPage() {
         </p>
       </div>
 
-      <NativeDepositCard />
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <NativeDepositCard />
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Coins className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base">{t("deposit.cryptoCard.title", "Or deposit crypto")}</CardTitle>
-          </div>
-          <CardDescription>
-            {t("deposit.cryptoCard.description", "Deposit addresses and on-chain deposit history now live on their own page.")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button asChild variant="outline">
-            <Link to="/portal/crypto">
-              {t("deposit.cryptoCard.goToWallets", "Go to crypto wallets")} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Coins className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">{t("deposit.cryptoCard.title", "Or deposit crypto")}</CardTitle>
+            </div>
+            <CardDescription>
+              {t("deposit.cryptoCard.description", "Deposit addresses and on-chain deposit history now live on their own page.")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link to="/portal/crypto">
+                {t("deposit.cryptoCard.goToWallets", "Go to crypto wallets")} <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

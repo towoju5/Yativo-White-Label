@@ -6,6 +6,7 @@ import { setStaffLoginPath } from "@/lib/api-client";
 import { TemplateProvider } from "@/templates/TemplateProvider";
 import { StaffAuthProvider } from "@/hooks/useStaffAuth";
 import { CustomerAuthProvider } from "@/hooks/useCustomerAuth";
+import { useRealtimeWalletBridge } from "@/hooks/useRealtimeWallets";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createRouter } from "@/router";
@@ -20,6 +21,7 @@ function SplashScreen() {
 
 export default function App() {
   const { data: branding, isLoading } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding });
+  useRealtimeWalletBridge();
 
   useEffect(() => {
     if (branding) {

@@ -60,10 +60,20 @@ function toCustomerListItem(tx: TxWithEntries, customerId: string) {
 export async function listTransactionsForCustomer(
   prisma: PrismaClient,
   customerId: string,
-  filters: { type?: LedgerTransactionType; status?: LedgerTransactionStatus; currencyCode?: string; dateFrom?: Date; dateTo?: Date },
+  filters: { type?: LedgerTransactionType; status?: LedgerTransactionStatus; currencyCode?: string; dateFrom?: Date; dateTo?: Date; search?: string },
   page: number,
   pageSize: number,
 ) {
+  // Free-text search spans the fields a customer would actually recognize a transaction by: its
+  // description, the upstream provider's reference, and its own id (for pasting one in directly).
+  const searchOr: Prisma.LedgerTransactionWhereInput[] | undefined = filters.search
+    ? [
+        { description: { contains: filters.search, mode: "insensitive" } },
+        { externalRef: { contains: filters.search, mode: "insensitive" } },
+        { id: { contains: filters.search, mode: "insensitive" } },
+      ]
+    : undefined;
+
   const where: Prisma.LedgerTransactionWhereInput = {
     entries: { some: { account: { customerId }, ...(filters.currencyCode ? { currencyCode: filters.currencyCode } : {}) } },
     ...(filters.type ? { type: filters.type } : {}),
@@ -71,6 +81,7 @@ export async function listTransactionsForCustomer(
     ...(filters.dateFrom || filters.dateTo
       ? { createdAt: { ...(filters.dateFrom ? { gte: filters.dateFrom } : {}), ...(filters.dateTo ? { lte: filters.dateTo } : {}) } }
       : {}),
+    ...(searchOr ? { OR: searchOr } : {}),
   };
 
   const [total, transactions] = await Promise.all([

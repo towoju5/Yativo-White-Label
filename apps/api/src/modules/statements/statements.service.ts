@@ -121,7 +121,6 @@ const PAGE_HEIGHT = 841.89; // A4 in points
 const PAGE_WIDTH = 595.28;
 const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
 const STAMP_QR_SIZE = 40;
-const STAMP_QR_GAP = 6;
 
 // Column widths sum to exactly CONTENT_WIDTH — date-only (no time) keeps that column narrow and
 // gives the description column the room a real description needs before truncating awkwardly.
@@ -172,10 +171,12 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
   const result = new Promise<Buffer>((resolve) => pdf.on("end", () => resolve(Buffer.concat(chunks))));
 
   // --- Footer band height: grows to fit the regulatory disclosure text (which varies with
-  // supportEmail's length) and/or the stamp+QR images, but never shrinks below the original
+  // supportEmail's length) and/or the verification QR code, but never shrinks below the original
   // fixed footer's height. Computed once, up front, so the pagination check below (which decides
-  // whether a transaction row fits before PAGE_BOTTOM) stays correct for every page. ---
-  const rightBlockWidth = (stampBuffer ? STAMP_QR_SIZE : 0) + (qrBuffer ? STAMP_QR_SIZE : 0) + (stampBuffer && qrBuffer ? STAMP_QR_GAP : 0);
+  // whether a transaction row fits before PAGE_BOTTOM) stays correct for every page. The stamp is
+  // no longer part of this band — it's placed once, directly under the transaction table's last
+  // row, not repeated in the running per-page footer (see below). ---
+  const rightBlockWidth = qrBuffer ? STAMP_QR_SIZE : 0;
   const footerTextWidth = CONTENT_WIDTH - (rightBlockWidth > 0 ? rightBlockWidth + 14 : 0);
   pdf.font("Inter-regular").fontSize(6.5);
   const disclosureHeight = pdf.heightOfString(disclosureText, { width: footerTextWidth, lineGap: 0.5 });
@@ -186,6 +187,25 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
 
   function label(text: string, x: number, y: number, width: number, align: "left" | "right" = "left") {
     pdf.font("Inter-semibold").fontSize(7).fillColor(MUTED).text(text.toUpperCase(), x, y, { width, align, characterSpacing: 0.5 });
+  }
+
+  // --- Compact letterhead repeated at the top of every continuation page, so a multi-page
+  // statement always carries the brand logo (or name, when no logo is configured) rather than
+  // only the first page. ---
+  function drawContinuationHeader() {
+    const y = PAGE_MARGIN;
+    if (logoBuffer) {
+      try {
+        pdf.image(logoBuffer, PAGE_MARGIN, y, { fit: [120, 20] });
+      } catch (err) {
+        logger.warn({ err }, "Couldn't render fetched logo image on continuation page — falling back to text");
+        pdf.font("Inter-bold").fontSize(10).fillColor(accentHex).text(opts.productName, PAGE_MARGIN, y, { width: 200 });
+      }
+    } else {
+      pdf.font("Inter-bold").fontSize(10).fillColor(accentHex).text(opts.productName, PAGE_MARGIN, y, { width: 200 });
+    }
+    pdf.font("Inter-regular").fontSize(7.5).fillColor(SUBTLE).text("Statement of Account (continued)", PAGE_MARGIN, y + 4, { width: CONTENT_WIDTH, align: "right" });
+    pdf.y = y + 26;
   }
 
   // --- Masthead: logo/wordmark at a restrained size on the left, the statement title and its
@@ -274,14 +294,17 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
   }
 
   doc.lines.forEach((line, i) => {
-    pdf.font("Inter-regular").fontSize(8.5);
+    // Measured in the same font the description is actually drawn in (Inter-medium, below) — using
+    // Inter-regular here under-measured wrapped descriptions, since Inter-medium's line height runs
+    // slightly taller, letting a 2-line description's second line crowd the row's bottom divider.
+    pdf.font("Inter-medium").fontSize(8.5);
     const descWidth = COL_WIDTHS.desc - CELL_PADDING_X * 2;
     const descHeight = pdf.heightOfString(line.description, { width: descWidth });
     const rowHeight = Math.max(ROW_MIN_HEIGHT, descHeight + ROW_PADDING_Y);
 
     if (pdf.y + rowHeight > PAGE_BOTTOM) {
       pdf.addPage();
-      pdf.y = PAGE_MARGIN;
+      drawContinuationHeader();
       drawTableHeader();
     }
 
@@ -316,9 +339,29 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
     pdf.y = y + rowHeight;
   });
 
+  // --- Branding stamp: placed once, at the bottom-right directly under the table's actual last
+  // row — not in the running per-page footer — so it reads as belonging to the transaction table
+  // rather than as a fixed page decoration. Lands on whichever page the last row fell on; if there
+  // isn't room below that row, it spills onto a fresh (lettered) continuation page instead of
+  // overlapping the footer band. ---
+  if (stampBuffer) {
+    const STAMP_MARGIN_TOP = 10;
+    if (pdf.y + STAMP_MARGIN_TOP + STAMP_QR_SIZE > PAGE_BOTTOM) {
+      pdf.addPage();
+      drawContinuationHeader();
+    }
+    const stampX = PAGE_MARGIN + CONTENT_WIDTH - STAMP_QR_SIZE;
+    const stampY = pdf.y + STAMP_MARGIN_TOP;
+    try {
+      pdf.image(stampBuffer, stampX, stampY, { fit: [STAMP_QR_SIZE, STAMP_QR_SIZE] });
+    } catch (err) {
+      logger.warn({ err }, "Couldn't render the branding stamp image — omitting it");
+    }
+  }
+
   // --- Running footer on every page: regulatory disclosure, disclaimer + page numbers, and the
-  // stamp/QR verification block — stamped now that the total page count is known (bufferPages
-  // above holds every page open until we do this). ---
+  // verification QR code — stamped now that the total page count is known (bufferPages above
+  // holds every page open until we do this). ---
   const footerTop = PAGE_HEIGHT - PAGE_MARGIN - FOOTER_BAND_HEIGHT;
   const { count } = pdf.bufferedPageRange();
   for (let i = 0; i < count; i++) {
@@ -332,20 +375,10 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
     pdf.text(`This is a system-generated statement from ${opts.productName}.`, PAGE_MARGIN, lineY, { width: footerTextWidth, lineBreak: false });
     pdf.text(`Page ${i + 1} of ${count}`, PAGE_MARGIN, lineY, { width: footerTextWidth, align: "right", lineBreak: false });
 
-    if (rightBlockWidth > 0) {
-      let imgX = PAGE_MARGIN + CONTENT_WIDTH - rightBlockWidth;
+    if (rightBlockWidth > 0 && qrBuffer) {
+      const imgX = PAGE_MARGIN + CONTENT_WIDTH - rightBlockWidth;
       const imgY = footerTop + 6;
-      if (stampBuffer) {
-        try {
-          pdf.image(stampBuffer, imgX, imgY, { fit: [STAMP_QR_SIZE, STAMP_QR_SIZE] });
-        } catch (err) {
-          logger.warn({ err }, "Couldn't render the branding stamp image — omitting it");
-        }
-        imgX += STAMP_QR_SIZE + STAMP_QR_GAP;
-      }
-      if (qrBuffer) {
-        pdf.image(qrBuffer, imgX, imgY, { fit: [STAMP_QR_SIZE, STAMP_QR_SIZE] });
-      }
+      pdf.image(qrBuffer, imgX, imgY, { fit: [STAMP_QR_SIZE, STAMP_QR_SIZE] });
     }
   }
 

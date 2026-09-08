@@ -10,11 +10,15 @@ import {
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
 import { sendMail } from "../../lib/mailer.js";
+import { AppError } from "../../lib/errors.js";
+import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
   getNotificationSettings,
   updateNotificationSettings,
   listEmailTemplates,
   updateEmailTemplate,
+  resetEmailTemplate,
+  resetAllEmailTemplates,
   renderSampleEmail,
 } from "./notifications.service.js";
 
@@ -64,11 +68,36 @@ export async function notificationsRoutes(app: FastifyInstance) {
     },
   );
 
+  server.delete(
+    "/admin/settings/email-templates/:type",
+    {
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      schema: { params: typeParam, response: { 200: emailTemplateSchema } },
+    },
+    async (request, reply) => {
+      const template = await resetEmailTemplate(app.prisma, request.params.type);
+      return reply.send(template);
+    },
+  );
+
+  server.post(
+    "/admin/settings/email-templates/reset-all",
+    { preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")], schema: { response: { 200: z.array(emailTemplateSchema) } } },
+    async (_request, reply) => {
+      const templates = await resetAllEmailTemplates(app.prisma);
+      return reply.send(templates);
+    },
+  );
+
   server.post(
     "/admin/settings/email-templates/:type/test",
     {
       preHandler: requireStaffAuth,
-      schema: { params: typeParam, body: z.object({ to: z.string().email().optional() }).optional(), response: { 204: z.void() } },
+      schema: {
+        params: typeParam,
+        body: z.object({ to: z.string().email().optional() }).optional(),
+        response: { 204: z.void(), 409: errorResponseSchema, 502: errorResponseSchema },
+      },
     },
     async (request, reply) => {
       let to = request.body?.to;
@@ -77,7 +106,22 @@ export async function notificationsRoutes(app: FastifyInstance) {
         to = staffUser.email;
       }
       const { subject, html } = await renderSampleEmail(app.prisma, request.params.type);
-      await sendMail({ to, subject: `[Test] ${subject}`, html });
+
+      let sent: boolean;
+      try {
+        sent = await sendMail({ to, subject: `[Test] ${subject}`, html });
+      } catch (err) {
+        // sendMail throws the real nodemailer/SMTP error (bad host, auth failure, timeout,
+        // TLS mismatch, etc.) — surfaced here instead of falling through to app.ts's generic
+        // catch-all, which would otherwise hide it behind an opaque "Internal server error"
+        // with no way for an admin to tell what's actually wrong with their SMTP settings.
+        const detail = err instanceof Error ? err.message : String(err);
+        throw new AppError(`Couldn't send via SMTP: ${detail}`, 502, "SMTP_SEND_FAILED");
+      }
+      if (!sent) {
+        throw new AppError("SMTP isn't configured yet — set a host under Settings → Integrations first.", 409, "SMTP_NOT_CONFIGURED");
+      }
+
       return reply.code(204).send();
     },
   );

@@ -30,6 +30,28 @@ export function sanitizeEmailHtml(html: string): string {
   return sanitizeHtml(html, SANITIZE_OPTIONS);
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+/**
+ * `{{brandMark}}`/`{{brandColorFrom}}`/`{{brandColorTo}}` — filled in from the admin's actual
+ * Branding settings (not sanitized through sanitizeEmailHtml, since that only runs on a template
+ * at *save* time, not on these vars at *send* time) — escaped here instead, since productName is
+ * admin-controlled free text that ends up directly in the HTML. Mirrors the web app's BrandLogo
+ * component: the logo replaces the product-name text entirely once one is set, never both at once.
+ */
+function buildBrandVars(branding: { productName: string; logoUrl: string | null; primaryColor: string; secondaryColor: string }): Record<string, string> {
+  const brandMark = branding.logoUrl
+    ? `<img src="${escapeHtml(branding.logoUrl)}" alt="${escapeHtml(branding.productName)}" style="max-height: 40px; max-width: 240px; width: auto; height: auto; display: inline-block;" />`
+    : `<span style="font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 700; color: #111827;">${escapeHtml(branding.productName)}</span>`;
+  return {
+    brandMark,
+    brandColorFrom: branding.primaryColor,
+    brandColorTo: branding.secondaryColor,
+  };
+}
+
 type DetailTone = "neutral" | "success" | "warning" | "danger";
 
 const TONE_COLORS: Record<DetailTone, { bg: string; border: string; label: string; value: string }> = {
@@ -42,8 +64,6 @@ const TONE_COLORS: Record<DetailTone, { bg: string; border: string; label: strin
 type EmailTemplateSpec = {
   /** A single emoji, shown in the header's icon circle. */
   icon: string;
-  /** Header background — [from, to] for a 135deg gradient. */
-  gradient: [string, string];
   /** Header title, next to the icon. */
   heading: string;
   /** First paragraph, right under the "Hi {{firstName}}," greeting. May contain inline HTML (e.g. <strong>). */
@@ -58,13 +78,14 @@ type EmailTemplateSpec = {
 
 /**
  * Every transactional email shares this table-based layout (required for consistent rendering
- * across email clients, most of which strip <style> blocks and ignore CSS classes) — a centered
- * card with a colored icon header, a body with an optional callout box and CTA button, and a
- * footer. `{{productName}}` and `{{firstName}}` are always available; other vars are per-type,
- * see EMAIL_NOTIFICATION_CATALOG in shared-types.
+ * across email clients, most of which strip <style> blocks and ignore CSS classes) — a brand bar
+ * (logo or product name) above a colored icon header, a body with an optional callout box and CTA
+ * button, and a footer. `{{productName}}`, `{{firstName}}`, `{{brandMark}}`, `{{brandColorFrom}}`,
+ * `{{brandColorTo}}` are always available (filled in from the admin's actual branding at send
+ * time — see buildBrandVars below); other vars are per-type, see EMAIL_NOTIFICATION_CATALOG in
+ * shared-types.
  */
 function buildEmailTemplate(spec: EmailTemplateSpec): string {
-  const [gradFrom, gradTo] = spec.gradient;
   const tone = TONE_COLORS[spec.detail?.tone ?? "neutral"];
   const font = "-apple-system, Helvetica, Arial, sans-serif";
 
@@ -73,7 +94,10 @@ function buildEmailTemplate(spec: EmailTemplateSpec): string {
     <td align="center" style="padding: 40px 16px;">
       <table align="center" style="width: 100%; max-width: 480px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
         <tr>
-          <td style="background: linear-gradient(135deg, ${gradFrom}, ${gradTo}); padding: 28px 32px; text-align: center;">
+          <td style="padding: 24px 32px 8px; text-align: center;">{{brandMark}}</td>
+        </tr>
+        <tr>
+          <td style="background: linear-gradient(135deg, {{brandColorFrom}}, {{brandColorTo}}); padding: 28px 32px; text-align: center;">
             <table align="center" style="margin: 0 auto;">
               <tr>
                 <td style="width: 48px; height: 48px; background-color: rgba(255,255,255,0.2); border-radius: 50%; text-align: center; vertical-align: middle; line-height: 48px; font-size: 24px;">${spec.icon}</td>
@@ -110,8 +134,8 @@ function buildEmailTemplate(spec: EmailTemplateSpec): string {
               spec.cta
                 ? `<table align="center" style="width: 100%; margin: 0 auto; margin-bottom: 8px;">
               <tr>
-                <td align="center" style="border-radius: 8px; background-color: ${gradFrom};">
-                  <a href="${spec.cta.href}" target="_blank" style="display: inline-block; padding: 12px 32px; font-family: ${font}; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px; background-color: ${gradFrom};" rel="noopener noreferrer">${spec.cta.label}</a>
+                <td align="center" style="border-radius: 8px; background-color: {{brandColorFrom}};">
+                  <a href="${spec.cta.href}" target="_blank" style="display: inline-block; padding: 12px 32px; font-family: ${font}; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px; background-color: {{brandColorFrom}};" rel="noopener noreferrer">${spec.cta.label}</a>
                 </td>
               </tr>
             </table>`
@@ -149,7 +173,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Welcome to {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "👋",
-      gradient: ["#4f46e5", "#6366f1"],
       heading: "Welcome",
       intro: "Your account is ready. Glad to have you on board.",
     }),
@@ -158,7 +181,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "You're verified — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "✅",
-      gradient: ["#16a34a", "#22c55e"],
       heading: "Verification Approved",
       intro: "Your identity verification has been approved. You now have full access to your account.",
     }),
@@ -167,7 +189,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Action needed on your verification — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "⚠️",
-      gradient: ["#d97706", "#f59e0b"],
       heading: "Verification Update",
       intro: "We weren't able to approve your identity verification.",
       detail: { label: "Reason", value: "{{reason}}", tone: "warning" },
@@ -178,7 +199,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Deposit submitted — {{amount}} {{currency}}",
     bodyHtml: buildEmailTemplate({
       icon: "⏳",
-      gradient: ["#2563eb", "#3b82f6"],
       heading: "Deposit Submitted",
       intro: "We've received your deposit request. We'll email you again once it's confirmed and available in your wallet.",
       detail: { label: "Amount", value: "{{amount}} {{currency}}" },
@@ -188,7 +208,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Deposit received — {{amount}} {{currency}}",
     bodyHtml: buildEmailTemplate({
       icon: "💰",
-      gradient: ["#16a34a", "#22c55e"],
       heading: "Deposit Received",
       intro: "We've received your deposit. It's now available in your wallet.",
       detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "success" },
@@ -198,7 +217,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Payout submitted — {{amount}} {{currency}}",
     bodyHtml: buildEmailTemplate({
       icon: "📤",
-      gradient: ["#2563eb", "#3b82f6"],
       heading: "Payout Submitted",
       intro: "Your payout has been submitted and is on its way.",
       detail: { label: "Amount", value: "{{amount}} {{currency}}" },
@@ -208,7 +226,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Payout completed — {{amount}} {{currency}}",
     bodyHtml: buildEmailTemplate({
       icon: "✅",
-      gradient: ["#16a34a", "#22c55e"],
       heading: "Payout Completed",
       intro: "Your payout has completed successfully.",
       detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "success" },
@@ -218,7 +235,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Payout failed — {{amount}} {{currency}}",
     bodyHtml: buildEmailTemplate({
       icon: "❌",
-      gradient: ["#dc2626", "#ef4444"],
       heading: "Payout Failed",
       intro: "Your payout couldn't be completed and the funds have been returned to your wallet.",
       detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "danger" },
@@ -229,7 +245,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Your new card is ready — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "💳",
-      gradient: ["#7c3aed", "#a855f7"],
       heading: "Card Issued",
       intro: "Your new virtual card is ready to use.",
       detail: { label: "Card", value: "•••• {{last4}}" },
@@ -239,7 +254,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Card frozen — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "🧊",
-      gradient: ["#d97706", "#f59e0b"],
       heading: "Card Frozen",
       intro: "Your card has been frozen. Unfreeze it any time from your dashboard.",
       detail: { label: "Card", value: "•••• {{last4}}", tone: "warning" },
@@ -249,7 +263,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Card unfrozen — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "🔓",
-      gradient: ["#16a34a", "#22c55e"],
       heading: "Card Unfrozen",
       intro: "Your card has been unfrozen and is ready to use again.",
       detail: { label: "Card", value: "•••• {{last4}}", tone: "success" },
@@ -259,7 +272,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Card terminated — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "🗑️",
-      gradient: ["#dc2626", "#ef4444"],
       heading: "Card Terminated",
       intro: "Your card has been permanently closed.",
       detail: { label: "Card", value: "•••• {{last4}}", tone: "danger" },
@@ -269,7 +281,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Card purchase — {{amount}} {{currency}}",
     bodyHtml: buildEmailTemplate({
       icon: "🛍️",
-      gradient: ["#2563eb", "#3b82f6"],
       heading: "Card Purchase",
       intro: "A purchase was made on your card at {{merchant}}.",
       detail: { label: "Amount", value: "{{amount}} {{currency}}" },
@@ -279,7 +290,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Currency swap completed — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "🔄",
-      gradient: ["#0d9488", "#14b8a6"],
       heading: "Swap Completed",
       intro: "Your currency swap has completed.",
       detail: { label: "Converted", value: "{{sourceAmount}} {{sourceCurrency}} → {{targetAmount}} {{targetCurrency}}" },
@@ -289,7 +299,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Two-factor authentication enabled — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "🔐",
-      gradient: ["#16a34a", "#22c55e"],
       heading: "Two-Factor Enabled",
       intro: "Two-factor authentication was just turned on for your account.",
       extra: CONTACT_SUPPORT_TEXT,
@@ -300,7 +309,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Security Alert — Two-factor authentication disabled",
     bodyHtml: buildEmailTemplate({
       icon: "🛡️",
-      gradient: ["#dc2626", "#ef4444"],
       heading: "Security Alert",
       intro: "Two-factor authentication was just turned off for your account.",
       extra: CONTACT_SUPPORT_TEXT,
@@ -311,7 +319,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "New passkey added — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "🔑",
-      gradient: ["#16a34a", "#22c55e"],
       heading: "Passkey Added",
       intro: "A new passkey was just added to your account. Here are the details:",
       detail: { label: "Added Passkey", value: '"{{passkeyName}}"', tone: "success" },
@@ -323,7 +330,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Security Alert — Passkey removed",
     bodyHtml: buildEmailTemplate({
       icon: "🛡️",
-      gradient: ["#dc2626", "#ef4444"],
       heading: "Security Alert",
       intro: "A passkey was just removed from your account. Here are the details:",
       detail: { label: "Removed Passkey", value: '"{{passkeyName}}"', tone: "danger" },
@@ -335,7 +341,6 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "New beneficiary added — {{productName}}",
     bodyHtml: buildEmailTemplate({
       icon: "👤",
-      gradient: ["#2563eb", "#3b82f6"],
       heading: "Beneficiary Added",
       intro: '"{{beneficiaryName}}" was just added as a payout beneficiary on your account.',
     }),
@@ -379,6 +384,26 @@ export async function listEmailTemplates(prisma: PrismaClient) {
   return templates.map(templateToDto);
 }
 
+/**
+ * Deletes the admin's saved row for one type, reverting it to whatever EMAIL_DEFAULTS[type] is in
+ * the code right now — the same fallback listEmailTemplates/sendNotificationEmail already use for
+ * a type with no row at all. This is the only way an already-saved template picks up a code-level
+ * redesign: listEmailTemplates seeds a row on first read and never overwrites an existing one
+ * (that's what protects a real admin customization), so a template saved before a template
+ * redesign ships stays on the old design until explicitly reset.
+ */
+export async function resetEmailTemplate(prisma: PrismaClient, type: EmailNotificationType) {
+  await prisma.emailTemplate.deleteMany({ where: { type } });
+  const fallback = EMAIL_DEFAULTS[type];
+  return { type, subject: fallback.subject, bodyHtml: fallback.bodyHtml, updatedAt: new Date().toISOString() };
+}
+
+/** Same as resetEmailTemplate, for every type at once. */
+export async function resetAllEmailTemplates(prisma: PrismaClient) {
+  await prisma.emailTemplate.deleteMany({});
+  return listEmailTemplates(prisma);
+}
+
 export async function updateEmailTemplate(prisma: PrismaClient, type: EmailNotificationType, input: UpdateEmailTemplateInput) {
   const template = await prisma.emailTemplate.upsert({
     where: { type },
@@ -396,6 +421,7 @@ export async function renderSampleEmail(prisma: PrismaClient, type: EmailNotific
     firstName: "Alex",
     productName: branding.productName,
     supportEmail: branding.supportEmail ?? "support@example.com",
+    ...buildBrandVars(branding),
     reason: "Document image was too blurry to read",
     amount: "250.00",
     currency: "USD",
@@ -433,7 +459,7 @@ export async function sendNotificationEmail(
     const template = row ? { subject: row.subject, bodyHtml: row.bodyHtml } : EMAIL_DEFAULTS[type];
 
     const firstName = customer.fullName?.split(" ")[0] || customer.businessName || "there";
-    const allVars = { ...vars, firstName, productName: branding.productName, supportEmail: branding.supportEmail ?? "" };
+    const allVars = { ...vars, firstName, productName: branding.productName, supportEmail: branding.supportEmail ?? "", ...buildBrandVars(branding) };
 
     await enqueueEmail({
       to: customer.email,

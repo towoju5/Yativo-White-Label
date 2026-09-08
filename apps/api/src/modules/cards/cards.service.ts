@@ -10,6 +10,7 @@ import { reverseTransaction } from "../ledger/reverseTransaction.js";
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
+import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
 import { majorToMinor } from "../../lib/money.js";
@@ -187,9 +188,22 @@ export async function listCardTransactions(prisma: PrismaClient, cardId: string,
 export async function getCardDetail(prisma: PrismaClient, cardId: string, scopeCustomerId?: string) {
   const card = await findOwnedCard(prisma, cardId, scopeCustomerId);
   const detail = await yativoClient.fiat.cards.getCard(card.yativoCardId!);
+
+  // In POOLED mode every card is issued under the same shared Yativo customer, so Yativo's own
+  // `cardholderName` reflects that one pooled identity for every customer's card — never this
+  // specific customer's real name. Overridden with our own record instead of leaking the wrong
+  // identity; billingAddress has no local equivalent to substitute, so it's left as Yativo's
+  // (pooled) value — a known limitation of pooled mode, not something this app can fix locally.
+  const settings = await getPlatformSettings(prisma);
+  let cardholderName = detail.cardholderName ?? null;
+  if (settings.yativoCustomerMode === "POOLED") {
+    const customer = await prisma.customer.findUnique({ where: { id: card.customerId } });
+    cardholderName = customer?.fullName ?? customer?.businessName ?? cardholderName;
+  }
+
   return {
     ...cardToDto(card),
-    cardholderName: detail.cardholderName ?? null,
+    cardholderName,
     cardBrand: detail.cardBrand ?? null,
     cardProgram: detail.cardProgram ?? null,
     maskedPan: detail.maskedPan ?? null,

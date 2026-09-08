@@ -35,17 +35,18 @@ function getTransporter(): Transporter | null {
 
 export type MailAttachment = { filename: string; contentBase64: string; contentType: string };
 
+/** Returns false (not configured — no attempt made, `t.sendMail` never called) or true (an attempt was made; throws on failure rather than swallowing it, so a caller that needs to know why can catch a real error). Callers that must never fail the business action that triggered them (see sendNotificationEmail) already wrap this in their own try/catch and ignore both the return value and any thrown error. */
 export async function sendMail(opts: {
   to: string;
   subject: string;
   html: string;
   replyTo?: string;
   attachments?: MailAttachment[];
-}): Promise<void> {
+}): Promise<boolean> {
   const t = getTransporter();
   if (!t) {
     logger.warn({ to: opts.to, subject: opts.subject }, "SMTP isn't configured (SMTP_HOST unset) — email not sent");
-    return;
+    return false;
   }
   await t.sendMail({
     from: smtpConfig.fromAddress,
@@ -55,4 +56,5 @@ export async function sendMail(opts: {
     replyTo: opts.replyTo,
     attachments: opts.attachments?.map((a) => ({ filename: a.filename, content: Buffer.from(a.contentBase64, "base64"), contentType: a.contentType })),
   });
+  return true;
 }
