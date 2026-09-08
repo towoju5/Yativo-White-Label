@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createHash } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { verifyYativoSignature } from "@white-label/yativo-sdk";
-import { yativoWebhookConfig } from "../lib/integrationRuntimeConfig.js";
+import { yativoWebhookConfig, syncWebhookSecretIfRotated } from "../lib/integrationRuntimeConfig.js";
 import logger from "../lib/logger.js";
 import { enqueueWebhookEvent } from "../jobs/queue.js";
 
@@ -82,6 +82,13 @@ function deriveExternalEventId(eventType: string, payload: Record<string, unknow
   return `${eventType}:${createHash("sha256").update(JSON.stringify(payload)).digest("hex")}`;
 }
 
+/** True when a body superficially looks like Yativo's `webhook_updated` notification (sent on registration and on every secret rotation) — used only to decide whether it's worth the extra round-trip to Yativo's business API to check for a rotated secret, never to trust the secret it claims directly. */
+function looksLikeWebhookUpdated(body: unknown): boolean {
+  if (typeof body !== "object" || body === null) return false;
+  const record = body as Record<string, unknown>;
+  return record["event.type"] === "webhook_updated" && typeof record.payload === "object" && record.payload !== null && typeof (record.payload as Record<string, unknown>).secret === "string";
+}
+
 export async function webhookRoutes(app: FastifyInstance) {
   // `app.register(webhookRoutes)` creates its own encapsulated Fastify context, so this
   // content-type parser override only applies to routes registered on `app` inside this
@@ -105,7 +112,6 @@ export async function webhookRoutes(app: FastifyInstance) {
       // still gets *recorded* (as invalid, most likely) instead of silently vanishing.
       const signatureHeader = request.headers[YATIVO_SIGNATURE_HEADER] ?? request.headers["x-signature"] ?? request.headers["x-yativo-signature"];
       const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
-      const signatureValid = !!signature && verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret);
 
       let parsedBody: unknown;
       let parseError = false;
@@ -113,6 +119,17 @@ export async function webhookRoutes(app: FastifyInstance) {
         parsedBody = JSON.parse(rawBody.toString("utf8"));
       } catch {
         parseError = true;
+      }
+
+      let signatureValid = !!signature && verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret);
+
+      // A webhook_updated notification failing verification is the one case that's expected on a
+      // legitimate secret rotation (the notification announcing the new secret is itself signed
+      // with that new secret, which we don't have yet) — worth an extra round-trip to Yativo's
+      // authenticated business-webhook API to check, then re-verifying against whatever it confirms.
+      if (!parseError && !signatureValid && signature && looksLikeWebhookUpdated(parsedBody)) {
+        const rotated = await syncWebhookSecretIfRotated(app.prisma);
+        if (rotated) signatureValid = verifyYativoSignature(rawBody, signature, yativoWebhookConfig.secret);
       }
 
       const classified = !parseError && signatureValid ? classifyIncomingWebhook(parsedBody) : null;

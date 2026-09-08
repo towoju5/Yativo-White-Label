@@ -17,6 +17,7 @@ import { createDepositsResource } from "./fiat/deposits.js";
 import { createLocationsResource } from "./fiat/locations.js";
 import { createKycReferenceResource } from "./fiat/kycReference.js";
 import { createCurrenciesResource } from "./fiat/currencies.js";
+import { createBusinessWebhooksResource } from "./fiat/businessWebhooks.js";
 
 import { createAccountsResource } from "./crypto/accounts.js";
 import { createCryptoWalletsResource } from "./crypto/wallets.js";
@@ -189,6 +190,9 @@ async function performRequest<T>(config: YativoConfig, opts: YativoRequestOpts<T
 
 export interface YativoClient {
   config: YativoConfig;
+  business: {
+    webhooks: ReturnType<typeof createBusinessWebhooksResource>;
+  };
   fiat: {
     wallets: ReturnType<typeof createWalletsResource>;
     customers: ReturnType<typeof createCustomersResource>;
@@ -228,6 +232,9 @@ export function createYativoClient(config: YativoConfig): YativoClient {
 
   return {
     config,
+    business: {
+      webhooks: createBusinessWebhooksResource(ctx),
+    },
     fiat: {
       wallets: createWalletsResource(ctx),
       customers: createCustomersResource(ctx),
