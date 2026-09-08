@@ -224,8 +224,12 @@ function NativeDepositCard() {
                     {result.localAmount && result.localCurrency && (
                       <Row label={t("deposit.dialog.amountToPay", "Amount to pay")} value={`${result.localAmount} ${result.localCurrency}`} />
                     )}
-                    {result.receiveAmount && result.walletCurrencyCode && (
-                      <Row label={t("deposit.dialog.youllReceive", "You'll receive")} value={`${result.receiveAmount} ${result.walletCurrencyCode}`} />
+                    {(result.netReceiveAmount ?? result.receiveAmount) && result.walletCurrencyCode && (
+                      <Row
+                        label={t("deposit.dialog.youllReceive", "You'll receive")}
+                        value={`${result.netReceiveAmount ?? result.receiveAmount} ${result.walletCurrencyCode}`}
+                        warn={result.netReceiveAmount != null && Number(result.netReceiveAmount) < 0}
+                      />
                     )}
                     {result.exchangeRate && <Row label={t("deposit.dialog.exchangeRate", "Exchange rate")} value={result.exchangeRate} />}
                     {(result.platformFee ?? result.transactionFee) && (
@@ -239,13 +243,6 @@ function NativeDepositCard() {
                                 : "")
                             : `${result.transactionFee}`
                         }
-                      />
-                    )}
-                    {result.netReceiveAmount && result.walletCurrencyCode && (
-                      <Row
-                        label={t("deposit.dialog.netReceive", "You'll actually receive (after fee)")}
-                        value={`${result.netReceiveAmount} ${result.walletCurrencyCode}`}
-                        warn={Number(result.netReceiveAmount) < 0}
                       />
                     )}
                     {result.estimatedDelivery && (
