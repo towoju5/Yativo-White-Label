@@ -7,7 +7,8 @@ import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
-import { ensureCustomerWalletAccount } from "../ledger/accounts.js";
+import { ensureCustomerWalletAccount, ensurePlatformAccount } from "../ledger/accounts.js";
+import { postTransaction } from "../ledger/postTransaction.js";
 import { env } from "../../config/env.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
@@ -68,7 +69,7 @@ export async function depositsRoutes(app: FastifyInstance) {
       // eagerly before this call would leave a stray empty wallet behind on any failure (e.g.
       // an unsupported currency), and the deposit.confirmed webhook already creates it lazily
       // on completion (see webhooks/handlers/deposit.handler.ts) if this doesn't run first.
-      await ensureCustomerWalletAccount(app.prisma, customer.id, request.body.walletCurrencyCode);
+      const wallet = await ensureCustomerWalletAccount(app.prisma, customer.id, request.body.walletCurrencyCode);
 
       // Recorded so the deposit.confirmed webhook can recognize this as a payin (as opposed to an
       // unsolicited virtual-account transfer, which never hits this route) and, when pricing is
@@ -87,16 +88,37 @@ export async function depositsRoutes(app: FastifyInstance) {
         if (feeMajor !== undefined && rate !== undefined && rate > 0 && walletCurrency) {
           yativoFeeMinor = majorToMinor(feeMajor / rate, walletCurrency.decimals);
         }
-        await app.prisma.deposit.create({
-          data: { customerId: customer.id, currencyCode: request.body.walletCurrencyCode, yativoDepositId: result.depositId, yativoFeeMinor },
-        });
 
-        // Previewed here so the customer sees what will actually come out of the deposit —
-        // the same getEffectiveFee call the deposit.confirmed webhook makes at settlement (see
-        // webhooks/handlers/deposit.handler.ts). Best-effort: left null if Yativo didn't return a
-        // receive amount or the wallet currency isn't seeded locally.
+        let pendingTransactionId: string | null = null;
         if (walletCurrency && result.receiveAmount) {
           const receiveAmountMinor = majorToMinor(result.receiveAmount, walletCurrency.decimals);
+
+          // Posted as PENDING so this deposit shows up in the customer's transaction history
+          // right away, instead of being invisible until (and unless) the deposit.confirmed
+          // webhook lands — mirrors createPortalPayout's PENDING hold at submission. Unlike a
+          // payout hold, this CREDITs the wallet (its normal/increasing direction) rather than
+          // debiting it, which getPendingHold deliberately never counts toward available balance
+          // (see ledger/balances.ts) — so it's purely informational and can't be spent against.
+          // Settled (reversed + re-posted against the real settlement account), not just left
+          // alone, once deposit.handler.ts confirms the deposit — see settlePendingTransaction there.
+          const suspense = await ensurePlatformAccount(app.prisma, "SUSPENSE_PENDING", request.body.walletCurrencyCode);
+          const pendingTx = await postTransaction(app.prisma, {
+            type: "DEPOSIT",
+            status: "PENDING",
+            idempotencyKey: `deposit:${result.depositId}`,
+            externalSource: "MANUAL",
+            externalRef: result.depositId,
+            description: `Deposit initiated via Yativo (${result.depositId})`,
+            lines: [
+              { accountId: suspense.id, direction: "DEBIT", amountMinor: receiveAmountMinor, currencyCode: request.body.walletCurrencyCode },
+              { accountId: wallet.id, direction: "CREDIT", amountMinor: receiveAmountMinor, currencyCode: request.body.walletCurrencyCode },
+            ],
+          });
+          pendingTransactionId = pendingTx.id;
+
+          // Previewed here so the customer sees what will actually come out of the deposit —
+          // the same getEffectiveFee call the deposit.confirmed webhook makes at settlement (see
+          // webhooks/handlers/deposit.handler.ts).
           const feeMinor = await getEffectiveFee(app.prisma, "PAYIN", customer.id, receiveAmountMinor, yativoFeeMinor ?? 0n);
           const feeMajorInWallet = Number(feeMinor) / 10 ** walletCurrency.decimals;
           platformFee = feeMajorInWallet.toFixed(walletCurrency.decimals);
@@ -115,6 +137,16 @@ export async function depositsRoutes(app: FastifyInstance) {
           // surface loudly rather than hide.
           netReceiveAmount = ((Number(receiveAmountMinor - feeMinor)) / 10 ** walletCurrency.decimals).toFixed(walletCurrency.decimals);
         }
+
+        await app.prisma.deposit.create({
+          data: {
+            customerId: customer.id,
+            currencyCode: request.body.walletCurrencyCode,
+            yativoDepositId: result.depositId,
+            yativoFeeMinor,
+            transactionId: pendingTransactionId,
+          },
+        });
       }
 
       // Fired immediately on submission — separate from DEPOSIT_RECEIVED, which only fires once

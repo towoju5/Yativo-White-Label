@@ -152,6 +152,7 @@ model LedgerTransaction {
 
   entries LedgerEntry[]
   payout  Payout?
+  deposit Deposit?
 
   @@index([externalRef])
   @@index([status])
@@ -765,15 +766,22 @@ model PricingOverride {
 /// shape, no other distinguishing field exists), and so Yativo's own quoted fee — only available
 /// at initiation time, in a human-readable string — survives to when the webhook settles it.
 model Deposit {
-  id              String   @id @default(cuid())
+  id              String             @id @default(cuid())
   customerId      String
-  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer        Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
   currencyCode    String
-  yativoDepositId String   @unique
+  yativoDepositId String             @unique
   /// Best-effort parse of Yativo's quoted transaction_fee, converted to this deposit's wallet
   /// currency minor units via the quoted exchange_rate — null if parsing failed or Yativo omitted it.
   yativoFeeMinor  BigInt?
-  createdAt       DateTime @default(now())
+  /// The PENDING ledger transaction posted at initiate time (see deposits.routes.ts), so this
+  /// deposit shows up in the customer's transaction history immediately, before Yativo's
+  /// deposit.confirmed webhook ever lands. Settled (not just posted fresh) by that webhook's
+  /// handler via settlePendingTransaction — see webhooks/handlers/deposit.handler.ts. Nullable
+  /// because deposits created before this column existed have no PENDING transaction to point at.
+  transactionId   String?            @unique
+  transaction     LedgerTransaction? @relation(fields: [transactionId], references: [id])
+  createdAt       DateTime           @default(now())
 
   @@map("deposits")
 }

@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import type { DepositEventPayload } from "@white-label/yativo-sdk";
 import { postTransaction } from "../../modules/ledger/postTransaction.js";
+import { settlePendingTransaction } from "../../modules/ledger/settlePendingTransaction.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../../modules/ledger/accounts.js";
 import { getEffectiveFee } from "../../modules/pricing/pricing.service.js";
 import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
@@ -41,20 +42,70 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
   const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", payload.currencyCode);
   const wallet = await ensureCustomerWalletAccount(prisma, customer.id, payload.currencyCode);
 
-  await postTransaction(prisma, {
-    type: "DEPOSIT",
-    status: "POSTED",
-    // Derived from the webhook's own externalEventId — replaying the same webhook
-    // (e.g. after a retry) is a guaranteed no-op via postTransaction's idempotency check.
-    idempotencyKey: `webhook:${externalEventId}`,
-    externalSource: "YATIVO_WEBHOOK",
-    externalRef: payload.yativoDepositId,
-    description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
-    lines: [
-      { accountId: settlement.id, direction: "DEBIT", amountMinor, currencyCode: payload.currencyCode },
-      { accountId: wallet.id, direction: "CREDIT", amountMinor, currencyCode: payload.currencyCode },
-    ],
-  });
+  const finalLines = [
+    { accountId: settlement.id, direction: "DEBIT" as const, amountMinor, currencyCode: payload.currencyCode },
+    { accountId: wallet.id, direction: "CREDIT" as const, amountMinor, currencyCode: payload.currencyCode },
+  ];
+  if (payinRecord?.transactionId) {
+    // Releases the PENDING placeholder posted at /portal/deposit/initiate (see deposits.routes.ts)
+    // and posts this as the real settlement in one atomic step — idempotent on its own terms
+    // (keyed by the pending transaction's id, not externalEventId), so a webhook replay after
+    // this has already settled is a no-op regardless of whether externalEventId matches.
+    await settlePendingTransaction(prisma, payinRecord.transactionId, finalLines, {
+      type: "DEPOSIT",
+      externalSource: "YATIVO_WEBHOOK",
+      externalRef: payload.yativoDepositId,
+      description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
+    });
+  } else {
+    // No local PENDING transaction to settle — either this deposit predates that column, or it
+    // never went through /portal/deposit/initiate (e.g. no `payinRecord` at all). Post it fresh,
+    // same as before.
+    await postTransaction(prisma, {
+      type: "DEPOSIT",
+      status: "POSTED",  const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", payload.currencyCode);
+  const wallet = await ensureCustomerWalletAccount(prisma, customer.id, payload.currencyCode);
+
+  const finalLines = [
+    { accountId: settlement.id, direction: "DEBIT" as const, amountMinor, currencyCode: payload.currencyCode },
+    { accountId: wallet.id, direction: "CREDIT" as const, amountMinor, currencyCode: payload.currencyCode },
+  ];
+  if (payinRecord?.transactionId) {
+    // Releases the PENDING placeholder posted at /portal/deposit/initiate (see deposits.routes.ts)
+    // and posts this as the real settlement in one atomic step — idempotent on its own terms
+    // (keyed by the pending transaction's id, not externalEventId), so a webhook replay after
+    // this has already settled is a no-op regardless of whether externalEventId matches.
+    await settlePendingTransaction(prisma, payinRecord.transactionId, finalLines, {
+      type: "DEPOSIT",
+      externalSource: "YATIVO_WEBHOOK",
+      externalRef: payload.yativoDepositId,
+      description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
+    });
+  } else {
+    // No local PENDING transaction to settle — either this deposit predates that column, or it
+    // never went through /portal/deposit/initiate (e.g. no `payinRecord` at all). Post it fresh,
+    // same as before.
+    await postTransaction(prisma, {
+      type: "DEPOSIT",
+      status: "POSTED",
+      // Derived from the webhook's own externalEventId — replaying the same webhook
+      // (e.g. after a retry) is a guaranteed no-op via postTransaction's idempotency check.
+      idempotencyKey: `webhook:${externalEventId}`,
+      externalSource: "YATIVO_WEBHOOK",
+      externalRef: payload.yativoDepositId,
+      description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
+      lines: finalLines,
+    });
+  }
+      // Derived from the webhook's own externalEventId — replaying the same webhook
+      // (e.g. after a retry) is a guaranteed no-op via postTransaction's idempotency check.
+      idempotencyKey: `webhook:${externalEventId}`,
+      externalSource: "YATIVO_WEBHOOK",
+      externalRef: payload.yativoDepositId,
+      description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
+      lines: finalLines,
+    });
+  }
 
   // payinRecord also carries Yativo's own quoted fee, captured at initiation time, for markup pricing.
   const upstreamFeeMinor = payinRecord?.yativoFeeMinor ?? 0n;
