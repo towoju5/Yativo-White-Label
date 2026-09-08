@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import type { TransactionDetail } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
-import { Printer } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import { portalApi } from "@/lib/api-client";
 import { fetchBranding } from "@/theme/branding";
+import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,13 +76,50 @@ function openReceiptWindow(data: TransactionDetail, productName: string, amountL
   setTimeout(() => win.print(), 300);
 }
 
+/** Plain-text summary for the Web Share API / clipboard fallback — same facts as the printed receipt, just without the HTML. */
+function buildReceiptText(data: TransactionDetail, productName: string, amountLabel: string): string {
+  const lines = [
+    `${productName} — transaction receipt`,
+    amountLabel,
+    `Type: ${humanizeType(data.type)}`,
+    `Status: ${data.status}`,
+    ...(data.description ? [`Description: ${data.description}`] : []),
+    ...(data.payout ? [`Recipient: ${data.payout.beneficiaryName}`] : []),
+    `Transaction ID: ${data.id}`,
+    `Date: ${new Date(data.createdAt).toLocaleString()}`,
+  ];
+  return lines.join("\n");
+}
+
 export function TransactionDetailDialog({ transactionId, onClose }: { transactionId: string | null; onClose: () => void }) {
+  const { toast } = useToast();
   const { data, isLoading } = useQuery({
     queryKey: ["portal", "transactions", transactionId],
     queryFn: () => portalApi.get<TransactionDetail>(`/portal/transactions/${transactionId}`),
     enabled: !!transactionId,
   });
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
+
+  const shareReceipt = async (txData: TransactionDetail, productName: string, amountLabel: string) => {
+    const text = buildReceiptText(txData, productName, amountLabel);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Receipt · ${txData.id}`, text });
+      } catch (err) {
+        // AbortError just means the user closed the native share sheet — not a real failure.
+        if (err instanceof Error && err.name !== "AbortError") {
+          toast({ variant: "destructive", title: "Couldn't share", description: err.message });
+        }
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: "Receipt copied to clipboard" });
+    } catch {
+      toast({ variant: "destructive", title: "Couldn't copy receipt" });
+    }
+  };
 
   const primaryEntry = data?.entries[0];
   const amountLabel = primaryEntry
@@ -119,13 +157,22 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
               {data.postedAt && <Row label="Posted" value={new Date(data.postedAt).toLocaleString()} />}
               {data.reversedAt && <Row label="Reversed" value={new Date(data.reversedAt).toLocaleString()} />}
             </dl>
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={() => openReceiptWindow(data, branding?.productName ?? "Receipt", amountLabel)}
-            >
-              <Printer className="h-4 w-4" /> Print receipt
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => shareReceipt(data, branding?.productName ?? "Receipt", amountLabel)}
+              >
+                <Share2 className="h-4 w-4" /> Share
+              </Button>
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => openReceiptWindow(data, branding?.productName ?? "Receipt", amountLabel)}
+              >
+                <Printer className="h-4 w-4" /> Print receipt
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>

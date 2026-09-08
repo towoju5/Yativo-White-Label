@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { CustomerTransactionListItem, WalletBalance } from "@white-label/shared-types";
 import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, LEDGER_TRANSACTION_STATUSES } from "@white-label/shared-types";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { portalApi } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
@@ -25,6 +25,10 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
   REVERSED: "destructive",
 };
 
+function humanizeType(type: string): string {
+  return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export default function PortalTransactionsPage() {
   const { t } = useTranslation();
   const [type, setType] = useState("ALL");
@@ -32,8 +36,20 @@ export default function PortalTransactionsPage() {
   const [currencyCode, setCurrencyCode] = useState("ALL");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+
+  // Debounced so typing doesn't fire a request per keystroke — the backend does the actual
+  // filtering, there's nothing to filter client-side while a page of results is in flight.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const { data: wallets } = useQuery({
     queryKey: ["portal", "wallets"],
@@ -41,7 +57,7 @@ export default function PortalTransactionsPage() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["portal", "transactions", { type, status, currencyCode, dateFrom, dateTo, page }],
+    queryKey: ["portal", "transactions", { type, status, currencyCode, dateFrom, dateTo, search, page }],
     queryFn: () =>
       portalApi.get<Paginated<CustomerTransactionListItem>>("/portal/transactions", {
         type: type === "ALL" ? undefined : type,
@@ -49,6 +65,7 @@ export default function PortalTransactionsPage() {
         currencyCode: currencyCode === "ALL" ? undefined : currencyCode,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
+        search: search || undefined,
         page,
         pageSize: PAGE_SIZE,
       }),
@@ -61,6 +78,19 @@ export default function PortalTransactionsPage() {
     setPage(1);
   };
 
+  const hasActiveFilters = type !== "ALL" || status !== "ALL" || currencyCode !== "ALL" || !!dateFrom || !!dateTo || !!search;
+
+  const clearFilters = () => {
+    setType("ALL");
+    setStatus("ALL");
+    setCurrencyCode("ALL");
+    setDateFrom("");
+    setDateTo("");
+    setSearchInput("");
+    setSearch("");
+    setPage(1);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -68,59 +98,100 @@ export default function PortalTransactionsPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">{t("transactions.subtitle", "Every transaction across all of your wallets")}</p>
       </div>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <Select value={type} onValueChange={resetPage(setType)}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder={t("transactions.type", "Type")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">{t("transactions.allTypes", "All types")}</SelectItem>
-            {LEDGER_TRANSACTION_TYPES.map((v) => (
-              <SelectItem key={v} value={v}>
-                {v}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={status} onValueChange={resetPage(setStatus)}>
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder={t("transactions.status", "Status")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">{t("transactions.allStatuses", "All statuses")}</SelectItem>
-            {LEDGER_TRANSACTION_STATUSES.map((v) => (
-              <SelectItem key={v} value={v}>
-                {v}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {wallets && wallets.length > 1 && (
-          <Select value={currencyCode} onValueChange={resetPage(setCurrencyCode)}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder={t("transactions.currency", "Currency")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">{t("transactions.allCurrencies", "All currencies")}</SelectItem>
-              {wallets.map((w) => (
-                <SelectItem key={w.walletId} value={w.currencyCode}>
-                  {w.currencyCode}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        <div className="space-y-1">
-          <Label htmlFor="dateFrom" className="text-xs text-muted-foreground">
-            {t("transactions.from", "From")}
-          </Label>
-          <Input id="dateFrom" type="date" className="w-40" value={dateFrom} onChange={(e) => resetPage(setDateFrom)(e.target.value)} />
+      <div className="space-y-3">
+        {/* Type filter — one button per transaction type, scrolls horizontally on narrow screens
+            rather than wrapping into a tall block. */}
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+          <Button
+            type="button"
+            size="sm"
+            variant={type === "ALL" ? "default" : "outline"}
+            className="shrink-0"
+            onClick={() => resetPage(setType)("ALL")}
+          >
+            {t("transactions.allTypes", "All types")}
+          </Button>
+          {LEDGER_TRANSACTION_TYPES.map((v) => (
+            <Button
+              key={v}
+              type="button"
+              size="sm"
+              variant={type === v ? "default" : "outline"}
+              className="shrink-0"
+              onClick={() => resetPage(setType)(v)}
+            >
+              {humanizeType(v)}
+            </Button>
+          ))}
         </div>
-        <div className="space-y-1">
-          <Label htmlFor="dateTo" className="text-xs text-muted-foreground">
-            {t("transactions.to", "To")}
-          </Label>
-          <Input id="dateTo" type="date" className="w-40" value={dateTo} onChange={(e) => resetPage(setDateTo)(e.target.value)} />
+
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="txSearch" className="text-xs text-muted-foreground">
+              {t("transactions.search", "Search")}
+            </Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="txSearch"
+                placeholder={t("transactions.searchPlaceholder", "Description, reference, or ID")}
+                className="w-64 pl-8"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">{t("transactions.status", "Status")}</Label>
+            <Select value={status} onValueChange={resetPage(setStatus)}>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder={t("transactions.status", "Status")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">{t("transactions.allStatuses", "All statuses")}</SelectItem>
+                {LEDGER_TRANSACTION_STATUSES.map((v) => (
+                  <SelectItem key={v} value={v}>
+                    {v}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {wallets && wallets.length > 1 && (
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">{t("transactions.currency", "Currency")}</Label>
+              <Select value={currencyCode} onValueChange={resetPage(setCurrencyCode)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder={t("transactions.currency", "Currency")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">{t("transactions.allCurrencies", "All currencies")}</SelectItem>
+                  {wallets.map((w) => (
+                    <SelectItem key={w.walletId} value={w.currencyCode}>
+                      {w.currencyCode}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <div className="space-y-1">
+            <Label htmlFor="dateFrom" className="text-xs text-muted-foreground">
+              {t("transactions.from", "From")}
+            </Label>
+            <Input id="dateFrom" type="date" className="w-40" value={dateFrom} onChange={(e) => resetPage(setDateFrom)(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="dateTo" className="text-xs text-muted-foreground">
+              {t("transactions.to", "To")}
+            </Label>
+            <Input id="dateTo" type="date" className="w-40" value={dateTo} onChange={(e) => resetPage(setDateTo)(e.target.value)} />
+          </div>
+          {hasActiveFilters && (
+            <Button type="button" variant="ghost" size="sm" onClick={clearFilters}>
+              <X className="h-3.5 w-3.5" /> {t("transactions.clearFilters", "Clear filters")}
+            </Button>
+          )}
         </div>
       </div>
 
