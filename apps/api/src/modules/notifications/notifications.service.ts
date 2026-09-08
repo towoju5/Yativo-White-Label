@@ -52,6 +52,10 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
     subject: "Action needed on your verification — {{productName}}",
     bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>We weren't able to approve your identity verification.</p><p><strong>Reason:</strong> {{reason}}</p><p>Please review and resubmit your details.</p>`),
   },
+  DEPOSIT_CREATED: {
+    subject: "Deposit submitted — {{amount}} {{currency}}",
+    bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>We've received your request to deposit <strong>{{amount}} {{currency}}</strong>. We'll email you again once it's confirmed and available in your wallet.</p>`),
+  },
   DEPOSIT_RECEIVED: {
     subject: "Deposit received — {{amount}} {{currency}}",
     bodyHtml: wrap(`<p>Hi {{firstName}},</p><p>We've received your deposit of <strong>{{amount}} {{currency}}</strong>. It's now available in your wallet.</p>`),

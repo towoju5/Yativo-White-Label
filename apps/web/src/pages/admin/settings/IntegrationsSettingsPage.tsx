@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Copy } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ type Config = {
     apiSecret?: string;
     webhookSecretConfigured: boolean;
     webhookSecret?: string;
+    webhookUrl: string;
   };
   smtp: {
     host: string;
@@ -42,6 +44,7 @@ const emptyConfig: Config = {
     apiKeyConfigured: false,
     apiSecretConfigured: false,
     webhookSecretConfigured: false,
+    webhookUrl: "",
   },
   smtp: {
     host: "",
@@ -87,6 +90,11 @@ export default function IntegrationsSettingsPage() {
     setConfig((c) => ({ ...c, smtp: { ...c.smtp, [field]: value } }));
   };
 
+  const copyWebhookUrl = () => {
+    navigator.clipboard?.writeText(config.yativo.webhookUrl);
+    toast({ title: "Copied to clipboard" });
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -112,6 +120,17 @@ export default function IntegrationsSettingsPage() {
           <CardDescription>Mode, base URLs, and API credentials for the upstream Yativo integration.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="webhookUrl">Webhook URL</Label>
+            <div className="flex gap-2">
+              <Input id="webhookUrl" readOnly value={config.yativo.webhookUrl} className="font-mono text-sm" />
+              <Button type="button" variant="outline" size="icon" aria-label="Copy webhook URL" onClick={copyWebhookUrl}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Register this URL on the Yativo dashboard so it can deliver events to this platform.</p>
+          </div>
+
           <div className="space-y-1.5">
             <Label>Mode</Label>
             <Select value={config.yativo.mode} onValueChange={(v) => updateYativo("mode", v)}>

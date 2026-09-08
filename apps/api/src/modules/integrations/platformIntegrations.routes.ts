@@ -60,6 +60,10 @@ function safe(value: Settings) {
       apiSecretConfigured: Boolean(value.yativo.apiSecret),
       webhookSecret: undefined,
       webhookSecretConfigured: Boolean(value.yativo.webhookSecret),
+      // Not part of the editable settings — always derived from APP_BASE_URL, so it stays correct
+      // if that env var changes without needing a separate save. This is the URL to register on
+      // the Yativo dashboard; the endpoint itself lives at POST /webhooks/yativo (see webhooks/yativo.routes.ts).
+      webhookUrl: `${env.APP_BASE_URL}/webhooks/yativo`,
     },
     smtp: {
       ...value.smtp,

@@ -13,6 +13,7 @@ import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
 import { majorToMinor } from "../../lib/money.js";
+import { sendNotificationEmail } from "../notifications/notifications.service.js";
 
 // Native gateway pay-ins only (country → method → wallet + amount → initiate) — for
 // long-lived bank-transfer receiving accounts, see modules/virtualAccounts instead.
@@ -85,6 +86,14 @@ export async function depositsRoutes(app: FastifyInstance) {
           data: { customerId: customer.id, currencyCode: request.body.walletCurrencyCode, yativoDepositId: result.depositId, yativoFeeMinor },
         });
       }
+
+      // Fired immediately on submission — separate from DEPOSIT_RECEIVED, which only fires once
+      // the deposit.confirmed webhook lands (and today, that webhook path is unreachable in local
+      // dev, so this is the one confirmation a customer reliably gets for now).
+      await sendNotificationEmail(app.prisma, "DEPOSIT_CREATED", customer.id, {
+        amount: result.receiveAmount ?? request.body.amount,
+        currency: request.body.walletCurrencyCode,
+      });
 
       return reply.send(result);
     },
