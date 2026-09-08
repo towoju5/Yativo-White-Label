@@ -33,9 +33,11 @@ export const SERVICE_LABELS: Record<PricingService, string> = {
   CARD_TERMINATE: "Virtual card — terminate",
 };
 
-// Only these two services carry a fee number reported by Yativo itself — for the rest, "markup"
-// has nothing to add on top of, so it behaves identically to standalone.
-const SERVICES_WITH_UPSTREAM_FEE: PricingService[] = ["PAYOUT", "PAYIN"];
+// Only PAYIN carries a fee number reported by Yativo itself (quoted at deposit-initiation time) —
+// for every other service, including PAYOUT (confirmed against Yativo's webhook guide: the real
+// payout.updated payload has no fee field at all), "markup" has nothing to add on top of, so it
+// behaves identically to standalone.
+const SERVICES_WITH_UPSTREAM_FEE: PricingService[] = ["PAYIN"];
 
 export const FEE_TYPE_LABELS: Record<FeeType, string> = {
   FIXED: "Fixed",

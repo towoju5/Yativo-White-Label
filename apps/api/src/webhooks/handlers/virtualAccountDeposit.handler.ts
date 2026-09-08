@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { DepositEventPayload } from "@white-label/yativo-sdk";
+import type { VirtualAccountDepositPayload } from "@white-label/yativo-sdk";
 import { postTransaction } from "../../modules/ledger/postTransaction.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../../modules/ledger/accounts.js";
 import { getEffectiveFee } from "../../modules/pricing/pricing.service.js";
@@ -9,14 +9,16 @@ import { majorToMinor } from "../../lib/money.js";
 import type { WebhookHandlerResult } from "./result.js";
 
 /**
- * `deposit.created` / `deposit.updated` — a native gateway pay-in (see modules/deposits). Only
- * `status === "success"` credits the wallet; other statuses (pending/processing/failed/cancelled/
- * expired) are recorded (see yativo.routes.ts) but don't move money — a later `deposit.updated`
- * delivery for the same deposit id will fire this again once it does resolve to success.
+ * `virtual_account.deposit` — funds landing in a customer's long-lived virtual account (see
+ * modules/virtualAccounts). Genuinely a separate event from deposit.created/updated, so unlike the
+ * old integration this app no longer has to guess the rail — the event type says so directly.
  */
-export async function handleDepositEvent(prisma: PrismaClient, payload: DepositEventPayload, externalEventId: string): Promise<WebhookHandlerResult> {
+export async function handleVirtualAccountDeposit(prisma: PrismaClient, payload: VirtualAccountDepositPayload, externalEventId: string): Promise<WebhookHandlerResult> {
   if (payload.status !== "success") {
-    return { status: "IGNORED", errorMessage: `Deposit status is ${payload.status}, not success — no ledger entry posted` };
+    return { status: "IGNORED", errorMessage: `Virtual account deposit status is ${payload.status}, not success — no ledger entry posted` };
+  }
+  if (!payload.yativoCustomerId) {
+    return { status: "FAILED", errorMessage: "Payload has no customer.customer_id" };
   }
 
   const customer = await prisma.customer.findFirst({ where: { yativoCustomerId: payload.yativoCustomerId } });
@@ -28,6 +30,8 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
   if (!currency) {
     return { status: "FAILED", errorMessage: `Unknown currency ${payload.currencyCode}` };
   }
+  // `amount` is already the net figure (post-fee) per Yativo's guide — `amount_recevied` (sic) is
+  // the gross figure before fees, kept only for display/audit, never credited directly.
   const amountMinor = majorToMinor(payload.amount, currency.decimals);
 
   const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", payload.currencyCode);
@@ -36,35 +40,27 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
   await postTransaction(prisma, {
     type: "DEPOSIT",
     status: "POSTED",
-    // Derived from the webhook's own externalEventId — replaying the same webhook
-    // (e.g. after a retry) is a guaranteed no-op via postTransaction's idempotency check.
     idempotencyKey: `webhook:${externalEventId}`,
     externalSource: "YATIVO_WEBHOOK",
-    externalRef: payload.yativoDepositId,
-    description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
+    externalRef: payload.transactionId,
+    description: `Virtual account deposit confirmed via Yativo (${payload.transactionId})`,
     lines: [
       { accountId: settlement.id, direction: "DEBIT", amountMinor, currencyCode: payload.currencyCode },
       { accountId: wallet.id, direction: "CREDIT", amountMinor, currencyCode: payload.currencyCode },
     ],
   });
 
-  // A previously-recorded local Deposit row (created at /portal/deposit/initiate) is how this app
-  // knows this is a PAYIN — it also carries Yativo's own quoted fee, captured at initiation time,
-  // for markup pricing. There's no such row for an unsolicited virtual-account transfer, but those
-  // arrive as a separate `virtual_account.deposit` event now (see virtualAccountDeposit.handler.ts),
-  // not through this handler at all.
-  const payinRecord = await prisma.deposit.findUnique({ where: { yativoDepositId: payload.yativoDepositId } });
-  const upstreamFeeMinor = payinRecord?.yativoFeeMinor ?? 0n;
-
-  const feeMinor = await getEffectiveFee(prisma, "PAYIN", customer.id, amountMinor, upstreamFeeMinor);
+  // No upstream fee figure is available for this rail (see pricing.service.ts) — markup mode
+  // behaves the same as standalone here until Yativo exposes one.
+  const feeMinor = await getEffectiveFee(prisma, "VIRTUAL_ACCOUNT_DEPOSIT", customer.id, amountMinor);
   if (feeMinor > 0n) {
     const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", payload.currencyCode);
     await postTransaction(prisma, {
       type: "FEE",
       status: "POSTED",
-      idempotencyKey: `fee:deposit:${externalEventId}`,
+      idempotencyKey: `fee:virtual-account-deposit:${externalEventId}`,
       externalSource: "YATIVO_WEBHOOK",
-      description: `Deposit fee for ${payload.yativoDepositId}`,
+      description: `Virtual account deposit fee for ${payload.transactionId}`,
       lines: [
         { accountId: wallet.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: payload.currencyCode },
         { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: payload.currencyCode },

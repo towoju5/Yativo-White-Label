@@ -455,7 +455,7 @@ export default function CustomerDetailPage() {
         onOpenChange={(v) => !v && setEditingPricing(null)}
         onSubmit={(input) => editingPricing && upsertPricingMutation.mutate({ service: editingPricing.service, input })}
         isPending={upsertPricingMutation.isPending}
-        hasUpstreamFee={editingPricing ? editingPricing.service === "PAYOUT" || editingPricing.service === "PAYIN" : false}
+        hasUpstreamFee={editingPricing ? editingPricing.service === "PAYIN" : false}
         title={editingPricing ? `Custom pricing — ${SERVICE_LABELS[editingPricing.service]}` : ""}
       />
     </div>
