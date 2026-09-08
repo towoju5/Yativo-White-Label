@@ -71,6 +71,11 @@ function NativeDepositCard() {
   const [extraData, setExtraData] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<DepositResult | null>(null);
+  // Yativo has no separate "quote" call for deposits — the numbers below (rate, fee, amounts)
+  // only exist because `result` was already created via /portal/deposit/initiate. This gate just
+  // holds the payment link back from the customer until they've reviewed those numbers and
+  // explicitly confirmed, rather than surfacing it immediately alongside the quote.
+  const [confirmed, setConfirmed] = useState(false);
 
   const countriesQuery = useQuery({
     queryKey: ["portal", "deposit", "countries"],
@@ -105,6 +110,7 @@ function NativeDepositCard() {
     setExtraData({});
     setFieldErrors({});
     setResult(null);
+    setConfirmed(false);
   };
 
   const initiateMutation = useMutation({
@@ -211,7 +217,8 @@ function NativeDepositCard() {
               {result ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-success">
-                    <Check className="h-4 w-4" /> {t("deposit.dialog.initiated", "Deposit initiated")}
+                    <Check className="h-4 w-4" />
+                    {confirmed ? t("deposit.dialog.initiated", "Deposit initiated") : t("deposit.dialog.reviewQuote", "Review your quote")}
                   </div>
                   <dl className="divide-y divide-border rounded-lg border border-border">
                     {result.localAmount && result.localCurrency && (
@@ -231,7 +238,7 @@ function NativeDepositCard() {
                       <Row label={t("deposit.dialog.estimatedDelivery", "Estimated delivery")} value={result.estimatedDelivery} />
                     )}
                   </dl>
-                  {result.depositUrl && (
+                  {confirmed && result.depositUrl && (
                     <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 p-3 text-sm">
                       <span className="truncate font-mono">{result.depositUrl}</span>
                       <div className="flex shrink-0 gap-1">
@@ -454,6 +461,17 @@ function NativeDepositCard() {
                       {t("deposit.buttons.continue", "Continue")} <ArrowRight className="h-4 w-4" />
                     </>
                   )}
+                </Button>
+              </div>
+            )}
+
+            {result && !confirmed && (
+              <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
+                <Button type="button" variant="ghost" onClick={resetWizard}>
+                  {t("deposit.buttons.startOver", "Start over")}
+                </Button>
+                <Button type="button" onClick={() => setConfirmed(true)}>
+                  {t("deposit.buttons.confirmQuote", "Confirm & get payment link")}
                 </Button>
               </div>
             )}
