@@ -14,6 +14,7 @@ import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
 import { majorToMinor } from "../../lib/money.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
+import { getEffectiveFee } from "../pricing/pricing.service.js";
 
 // Native gateway pay-ins only (country → method → wallet + amount → initiate) — for
 // long-lived bank-transfer receiving accounts, see modules/virtualAccounts instead.
@@ -74,17 +75,29 @@ export async function depositsRoutes(app: FastifyInstance) {
       // set to markup, add the platform's fee on top of what Yativo itself quoted here —
       // `transactionFee`/`exchangeRate` are human-readable strings ("3.4 MXN", "1 USD = 17.2 MXN"),
       // so this parse is best-effort and never blocks the deposit if it fails.
+      let platformFee: string | null = null;
       if (result.depositId) {
+        const walletCurrency = await app.prisma.currency.findUnique({ where: { code: request.body.walletCurrencyCode } });
+
         let yativoFeeMinor: bigint | null = null;
         const feeMajor = parseYativoFeeString(result.transactionFee);
         const rate = parseYativoFeeString(result.exchangeRate);
-        if (feeMajor !== undefined && rate !== undefined && rate > 0) {
-          const walletCurrency = await app.prisma.currency.findUnique({ where: { code: request.body.walletCurrencyCode } });
-          if (walletCurrency) yativoFeeMinor = majorToMinor(feeMajor / rate, walletCurrency.decimals);
+        if (feeMajor !== undefined && rate !== undefined && rate > 0 && walletCurrency) {
+          yativoFeeMinor = majorToMinor(feeMajor / rate, walletCurrency.decimals);
         }
         await app.prisma.deposit.create({
           data: { customerId: customer.id, currencyCode: request.body.walletCurrencyCode, yativoDepositId: result.depositId, yativoFeeMinor },
         });
+
+        // Previewed here so the customer sees what will actually come out of the deposit —
+        // the same getEffectiveFee call the deposit.confirmed webhook makes at settlement (see
+        // webhooks/handlers/deposit.handler.ts). Best-effort: left null if Yativo didn't return a
+        // receive amount or the wallet currency isn't seeded locally.
+        if (walletCurrency && result.receiveAmount) {
+          const receiveAmountMinor = majorToMinor(result.receiveAmount, walletCurrency.decimals);
+          const feeMinor = await getEffectiveFee(app.prisma, "PAYIN", customer.id, receiveAmountMinor, yativoFeeMinor ?? 0n);
+          platformFee = (Number(feeMinor) / 10 ** walletCurrency.decimals).toFixed(walletCurrency.decimals);
+        }
       }
 
       // Fired immediately on submission — separate from DEPOSIT_RECEIVED, which only fires once
@@ -95,7 +108,7 @@ export async function depositsRoutes(app: FastifyInstance) {
         currency: request.body.walletCurrencyCode,
       });
 
-      return reply.send(result);
+      return reply.send({ ...result, platformFee });
     },
   );
 }

@@ -221,7 +221,12 @@ function NativeDepositCard() {
                       <Row label={t("deposit.dialog.youllReceive", "You'll receive")} value={`${result.receiveAmount} ${result.walletCurrencyCode}`} />
                     )}
                     {result.exchangeRate && <Row label={t("deposit.dialog.exchangeRate", "Exchange rate")} value={result.exchangeRate} />}
-                    {result.transactionFee && <Row label={t("deposit.dialog.fee", "Fee")} value={result.transactionFee} />}
+                    {(result.platformFee ?? result.transactionFee) && (
+                      <Row
+                        label={t("deposit.dialog.fee", "Fee")}
+                        value={`${result.platformFee ?? result.transactionFee} ${result.walletCurrencyCode ?? ""}`.trim()}
+                      />
+                    )}
                     {result.estimatedDelivery && (
                       <Row label={t("deposit.dialog.estimatedDelivery", "Estimated delivery")} value={result.estimatedDelivery} />
                     )}

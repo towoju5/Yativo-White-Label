@@ -107,6 +107,13 @@ export const quoteSchema = z.object({
   /** What the sender pays and the recipient receives, in each currency's minor units. */
   debitAmountMinor: minorAmountSchema,
   receiveAmountMinor: minorAmountSchema,
+  /**
+   * The platform's own fee (admin-configured global default, or a per-customer override if one is
+   * set) that will be charged separately at settlement — see getEffectiveFee/settlePayoutCompleted.
+   * In `debitCurrency` minor units. Distinct from debitAmountMinor, which is Yativo's own
+   * fee-inclusive debit total and never includes this platform fee.
+   */
+  platformFeeMinor: minorAmountSchema,
   /** Quotes expire ~5 minutes after issuance — re-quote past this. */
   expiresAt: z.string(),
 });

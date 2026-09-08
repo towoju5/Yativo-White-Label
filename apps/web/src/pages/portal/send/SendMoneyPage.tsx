@@ -619,6 +619,14 @@ export default function SendMoneyPage() {
                     {formatMinorAmount(quote.debitAmountMinor, quote.debitDecimals)} {quote.debitCurrency}
                   </dd>
                 </div>
+                {Number(quote.platformFeeMinor) > 0 && (
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">{t("send.review.feeLabel", "Fee")}</dt>
+                    <dd className="font-mono font-medium">
+                      {formatMinorAmount(quote.platformFeeMinor, quote.debitDecimals)} {quote.debitCurrency}
+                    </dd>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{t("send.review.recipientGetsLabel", "Recipient gets")}</dt>
                   <dd className="font-mono font-medium">

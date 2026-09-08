@@ -60,6 +60,14 @@ export const depositResultSchema = z.object({
   receiveAmount: z.string().nullable(),
   exchangeRate: z.string().nullable(),
   transactionFee: z.string().nullable(),
+  /**
+   * What will actually be deducted from the customer's wallet for this deposit — the platform's
+   * own fee (admin-configured global default, or a per-customer override if one is set), possibly
+   * plus Yativo's own fee (`transactionFee`) if pricing is set to markup. In `walletCurrencyCode`
+   * major units. Null when it couldn't be computed (e.g. Yativo didn't return a receive amount).
+   * See getEffectiveFee — this is the same figure the deposit.confirmed webhook charges.
+   */
+  platformFee: z.string().nullable(),
   estimatedDelivery: z.string().nullable(),
 });
 export type DepositResult = z.infer<typeof depositResultSchema>;

@@ -6,6 +6,7 @@ import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.service.js";
+import { getEffectiveFee } from "../pricing/pricing.service.js";
 
 /**
  * Yativo's real quote endpoint (POST /exchange-rate — see fiat/quotes.ts). Cross-currency:
@@ -27,9 +28,10 @@ export async function quotesRoutes(app: FastifyInstance) {
     { preHandler: requireCustomerAuth, schema: { body: quoteRequestSchema, response: { 200: quoteSchema } } },
     async (request, reply) => {
       const { beneficiaryId, debitCurrency, sendAmount } = request.body;
+      const customerId = resolveEffectiveCustomerId(request.customer!);
 
       const beneficiary = await app.prisma.beneficiary.findFirst({
-        where: { id: beneficiaryId, customerId: resolveEffectiveCustomerId(request.customer!), archivedAt: null },
+        where: { id: beneficiaryId, customerId, archivedAt: null },
       });
       if (!beneficiary) throw new NotFoundError("Beneficiary");
       const { gatewayId, currency: payoutCurrency } = getBeneficiaryGatewayInfo(beneficiary);
@@ -62,6 +64,14 @@ export async function quotesRoutes(app: FastifyInstance) {
       }
 
       const toMinor = (majorAmount: string, decimals: number) => Math.round(Number(majorAmount) * 10 ** decimals).toString();
+      const debitAmountMinor = toMinor(yativoQuote.customerTotalAmountDue, debitCurrencyRow.decimals);
+
+      // Previewed here so the customer sees the platform's own fee (global default, or a
+      // per-customer override if one is set) before confirming — the same figure
+      // settlePayoutCompleted charges separately at settlement. Yativo never reports its own
+      // payout fee as a distinct number (it's baked into debitAmountMinor above), so there's no
+      // upstream figure to pass for MARKUP mode here — matches every settlePayoutCompleted call site.
+      const platformFeeMinor = await getEffectiveFee(app.prisma, "PAYOUT", customerId, BigInt(debitAmountMinor));
 
       return reply.send({
         quoteId: yativoQuote.quoteId,
@@ -71,8 +81,9 @@ export async function quotesRoutes(app: FastifyInstance) {
         payoutDecimals,
         methodId: String(gatewayId),
         rate: yativoQuote.rate,
-        debitAmountMinor: toMinor(yativoQuote.customerTotalAmountDue, debitCurrencyRow.decimals),
+        debitAmountMinor,
         receiveAmountMinor: toMinor(yativoQuote.customerReceiveAmount, payoutDecimals),
+        platformFeeMinor: platformFeeMinor.toString(),
         expiresAt: yativoQuote.expiresAt,
       });
     },
