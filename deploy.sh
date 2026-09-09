@@ -113,16 +113,33 @@ fi
 # ── 2. Instance identity — lets multiple independent copies of this repo run ──
 # on the same VPS (different domains, different DB/Redis, different systemd unit and
 # Linux user) without colliding. Derived from the API domain unless --instance= is given.
+#
+# Existing deployments (this exact directory was already deployed by an older version of
+# this script) are a special case: they're already running under the legacy fixed names
+# ("whitelabel-api" service/user, and whatever Docker Compose's implicit default project
+# name already is here). We deliberately keep using those on every rerun instead of
+# switching to the new per-instance scheme — otherwise a routine update would spin up a
+# second systemd service alongside the old one, and worse, point Docker Compose at a
+# brand-new empty project instead of your real running Postgres/Redis containers.
 
 slugify() { echo -n "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'; }
 
 INSTANCE_SLUG="$(slugify "${INSTANCE_ARG:-$API_DOMAIN}")"
 INSTANCE_HASH="$(echo -n "$API_DOMAIN" | sha1sum | cut -c1-6)"
 
-SERVICE_USER="wl-${INSTANCE_HASH}"                                   # <=32 chars, unique per instance
-SERVICE_NAME="whitelabel-api-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
-COMPOSE_PROJECT_NAME="whitelabel-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
-export COMPOSE_PROJECT_NAME
+if [ -f apps/api/.env ]; then
+  log "Existing deployment detected in this directory — keeping its legacy service/user/Compose project for continuity."
+  SERVICE_USER="whitelabel"
+  SERVICE_NAME="whitelabel-api"
+  # Left empty (and NOT exported) so docker compose keeps resolving its own existing
+  # implicit default (based on this directory), exactly as it always has here.
+  COMPOSE_PROJECT_NAME=""
+else
+  SERVICE_USER="wl-${INSTANCE_HASH}"                                 # <=32 chars, unique per instance
+  SERVICE_NAME="whitelabel-api-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
+  COMPOSE_PROJECT_NAME="whitelabel-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
+  export COMPOSE_PROJECT_NAME
+fi
 
 # ── 3. Ports — the actual "no port issues" guarantee ────────────────────────
 #
@@ -178,6 +195,16 @@ if [ -f "$REPO_ROOT/.env" ]; then
   EXISTING_DB_PORT="$(grep -oP '(?<=^DB_PORT=).*' "$REPO_ROOT/.env" || true)"
   EXISTING_REDIS_PORT="$(grep -oP '(?<=^REDIS_PORT=).*' "$REPO_ROOT/.env" || true)"
 fi
+# Deployments made before DB_PORT/REDIS_PORT existed as explicit keys never wrote them to
+# root .env — but the real port each is already running on is still recorded in apps/api/.env's
+# connection strings, so fall back to reading it from there rather than auto-picking a new
+# (wrong) port out from under an already-running database.
+if [ -z "$EXISTING_DB_PORT" ] && [ -f apps/api/.env ]; then
+  EXISTING_DB_PORT="$(grep -oP '^DATABASE_URL=.*localhost:\K[0-9]+' apps/api/.env || true)"
+fi
+if [ -z "$EXISTING_REDIS_PORT" ] && [ -f apps/api/.env ]; then
+  EXISTING_REDIS_PORT="$(grep -oP '^REDIS_URL=.*localhost:\K[0-9]+' apps/api/.env || true)"
+fi
 
 log "Resolving ports for instance '${INSTANCE_SLUG}' (${SERVICE_NAME})…"
 API_PORT="$(resolve_port "$EXISTING_API_PORT" "$API_PORT_ARG" 9000 "the API")"
@@ -186,7 +213,7 @@ REDIS_PORT="$(resolve_port "$EXISTING_REDIS_PORT" "$REDIS_PORT_ARG" 6380 "Redis"
 ok "Ports: API=$API_PORT, Postgres=$DB_PORT, Redis=$REDIS_PORT"
 
 log "Deploying:"
-echo "    Instance:  $INSTANCE_SLUG  (service: $SERVICE_NAME, user: $SERVICE_USER, compose project: $COMPOSE_PROJECT_NAME)"
+echo "    Instance:  $INSTANCE_SLUG  (service: $SERVICE_NAME, user: $SERVICE_USER, compose project: ${COMPOSE_PROJECT_NAME:-<default>})"
 echo "    API:       https://$API_DOMAIN  (proxied to 127.0.0.1:$API_PORT)"
 echo "    Web app:   https://$WEB_DOMAIN  (static build served by Nginx)"
 echo "    SSL:       $([ "$SKIP_SSL" -eq 1 ] && echo 'skipped (HTTP only)' || echo "yes, via $CERT_EMAIL")"
@@ -254,23 +281,23 @@ ok "ufw active — only SSH, HTTP, and HTTPS are reachable from the internet. Th
 
 if [ ! -f "$REPO_ROOT/.env" ]; then
   log "Generating root .env with strong Postgres/Redis passwords…"
-  cat > "$REPO_ROOT/.env" <<EOF
-POSTGRES_PASSWORD=$(openssl rand -hex 24)
-REDIS_PASSWORD=$(openssl rand -hex 24)
-DB_PORT=${DB_PORT}
-REDIS_PORT=${REDIS_PORT}
-COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
-EOF
+  {
+    echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+    echo "REDIS_PASSWORD=$(openssl rand -hex 24)"
+    echo "DB_PORT=${DB_PORT}"
+    echo "REDIS_PORT=${REDIS_PORT}"
+    [ -n "$COMPOSE_PROJECT_NAME" ] && echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
+  } > "$REPO_ROOT/.env"
   chmod 600 "$REPO_ROOT/.env"
   ok "Root .env created — docker-compose.yml picks it up automatically."
 else
   ok "Root .env already exists — leaving it untouched (rerun-safe)."
   if ! grep -q '^DB_PORT=' "$REPO_ROOT/.env"; then
-    log "Root .env predates DB_PORT/REDIS_PORT/COMPOSE_PROJECT_NAME — appending them (existing secrets untouched)…"
+    log "Root .env predates DB_PORT/REDIS_PORT — appending them (existing secrets untouched)…"
     {
       echo "DB_PORT=${DB_PORT}"
       echo "REDIS_PORT=${REDIS_PORT}"
-      echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
+      [ -n "$COMPOSE_PROJECT_NAME" ] && echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
     } >> "$REPO_ROOT/.env"
     ok "Appended."
   fi
@@ -541,11 +568,11 @@ echo
 echo "  Instance:   ${INSTANCE_SLUG}"
 echo "  API:        http$( [ "$SKIP_SSL" -eq 0 ] && echo s )://${API_DOMAIN}  (127.0.0.1:${API_PORT})"
 echo "  Web app:    http$( [ "$SKIP_SSL" -eq 0 ] && echo s )://${WEB_DOMAIN}"
-echo "  Postgres:   127.0.0.1:${DB_PORT}  Redis: 127.0.0.1:${REDIS_PORT}  (compose project: ${COMPOSE_PROJECT_NAME})"
+echo "  Postgres:   127.0.0.1:${DB_PORT}  Redis: 127.0.0.1:${REDIS_PORT}  (compose project: ${COMPOSE_PROJECT_NAME:-<default>})"
 echo "  Service:    systemctl {status|restart|stop} ${SERVICE_NAME}"
 echo "  Logs:       journalctl -u ${SERVICE_NAME} -f"
 echo
-echo "  Other instances on this host: systemctl list-units 'whitelabel-api-*'"
+echo "  Other instances on this host: systemctl list-units 'whitelabel-api*'"
 echo "  To add another independent copy: clone this repo elsewhere and rerun ./deploy.sh"
 echo "  with a new pair of domains — see the header comment for details."
 echo
