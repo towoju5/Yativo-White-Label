@@ -76,6 +76,7 @@ export default function BrandingSettingsPage() {
         supportEmail: data.supportEmail,
         liveChatEnabled: data.liveChatEnabled,
         liveChatCode: data.liveChatCode,
+        statementFooterText: data.statementFooterText,
       });
     }
   }, [data, draft]);
@@ -310,6 +311,36 @@ export default function BrandingSettingsPage() {
               <p className="text-xs text-muted-foreground">PNG, JPEG, WEBP, or SVG. A transparent PNG works best.</p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Statement footer text</CardTitle>
+          <CardDescription>
+            The regulatory disclosure printed at the bottom of every generated statement of account (PDF and Excel). Leave blank to use the
+            default disclosure.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="statementFooterText">Footer text</Label>
+            <Textarea
+              id="statementFooterText"
+              rows={4}
+              className="text-xs"
+              placeholder="Checking account provided by [Bank], Member FDIC. Please review your statement and promptly report any inaccuracies..."
+              value={draft.statementFooterText ?? ""}
+              onChange={(e) => setDraft((d) => (d ? { ...d, statementFooterText: e.target.value || null } : d))}
+            />
+          </div>
+          <Button
+            onClick={() => saveMutation.mutate(draft)}
+            disabled={!canEdit || saveMutation.isPending}
+            title={canEdit ? undefined : "Only owners and admins can change branding"}
+          >
+            <Save className="h-4 w-4" /> {saveMutation.isPending ? "Saving…" : "Save branding"}
+          </Button>
         </CardContent>
       </Card>
 

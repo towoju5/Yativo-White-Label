@@ -34,6 +34,9 @@ export const brandingConfigSchema = z.object({
   // StaticPage content, since a chat widget needs a real <script> tag to function.
   liveChatEnabled: z.boolean(),
   liveChatCode: z.string().nullable(),
+  // Overrides the default Lead Bank/FDIC disclosure printed in the statement PDF footer. Null
+  // keeps the built-in default text.
+  statementFooterText: z.string().nullable(),
   updatedAt: z.string(),
 });
 export type BrandingConfig = z.infer<typeof brandingConfigSchema>;

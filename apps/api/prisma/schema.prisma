@@ -660,6 +660,9 @@ model BrandingConfig {
   // like StaticPage.contentHtml since a chat widget needs a real <script> tag to run.
   liveChatEnabled  Boolean  @default(false)
   liveChatCode     String?  @db.Text
+  // Overrides the default Lead Bank/FDIC disclosure printed in the statement PDF footer (see
+  // buildDisclosureText in statements.service.ts). Null keeps the built-in default text.
+  statementFooterText String? @db.Text
   updatedAt        DateTime @updatedAt
 
   @@map("branding_config")

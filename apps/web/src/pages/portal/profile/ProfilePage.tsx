@@ -69,25 +69,27 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base">{t("profile.identityVerificationTitle", "Identity verification")}</CardTitle>
-            <Badge variant={STATUS_VARIANT[status] ?? "secondary"} className="ml-auto">
-              {status.replace("_", " ")}
-            </Badge>
-          </div>
-          <CardDescription>{STATUS_COPY[status] ?? STATUS_COPY.NOT_STARTED}</CardDescription>
-        </CardHeader>
-        {canStart && (
-          <CardContent>
-            <Button onClick={() => navigate("/portal/verify")}>
-              {status === "REJECTED" ? t("profile.restartVerification", "Restart verification") : t("profile.startVerification", "Start verification")}
-            </Button>
-          </CardContent>
-        )}
-      </Card>
+      {status !== "APPROVED" && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">{t("profile.identityVerificationTitle", "Identity verification")}</CardTitle>
+              <Badge variant={STATUS_VARIANT[status] ?? "secondary"} className="ml-auto">
+                {status.replace("_", " ")}
+              </Badge>
+            </div>
+            <CardDescription>{STATUS_COPY[status] ?? STATUS_COPY.NOT_STARTED}</CardDescription>
+          </CardHeader>
+          {canStart && (
+            <CardContent>
+              <Button onClick={() => navigate("/portal/verify")}>
+                {status === "REJECTED" ? t("profile.restartVerification", "Restart verification") : t("profile.startVerification", "Start verification")}
+              </Button>
+            </CardContent>
+          )}
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

@@ -77,25 +77,18 @@ export async function updateKycRequirements(prisma: PrismaClient, input: UpdateK
  * data that can't be recovered from this app alone.
  */
 export async function updateYativoCustomerMode(prisma: PrismaClient, input: UpdateYativoCustomerModeInput) {
-  if (input.mode === "POOLED" && !input.pooledYativoCustomerId) {
-    throw new AppError("A pooled Yativo customer ID is required to enable pooled mode.", 400, "POOLED_YATIVO_CUSTOMER_ID_REQUIRED");
+  // Pooled mode bypasses per-customer KYC (see requireKycApproved.ts) — every customer must be
+  // individually verified, so this platform no longer allows switching into it.
+  if (input.mode === "POOLED") {
+    throw new AppError("Pooled Yativo customer mode is disabled — every customer must complete their own KYC.", 400, "POOLED_MODE_DISABLED");
   }
 
   const settings = await prisma.platformSettings.update({
     where: { id: 1 },
-    data: {
-      yativoCustomerMode: input.mode,
-      pooledYativoCustomerId: input.mode === "POOLED" ? input.pooledYativoCustomerId : null,
-    },
+    data: { yativoCustomerMode: input.mode, pooledYativoCustomerId: null },
   });
 
-  let migratedCount = 0;
-  if (input.mode === "POOLED" && input.migrateExisting) {
-    const result = await prisma.customer.updateMany({ data: { yativoCustomerId: input.pooledYativoCustomerId } });
-    migratedCount = result.count;
-  }
-
-  return { settings: settingsToDto(settings), migratedCount };
+  return { settings: settingsToDto(settings), migratedCount: 0 };
 }
 
 export async function setCurrencyEnabled(prisma: PrismaClient, code: string, isEnabledForCustomers: boolean) {

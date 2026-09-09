@@ -52,6 +52,8 @@ export type StatementRenderOptions = {
   stampUrl?: string | null;
   /** Public verification-page URL encoded into the footer QR code, when present. */
   verifyUrl?: string | null;
+  /** Admin-set override for the footer disclosure text — falls back to the built-in default below when unset. */
+  footerText?: string | null;
 };
 
 function humanizeType(type: string): string {
@@ -64,6 +66,10 @@ function buildDisclosureText(supportEmail: string | null | undefined): string {
     ? ` by contacting Yativo SPA. at ${supportEmail}. Please include your account number when writing to us.`
     : " by contacting Yativo SPA. Please include your account number when writing to us.";
   return `Checking account provided by Lead Bank., Member FDIC. Please review your statement and promptly report any inaccuracies or discrepancies to Lead Bank.${contactClause}`;
+}
+
+function resolveDisclosureText(opts: Pick<StatementRenderOptions, "footerText" | "supportEmail">): string {
+  return opts.footerText?.trim() ? opts.footerText.trim() : buildDisclosureText(opts.supportEmail);
 }
 
 function fmt(doc: StatementDocument, amountMinor: string): string {
@@ -153,7 +159,7 @@ export async function renderStatementPdf(doc: StatementDocument, opts: Statement
       logger.warn({ err }, "Couldn't generate the statement verification QR code — omitting it");
     }
   }
-  const disclosureText = buildDisclosureText(opts.supportEmail);
+  const disclosureText = resolveDisclosureText(opts);
 
   let totalDebitMinor = 0n;
   let totalCreditMinor = 0n;
@@ -461,7 +467,7 @@ export async function renderStatementExcel(doc: StatementDocument, opts: Stateme
   });
 
   sheet.addRow([]);
-  const disclosureRow = sheet.addRow([buildDisclosureText(opts.supportEmail)]);
+  const disclosureRow = sheet.addRow([resolveDisclosureText(opts)]);
   sheet.mergeCells(disclosureRow.number, 1, disclosureRow.number, lastCol);
   disclosureRow.getCell(1).font = { size: 8, color: { argb: "FF8B90A0" } };
   disclosureRow.getCell(1).alignment = { wrapText: true, vertical: "top" };

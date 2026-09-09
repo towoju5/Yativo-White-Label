@@ -20,14 +20,37 @@
 #   sudo ./deploy.sh api.example.com app.example.com admin@example.com
 #
 # Optional flags:
-#   --skip-ssl        Stand the site up on plain HTTP only (use when DNS isn't pointed yet —
-#                      rerun the script without this flag once it is, to add HTTPS)
-#   --seed            Also run the Prisma seed script (creates TEST data/credentials —
-#                      do NOT use this on a real production database)
-#   --yativo-mode=X   mock | sandbox | live (default: mock — the script never assumes "live")
+#   --skip-ssl          Stand the site up on plain HTTP only (use when DNS isn't pointed yet —
+#                        rerun the script without this flag once it is, to add HTTPS)
+#   --seed              Also run the Prisma seed script (creates TEST data/credentials —
+#                        do NOT use this on a real production database)
+#   --yativo-mode=X     mock | sandbox | live (default: mock — the script never assumes "live")
+#   --instance=NAME     Short name for this deployment (used in the systemd service name,
+#                        the Linux service user, and the Docker Compose project name so
+#                        multiple copies never collide). Auto-derived from the API domain
+#                        if omitted — pass this only if you want a friendlier name.
+#   --api-port=PORT     Pin the API's loopback port instead of auto-picking one.
+#   --db-port=PORT      Pin this instance's Postgres loopback port.
+#   --redis-port=PORT   Pin this instance's Redis loopback port.
+#   --cpu-quota=X       Optional systemd CPUQuota for the API service (e.g. "50%") — caps
+#                        how much CPU this instance can take from others on the same VPS.
+#   --memory-max=X      Optional systemd MemoryMax for the API service (e.g. "512M").
 #
 # Safe to re-run: every step below either skips work that's already done, or is naturally
 # idempotent (systemd restart, nginx reload, docker compose up -d, prisma migrate deploy).
+# Rerunning with the SAME domains reuses the SAME ports/service/user it picked the first
+# time — ports are only (re-)picked when this instance has no prior config to read back.
+#
+# ── Running a second, fully independent copy on the same VPS ──────────────────
+# Each copy needs its own working directory (this script derives everything — ports,
+# .env files, build output, systemd unit — from "where it lives" and "which domains you
+# pass it"), so:
+#   git clone <this repo> /opt/whitelabel-2 && cd /opt/whitelabel-2
+#   sudo ./deploy.sh api2.example.com app2.example.com admin@example.com
+# That's it — no shared state with the first copy. It gets its own Postgres/Redis
+# containers (separate Docker Compose project, separate volumes), its own API port, its
+# own systemd service + Linux user, and its own Nginx server blocks/TLS certs, so neither
+# copy's load, crashes, restarts, or DB can affect the other's uptime.
 
 set -euo pipefail
 
@@ -51,12 +74,24 @@ command -v apt-get >/dev/null 2>&1 || die "This script only supports Debian/Ubun
 SKIP_SSL=0
 RUN_SEED=0
 YATIVO_MODE="mock"
+INSTANCE_ARG=""
+API_PORT_ARG=""
+DB_PORT_ARG=""
+REDIS_PORT_ARG=""
+CPU_QUOTA=""
+MEMORY_MAX=""
 POSITIONAL=()
 for arg in "$@"; do
   case "$arg" in
     --skip-ssl) SKIP_SSL=1 ;;
     --seed) RUN_SEED=1 ;;
     --yativo-mode=*) YATIVO_MODE="${arg#*=}" ;;
+    --instance=*) INSTANCE_ARG="${arg#*=}" ;;
+    --api-port=*) API_PORT_ARG="${arg#*=}" ;;
+    --db-port=*) DB_PORT_ARG="${arg#*=}" ;;
+    --redis-port=*) REDIS_PORT_ARG="${arg#*=}" ;;
+    --cpu-quota=*) CPU_QUOTA="${arg#*=}" ;;
+    --memory-max=*) MEMORY_MAX="${arg#*=}" ;;
     -h|--help) grep '^#' "$0" | sed 's/^#//'; exit 0 ;;
     *) POSITIONAL+=("$arg") ;;
   esac
@@ -75,25 +110,32 @@ if [ "$SKIP_SSL" -eq 0 ] && [ -z "$CERT_EMAIL" ]; then
   die "An email is required for Let's Encrypt (used only for renewal notices), or pass --skip-ssl to stand up HTTP-only for now."
 fi
 
-API_PORT=9000
-DB_PORT=5433
-REDIS_PORT=6380
-SERVICE_USER="whitelabel"
-SERVICE_NAME="whitelabel-api"
+# ── 2. Instance identity — lets multiple independent copies of this repo run ──
+# on the same VPS (different domains, different DB/Redis, different systemd unit and
+# Linux user) without colliding. Derived from the API domain unless --instance= is given.
 
-log "Deploying:"
-echo "    API:       https://$API_DOMAIN  (proxied to 127.0.0.1:$API_PORT)"
-echo "    Web app:   https://$WEB_DOMAIN  (static build served by Nginx)"
-echo "    SSL:       $([ "$SKIP_SSL" -eq 1 ] && echo 'skipped (HTTP only)' || echo "yes, via $CERT_EMAIL")"
-echo "    Yativo:    $YATIVO_MODE"
-echo "    Repo:      $REPO_ROOT"
-echo
+slugify() { echo -n "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'; }
 
-# ── 2. Port pre-flight — the actual "no port issues" guarantee ─────────────
+INSTANCE_SLUG="$(slugify "${INSTANCE_ARG:-$API_DOMAIN}")"
+INSTANCE_HASH="$(echo -n "$API_DOMAIN" | sha1sum | cut -c1-6)"
+
+SERVICE_USER="wl-${INSTANCE_HASH}"                                   # <=32 chars, unique per instance
+SERVICE_NAME="whitelabel-api-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
+COMPOSE_PROJECT_NAME="whitelabel-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
+export COMPOSE_PROJECT_NAME
+
+# ── 3. Ports — the actual "no port issues" guarantee ────────────────────────
 #
-# Checked BEFORE anything is installed/started, and again right before the API service
-# starts. If something else already owns a port we need, we stop here with a clear
-# diagnostic instead of silently fighting it or producing a cryptic downstream error.
+# Each instance gets its own API/Postgres/Redis loopback port. Checked BEFORE anything
+# is installed/started, and again right before the API service starts. If something else
+# already owns a port we need, we stop here with a clear diagnostic instead of silently
+# fighting it or producing a cryptic downstream error.
+#
+# On a RERUN of this same instance, we reuse whatever ports it's already configured with
+# (read back from its own env files) instead of re-picking — so a redeploy never
+# renumbers a running instance out from under itself. For a brand-new instance: use
+# --api-port/--db-port/--redis-port if given, otherwise auto-pick the next free port
+# starting at the defaults below (so a second copy "just works" with no flags at all).
 
 port_owner() { ss -ltnp 2>/dev/null | awk -v p=":$1\$" '$4 ~ p {print; found=1} END{exit !found}'; }
 
@@ -102,15 +144,55 @@ check_port_free() {
   if port_owner "$port" >/dev/null; then
     warn "Port $port ($label) is already in use:"
     port_owner "$port" | sed 's/^/    /'
-    die "Free port $port before continuing (stop whatever's on it, or rerun with a different port by editing API_PORT/DB_PORT/REDIS_PORT at the top of this script)."
+    die "Free port $port before continuing, or pick a different one with --api-port/--db-port/--redis-port."
   fi
 }
 
-log "Checking required ports are free…"
-for p in "$API_PORT:the API" "$DB_PORT:Postgres" "$REDIS_PORT:Redis"; do
-  check_port_free "${p%%:*}" "${p#*:}"
-done
-ok "Ports $API_PORT, $DB_PORT, $REDIS_PORT are free."
+find_free_port() {
+  local p="$1"
+  for _ in $(seq 1 50); do
+    port_owner "$p" >/dev/null || { echo "$p"; return 0; }
+    p=$((p + 1))
+  done
+  die "Could not find a free port starting at $1 after 50 attempts."
+}
+
+# resolve_port EXISTING FLAG DEFAULT_BASE LABEL
+resolve_port() {
+  local existing="$1" flag="$2" base="$3" label="$4"
+  if [ -n "$existing" ]; then
+    echo "$existing"
+  elif [ -n "$flag" ]; then
+    check_port_free "$flag" "$label"
+    echo "$flag"
+  else
+    find_free_port "$base"
+  fi
+}
+
+EXISTING_API_PORT=""
+[ -f apps/api/.env ] && EXISTING_API_PORT="$(grep -oP '(?<=^PORT=).*' apps/api/.env || true)"
+EXISTING_DB_PORT=""
+EXISTING_REDIS_PORT=""
+if [ -f "$REPO_ROOT/.env" ]; then
+  EXISTING_DB_PORT="$(grep -oP '(?<=^DB_PORT=).*' "$REPO_ROOT/.env" || true)"
+  EXISTING_REDIS_PORT="$(grep -oP '(?<=^REDIS_PORT=).*' "$REPO_ROOT/.env" || true)"
+fi
+
+log "Resolving ports for instance '${INSTANCE_SLUG}' (${SERVICE_NAME})…"
+API_PORT="$(resolve_port "$EXISTING_API_PORT" "$API_PORT_ARG" 9000 "the API")"
+DB_PORT="$(resolve_port "$EXISTING_DB_PORT" "$DB_PORT_ARG" 5433 "Postgres")"
+REDIS_PORT="$(resolve_port "$EXISTING_REDIS_PORT" "$REDIS_PORT_ARG" 6380 "Redis")"
+ok "Ports: API=$API_PORT, Postgres=$DB_PORT, Redis=$REDIS_PORT"
+
+log "Deploying:"
+echo "    Instance:  $INSTANCE_SLUG  (service: $SERVICE_NAME, user: $SERVICE_USER, compose project: $COMPOSE_PROJECT_NAME)"
+echo "    API:       https://$API_DOMAIN  (proxied to 127.0.0.1:$API_PORT)"
+echo "    Web app:   https://$WEB_DOMAIN  (static build served by Nginx)"
+echo "    SSL:       $([ "$SKIP_SSL" -eq 1 ] && echo 'skipped (HTTP only)' || echo "yes, via $CERT_EMAIL")"
+echo "    Yativo:    $YATIVO_MODE"
+echo "    Repo:      $REPO_ROOT"
+echo
 
 # ── 3. System packages ───────────────────────────────────────────────────────
 
@@ -163,22 +245,35 @@ ok "ufw active — only SSH, HTTP, and HTTPS are reachable from the internet. Th
 
 # ── 5. Postgres + Redis (the repo's own docker-compose.yml, unmodified) ────
 #
-# docker-compose.yml reads POSTGRES_PASSWORD/REDIS_PASSWORD from a root-level
-# .env file (docker compose loads this automatically) — generated once, here,
-# before the containers are first created, since Postgres only applies
-# POSTGRES_PASSWORD on an empty data directory. Never clobbered on rerun, same
-# rule as apps/api/.env below.
+# docker-compose.yml reads POSTGRES_PASSWORD/REDIS_PASSWORD/DB_PORT/REDIS_PORT from a
+# root-level .env file (docker compose loads this automatically, including
+# COMPOSE_PROJECT_NAME — which is what keeps this instance's containers/volumes separate
+# from any other copy's) — generated once, here, before the containers are first
+# created, since Postgres only applies POSTGRES_PASSWORD on an empty data directory.
+# Never clobbered on rerun, same rule as apps/api/.env below.
 
 if [ ! -f "$REPO_ROOT/.env" ]; then
   log "Generating root .env with strong Postgres/Redis passwords…"
   cat > "$REPO_ROOT/.env" <<EOF
 POSTGRES_PASSWORD=$(openssl rand -hex 24)
 REDIS_PASSWORD=$(openssl rand -hex 24)
+DB_PORT=${DB_PORT}
+REDIS_PORT=${REDIS_PORT}
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
 EOF
   chmod 600 "$REPO_ROOT/.env"
   ok "Root .env created — docker-compose.yml picks it up automatically."
 else
   ok "Root .env already exists — leaving it untouched (rerun-safe)."
+  if ! grep -q '^DB_PORT=' "$REPO_ROOT/.env"; then
+    log "Root .env predates DB_PORT/REDIS_PORT/COMPOSE_PROJECT_NAME — appending them (existing secrets untouched)…"
+    {
+      echo "DB_PORT=${DB_PORT}"
+      echo "REDIS_PORT=${REDIS_PORT}"
+      echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
+    } >> "$REPO_ROOT/.env"
+    ok "Appended."
+  fi
 fi
 
 log "Starting Postgres + Redis…"
@@ -312,9 +407,14 @@ fi
 chown -R "$SERVICE_USER:$SERVICE_USER" "$REPO_ROOT"
 
 log "Writing systemd unit…"
+RESOURCE_LIMITS=""
+[ -n "$CPU_QUOTA" ] && RESOURCE_LIMITS="${RESOURCE_LIMITS}CPUQuota=${CPU_QUOTA}
+"
+[ -n "$MEMORY_MAX" ] && RESOURCE_LIMITS="${RESOURCE_LIMITS}MemoryMax=${MEMORY_MAX}
+"
 cat > "/etc/systemd/system/${SERVICE_NAME}.service" <<EOF
 [Unit]
-Description=White Label API
+Description=White Label API ($INSTANCE_SLUG)
 After=network.target docker.service
 Requires=docker.service
 
@@ -334,7 +434,7 @@ ProtectSystem=strict
 ReadWritePaths=${REPO_ROOT}/apps/api
 ProtectHome=true
 PrivateTmp=true
-
+${RESOURCE_LIMITS}
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -438,10 +538,16 @@ fi
 echo
 ok "Done."
 echo
-echo "  API:        http$( [ "$SKIP_SSL" -eq 0 ] && echo s )://${API_DOMAIN}"
+echo "  Instance:   ${INSTANCE_SLUG}"
+echo "  API:        http$( [ "$SKIP_SSL" -eq 0 ] && echo s )://${API_DOMAIN}  (127.0.0.1:${API_PORT})"
 echo "  Web app:    http$( [ "$SKIP_SSL" -eq 0 ] && echo s )://${WEB_DOMAIN}"
+echo "  Postgres:   127.0.0.1:${DB_PORT}  Redis: 127.0.0.1:${REDIS_PORT}  (compose project: ${COMPOSE_PROJECT_NAME})"
 echo "  Service:    systemctl {status|restart|stop} ${SERVICE_NAME}"
 echo "  Logs:       journalctl -u ${SERVICE_NAME} -f"
+echo
+echo "  Other instances on this host: systemctl list-units 'whitelabel-api-*'"
+echo "  To add another independent copy: clone this repo elsewhere and rerun ./deploy.sh"
+echo "  with a new pair of domains — see the header comment for details."
 echo
 warn "Before going further:"
 echo "  1. Fill in YATIVO_API_KEY / YATIVO_API_SECRET in apps/api/.env, then: systemctl restart ${SERVICE_NAME}"

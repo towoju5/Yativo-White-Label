@@ -40,6 +40,7 @@ async function renderDocument(
     supportEmail: branding.supportEmail,
     stampUrl: branding.stampUrl,
     verifyUrl: `${env.WEB_APP_URL}/verify-statement/${verifyToken}`,
+    footerText: branding.statementFooterText,
   };
   const buffer = format === "PDF" ? await renderStatementPdf(doc, renderOpts) : await renderStatementExcel(doc, renderOpts);
   return { doc, buffer };
