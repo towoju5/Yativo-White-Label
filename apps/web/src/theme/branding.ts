@@ -16,6 +16,7 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   adminLoginPath: "/admin/login",
   liveChatEnabled: false,
   liveChatCode: null,
+  statementFooterText: null,
   updatedAt: new Date().toISOString(),
 };
 
