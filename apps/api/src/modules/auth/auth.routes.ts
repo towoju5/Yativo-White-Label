@@ -9,6 +9,7 @@ import {
   inviteStaffSchema,
   updateStaffSchema,
   resetStaffPasswordResultSchema,
+  changePasswordSchema,
   roleSchema,
   createRoleSchema,
   updateRoleSchema,
@@ -28,6 +29,7 @@ import {
   reactivateStaff,
   deleteStaff,
   resetStaffPassword,
+  changePassword,
   resolveStaffPermissions,
   listRoles,
   createRole,
@@ -159,6 +161,18 @@ export async function authRoutes(app: FastifyInstance) {
         include: { customRole: true, invitedBy: { select: { email: true } } },
       });
       return reply.send(toDto(user));
+    },
+  );
+
+  server.post(
+    "/auth/change-password",
+    {
+      preHandler: requireStaffAuth,
+      schema: { body: changePasswordSchema, response: { 200: z.object({ success: z.literal(true) }), 401: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      await changePassword(app.prisma, request.staffUser!.sub, request.body.currentPassword, request.body.newPassword);
+      return reply.send({ success: true });
     },
   );
 

@@ -4,6 +4,7 @@ import type { CryptoDeposit, CryptoWallet, PaginatedResponse } from "@white-labe
 import { AlertTriangle, Coins, Copy, Plus, Trash2 } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ function truncateAddress(address: string) {
 export default function CryptoWalletsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canManage = useStaffPermission("crypto.manage");
   const [open, setOpen] = useState(false);
   const [currency, setCurrency] = useState("");
   const [label, setLabel] = useState("");
@@ -80,6 +82,7 @@ export default function CryptoWalletsPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">Crypto wallets</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Platform-level deposit addresses — shared across all customers, not isolated per account.</p>
         </div>
+        {canManage && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
@@ -120,6 +123,7 @@ export default function CryptoWalletsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-foreground">
@@ -176,9 +180,11 @@ export default function CryptoWalletsPage() {
                     <TableCell className="text-muted-foreground">{w.customerId ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{new Date(w.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(w.id)} disabled={deleteMutation.isPending}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      {canManage && (
+                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(w.id)} disabled={deleteMutation.isPending}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

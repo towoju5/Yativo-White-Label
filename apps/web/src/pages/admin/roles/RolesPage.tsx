@@ -6,6 +6,7 @@ import { createRoleSchema, PERMISSION_CATALOG, type RoleDto, type CreateRoleInpu
 import { Plus, Pencil, Trash2, ShieldCheck } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const GROUPS = Array.from(new Set(PERMISSION_CATALOG.map((p) => p.group)));
 export default function RolesPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canManage = useStaffPermission("team.manage");
   const [editing, setEditing] = useState<RoleDto | "new" | null>(null);
   const [deleting, setDeleting] = useState<RoleDto | null>(null);
 
@@ -67,9 +69,11 @@ export default function RolesPage() {
             Custom roles narrow what a staff member can do. Owners and admins always have full access.
           </p>
         </div>
-        <Button size="sm" onClick={() => setEditing("new")}>
-          <Plus className="h-4 w-4" /> New role
-        </Button>
+        {canManage && (
+          <Button size="sm" onClick={() => setEditing("new")}>
+            <Plus className="h-4 w-4" /> New role
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -92,14 +96,16 @@ export default function RolesPage() {
                     <ShieldCheck className="h-4 w-4 text-primary" />
                     <CardTitle className="text-base">{role.name}</CardTitle>
                   </div>
-                  <div className="flex shrink-0 gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => setEditing(role)} aria-label="Edit role">
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setDeleting(role)} aria-label="Delete role">
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
-                  </div>
+                  {canManage && (
+                    <div className="flex shrink-0 gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setEditing(role)} aria-label="Edit role">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleting(role)} aria-label="Delete role">
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <CardDescription>{role.description || "No description"}</CardDescription>
               </CardHeader>

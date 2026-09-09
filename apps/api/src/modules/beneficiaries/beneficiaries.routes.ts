@@ -10,6 +10,7 @@ import {
   beneficiaryFormFieldSchema,
 } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
@@ -64,7 +65,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
 
   server.get(
     "/portal/beneficiaries",
-    { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(beneficiarySchema) } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("beneficiaries.manage")], schema: { response: { 200: z.array(beneficiarySchema) } } },
     async (request, reply) => {
       const beneficiaries = await listBeneficiaries(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(beneficiaries);
@@ -73,7 +74,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
 
   server.post(
     "/portal/beneficiaries",
-    { preHandler: requireCustomerAuth, schema: { body: createBeneficiarySchema, response: { 200: beneficiarySchema } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("beneficiaries.manage")], schema: { body: createBeneficiarySchema, response: { 200: beneficiarySchema } } },
     async (request, reply) => {
       const beneficiary = await createBeneficiary(app.prisma, resolveEffectiveCustomerId(request.customer!), request.body);
       return reply.send(beneficiary);
@@ -83,7 +84,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
   server.get(
     "/portal/beneficiaries/:id",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("beneficiaries.manage")],
       schema: { params: z.object({ id: z.string() }), response: { 200: beneficiarySchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -95,7 +96,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
   server.patch(
     "/portal/beneficiaries/:id",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("beneficiaries.manage")],
       schema: { params: z.object({ id: z.string() }), body: updateBeneficiarySchema, response: { 200: beneficiarySchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -107,7 +108,7 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
   server.delete(
     "/portal/beneficiaries/:id",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("beneficiaries.manage")],
       schema: { params: z.object({ id: z.string() }), response: { 204: z.void(), 404: errorResponseSchema } },
     },
     async (request, reply) => {

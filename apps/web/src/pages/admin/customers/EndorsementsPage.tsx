@@ -5,6 +5,7 @@ import { Search, User } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ const KYC_VARIANT: Record<string, "success" | "warning" | "destructive" | "secon
 };
 
 export default function EndorsementsPage() {
+  const canManage = useStaffPermission("endorsements.manage");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -110,7 +112,7 @@ export default function EndorsementsPage() {
                 endorsements={endorsementsQuery.data}
                 isLoading={endorsementsQuery.isLoading}
                 errorMessage={endorsementsQuery.isError ? (endorsementsQuery.error instanceof ApiError ? endorsementsQuery.error.message : "Couldn't load endorsements.") : null}
-                onGenerateLink={(service) => staffApi.post<CustomerEndorsement[]>(`/admin/customers/${selectedId}/endorsements/${service}/link`)}
+                onGenerateLink={canManage ? (service) => staffApi.post<CustomerEndorsement[]>(`/admin/customers/${selectedId}/endorsements/${service}/link`) : undefined}
               />
             )}
           </CardContent>

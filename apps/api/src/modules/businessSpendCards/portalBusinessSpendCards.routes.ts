@@ -12,6 +12,7 @@ import {
   businessSpendCardTransactionSchema,
 } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
@@ -31,7 +32,7 @@ export async function portalBusinessSpendCardsRoutes(app: FastifyInstance) {
 
   server.get(
     "/portal/business-spend-cards",
-    { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(businessSpendCardSchema) } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")], schema: { response: { 200: z.array(businessSpendCardSchema) } } },
     async (request, reply) => {
       const cards = await listPortalBusinessSpendCards(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(cards);
@@ -40,7 +41,7 @@ export async function portalBusinessSpendCardsRoutes(app: FastifyInstance) {
 
   server.post(
     "/portal/business-spend-cards",
-    { preHandler: requireCustomerAuth, schema: { body: portalIssueBusinessSpendCardSchema, response: { 200: businessSpendCardSchema, 403: errorResponseSchema } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")], schema: { body: portalIssueBusinessSpendCardSchema, response: { 200: businessSpendCardSchema, 403: errorResponseSchema } } },
     async (request, reply) => {
       const card = await issueBusinessSpendCard(app.prisma, resolveEffectiveCustomerId(request.customer!), request.body.cardType);
       return reply.send(card);
@@ -50,7 +51,7 @@ export async function portalBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.post(
     "/portal/business-spend-cards/:id/wallet",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")],
       schema: { params: idParam, body: businessSpendCardWalletActionSchema, response: { 200: businessSpendCardWalletActionResultSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -67,7 +68,7 @@ export async function portalBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.post(
     "/portal/business-spend-cards/:id/status",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")],
       schema: { params: idParam, body: businessSpendCardStatusActionSchema, response: { 200: businessSpendCardSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -78,7 +79,7 @@ export async function portalBusinessSpendCardsRoutes(app: FastifyInstance) {
 
   server.post(
     "/portal/business-spend-cards/:id/pin",
-    { preHandler: requireCustomerAuth, schema: { params: idParam, body: businessSpendCardPinSchema, response: { 200: businessSpendCardSchema, 404: errorResponseSchema } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")], schema: { params: idParam, body: businessSpendCardPinSchema, response: { 200: businessSpendCardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
       const card = await setBusinessSpendCardPin(
         app.prisma,
@@ -95,7 +96,7 @@ export async function portalBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.put(
     "/portal/business-spend-cards/:id/limits",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")],
       schema: { params: idParam, body: businessSpendCardLimitsSchema, response: { 200: z.object({ card: businessSpendCardSchema, limits: z.array(z.record(z.unknown())) }), 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -106,7 +107,7 @@ export async function portalBusinessSpendCardsRoutes(app: FastifyInstance) {
 
   server.get(
     "/portal/business-spend-cards/:id/transactions",
-    { preHandler: requireCustomerAuth, schema: { params: idParam, response: { 200: z.array(businessSpendCardTransactionSchema), 404: errorResponseSchema } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")], schema: { params: idParam, response: { 200: z.array(businessSpendCardTransactionSchema), 404: errorResponseSchema } } },
     async (request, reply) => {
       const transactions = await listBusinessSpendCardTransactions(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(transactions);

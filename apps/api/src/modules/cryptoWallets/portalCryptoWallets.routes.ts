@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { CRYPTO_DEPOSIT_CURRENCIES, cryptoWalletSchema, cryptoDepositSchema, createCryptoWalletSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { listMyCryptoWallets, getOrCreateMyCryptoWallet, listMyCryptoDeposits } from "./cryptoWallets.service.js";
@@ -18,7 +19,7 @@ export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
 
   server.get(
     "/portal/crypto/wallets",
-    { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(cryptoWalletSchema) } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("crypto.manage")], schema: { response: { 200: z.array(cryptoWalletSchema) } } },
     async (request, reply) => {
       const wallets = await listMyCryptoWallets(resolveEffectiveCustomerId(request.customer!));
       return reply.send(wallets);
@@ -28,7 +29,7 @@ export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
   server.post(
     "/portal/crypto/wallets",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("crypto.manage")],
       schema: { body: createCryptoWalletSchema.pick({ currency: true }), response: { 200: cryptoWalletSchema } },
     },
     async (request, reply) => {
@@ -41,7 +42,7 @@ export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
 
   server.get(
     "/portal/crypto/deposits",
-    { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(cryptoDepositSchema) } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("crypto.manage")], schema: { response: { 200: z.array(cryptoDepositSchema) } } },
     async (request, reply) => {
       const deposits = await listMyCryptoDeposits(resolveEffectiveCustomerId(request.customer!));
       return reply.send(deposits);

@@ -5,6 +5,7 @@ import type { BrandingConfig } from "@white-label/shared-types";
 import { z } from "zod";
 import { exportStatementQuerySchema, emailStatementSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
@@ -52,7 +53,7 @@ export async function statementsRoutes(app: FastifyInstance) {
   server.get(
     "/portal/wallets/:id/statement/export",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("statements.view")],
       schema: { params: z.object({ id: z.string() }), querystring: exportStatementQuerySchema, response: { 200: z.any(), 404: errorResponseSchema, 400: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -70,7 +71,7 @@ export async function statementsRoutes(app: FastifyInstance) {
   server.post(
     "/portal/wallets/:id/statement/email",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("statements.view")],
       schema: {
         params: z.object({ id: z.string() }),
         body: emailStatementSchema,

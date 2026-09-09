@@ -6,6 +6,7 @@ import { createApiKeySchema, type ApiKeyDto, type CreateApiKeyInput, type Create
 import { Copy, KeyRound, Plus, Trash2 } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 export default function ApiKeysSettingsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canManage = useStaffPermission("api_keys.manage");
   const [open, setOpen] = useState(false);
   const [created, setCreated] = useState<CreateApiKeyResult | null>(null);
 
@@ -58,6 +60,7 @@ export default function ApiKeysSettingsPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">API keys</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Keys for your own integrations against this platform</p>
         </div>
+        {canManage && (
         <Dialog
           open={open}
           onOpenChange={(v) => {
@@ -105,6 +108,7 @@ export default function ApiKeysSettingsPage() {
             )}
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       {isLoading ? (
@@ -139,7 +143,7 @@ export default function ApiKeysSettingsPage() {
                   <Badge variant={k.revokedAt ? "destructive" : "success"}>{k.revokedAt ? "Revoked" : "Active"}</Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  {!k.revokedAt && (
+                  {!k.revokedAt && canManage && (
                     <Button variant="ghost" size="icon" onClick={() => revokeMutation.mutate(k.id)} disabled={revokeMutation.isPending}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

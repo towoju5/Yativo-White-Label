@@ -44,6 +44,12 @@ export type UpdateStaffInput = z.infer<typeof updateStaffSchema>;
 export const resetStaffPasswordResultSchema = z.object({ tempPassword: z.string() });
 export type ResetStaffPasswordResult = z.infer<typeof resetStaffPasswordResultSchema>;
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8),
+});
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
 export const roleSchema = z.object({
   id: z.string(),
   name: z.string(),

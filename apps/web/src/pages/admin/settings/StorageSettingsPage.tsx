@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { STORAGE_PROVIDER_LABELS, STORAGE_PROVIDERS, type StorageProviderId } from "@white-label/shared-types";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,6 +84,7 @@ function S3LikeFields({ value, onChange, endpointHint }: { value: S3LikeConfig; 
 
 export default function StorageSettingsPage() {
   const { toast } = useToast();
+  const canManage = useStaffPermission("storage.manage");
   const [config, setConfig] = useState<Config>(emptyConfig);
 
   const { data, isLoading } = useQuery({
@@ -272,11 +274,13 @@ export default function StorageSettingsPage() {
         </Card>
       )}
 
-      <div className="flex justify-end">
-        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-          {saveMutation.isPending ? "Saving…" : "Save storage settings"}
-        </Button>
-      </div>
+      {canManage && (
+        <div className="flex justify-end">
+          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+            {saveMutation.isPending ? "Saving…" : "Save storage settings"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

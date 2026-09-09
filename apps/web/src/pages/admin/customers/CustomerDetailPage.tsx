@@ -7,6 +7,7 @@ import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as W
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { useToast } from "@/hooks/use-toast";
 import { useWatchCustomerWallet } from "@/hooks/useRealtimeWallets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +42,8 @@ export default function CustomerDetailPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const canAdjust = user?.role === "OWNER" || user?.role === "ADMIN";
+  const canWrite = useStaffPermission("customers.write");
+  const canReviewKyc = useStaffPermission("kyc.review");
   useWatchCustomerWallet(customerId);
 
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -205,7 +208,7 @@ export default function CustomerDetailPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {customer.kycStatus === "PENDING" && (
+          {customer.kycStatus === "PENDING" && canReviewKyc && (
             <>
               <Button size="sm" onClick={() => approveMutation.mutate()} disabled={approveMutation.isPending}>
                 <ShieldCheck className="h-4 w-4" /> Approve KYC
@@ -237,22 +240,24 @@ export default function CustomerDetailPage() {
               </Dialog>
             </>
           )}
-          {!customer.yativoCustomerId && (
+          {!customer.yativoCustomerId && canWrite && (
             <Button size="sm" variant="outline" onClick={() => resubmitYativoMutation.mutate()} disabled={resubmitYativoMutation.isPending}>
               <RefreshCw className={resubmitYativoMutation.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"} /> Resubmit to Yativo
             </Button>
           )}
-          <Button size="sm" variant="outline" onClick={() => freezeMutation.mutate()} disabled={freezeMutation.isPending}>
-            {customer.status === "FROZEN" ? (
-              <>
-                <Sun className="h-4 w-4" /> Unfreeze
-              </>
-            ) : (
-              <>
-                <Snowflake className="h-4 w-4" /> Freeze
-              </>
-            )}
-          </Button>
+          {canWrite && (
+            <Button size="sm" variant="outline" onClick={() => freezeMutation.mutate()} disabled={freezeMutation.isPending}>
+              {customer.status === "FROZEN" ? (
+                <>
+                  <Sun className="h-4 w-4" /> Unfreeze
+                </>
+              ) : (
+                <>
+                  <Snowflake className="h-4 w-4" /> Freeze
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 

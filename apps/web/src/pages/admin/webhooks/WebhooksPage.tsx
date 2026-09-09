@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, RefreshCw, Eye } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +26,7 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
 export default function WebhooksPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canManage = useStaffPermission("webhooks.manage");
   const [processingStatus, setProcessingStatus] = useState("ALL");
   const [eventType, setEventType] = useState("");
   const [page, setPage] = useState(1);
@@ -127,15 +129,17 @@ export default function WebhooksPage() {
                       <Button variant="ghost" size="icon" onClick={() => setSelected(w)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => replayMutation.mutate(w.id)}
-                        disabled={replayMutation.isPending}
-                        title="Replay"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
+                      {canManage && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => replayMutation.mutate(w.id)}
+                          disabled={replayMutation.isPending}
+                          title="Replay"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

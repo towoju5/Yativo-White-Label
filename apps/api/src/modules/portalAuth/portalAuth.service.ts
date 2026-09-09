@@ -17,7 +17,11 @@ import logger from "../../lib/logger.js";
 import type { CreateCustomerInput } from "@white-label/shared-types";
 
 async function issueSession(prisma: PrismaClient, customerId: string) {
-  const accessToken = signPortalAccessToken({ sub: customerId });
+  // Explicit, not just implied by isPortalOwnerLevel's bypass — mirrors resolveStaffPermissions
+  // giving OWNER/ADMIN the full list outright, so any future permission check reading
+  // `customer.permissions` directly (rather than going through the bypass) sees the account
+  // owner as fully permitted rather than as having none.
+  const accessToken = signPortalAccessToken({ sub: customerId, permissions: [...PORTAL_PERMISSIONS] });
   const { token: refreshToken, tokenHash } = generateRefreshToken();
   await prisma.customerRefreshToken.create({
     data: { customerId, tokenHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
@@ -177,7 +181,7 @@ export async function refreshCustomerSession(prisma: PrismaClient, refreshToken:
     await prisma.customerRefreshToken.create({
       data: { customerId: existing.customerId, tokenHash: newHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
     });
-    const accessToken = signPortalAccessToken({ sub: existing.customer.id });
+    const accessToken = signPortalAccessToken({ sub: existing.customer.id, permissions: [...PORTAL_PERMISSIONS] });
     return { accessToken, refreshToken: newRefreshToken };
   }
 

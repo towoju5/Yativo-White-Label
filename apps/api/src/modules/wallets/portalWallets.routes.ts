@@ -10,6 +10,7 @@ import {
   addWalletCurrencySchema,
 } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
@@ -26,7 +27,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
 
   server.get(
     "/portal/wallets",
-    { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(walletBalanceSchema) } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("wallets.view")], schema: { response: { 200: z.array(walletBalanceSchema) } } },
     async (request, reply) => {
       const wallets = await listCustomerWallets(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(wallets);
@@ -35,7 +36,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
 
   server.get(
     "/portal/wallets/currencies",
-    { preHandler: requireCustomerAuth, schema: { response: { 200: portalWalletCurrencyOptionsSchema } } },
+    { preHandler: [requireCustomerAuth, requirePortalPermission("wallets.view")], schema: { response: { 200: portalWalletCurrencyOptionsSchema } } },
     async (request, reply) => {
       const options = await getPortalWalletCurrencyOptions(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(options);
@@ -45,7 +46,9 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
   server.post(
     "/portal/wallets",
     {
-      preHandler: requireCustomerAuth,
+      // No dedicated "wallets.manage" permission exists — wallets.transfer is the closest fit for
+      // any wallet mutation beyond viewing (see beneficiaries/virtualAccounts for the same pattern).
+      preHandler: [requireCustomerAuth, requirePortalPermission("wallets.transfer")],
       schema: { body: addWalletCurrencySchema, response: { 200: walletBalanceSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -57,7 +60,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
   server.delete(
     "/portal/wallets/:id",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("wallets.transfer")],
       schema: { params: z.object({ id: z.string() }), response: { 204: z.void(), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -69,7 +72,7 @@ export async function portalWalletsRoutes(app: FastifyInstance) {
   server.get(
     "/portal/wallets/:id/statement",
     {
-      preHandler: requireCustomerAuth,
+      preHandler: [requireCustomerAuth, requirePortalPermission("wallets.view")],
       schema: {
         params: z.object({ id: z.string() }),
         querystring: paginationQuerySchema,

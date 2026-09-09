@@ -5,6 +5,7 @@ import { CreditCard, Plus, Lock, Unlock, XCircle, Loader2, Settings2 } from "luc
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
 export default function AdminBusinessSpendCardsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canManage = useStaffPermission("businessSpendCards.manage");
   const [issueOpen, setIssueOpen] = useState(false);
   const [customerId, setCustomerId] = useState("");
   const [manageCard, setManageCard] = useState<AdminBusinessSpendCardListItem | null>(null);
@@ -76,6 +78,7 @@ export default function AdminBusinessSpendCardsPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">Business Spend Cards</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Platform-wide Business Spend Card issuance — business customers only</p>
         </div>
+        {canManage && (
         <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
@@ -100,6 +103,7 @@ export default function AdminBusinessSpendCardsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       {isLoading ? (
@@ -138,7 +142,9 @@ export default function AdminBusinessSpendCardsPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    {c.status !== "TERMINATED" && (
+                    {!canManage ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : c.status !== "TERMINATED" && (
                       <>
                         <Button variant="ghost" size="icon" title="Manage" onClick={() => setManageCard(c)}>
                           <Settings2 className="h-4 w-4" />

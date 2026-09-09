@@ -224,6 +224,20 @@ export async function deleteStaff(prisma: PrismaClient, actingStaffId: string, t
   ]);
 }
 
+/** Self-service password change — unlike resetStaffPassword (admin-triggered, any target), this requires knowing the current password and only ever acts on the caller's own account. */
+export async function changePassword(prisma: PrismaClient, staffId: string, currentPassword: string, newPassword: string) {
+  const user = await prisma.staffUser.findUnique({ where: { id: staffId } });
+  if (!user) throw new NotFoundError("Staff member");
+  if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+    throw new UnauthorizedError("Current password is incorrect");
+  }
+  const passwordHash = await hashPassword(newPassword);
+  await prisma.$transaction([
+    prisma.staffUser.update({ where: { id: staffId }, data: { passwordHash } }),
+    prisma.refreshToken.updateMany({ where: { staffUserId: staffId, revokedAt: null }, data: { revokedAt: new Date() } }),
+  ]);
+}
+
 export async function resetStaffPassword(prisma: PrismaClient, targetId: string) {
   const target = await prisma.staffUser.findUnique({ where: { id: targetId } });
   if (!target) throw new NotFoundError("Staff member");

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { KeyRound, Trash2 } from "lucide-react";
@@ -86,6 +86,91 @@ function ProviderSection({ name, title, fields, config, onUpdate }: ProviderSect
           />
         </div>
       ))}
+    </section>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Change password — self-service, for the currently signed-in staff member only.
+// -----------------------------------------------------------------------------
+function ChangePasswordSection() {
+  const { toast } = useToast();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const changePasswordMutation = useMutation({
+    mutationFn: () => staffApi.post("/auth/change-password", { currentPassword, newPassword }),
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast({ title: "Password updated" });
+    },
+    onError: (e) =>
+      setFormError(e instanceof ApiError ? e.message : "Couldn't update your password."),
+  });
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    if (newPassword !== confirmPassword) {
+      setFormError("New passwords don't match.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setFormError("New password must be at least 8 characters.");
+      return;
+    }
+    changePasswordMutation.mutate();
+  };
+
+  return (
+    <section className="space-y-3 rounded-lg border p-4">
+      <div>
+        <h2 className="font-medium">Change your password</h2>
+        <p className="text-xs text-muted-foreground">Updates the password for your own account and signs out any other active sessions.</p>
+      </div>
+      <form className="max-w-sm space-y-3" onSubmit={handleSubmit}>
+        <div className="space-y-1">
+          <Label htmlFor="currentPassword">Current password</Label>
+          <Input
+            id="currentPassword"
+            type="password"
+            autoComplete="current-password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="newPassword">New password</Label>
+          <Input
+            id="newPassword"
+            type="password"
+            autoComplete="new-password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="confirmPassword">Confirm new password</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+        {formError && <p className="text-xs text-destructive">{formError}</p>}
+        <Button type="submit" disabled={changePasswordMutation.isPending}>
+          {changePasswordMutation.isPending ? "Updating…" : "Update password"}
+        </Button>
+      </form>
     </section>
   );
 }
@@ -346,6 +431,7 @@ export default function AuthenticationSettingsPage() {
         />
 
         <PasskeysSection />
+        <ChangePasswordSection />
       </div>
 
       {/* Save Button */}

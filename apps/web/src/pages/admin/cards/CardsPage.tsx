@@ -5,6 +5,7 @@ import { CreditCard, Eye, EyeOff, Plus, Snowflake, Sun, XCircle, Loader2 } from 
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
 export default function AdminCardsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canManage = useStaffPermission("cards.manage");
   const [open, setOpen] = useState(false);
   const [customerId, setCustomerId] = useState("");
   const [amount, setAmount] = useState("5.00");
@@ -100,6 +102,7 @@ export default function AdminCardsPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">Cards</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Platform-wide Visa virtual card issuance — USD only</p>
         </div>
+        {canManage && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
@@ -134,6 +137,7 @@ export default function AdminCardsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       {isLoading ? (
@@ -183,7 +187,9 @@ export default function AdminCardsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      {c.status !== "CLOSED" && (
+                      {!canManage ? (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      ) : c.status !== "CLOSED" && (
                         <>
                           <Button
                             variant="ghost"

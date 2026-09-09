@@ -6,6 +6,7 @@ import { AlertTriangle, ChevronLeft, ChevronRight, PlayCircle } from "lucide-rea
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +18,7 @@ const PAGE_SIZE = 20;
 export default function ReconciliationPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canManage = useStaffPermission("reconciliation.manage");
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
@@ -48,9 +50,11 @@ export default function ReconciliationPage() {
             {mismatchCount > 0 && <span className="font-medium text-destructive">— {mismatchCount} mismatch{mismatchCount > 1 ? "es" : ""}</span>}
           </p>
         </div>
-        <Button onClick={() => runMutation.mutate()} disabled={runMutation.isPending}>
-          <PlayCircle className="h-4 w-4" /> {runMutation.isPending ? "Running…" : "Run now"}
-        </Button>
+        {canManage && (
+          <Button onClick={() => runMutation.mutate()} disabled={runMutation.isPending}>
+            <PlayCircle className="h-4 w-4" /> {runMutation.isPending ? "Running…" : "Run now"}
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
