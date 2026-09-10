@@ -67,4 +67,31 @@ function applyDocumentDirection(language: string) {
 applyDocumentDirection(i18n.language);
 i18n.on("languageChanged", applyDocumentDirection);
 
+/**
+ * IP-based language fallback — only for a first-time visitor whose browser gave i18next nothing
+ * usable (no prior explicit/detected choice cached, and navigator.language isn't one of our
+ * supported locales). Never overrides a real signal: a cached choice (manual pick or a past run
+ * of this same detection) or a supported browser locale both win outright, so this only upgrades
+ * the "we had to guess English" case to a real guess based on the visitor's country.
+ */
+async function detectLanguageFromIp() {
+  const cached = localStorage.getItem("wl-language");
+  if (cached) return;
+
+  const browserLanguage = navigator.language?.split("-")[0];
+  if (browserLanguage && (SUPPORTED_LANGUAGES as readonly string[]).includes(browserLanguage)) return;
+
+  try {
+    const { publicApi } = await import("@/lib/api-client");
+    const { language } = await publicApi.get<{ country: string | null; language: string | null }>("/locations/detect-language");
+    if (language && (SUPPORTED_LANGUAGES as readonly string[]).includes(language)) {
+      await i18n.changeLanguage(language);
+    }
+  } catch {
+    // Offline, blocked, or the lookup came up empty — silently keep whatever i18next already picked.
+  }
+}
+
+void detectLanguageFromIp();
+
 export default i18n;

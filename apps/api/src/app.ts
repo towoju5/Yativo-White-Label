@@ -64,7 +64,11 @@ export async function buildApp() {
   // several such fields need real headroom). Raised here rather than left at the default so a
   // large-but-valid submission fails with a clear multipart-level error instead of the browser
   // seeing an opaque connection reset.
-  const app = Fastify({ loggerInstance: logger, bodyLimit: 30 * 1024 * 1024 }).withTypeProvider();
+  // trustProxy: this API is never reachable directly (deploy.sh keeps its port loopback-only —
+  // Nginx on the same host is the only thing that can ever connect), so the X-Forwarded-For
+  // Nginx sets is trustworthy here. Without this, request.ip would just be Nginx's own loopback
+  // address for every request, breaking IP-based geolocation (see locations.routes.ts).
+  const app = Fastify({ loggerInstance: logger, bodyLimit: 30 * 1024 * 1024, trustProxy: true }).withTypeProvider();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
