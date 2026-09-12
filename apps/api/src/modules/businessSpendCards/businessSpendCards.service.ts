@@ -48,8 +48,8 @@ export async function issueBusinessSpendCard(prisma: PrismaClient, customerId: s
   if (customer.kycStatus === "NOT_STARTED") {
     throw new AppError("Full KYC must be submitted for this customer before a Business Spend Card can be created.", 403, "KYC_NOT_SUBMITTED");
   }
-  // Respects the admin's PlatformSettings.kycRequiredServices toggle and the POOLED-mode bypass,
-  // same as every other product — separate from (and in addition to) the guide's own two checks.
+  // Respects the admin's PlatformSettings.kycRequiredServices toggle, same as every other
+  // product — separate from (and in addition to) the guide's own two checks.
   await requireKycApprovedForService(prisma, "BUSINESS_SPEND_CARD", customer);
 
   const yativoCustomerId = await ensureYativoCustomer(prisma, customer);

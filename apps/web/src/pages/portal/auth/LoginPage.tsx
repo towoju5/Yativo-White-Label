@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ApiError } from "@/lib/api-client";
+import { ApiError, publicApi } from "@/lib/api-client";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function PortalLoginPage() {
@@ -27,6 +27,9 @@ export default function PortalLoginPage() {
   const [passkeySubmitting, setPasskeySubmitting] = useState(false);
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [code, setCode] = useState("");
+  const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
+  const [lastEmail, setLastEmail] = useState("");
 
   const {
     register,
@@ -41,6 +44,8 @@ export default function PortalLoginPage() {
 
   const onSubmit = async (values: PortalLoginInput) => {
     setError(null);
+    setNeedsEmailVerification(false);
+    setResendState("idle");
     setSubmitting(true);
     try {
       const result = await login(values);
@@ -50,9 +55,24 @@ export default function PortalLoginPage() {
       }
       navigate("/portal", { replace: true });
     } catch (e) {
+      if (e instanceof ApiError && e.body && typeof e.body === "object" && (e.body as { code?: string }).code === "EMAIL_NOT_VERIFIED") {
+        setNeedsEmailVerification(true);
+        setLastEmail(values.email);
+      }
       setError(e instanceof ApiError ? e.message : t("login.genericError", "Unable to sign in. Check your credentials."));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const onResendVerification = async () => {
+    if (!lastEmail) return;
+    setResendState("sending");
+    try {
+      await publicApi.post("/portal/auth/resend-verification", { email: lastEmail });
+      setResendState("sent");
+    } catch {
+      setResendState("idle");
     }
   };
 
@@ -158,6 +178,24 @@ export default function PortalLoginPage() {
                     {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                   </div>
                   {error && <p className="text-sm text-destructive">{error}</p>}
+                  {needsEmailVerification && (
+                    <p className="text-sm">
+                      {resendState === "sent" ? (
+                        t("login.verificationResent", "Verification email sent — check your inbox.")
+                      ) : (
+                        <button
+                          type="button"
+                          className="font-medium text-primary hover:underline disabled:opacity-50"
+                          disabled={resendState === "sending"}
+                          onClick={onResendVerification}
+                        >
+                          {resendState === "sending"
+                            ? t("login.resendingVerification", "Resending…")
+                            : t("login.resendVerification", "Resend verification email")}
+                        </button>
+                      )}
+                    </p>
+                  )}
                   <Button type="submit" className="w-full" disabled={submitting}>
                     {submitting ? t("login.signingIn", "Signing in…") : t("login.signIn", "Sign in")}
                   </Button>

@@ -9,10 +9,12 @@ import { signPortalAccessToken, signPortal2faChallengeToken, verifyPortal2faChal
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
-import { UnauthorizedError, ConflictError } from "../../lib/errors.js";
+import { enqueueEmail } from "../../jobs/emailQueue.js";
+import { UnauthorizedError, ConflictError, EmailNotVerifiedError } from "../../lib/errors.js";
 import { ensureYativoCustomer, tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { provisionDefaultWallets, tryProvisionDefaultWallets } from "../wallets/wallets.service.js";
 import { verifyTotp } from "../../lib/totp.js";
+import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import logger from "../../lib/logger.js";
 import type { CreateCustomerInput } from "@white-label/shared-types";
 
@@ -47,6 +49,23 @@ async function issueMemberSession(prisma: PrismaClient, member: CustomerTeamMemb
     data: { memberId: member.id, tokenHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
   });
   return { accessToken, refreshToken };
+}
+
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+/** Generates and emails a fresh verification link, overwriting any previous unredeemed token. */
+async function issueEmailVerification(prisma: PrismaClient, customerId: string, email: string, name: string) {
+  const { token, tokenHash } = generateRefreshToken();
+  await prisma.customer.update({
+    where: { id: customerId },
+    data: { emailVerificationTokenHash: tokenHash, emailVerificationExpiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS) },
+  });
+  const verifyUrl = `${env.WEB_APP_URL}/portal/verify-email?token=${token}`;
+  await enqueueEmail({
+    to: email,
+    subject: "Verify your email address",
+    html: `<p>Hi ${name},</p><p>Please confirm your email address to finish setting up your account. <a href="${verifyUrl}">Verify your email</a>. This link expires in 24 hours.</p>`,
+  });
 }
 
 /**
@@ -87,9 +106,39 @@ export async function signupCustomer(prisma: PrismaClient, input: CreateCustomer
   // enabled currency up front rather than waiting for a self-service add or a deposit.
   await provisionDefaultWallets(prisma, customer.id);
 
-  const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
+  const name = customer.fullName ?? customer.businessName ?? customer.email;
+  // A verification email always goes out regardless of the setting below, so turning
+  // requireEmailVerification on later never strands a customer with no way to verify.
+  await issueEmailVerification(prisma, customer.id, customer.email, name);
   await sendNotificationEmail(prisma, "WELCOME", customer.id, {});
-  return { customer, accessToken, refreshToken };
+
+  const settings = await getPlatformSettings(prisma);
+  if (settings.requireEmailVerification) {
+    return { customer, pendingVerification: true as const };
+  }
+
+  const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
+  return { customer, accessToken, refreshToken, pendingVerification: false as const };
+}
+
+export async function verifyCustomerEmail(prisma: PrismaClient, token: string): Promise<void> {
+  const tokenHash = hashRefreshToken(token);
+  const customer = await prisma.customer.findUnique({ where: { emailVerificationTokenHash: tokenHash } });
+  if (!customer || !customer.emailVerificationExpiresAt || customer.emailVerificationExpiresAt < new Date()) {
+    throw new UnauthorizedError("This verification link is invalid or has expired");
+  }
+  await prisma.customer.update({
+    where: { id: customer.id },
+    data: { emailVerifiedAt: new Date(), emailVerificationTokenHash: null, emailVerificationExpiresAt: null },
+  });
+}
+
+/** Silently no-ops for an unknown email or an already-verified account — never reveals which via timing or response. */
+export async function resendVerificationEmail(prisma: PrismaClient, email: string): Promise<void> {
+  const customer = await prisma.customer.findUnique({ where: { email } });
+  if (!customer || customer.emailVerifiedAt) return;
+  const name = customer.fullName ?? customer.businessName ?? customer.email;
+  await issueEmailVerification(prisma, customer.id, customer.email, name);
 }
 
 export async function loginCustomer(prisma: PrismaClient, email: string, password: string) {
@@ -110,6 +159,9 @@ export async function loginCustomer(prisma: PrismaClient, email: string, passwor
     throw new UnauthorizedError("Invalid email or password");
   }
   if (customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
+
+  const settings = await getPlatformSettings(prisma);
+  if (settings.requireEmailVerification && !customer.emailVerifiedAt) throw new EmailNotVerifiedError();
 
   // 2FA-enabled accounts don't get a session from password alone — the challenge token proves
   // the password step already passed, and POST /portal/auth/2fa/verify redeems it for the real

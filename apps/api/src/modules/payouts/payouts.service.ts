@@ -62,6 +62,7 @@ function payoutToDto(payout: PayoutWithTransaction, status: "PENDING" | "POSTED"
     beneficiaryId: payout.beneficiaryId,
     currencyCode: payout.currencyCode,
     amountMinor: payout.amountMinor.toString(),
+    platformFeeMinor: payout.platformFeeMinor.toString(),
     status,
     transactionId: payout.transactionId,
     yativoPayoutId: payout.yativoPayoutId,
@@ -75,49 +76,41 @@ async function toSinglePayoutDto(prisma: PrismaClient, payout: PayoutWithTransac
 }
 
 /**
- * Atomically posts a POSTED settlement for a payout's PENDING hold (reversing
- * the hold + posting the final DEBIT wallet / CREDIT settlement in one DB
- * transaction) and, if a fee was charged, a separate POSTED FEE transaction.
- * Shared by the `payout.completed` webhook handler and the mock-mode
- * synchronous escape hatch in createPortalPayout below.
+ * Atomically posts a POSTED settlement for a payout's PENDING hold — the hold was placed for
+ * amountMinor + platformFeeMinor combined (see createPortalPayout), so this releases it into
+ * two destinations in the SAME balanced transaction: amountMinor to YATIVO_SETTLEMENT (what was
+ * actually submitted to Yativo) and platformFeeMinor to PLATFORM_FEE_REVENUE (the platform's own
+ * cut, never forwarded to Yativo). Using payout.platformFeeMinor — locked in at creation time,
+ * not recomputed here — means this can never drift from what the customer was quoted, and never
+ * needs a second, unchecked debit against the wallet the way computing it fresh at settlement
+ * time used to. Shared by the `payout.completed` webhook handler and the mock-mode synchronous
+ * escape hatch in createPortalPayout below.
  */
 export async function settlePayoutCompleted(
   prisma: PrismaClient,
-  payout: { id: string; customerId: string; currencyCode: string; amountMinor: bigint; transactionId: string },
-  opts: { externalSource: LedgerExternalSource; upstreamFeeMinor?: bigint },
+  payout: { id: string; customerId: string; currencyCode: string; amountMinor: bigint; platformFeeMinor: bigint; transactionId: string },
+  opts: { externalSource: LedgerExternalSource },
 ) {
   const walletAccount = await prisma.account.findFirstOrThrow({
     where: { type: "CUSTOMER_WALLET", customerId: payout.customerId, currencyCode: payout.currencyCode },
   });
   const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", payout.currencyCode);
 
-  const tx = await settlePendingTransaction(
-    prisma,
-    payout.transactionId,
-    [
-      { accountId: walletAccount.id, direction: "DEBIT", amountMinor: payout.amountMinor, currencyCode: payout.currencyCode },
-      { accountId: settlement.id, direction: "CREDIT", amountMinor: payout.amountMinor, currencyCode: payout.currencyCode },
-    ],
-    { type: "PAYOUT", externalSource: opts.externalSource, description: `Payout ${payout.id} settled` },
-  );
-
-  // Our own platform fee — computed from admin-configured pricing, optionally on top of Yativo's
-  // own reported fee (opts.upstreamFeeMinor), never charged as Yativo's number directly.
-  const feeMinor = await getEffectiveFee(prisma, "PAYOUT", payout.customerId, payout.amountMinor, opts.upstreamFeeMinor ?? 0n);
-  if (feeMinor > 0n) {
+  const totalMinor = payout.amountMinor + payout.platformFeeMinor;
+  const lines = [
+    { accountId: walletAccount.id, direction: "DEBIT" as const, amountMinor: totalMinor, currencyCode: payout.currencyCode },
+    { accountId: settlement.id, direction: "CREDIT" as const, amountMinor: payout.amountMinor, currencyCode: payout.currencyCode },
+  ];
+  if (payout.platformFeeMinor > 0n) {
     const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", payout.currencyCode);
-    await postTransaction(prisma, {
-      type: "FEE",
-      status: "POSTED",
-      idempotencyKey: `fee:payout:${payout.id}`,
-      externalSource: opts.externalSource,
-      description: `Payout fee for ${payout.id}`,
-      lines: [
-        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: payout.currencyCode },
-        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: payout.currencyCode },
-      ],
-    });
+    lines.push({ accountId: feeRevenue.id, direction: "CREDIT" as const, amountMinor: payout.platformFeeMinor, currencyCode: payout.currencyCode });
   }
+
+  const tx = await settlePendingTransaction(prisma, payout.transactionId, lines, {
+    type: "PAYOUT",
+    externalSource: opts.externalSource,
+    description: `Payout ${payout.id} settled`,
+  });
 
   await sendNotificationEmail(prisma, "PAYOUT_COMPLETED", payout.customerId, {
     amount: await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor),
@@ -148,11 +141,19 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
 
   const amountMinor = BigInt(input.amountMinor);
 
+  // The platform's own fee, computed server-side from admin-configured pricing (never trusted
+  // from the client) and locked in now — settlePayoutCompleted reads this same stored value
+  // rather than recomputing it later, so it can't drift and isn't charged as a second, unchecked
+  // debit after the fact. Same base (amountMinor, Yativo's fee-inclusive debit total) that
+  // /portal/quotes previewed to the customer as platformFeeMinor.
+  const platformFeeMinor = await getEffectiveFee(prisma, "PAYOUT", customerId, amountMinor);
+  const totalMinor = amountMinor + platformFeeMinor;
+
   // Fast, non-authoritative fail-fast for the common uncontested case — skips
   // creating a payout id/hold when it's obviously insufficient. Not a
   // correctness guarantee by itself (see enforceNonNegativeOn below).
   const available = await getAvailableBalance(prisma, walletAccount.id, "CUSTOMER_WALLET");
-  if (available < amountMinor) throw new InsufficientFundsError(walletAccount.id);
+  if (available < totalMinor) throw new InsufficientFundsError(walletAccount.id);
 
   const suspense = await ensurePlatformAccount(prisma, "SUSPENSE_PENDING", input.currencyCode);
 
@@ -163,9 +164,13 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
     idempotencyKey: `payout:${payoutId}`,
     externalSource: "MANUAL",
     description: `Payout to beneficiary ${beneficiary.name}`,
+    // Held together as one total — amountMinor (what's submitted to Yativo below) plus
+    // platformFeeMinor (the platform's own cut) — so the customer can never authorize a payout
+    // whose fee ends up uncovered once it's actually charged at settlement (see
+    // settlePayoutCompleted).
     lines: [
-      { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: input.currencyCode },
-      { accountId: suspense.id, direction: "CREDIT", amountMinor, currencyCode: input.currencyCode },
+      { accountId: walletAccount.id, direction: "DEBIT", amountMinor: totalMinor, currencyCode: input.currencyCode },
+      { accountId: suspense.id, direction: "CREDIT", amountMinor: totalMinor, currencyCode: input.currencyCode },
     ],
     // The authoritative check: enforced inside the same locked transaction
     // as the insert above, so concurrent payouts on this wallet serialize on
@@ -181,6 +186,7 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
       beneficiaryId: beneficiary.id,
       currencyCode: input.currencyCode,
       amountMinor,
+      platformFeeMinor,
       transactionId: pendingTx.id,
     },
     include: { transaction: true },
@@ -213,7 +219,7 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
     // simulate the `payout.completed` webhook synchronously right here. This keeps the
     // scaffold testable end-to-end locally without standing up a webhook receiver. In
     // sandbox/live mode this block never runs — settlement happens via the real webhook.
-    await settlePayoutCompleted(prisma, { ...payout, amountMinor }, { externalSource: "SYSTEM" });
+    await settlePayoutCompleted(prisma, { ...payout, amountMinor, platformFeeMinor }, { externalSource: "SYSTEM" });
   } else {
     // Fallback safety net alongside the webhook: re-checks this payout's live status with
     // Yativo every 10-20 min (backing off up to 16x) for up to 15 attempts, in case the

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { WalletCurrencySettings, KycRequiredService } from "@white-label/shared-types";
 import { KYC_REQUIRED_SERVICES } from "@white-label/shared-types";
-import { ShieldCheck, Users } from "lucide-react";
+import { ShieldCheck, Users, MailCheck } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +29,12 @@ export default function VerificationSettingsPage() {
 
   const updateMutation = useMutation({
     mutationFn: (kycRequiredServices: KycRequiredService[]) => staffApi.patch("/admin/settings/kyc-requirements", { kycRequiredServices }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "settings", "wallet-currencies"] }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't update", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const emailVerificationMutation = useMutation({
+    mutationFn: (requireEmailVerification: boolean) => staffApi.patch("/admin/settings/email-verification", { requireEmailVerification }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "settings", "wallet-currencies"] }),
     onError: (e) => toast({ variant: "destructive", title: "Couldn't update", description: e instanceof ApiError ? e.message : undefined }),
   });
@@ -87,10 +93,37 @@ export default function VerificationSettingsPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
+            <MailCheck className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Email verification</CardTitle>
+          </div>
+          <CardDescription>A verification email is always sent at signup. Turning this on also blocks login until the customer verifies.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <Skeleton className="h-10" />
+          ) : (
+            <div className="flex items-center justify-between py-1">
+              <div>
+                <p className="text-sm font-medium">Require email verification before login</p>
+                <p className="text-xs text-muted-foreground">Off by default so existing customers aren't suddenly locked out.</p>
+              </div>
+              <Switch
+                checked={data?.settings.requireEmailVerification ?? false}
+                disabled={emailVerificationMutation.isPending}
+                onCheckedChange={(checked) => emailVerificationMutation.mutate(checked)}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-primary" />
             <CardTitle className="text-base">Yativo customer registration</CardTitle>
           </div>
-          <CardDescription>Every customer gets their own Yativo identity and must complete KYC — pooled (shared-identity, no-KYC) registration is disabled.</CardDescription>
+          <CardDescription>Every customer gets their own Yativo identity and must complete KYC — there is no pooled/shared-identity mode.</CardDescription>
         </CardHeader>
       </Card>
     </div>

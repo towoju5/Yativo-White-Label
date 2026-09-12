@@ -6,8 +6,7 @@ import {
   updatePlatformSettingsSchema,
   updateCurrencyEnabledSchema,
   updateKycRequirementsSchema,
-  updateYativoCustomerModeSchema,
-  updateYativoCustomerModeResultSchema,
+  updateEmailVerificationSchema,
   adminCurrencySchema,
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
@@ -17,7 +16,7 @@ import {
   syncCurrenciesFromYativo,
   updatePlatformSettings,
   updateKycRequirements,
-  updateYativoCustomerMode,
+  updateEmailVerificationSetting,
   setCurrencyEnabled,
 } from "./platformSettings.service.js";
 
@@ -67,14 +66,14 @@ export async function platformSettingsRoutes(app: FastifyInstance) {
   );
 
   server.patch(
-    "/admin/settings/yativo-customer-mode",
+    "/admin/settings/email-verification",
     {
       preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
-      schema: { body: updateYativoCustomerModeSchema, response: { 200: updateYativoCustomerModeResultSchema, 400: errorResponseSchema } },
+      schema: { body: updateEmailVerificationSchema, response: { 200: walletCurrencySettingsSchema.shape.settings } },
     },
     async (request, reply) => {
-      const result = await updateYativoCustomerMode(app.prisma, request.body);
-      return reply.send(result);
+      const settings = await updateEmailVerificationSetting(app.prisma, request.body);
+      return reply.send(settings);
     },
   );
 

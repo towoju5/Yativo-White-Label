@@ -131,10 +131,7 @@ export default function SendMoneyPage() {
   const quoteMutation = useMutation({
     mutationFn: () =>
       portalApi.post<Quote>("/portal/quotes", { beneficiaryId: activeBeneficiary!.id, debitCurrency, sendAmount }),
-    onSuccess: (q) => {
-      setQuote(q);
-      setStep((s) => s + 1);
-    },
+    onSuccess: (q) => setQuote(q),
     onError: (e) =>
       toast({
         variant: "destructive",
@@ -219,7 +216,7 @@ export default function SendMoneyPage() {
       setAmountError(t("send.errors.enterAmount", "Enter an amount"));
       return;
     }
-    quoteMutation.mutate();
+    quoteMutation.mutate(undefined, { onSuccess: () => setStep((s) => s + 1) });
   };
 
   const goNext = () => {
@@ -614,19 +611,25 @@ export default function SendMoneyPage() {
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">{t("send.review.totalChargedLabel", "Total charged")}</dt>
+                  <dt className="text-muted-foreground">{t("send.review.payoutAmountLabel", "Payout amount")}</dt>
                   <dd className="font-mono font-medium">
                     {formatMinorAmount(quote.debitAmountMinor, quote.debitDecimals)} {quote.debitCurrency}
                   </dd>
                 </div>
                 {Number(quote.platformFeeMinor) > 0 && (
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">{t("send.review.feeLabel", "Fee")}</dt>
+                    <dt className="text-muted-foreground">{t("send.review.feeLabel", "Platform fee")}</dt>
                     <dd className="font-mono font-medium">
                       {formatMinorAmount(quote.platformFeeMinor, quote.debitDecimals)} {quote.debitCurrency}
                     </dd>
                   </div>
                 )}
+                <div className="flex justify-between border-t border-border pt-2.5">
+                  <dt className="font-medium">{t("send.review.totalChargedLabel", "Total charged to your wallet")}</dt>
+                  <dd className="font-mono font-semibold">
+                    {formatMinorAmount(quote.totalDebitMinor, quote.debitDecimals)} {quote.debitCurrency}
+                  </dd>
+                </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{t("send.review.recipientGetsLabel", "Recipient gets")}</dt>
                   <dd className="font-mono font-medium">

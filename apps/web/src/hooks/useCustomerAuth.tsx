@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
-import type { Customer, CreateCustomerInput, PortalLoginInput, PortalLoginResult, PasskeyLoginOptionsResult } from "@white-label/shared-types";
+import type { Customer, CreateCustomerInput, PortalLoginInput, PortalLoginResult, PasskeyLoginOptionsResult, SignupResult } from "@white-label/shared-types";
 import { apiFetch, portalApi, portalTokenStore } from "@/lib/api-client";
 
 interface CustomerAuthState {
@@ -11,7 +11,8 @@ interface CustomerAuthState {
   login: (input: PortalLoginInput) => Promise<PortalLoginResult>;
   loginWithPasskey: () => Promise<void>;
   verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
-  signup: (input: CreateCustomerInput) => Promise<void>;
+  /** Returns the raw signup result — the caller checks `pendingVerification` and, if true, shows a "check your email" state instead of navigating in. */
+  signup: (input: CreateCustomerInput) => Promise<SignupResult>;
   logout: () => Promise<void>;
 }
 
@@ -69,10 +70,12 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signup: CustomerAuthState["signup"] = async (input) => {
-    const { accessToken } = await apiFetch<{ accessToken: string }>("/portal/auth/signup", { method: "POST", body: input });
-    portalTokenStore.set(accessToken);
+    const result = await apiFetch<SignupResult>("/portal/auth/signup", { method: "POST", body: input });
+    if ("pendingVerification" in result) return result;
+    portalTokenStore.set(result.accessToken);
     const me = await portalApi.get<Customer>("/portal/auth/me");
     setUser(me);
+    return result;
   };
 
   const logout: CustomerAuthState["logout"] = async () => {

@@ -18,6 +18,7 @@ export * from "./location.schema.js";
 export * from "./deposit.schema.js";
 export * from "./virtualAccount.schema.js";
 export * from "./platformSettings.schema.js";
+export * from "./paymentGateway.schema.js";
 export * from "./twoFactor.schema.js";
 export * from "./passkey.schema.js";
 export * from "./notifications.schema.js";

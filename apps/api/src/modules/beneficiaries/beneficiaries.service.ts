@@ -4,6 +4,7 @@ import type { CreateBeneficiaryInput, UpdateBeneficiaryInput } from "@white-labe
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { yativoClient } from "../../lib/yativoClient.js";
+import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import logger from "../../lib/logger.js";
 
@@ -121,8 +122,9 @@ export async function listPayoutCountries() {
 }
 
 /** Active payout rails for a country/currency corridor — step 2. `gatewayId` feeds getBeneficiaryForm and beneficiary creation. */
-export async function listPayoutMethods(country?: string, currency?: string) {
-  return yativoClient.fiat.paymentMethods.listActivePayoutMethods({ country, currency });
+export async function listPayoutMethods(prisma: PrismaClient, country?: string, currency?: string) {
+  const methods = await yativoClient.fiat.paymentMethods.listActivePayoutMethods({ country, currency });
+  return filterEnabledGateways(prisma, "PAYOUT", methods);
 }
 
 /** Field schema for a chosen payout method — step 3, drives the dynamic payment_data form. */

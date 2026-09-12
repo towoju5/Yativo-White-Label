@@ -17,10 +17,10 @@ export async function handleVirtualAccountDeposit(prisma: PrismaClient, payload:
   if (payload.status !== "success") {
     return { status: "IGNORED", errorMessage: `Virtual account deposit status is ${payload.status}, not success — no ledger entry posted` };
   }
-  // Resolved via the local VirtualAccount record first, not Yativo's customer_id — that lookup is
-  // ambiguous once yativoCustomerMode = POOLED makes customer_id the same for every platform
-  // customer. `identifiers` is searched as text rather than matched on one known key because the
-  // field actually naming the account number in Yativo's own API varies by country/rail.
+  // Resolved via the local VirtualAccount record first, not Yativo's customer_id — a more direct
+  // and reliable attribution than trusting the upstream label. `identifiers` is searched as text
+  // rather than matched on one known key because the field actually naming the account number in
+  // Yativo's own API varies by country/rail.
   let customer = null as Awaited<ReturnType<typeof prisma.customer.findFirst>>;
   if (payload.accountNumber) {
     const matches = await prisma.$queryRaw<{ customerId: string }[]>`

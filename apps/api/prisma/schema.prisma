@@ -54,29 +54,20 @@ enum KycRequiredService {
   BUSINESS_SPEND_CARD
 }
 
-// PER_CUSTOMER: every platform customer gets their own Yativo customer_id (created on first use,
-// requires that customer's own phone/country from KYC) — the original, default behavior.
-// POOLED: every platform customer transacts under one admin-provided Yativo customer_id — no
-// per-customer registration or Yativo-side KYC. See ensureYativoCustomer.ts and
-// requireKycApproved.ts for where this is actually enforced.
-enum YativoCustomerMode {
-  PER_CUSTOMER
-  POOLED
-}
-
 /// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
 model PlatformSettings {
-  id                     Int                  @id @default(1)
-  walletCurrencyMode     WalletCurrencyMode   @default(DEFAULT_ONLY)
-  defaultCurrencyCode    String               @db.Char(3)
-  defaultCurrency        Currency             @relation(fields: [defaultCurrencyCode], references: [code])
+  id                       Int                  @id @default(1)
+  walletCurrencyMode       WalletCurrencyMode   @default(DEFAULT_ONLY)
+  defaultCurrencyCode      String               @db.Char(3)
+  defaultCurrency          Currency             @relation(fields: [defaultCurrencyCode], references: [code])
   // Defaults to every service requiring KYC — matches this app's original hardcoded behavior,
   // so a migration never silently relaxes a security check nobody asked to relax.
-  kycRequiredServices    KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET, BUSINESS_SPEND_CARD])
-  yativoCustomerMode     YativoCustomerMode   @default(PER_CUSTOMER)
-  // Only meaningful when yativoCustomerMode = POOLED.
-  pooledYativoCustomerId String?
-  updatedAt              DateTime             @updatedAt
+  kycRequiredServices      KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET, BUSINESS_SPEND_CARD])
+  // Off by default so this never surprises an existing deployment — a signup always sends a
+  // verification email regardless (see signupCustomer), this only decides whether login/session
+  // issuance actually enforce it.
+  requireEmailVerification Boolean              @default(false)
+  updatedAt                DateTime             @updatedAt
 
   @@map("platform_settings")
 }
@@ -232,6 +223,64 @@ model VirtualAccount {
   @@map("virtual_accounts")
 }
 
+enum PaymentGatewayKind {
+  PAYIN
+  PAYOUT
+}
+
+/// Admin-controlled override, independent of whatever Yativo reports as `active` — this app is
+/// built on top of Yativo but its own product decisions (which rails to offer) aren't Yativo's to
+/// make. A row's mere presence means this gateway is disabled for customers; absence means
+/// enabled (the default for every gateway that exists, so this never silently breaks an existing
+/// deployment — admin only needs to act to turn something OFF, not to keep everything else on).
+model PaymentGatewayOverride {
+  kind      PaymentGatewayKind
+  gatewayId String
+  updatedAt DateTime           @updatedAt
+
+  @@id([kind, gatewayId])
+  @@map("payment_gateway_overrides")
+}
+
+/// Local record of a customer's crypto wallet label. Yativo's `customer_id` on a wallet is not an
+/// isolation boundary — every wallet for a given currency on this account shares the same
+/// on-chain address regardless of that label (see cryptoWallets.service.ts) — so this table is
+/// this app's own source of truth for which customer a given (currency, address) pair belongs to,
+/// used to attribute incoming crypto_deposit webhooks.
+model CryptoWallet {
+  id         String   @id // Yativo's own wallet id
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  currency   String
+  network    String
+  address    String
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+  @@index([address])
+  @@map("crypto_wallets")
+}
+
+/// Read-model of crypto deposits, scoped by customer — populated by the crypto_deposit webhook
+/// (see webhooks/handlers/cryptoDeposit.handler.ts) and backfilled from Yativo's per-address
+/// deposit history filtered by the customer_id label. Display/history only — no ledger entries
+/// are posted from this, since crypto currencies (e.g. USDC_SOL) aren't rows in the fiat Currency
+/// table that ledger posting requires.
+model CryptoDeposit {
+  id            String   @id // Yativo's own deposit id
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  currency      String
+  amount        String
+  address       String
+  transactionId String?
+  status        String
+  createdAt     DateTime @default(now())
+
+  @@index([customerId])
+  @@map("crypto_deposits")
+}
+
 // ── Customers (end users of the reseller — portal auth) ─────────────────
 
 enum CustomerType {
@@ -252,47 +301,53 @@ enum KycStatus {
 }
 
 model Customer {
-  id                        String         @id @default(cuid())
-  type                      CustomerType   @default(INDIVIDUAL)
-  fullName                  String?
-  businessName              String?
-  email                     String         @unique
-  passwordHash              String
-  emailVerifiedAt           DateTime?
-  lastLoginAt               DateTime?
-  status                    CustomerStatus @default(ACTIVE)
-  kycStatus                 KycStatus      @default(NOT_STARTED)
-  yativoCustomerId          String?
-  phone                     String?
+  id                         String         @id @default(cuid())
+  type                       CustomerType   @default(INDIVIDUAL)
+  fullName                   String?
+  businessName               String?
+  email                      String         @unique
+  passwordHash               String
+  emailVerifiedAt            DateTime?
+  /// Set only while a verification email has been sent and not yet redeemed — mirrors
+  /// CustomerTeamMember's inviteTokenHash/inviteExpiresAt pattern. Hash, not the raw token.
+  emailVerificationTokenHash String?        @unique
+  emailVerificationExpiresAt DateTime?
+  lastLoginAt                DateTime?
+  status                     CustomerStatus @default(ACTIVE)
+  kycStatus                  KycStatus      @default(NOT_STARTED)
+  yativoCustomerId           String?
+  phone                      String?
   /// ISO 3166-1 alpha-3, e.g. "USA" — collected at KYC submission time, required by Yativo's customer + KYC APIs.
-  countryCode               String?
-  kycSubmissionId           String?
-  kycSubmittedAt            DateTime?
+  countryCode                String?
+  kycSubmissionId            String?
+  kycSubmittedAt             DateTime?
   /// Set once POST /customer/virtual/cards/activate has been called for this customer — the card
   /// issuer requires that exactly once before their first card, and the guide doesn't document it
   /// as safely repeatable, so this avoids calling it again on every card issuance.
-  cardsActivatedAt          DateTime?
+  cardsActivatedAt           DateTime?
   /// Base32 TOTP secret — only set once 2FA setup is confirmed (see /portal/2fa/enable). The
   /// pending, unconfirmed secret from /portal/2fa/setup lives in Redis, not here, until confirmed.
-  twoFactorEnabled          Boolean        @default(false)
-  twoFactorSecret           String?
+  twoFactorEnabled           Boolean        @default(false)
+  twoFactorSecret            String?
   /// bcrypt hashes of one-time recovery codes — each is removed from the array once used.
-  twoFactorBackupCodeHashes String[]       @default([])
-  createdAt                 DateTime       @default(now())
-  updatedAt                 DateTime       @updatedAt
+  twoFactorBackupCodeHashes  String[]       @default([])
+  createdAt                  DateTime       @default(now())
+  updatedAt                  DateTime       @updatedAt
 
-  wallets          Wallet[]
-  accounts         Account[]
-  beneficiaries    Beneficiary[]
-  cards            Card[]
+  wallets            Wallet[]
+  accounts           Account[]
+  beneficiaries      Beneficiary[]
+  cards              Card[]
   businessSpendCards BusinessSpendCard[]
-  refreshTokens    CustomerRefreshToken[]
-  payouts          Payout[]
-  passkeys         CustomerPasskey[]
-  teamMembers      CustomerTeamMember[]   @relation("TeamMembers")
-  pricingOverrides PricingOverride[]
-  deposits         Deposit[]
-  virtualAccounts  VirtualAccount[]
+  refreshTokens      CustomerRefreshToken[]
+  payouts            Payout[]
+  passkeys           CustomerPasskey[]
+  teamMembers        CustomerTeamMember[]   @relation("TeamMembers")
+  pricingOverrides   PricingOverride[]
+  deposits           Deposit[]
+  virtualAccounts    VirtualAccount[]
+  cryptoWallets      CryptoWallet[]
+  cryptoDeposits     CryptoDeposit[]
 
   @@map("customers")
 }
@@ -512,17 +567,22 @@ model Beneficiary {
 }
 
 model Payout {
-  id             String            @id @default(cuid())
-  customerId     String
-  customer       Customer          @relation(fields: [customerId], references: [id])
-  beneficiaryId  String
-  beneficiary    Beneficiary       @relation(fields: [beneficiaryId], references: [id])
-  currencyCode   String            @db.Char(3)
-  amountMinor    BigInt
-  transactionId  String            @unique
-  transaction    LedgerTransaction @relation(fields: [transactionId], references: [id])
-  yativoPayoutId String?
-  createdAt      DateTime          @default(now())
+  id               String            @id @default(cuid())
+  customerId       String
+  customer         Customer          @relation(fields: [customerId], references: [id])
+  beneficiaryId    String
+  beneficiary      Beneficiary       @relation(fields: [beneficiaryId], references: [id])
+  currencyCode     String            @db.Char(3)
+  /// The amount actually submitted to Yativo (principal + Yativo's own fee) — never includes platformFeeMinor.
+  amountMinor      BigInt
+  /// The platform's own fee, computed and locked in at creation time (not recomputed at
+  /// settlement — see settlePayoutCompleted) so it can never drift from what the customer was
+  /// quoted, and held from the wallet alongside amountMinor rather than as a surprise extra debit.
+  platformFeeMinor BigInt            @default(0)
+  transactionId    String            @unique
+  transaction      LedgerTransaction @relation(fields: [transactionId], references: [id])
+  yativoPayoutId   String?
+  createdAt        DateTime          @default(now())
 
   @@index([customerId])
   @@map("payouts")
@@ -640,30 +700,30 @@ model ApiKey {
 }
 
 model BrandingConfig {
-  id               Int      @id @default(1)
-  productName      String   @default("White Label")
-  logoUrl          String?
+  id                  Int      @id @default(1)
+  productName         String   @default("White Label")
+  logoUrl             String?
   // Optional dedicated logo for dark mode. When unset, logoUrl is reused for both modes,
   // optionally CSS-inverted via logoInvertOnDark below.
-  logoUrlDark      String?
-  logoInvertOnDark Boolean  @default(false)
-  faviconUrl       String?
+  logoUrlDark         String?
+  logoInvertOnDark    Boolean  @default(false)
+  faviconUrl          String?
   // Official stamp/seal image printed on generated statements (see statements.service.ts).
-  stampUrl         String?
-  templateId       String   @default("nova")
-  primaryColor     String   @default("#6366f1")
-  secondaryColor   String   @default("#0ea5e9")
-  accentColor      String   @default("#22d3ee")
-  supportEmail     String?
-  adminLoginPath   String   @default("/admin/login")
+  stampUrl            String?
+  templateId          String   @default("nova")
+  primaryColor        String   @default("#6366f1")
+  secondaryColor      String   @default("#0ea5e9")
+  accentColor         String   @default("#22d3ee")
+  supportEmail        String?
+  adminLoginPath      String   @default("/admin/login")
   // Raw admin-pasted embed snippet (e.g. tawk.to) — OWNER/ADMIN-only, deliberately not sanitized
   // like StaticPage.contentHtml since a chat widget needs a real <script> tag to run.
-  liveChatEnabled  Boolean  @default(false)
-  liveChatCode     String?  @db.Text
+  liveChatEnabled     Boolean  @default(false)
+  liveChatCode        String?  @db.Text
   // Overrides the default Lead Bank/FDIC disclosure printed in the statement PDF footer (see
   // buildDisclosureText in statements.service.ts). Null keeps the built-in default text.
-  statementFooterText String? @db.Text
-  updatedAt        DateTime @updatedAt
+  statementFooterText String?  @db.Text
+  updatedAt           DateTime @updatedAt
 
   @@map("branding_config")
 }

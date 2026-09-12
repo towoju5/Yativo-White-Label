@@ -51,3 +51,9 @@ export class KycRequiredError extends AppError {
     super("Identity verification must be approved before using this feature.", 403, "KYC_REQUIRED");
   }
 }
+
+export class EmailNotVerifiedError extends AppError {
+  constructor() {
+    super("Please verify your email before signing in.", 403, "EMAIL_NOT_VERIFIED");
+  }
+}

@@ -1,13 +1,17 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { z } from "zod";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import type { PortalPermission } from "@white-label/shared-types";
 import {
   portalLoginSchema,
   createCustomerSchema,
   authTokensSchema,
+  signupResultSchema,
   portalLoginResultSchema,
   verifyTwoFactorSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
   customerSchema,
   passkeyLoginOptionsResultSchema,
   verifyPasskeyLoginSchema,
@@ -20,6 +24,8 @@ import {
   logoutCustomer,
   getCustomerPasskeyLoginOptions,
   verifyCustomerPasskeyLogin,
+  verifyCustomerEmail,
+  resendVerificationEmail,
 } from "./portalAuth.service.js";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { env } from "../../config/env.js";
@@ -59,11 +65,32 @@ export async function portalAuthRoutes(app: FastifyInstance) {
 
   server.post(
     "/portal/auth/signup",
-    { schema: { body: createCustomerSchema, response: { 200: authTokensSchema } } },
+    { schema: { body: createCustomerSchema, response: { 200: signupResultSchema } } },
     async (request, reply) => {
-      const { accessToken, refreshToken } = await signupCustomer(app.prisma, request.body);
-      setRefreshCookie(reply, refreshToken);
-      return reply.send({ accessToken });
+      const result = await signupCustomer(app.prisma, request.body);
+      if (result.pendingVerification) {
+        return reply.send({ pendingVerification: true });
+      }
+      setRefreshCookie(reply, result.refreshToken);
+      return reply.send({ accessToken: result.accessToken });
+    },
+  );
+
+  server.post(
+    "/portal/auth/verify-email",
+    { schema: { body: verifyEmailSchema, response: { 204: z.void(), 401: errorResponseSchema } } },
+    async (request, reply) => {
+      await verifyCustomerEmail(app.prisma, request.body.token);
+      return reply.code(204).send();
+    },
+  );
+
+  server.post(
+    "/portal/auth/resend-verification",
+    { schema: { body: resendVerificationSchema, response: { 204: z.void() } } },
+    async (request, reply) => {
+      await resendVerificationEmail(app.prisma, request.body.email);
+      return reply.code(204).send();
     },
   );
 

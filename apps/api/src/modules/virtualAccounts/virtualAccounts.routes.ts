@@ -57,7 +57,15 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
       await requireKycApprovedForService(app.prisma, "VIRTUAL_ACCOUNT", customer);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
       const accounts = await yativoClient.fiat.virtualAccounts.listForCustomer(yativoCustomerId);
-      return reply.send(accounts);
+
+      // Trusting Yativo's customer_id alone to scope this list isn't safe (confirmed live: it has
+      // returned other customers' accounts too, e.g. from data created before per-customer
+      // registration was strictly enforced). The local VirtualAccount table (recorded on creation,
+      // below) is this app's own record of which accounts belong to this customer, so filter the
+      // upstream list down to those before returning it.
+      const owned = await app.prisma.virtualAccount.findMany({ where: { customerId: customer.id }, select: { yativoAccountId: true } });
+      const ownedIds = new Set(owned.map((o) => o.yativoAccountId));
+      return reply.send(accounts.filter((a) => a.accountId && ownedIds.has(a.accountId)));
     },
   );
 
@@ -93,11 +101,10 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
 
       const account = await yativoClient.fiat.virtualAccounts.getOrCreate(yativoCustomerId, request.body.currency);
 
-      // Recorded locally so the virtual_account.deposit webhook can attribute an incoming deposit
-      // to this customer via account-number matching instead of Yativo's customer_id — required
-      // once yativoCustomerMode = POOLED makes customer_id the same for every customer. `identifiers`
-      // stores the whole flattened response since the field actually naming the account number
-      // varies by country/rail (accountNumber/iban/clabe/pixKey/...).
+      // Recorded locally so the virtual_account.deposit webhook (and the GET handler above) can
+      // attribute an account to this customer via account-number matching rather than trusting
+      // Yativo's customer_id alone. `identifiers` stores the whole flattened response since the
+      // field actually naming the account number varies by country/rail (accountNumber/iban/clabe/pixKey/...).
       if (account.accountId) {
         await app.prisma.virtualAccount.upsert({
           where: { yativoAccountId: account.accountId },

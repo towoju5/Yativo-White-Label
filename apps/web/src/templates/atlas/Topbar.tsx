@@ -23,6 +23,8 @@ export interface NavItem {
   label: string;
   icon: LucideIcon;
   end?: boolean;
+  /** Small attention dot on the icon, e.g. to flag an incomplete KYC submission. */
+  showDot?: boolean;
 }
 
 interface TopbarProps {
@@ -55,7 +57,10 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
                 )
               }
             >
-              <item.icon className="h-3.5 w-3.5" />
+              <span className="relative">
+                <item.icon className="h-3.5 w-3.5" />
+                {item.showDot && <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-destructive" />}
+              </span>
               {item.label}
             </NavLink>
           ))}
@@ -105,7 +110,10 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
                       )
                     }
                   >
-                    <item.icon className="h-4 w-4" />
+                    <span className="relative">
+                      <item.icon className="h-4 w-4" />
+                      {item.showDot && <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-destructive" />}
+                    </span>
                     {item.label}
                   </NavLink>
                 ))}

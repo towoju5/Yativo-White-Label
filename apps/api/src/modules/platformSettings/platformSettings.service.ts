@@ -1,5 +1,5 @@
 import type { Currency, PlatformSettings, PrismaClient } from "@prisma/client";
-import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput, UpdateYativoCustomerModeInput } from "@white-label/shared-types";
+import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput, UpdateEmailVerificationInput } from "@white-label/shared-types";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 
@@ -21,8 +21,7 @@ function settingsToDto(s: PlatformSettings) {
     walletCurrencyMode: s.walletCurrencyMode,
     defaultCurrencyCode: s.defaultCurrencyCode,
     kycRequiredServices: s.kycRequiredServices,
-    yativoCustomerMode: s.yativoCustomerMode,
-    pooledYativoCustomerId: s.pooledYativoCustomerId,
+    requireEmailVerification: s.requireEmailVerification,
     updatedAt: s.updatedAt.toISOString(),
   };
 }
@@ -69,26 +68,9 @@ export async function updateKycRequirements(prisma: PrismaClient, input: UpdateK
   return settingsToDto(settings);
 }
 
-/**
- * Switches between per-customer Yativo registration and one shared, admin-provided customer_id
- * for everyone (see YativoCustomerMode). `migrateExisting: true` additionally re-points every
- * customer's yativoCustomerId to the pooled one, including customers who already had their own —
- * an explicit, opt-in bulk action (never implied by just switching the mode) since it overwrites
- * data that can't be recovered from this app alone.
- */
-export async function updateYativoCustomerMode(prisma: PrismaClient, input: UpdateYativoCustomerModeInput) {
-  // Pooled mode bypasses per-customer KYC (see requireKycApproved.ts) — every customer must be
-  // individually verified, so this platform no longer allows switching into it.
-  if (input.mode === "POOLED") {
-    throw new AppError("Pooled Yativo customer mode is disabled — every customer must complete their own KYC.", 400, "POOLED_MODE_DISABLED");
-  }
-
-  const settings = await prisma.platformSettings.update({
-    where: { id: 1 },
-    data: { yativoCustomerMode: input.mode, pooledYativoCustomerId: null },
-  });
-
-  return { settings: settingsToDto(settings), migratedCount: 0 };
+export async function updateEmailVerificationSetting(prisma: PrismaClient, input: UpdateEmailVerificationInput) {
+  const settings = await prisma.platformSettings.update({ where: { id: 1 }, data: { requireEmailVerification: input.requireEmailVerification } });
+  return settingsToDto(settings);
 }
 
 export async function setCurrencyEnabled(prisma: PrismaClient, code: string, isEnabledForCustomers: boolean) {

@@ -114,6 +114,8 @@ export const quoteSchema = z.object({
    * fee-inclusive debit total and never includes this platform fee.
    */
   platformFeeMinor: minorAmountSchema,
+  /** debitAmountMinor + platformFeeMinor — the true total that will be debited from the customer's wallet. */
+  totalDebitMinor: minorAmountSchema,
   /** Quotes expire ~5 minutes after issuance — re-quote past this. */
   expiresAt: z.string(),
 });
@@ -135,7 +137,10 @@ export const payoutSchema = z.object({
   customerId: z.string(),
   beneficiaryId: z.string(),
   currencyCode: currencyCodeSchema,
+  /** The amount actually submitted to Yativo (principal + Yativo's own fee) — does not include platformFeeMinor. */
   amountMinor: minorAmountSchema,
+  /** The platform's own fee, locked in at payout creation time — debited from the wallet alongside amountMinor, never forwarded to Yativo. */
+  platformFeeMinor: minorAmountSchema,
   status: z.enum(["PENDING", "POSTED", "REVERSED"]),
   transactionId: z.string(),
   yativoPayoutId: z.string().nullable(),

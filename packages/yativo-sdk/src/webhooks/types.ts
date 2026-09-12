@@ -102,6 +102,30 @@ export const virtualAccountDepositPayloadSchema = rawVirtualAccountDepositSchema
 }));
 export type VirtualAccountDepositPayload = z.infer<typeof virtualAccountDepositPayloadSchema>;
 
+/** `crypto_deposit` — same field shape as the REST deposit-history endpoints (see crypto/wallets.ts's depositSchema), delivered as a webhook instead. */
+const rawCryptoDepositSchema = z
+  .object({
+    id: z.string(),
+    currency: z.string(),
+    amount: z.union([z.string(), z.number()]),
+    address: z.string(),
+    transaction_id: z.string().nullable().optional(),
+    status: z.string(),
+    customer_id: z.string().nullable().optional(),
+  })
+  .passthrough();
+
+export const cryptoDepositEventPayloadSchema = rawCryptoDepositSchema.transform((d) => ({
+  id: d.id,
+  currency: d.currency,
+  amount: String(d.amount),
+  address: d.address,
+  transactionId: d.transaction_id ?? null,
+  status: d.status,
+  customerId: d.customer_id ?? null,
+}));
+export type CryptoDepositEventPayload = z.infer<typeof cryptoDepositEventPayloadSchema>;
+
 /**
  * `virtualcard.transaction.debit` — a card purchase. No envelope, and (per Yativo's own guide)
  * most events in this family carry no field naming the event at all — this app only acts on the

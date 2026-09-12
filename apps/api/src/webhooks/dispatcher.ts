@@ -5,12 +5,14 @@ import {
   virtualAccountDepositPayloadSchema,
   virtualCardDeactivatedPayloadSchema,
   businessSpendCardEventPayloadSchema,
+  cryptoDepositEventPayloadSchema,
 } from "@white-label/yativo-sdk";
 import { handleDepositEvent } from "./handlers/deposit.handler.js";
 import { handlePayoutEvent } from "./handlers/payout.handler.js";
 import { handleVirtualAccountDeposit } from "./handlers/virtualAccountDeposit.handler.js";
 import { handleVirtualCardDeactivated } from "./handlers/card.handler.js";
 import { handleBusinessSpendCardEvent } from "./handlers/businessSpendCard.handler.js";
+import { handleCryptoDeposit } from "./handlers/cryptoDeposit.handler.js";
 import type { WebhookHandlerResult } from "./handlers/result.js";
 
 /** Dispatches a persisted WebhookEvent to the handler for its eventType. Unrecognized event types are IGNORED, not FAILED. */
@@ -30,6 +32,8 @@ export async function dispatchWebhookEvent(
       return handleVirtualAccountDeposit(prisma, virtualAccountDepositPayloadSchema.parse(payload), externalEventId);
     case "virtualcard.deactivated":
       return handleVirtualCardDeactivated(prisma, virtualCardDeactivatedPayloadSchema.parse(payload));
+    case "crypto_deposit":
+      return handleCryptoDeposit(prisma, cryptoDepositEventPayloadSchema.parse(payload));
     case "business_spend_card.created":
     case "business_spend_card.activated":
     case "business_spend_card.suspended":
@@ -52,7 +56,6 @@ export async function dispatchWebhookEvent(
     case "metadata.created":
     case "tracking.created":
     case "crypto.wallet.created":
-    case "crypto_deposit":
     case "giftcard.status_changed":
     case "webhook_updated":
       return { status: "IGNORED", errorMessage: `No handler wired up yet for eventType: ${eventType}` };

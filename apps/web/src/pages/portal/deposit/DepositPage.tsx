@@ -250,22 +250,29 @@ function NativeDepositCard() {
                     )}
                   </dl>
                   {confirmed && result.depositUrl && (
-                    <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 p-3 text-sm">
-                      <span className="truncate font-mono">{result.depositUrl}</span>
-                      <div className="flex shrink-0 gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => copy(result.depositUrl!)}
-                          aria-label={t("deposit.dialog.copyLinkAriaLabel", "Copy link")}
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" asChild>
-                          <a href={result.depositUrl} target="_blank" rel="noreferrer" aria-label={t("deposit.dialog.openLinkAriaLabel", "Open link")}>
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
-                        </Button>
+                    <div className="space-y-2">
+                      <Button asChild className="w-full">
+                        <a href={result.depositUrl} target="_blank" rel="noreferrer">
+                          {t("deposit.dialog.goToCheckout", "Go to checkout")}
+                        </a>
+                      </Button>
+                      <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                        <span className="truncate font-mono">{result.depositUrl}</span>
+                        <div className="flex shrink-0 gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => copy(result.depositUrl!)}
+                            aria-label={t("deposit.dialog.copyLinkAriaLabel", "Copy link")}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" asChild>
+                            <a href={result.depositUrl} target="_blank" rel="noreferrer" aria-label={t("deposit.dialog.openLinkAriaLabel", "Open link")}>
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}

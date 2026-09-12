@@ -17,6 +17,7 @@ import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
 import { majorToMinor } from "../../lib/money.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
+import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
 
 // Native gateway pay-ins only (country → method → wallet + amount → initiate) — for
 // long-lived bank-transfer receiving accounts, see modules/virtualAccounts instead.
@@ -40,7 +41,8 @@ export async function depositsRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const methods = await yativoClient.fiat.paymentMethods.listPayinMethodsByCountry({ country: request.query.country });
-      return reply.send(methods.filter((m) => m.active));
+      const active = methods.filter((m) => m.active);
+      return reply.send(await filterEnabledGateways(app.prisma, "PAYIN", active));
     },
   );
 

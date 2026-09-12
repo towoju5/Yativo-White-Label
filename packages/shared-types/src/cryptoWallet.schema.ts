@@ -5,29 +5,8 @@ import { z } from "zod";
  * endpoint for this list, so it's hand-maintained to match packages/yativo-sdk/src/crypto/wallets.ts.
  */
 export const CRYPTO_DEPOSIT_CURRENCIES = [
-  "USDC_POL",
   "USDC_SOL",
   "EURC_SOL",
-  "USDG_SOL",
-  "PYUSD_SOL",
-  "USDC_ETH",
-  "USDT_ETH",
-  "DAI_ETH",
-  "WETH_ETH",
-  "USDC_ARB",
-  "USDT_ARB",
-  "ARB_ARB",
-  "USDC_OP",
-  "USDT_OP",
-  "OP_OP",
-  "USDC_BASE",
-  "EURC_BASE",
-  "USDC_AVAX",
-  "USDT_AVAX",
-  "USDC_BSC",
-  "USDT_BSC",
-  "BUSD_BSC",
-  "USDC_XLM",
 ] as const;
 export type CryptoDepositCurrency = (typeof CRYPTO_DEPOSIT_CURRENCIES)[number];
 export const cryptoDepositCurrencySchema = z.enum(CRYPTO_DEPOSIT_CURRENCIES);

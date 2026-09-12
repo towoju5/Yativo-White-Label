@@ -20,11 +20,11 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
     return { status: "IGNORED", errorMessage: `Deposit status is ${payload.status}, not success — no ledger entry posted` };
   }
 
-  // Resolved via the local Deposit row (recorded at /portal/deposit/initiate) first, not Yativo's
-  // customer_id — that's the only attribution that still works once yativoCustomerMode = POOLED
-  // makes customer_id the same for every platform customer. Falls back to the customer_id lookup
-  // only for a deposit this app never initiated a local record for (shouldn't normally happen for
-  // deposit.created/updated specifically, since every payin goes through that route first).
+  // Resolved via the local Deposit row (recorded at /portal/deposit/initiate) first — a more
+  // direct and reliable attribution than trusting Yativo's customer_id label. Falls back to the
+  // customer_id lookup only for a deposit this app never initiated a local record for (shouldn't
+  // normally happen for deposit.created/updated specifically, since every payin goes through that
+  // route first).
   const payinRecord = await prisma.deposit.findUnique({ where: { yativoDepositId: payload.yativoDepositId } });
   const customer = payinRecord
     ? await prisma.customer.findUnique({ where: { id: payinRecord.customerId } })

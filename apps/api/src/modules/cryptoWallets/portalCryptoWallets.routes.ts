@@ -35,7 +35,7 @@ export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       await requireKycApprovedForService(app.prisma, "CRYPTO_WALLET", customer);
-      const wallet = await getOrCreateMyCryptoWallet(customer.id, request.body.currency);
+      const wallet = await getOrCreateMyCryptoWallet(app.prisma, customer.id, request.body.currency);
       return reply.send(wallet);
     },
   );
@@ -44,7 +44,7 @@ export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
     "/portal/crypto/deposits",
     { preHandler: [requireCustomerAuth, requirePortalPermission("crypto.manage")], schema: { response: { 200: z.array(cryptoDepositSchema) } } },
     async (request, reply) => {
-      const deposits = await listMyCryptoDeposits(resolveEffectiveCustomerId(request.customer!));
+      const deposits = await listMyCryptoDeposits(app.prisma, resolveEffectiveCustomerId(request.customer!));
       return reply.send(deposits);
     },
   );

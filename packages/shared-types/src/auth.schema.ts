@@ -90,6 +90,27 @@ export type TwoFactorChallenge = z.infer<typeof twoFactorChallengeSchema>;
 export const portalLoginResultSchema = z.union([authTokensSchema, twoFactorChallengeSchema]);
 export type PortalLoginResult = z.infer<typeof portalLoginResultSchema>;
 
+/** Returned from POST /portal/auth/signup in place of authTokensSchema when
+ * PlatformSettings.requireEmailVerification is on — no session is issued until the customer
+ * verifies their email. */
+export const pendingEmailVerificationSchema = z.object({
+  pendingVerification: z.literal(true),
+});
+export type PendingEmailVerification = z.infer<typeof pendingEmailVerificationSchema>;
+
+export const signupResultSchema = z.union([authTokensSchema, pendingEmailVerificationSchema]);
+export type SignupResult = z.infer<typeof signupResultSchema>;
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1),
+});
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email(),
+});
+export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
+
 export const verifyTwoFactorSchema = z.object({
   challengeToken: z.string(),
   /** A 6-digit TOTP code, or a one-time backup code. */

@@ -84,6 +84,7 @@ export async function quotesRoutes(app: FastifyInstance) {
         debitAmountMinor,
         receiveAmountMinor: toMinor(yativoQuote.customerReceiveAmount, payoutDecimals),
         platformFeeMinor: platformFeeMinor.toString(),
+        totalDebitMinor: (BigInt(debitAmountMinor) + platformFeeMinor).toString(),
         expiresAt: yativoQuote.expiresAt,
       });
     },

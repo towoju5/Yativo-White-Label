@@ -13,6 +13,8 @@ export interface NavItem {
   label: string;
   icon: LucideIcon;
   end?: boolean;
+  /** Small attention dot on the icon, e.g. to flag an incomplete KYC submission. */
+  showDot?: boolean;
 }
 
 export interface NavSection {
@@ -75,7 +77,10 @@ export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, pro
                     )
                   }
                 >
-                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className="relative shrink-0">
+                    <item.icon className="h-4 w-4" />
+                    {item.showDot && <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-destructive" />}
+                  </span>
                   <span className="truncate">{item.label}</span>
                 </NavLink>
               ))}

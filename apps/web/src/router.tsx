@@ -11,6 +11,7 @@ import VerifyStatementPage from "@/pages/public/VerifyStatementPage";
 
 import PortalLoginPage from "@/pages/portal/auth/LoginPage";
 import PortalSignupPage from "@/pages/portal/auth/SignupPage";
+import VerifyEmailPage from "@/pages/portal/auth/VerifyEmailPage";
 import AcceptInvitePage from "@/pages/portal/auth/AcceptInvitePage";
 import PortalTeamPage from "@/pages/portal/team/TeamPage";
 import PortalDashboardPage from "@/pages/portal/dashboard/DashboardPage";
@@ -50,6 +51,7 @@ import BrandingSettingsPage from "@/pages/admin/settings/BrandingSettingsPage";
 import ApiKeysSettingsPage from "@/pages/admin/settings/ApiKeysSettingsPage";
 import WalletCurrenciesSettingsPage from "@/pages/admin/settings/WalletCurrenciesSettingsPage";
 import PricingSettingsPage from "@/pages/admin/settings/PricingSettingsPage";
+import PaymentGatewaysSettingsPage from "@/pages/admin/settings/PaymentGatewaysSettingsPage";
 import IntegrationsSettingsPage from "@/pages/admin/settings/IntegrationsSettingsPage";
 import VerificationSettingsPage from "@/pages/admin/settings/VerificationSettingsPage";
 import AuthenticationSettingsPage from "@/pages/admin/settings/AuthenticationSettingsPage";
@@ -69,6 +71,7 @@ export function createRouter(adminLoginPath: string) {
 
       { path: "/portal/login", element: <PortalLoginPage /> },
       { path: "/portal/signup", element: <PortalSignupPage /> },
+      { path: "/portal/verify-email", element: <VerifyEmailPage /> },
       { path: "/portal/accept-invite", element: <AcceptInvitePage /> },
       {
         path: "/portal/verify",
@@ -145,6 +148,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "settings/api-keys", element: <ApiKeysSettingsPage /> },
               { path: "settings/wallet-currencies", element: <WalletCurrenciesSettingsPage /> },
               { path: "settings/pricing", element: <PricingSettingsPage /> },
+              { path: "settings/payment-gateways", element: <PaymentGatewaysSettingsPage /> },
               { path: "settings/verification", element: <VerificationSettingsPage /> },
               { path: "settings/integrations", element: <IntegrationsSettingsPage /> },
               { path: "settings/authentication", element: <AuthenticationSettingsPage /> },

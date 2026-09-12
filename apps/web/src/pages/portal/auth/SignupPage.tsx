@@ -23,6 +23,7 @@ export default function PortalSignupPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
 
   const { data: countries } = useQuery({
     queryKey: ["locations", "countries"],
@@ -49,8 +50,12 @@ export default function PortalSignupPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await signup(values);
-      navigate("/portal", { replace: true });
+      const result = await signup(values);
+      if ("pendingVerification" in result) {
+        setPendingVerification(true);
+      } else {
+        navigate("/portal", { replace: true });
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("signup.genericError", "Unable to create your account."));
     } finally {
@@ -68,6 +73,18 @@ export default function PortalSignupPage() {
           <BrandLogo branding={branding} className="h-10" badgeClassName="rounded-xl text-sm" textClassName="text-lg" />
         </div>
         <Card>
+          {pendingVerification ? (
+            <CardContent className="space-y-3 pt-6 text-center">
+              <CardTitle>{t("signup.checkEmailTitle", "Check your email")}</CardTitle>
+              <CardDescription>
+                {t("signup.checkEmailDescription", "We've sent a verification link to your email address. Verify it to finish setting up your account.")}
+              </CardDescription>
+              <Link to="/portal/login" className="inline-block text-sm font-medium text-primary hover:underline">
+                {t("signup.backToLogin", "Back to sign in")}
+              </Link>
+            </CardContent>
+          ) : (
+          <>
           <CardHeader>
             <CardTitle>{t("signup.createYourAccount", "Create your account")}</CardTitle>
             <CardDescription>{t("signup.startSendingDescription", "Start sending, holding and spending in minutes")}</CardDescription>
@@ -181,6 +198,8 @@ export default function PortalSignupPage() {
               </Link>
             </p>
           </CardContent>
+          </>
+          )}
         </Card>
       </div>
     </div>

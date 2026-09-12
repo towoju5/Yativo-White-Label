@@ -8,13 +8,6 @@ export const KYC_REQUIRED_SERVICES = ["DEPOSIT", "VIRTUAL_ACCOUNT", "PAYOUT", "C
 export const kycRequiredServiceSchema = z.enum(KYC_REQUIRED_SERVICES);
 export type KycRequiredService = z.infer<typeof kycRequiredServiceSchema>;
 
-// PER_CUSTOMER: every customer gets their own Yativo customer_id (default). POOLED: every
-// customer transacts under one admin-provided Yativo customer_id — no per-customer registration
-// or Yativo-side KYC.
-export const YATIVO_CUSTOMER_MODES = ["PER_CUSTOMER", "POOLED"] as const;
-export const yativoCustomerModeSchema = z.enum(YATIVO_CUSTOMER_MODES);
-export type YativoCustomerMode = z.infer<typeof yativoCustomerModeSchema>;
-
 export const adminCurrencySchema = z.object({
   code: z.string(),
   name: z.string(),
@@ -31,31 +24,20 @@ export const platformSettingsSchema = z.object({
   walletCurrencyMode: walletCurrencyModeSchema,
   defaultCurrencyCode: z.string(),
   kycRequiredServices: z.array(kycRequiredServiceSchema),
-  yativoCustomerMode: yativoCustomerModeSchema,
-  pooledYativoCustomerId: z.string().nullable(),
+  requireEmailVerification: z.boolean(),
   updatedAt: z.string(),
 });
 export type PlatformSettings = z.infer<typeof platformSettingsSchema>;
-
-export const updateYativoCustomerModeSchema = z.object({
-  mode: yativoCustomerModeSchema,
-  pooledYativoCustomerId: z.string().min(1).optional(),
-  // Explicit opt-in: also re-point every existing customer's yativoCustomerId to the pooled one,
-  // not just customers who don't have one yet. Ignored when mode is PER_CUSTOMER.
-  migrateExisting: z.boolean().default(false),
-});
-export type UpdateYativoCustomerModeInput = z.infer<typeof updateYativoCustomerModeSchema>;
-
-export const updateYativoCustomerModeResultSchema = z.object({
-  settings: platformSettingsSchema,
-  migratedCount: z.number().int(),
-});
-export type UpdateYativoCustomerModeResult = z.infer<typeof updateYativoCustomerModeResultSchema>;
 
 export const updateKycRequirementsSchema = z.object({
   kycRequiredServices: z.array(kycRequiredServiceSchema),
 });
 export type UpdateKycRequirementsInput = z.infer<typeof updateKycRequirementsSchema>;
+
+export const updateEmailVerificationSchema = z.object({
+  requireEmailVerification: z.boolean(),
+});
+export type UpdateEmailVerificationInput = z.infer<typeof updateEmailVerificationSchema>;
 
 export const walletCurrencySettingsSchema = z.object({
   settings: platformSettingsSchema,
