@@ -7,6 +7,7 @@ import { getEffectiveFee } from "../../modules/pricing/pricing.service.js";
 import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
 import { majorToMinor } from "../../lib/money.js";
+import type { EntryLine } from "../../modules/ledger/types.js";
 import type { WebhookHandlerResult } from "./result.js";
 
 /**
@@ -46,10 +47,23 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
   const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", payload.currencyCode);
   const wallet = await ensureCustomerWalletAccount(prisma, customer.id, payload.currencyCode);
 
-  const finalLines = [
-    { accountId: settlement.id, direction: "DEBIT" as const, amountMinor, currencyCode: payload.currencyCode },
-    { accountId: wallet.id, direction: "CREDIT" as const, amountMinor, currencyCode: payload.currencyCode },
+  // The platform's own fee — read back from the locked-in value captured at /portal/deposit/initiate
+  // (not recomputed here, same rationale as settlePayoutCompleted) whenever a local record exists;
+  // recomputed fresh only for a deposit this app never initiated a local record for at all.
+  const platformFeeMinor = payinRecord
+    ? payinRecord.platformFeeMinor
+    : await getEffectiveFee(prisma, "PAYIN", customer.id, amountMinor, 0n);
+  const netAmountMinor = amountMinor - platformFeeMinor;
+
+  const finalLines: EntryLine[] = [
+    { accountId: settlement.id, direction: "DEBIT", amountMinor, currencyCode: payload.currencyCode },
+    { accountId: wallet.id, direction: "CREDIT", amountMinor: netAmountMinor, currencyCode: payload.currencyCode },
   ];
+  if (platformFeeMinor > 0n) {
+    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", payload.currencyCode);
+    finalLines.push({ accountId: feeRevenue.id, direction: "CREDIT", amountMinor: platformFeeMinor, currencyCode: payload.currencyCode });
+  }
+
   if (payinRecord?.transactionId) {
     // Releases the PENDING placeholder posted at /portal/deposit/initiate (see deposits.routes.ts)
     // and posts this as the real settlement in one atomic step — idempotent on its own terms
@@ -78,27 +92,8 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
     });
   }
 
-  // payinRecord also carries Yativo's own quoted fee, captured at initiation time, for markup pricing.
-  const upstreamFeeMinor = payinRecord?.yativoFeeMinor ?? 0n;
-
-  const feeMinor = await getEffectiveFee(prisma, "PAYIN", customer.id, amountMinor, upstreamFeeMinor);
-  if (feeMinor > 0n) {
-    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", payload.currencyCode);
-    await postTransaction(prisma, {
-      type: "FEE",
-      status: "POSTED",
-      idempotencyKey: `fee:deposit:${externalEventId}`,
-      externalSource: "YATIVO_WEBHOOK",
-      description: `Deposit fee for ${payload.yativoDepositId}`,
-      lines: [
-        { accountId: wallet.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: payload.currencyCode },
-        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: payload.currencyCode },
-      ],
-    });
-  }
-
   await sendNotificationEmail(prisma, "DEPOSIT_RECEIVED", customer.id, {
-    amount: await formatMinorAmount(prisma, payload.currencyCode, amountMinor),
+    amount: await formatMinorAmount(prisma, payload.currencyCode, netAmountMinor),
     currency: payload.currencyCode,
   });
 

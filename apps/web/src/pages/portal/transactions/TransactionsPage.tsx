@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { CustomerTransactionListItem, WalletBalance } from "@white-label/shared-types";
 import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, LEDGER_TRANSACTION_STATUSES } from "@white-label/shared-types";
+
+// SWAP and ADJUSTMENT are internal/platform-side ledger mechanics, not something a customer
+// filters their own activity by — hidden from this picker even though the admin transactions
+// page still shows every type for reconciliation.
+const CUSTOMER_FILTERABLE_TYPES = LEDGER_TRANSACTION_TYPES.filter((t) => t !== "SWAP" && t !== "ADJUSTMENT");
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { portalApi } from "@/lib/api-client";
@@ -111,7 +116,7 @@ export default function PortalTransactionsPage() {
           >
             {t("transactions.allTypes", "All types")}
           </Button>
-          {LEDGER_TRANSACTION_TYPES.map((v) => (
+          {CUSTOMER_FILTERABLE_TYPES.map((v) => (
             <Button
               key={v}
               type="button"

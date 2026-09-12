@@ -8,6 +8,7 @@ export const customerSchema = z.object({
   fullName: z.string().nullable(),
   businessName: z.string().nullable(),
   email: z.string().email(),
+  emailVerifiedAt: z.string().nullable(),
   kycStatus: z.enum(KYC_STATUSES),
   status: z.enum(CUSTOMER_STATUSES),
   yativoCustomerId: z.string().nullable(),

@@ -12,6 +12,7 @@ export function customerToDto(customer: {
   fullName: string | null;
   businessName: string | null;
   email: string;
+  emailVerifiedAt: Date | null;
   kycStatus: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
   status: "ACTIVE" | "FROZEN";
   yativoCustomerId: string | null;
@@ -24,6 +25,7 @@ export function customerToDto(customer: {
     fullName: customer.fullName,
     businessName: customer.businessName,
     email: customer.email,
+    emailVerifiedAt: customer.emailVerifiedAt?.toISOString() ?? null,
     kycStatus: customer.kycStatus,
     status: customer.status,
     yativoCustomerId: customer.yativoCustomerId,

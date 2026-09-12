@@ -41,13 +41,14 @@ function toDto(customer: {
   fullName: string | null;
   businessName: string | null;
   email: string;
+  emailVerifiedAt: Date | null;
   kycStatus: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
   status: "ACTIVE" | "FROZEN";
   yativoCustomerId: string | null;
   twoFactorEnabled: boolean;
   createdAt: Date;
 }) {
-  return { ...customer, createdAt: customer.createdAt.toISOString() };
+  return { ...customer, emailVerifiedAt: customer.emailVerifiedAt?.toISOString() ?? null, createdAt: customer.createdAt.toISOString() };
 }
 
 function setRefreshCookie(reply: import("fastify").FastifyReply, token: string) {

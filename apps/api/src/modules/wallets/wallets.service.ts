@@ -167,6 +167,7 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
     include: {
       entries: { include: { account: true } },
       payout: { include: { beneficiary: true } },
+      deposit: true,
     },
   });
   if (!tx) throw new NotFoundError("Transaction");
@@ -192,6 +193,17 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
           yativoPayoutId: tx.payout.yativoPayoutId,
           amountMinor: tx.payout.amountMinor.toString(),
           currencyCode: tx.payout.currencyCode,
+          platformFeeMinor: tx.payout.platformFeeMinor.toString(),
+        }
+      : null,
+    deposit: tx.deposit
+      ? {
+          grossAmountMinor: tx.deposit.grossAmountMinor?.toString() ?? null,
+          platformFeeMinor: tx.deposit.platformFeeMinor.toString(),
+          currencyCode: tx.deposit.currencyCode,
+          exchangeRate: tx.deposit.exchangeRate,
+          localCurrency: tx.deposit.localCurrency,
+          localAmount: tx.deposit.localAmount,
         }
       : null,
   };

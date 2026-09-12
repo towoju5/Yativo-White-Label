@@ -122,8 +122,23 @@ export const transactionDetailPayoutSchema = z.object({
   yativoPayoutId: z.string().nullable(),
   amountMinor: minorAmountSchema,
   currencyCode: currencyCodeSchema,
+  /** The platform's own fee, already reflected in amountMinor's debit but broken out here for the receipt. */
+  platformFeeMinor: minorAmountSchema,
 });
 export type TransactionDetailPayout = z.infer<typeof transactionDetailPayoutSchema>;
+
+export const transactionDetailDepositSchema = z.object({
+  /** Gross wallet-currency amount Yativo credited, before this platform's own fee. */
+  grossAmountMinor: minorAmountSchema.nullable(),
+  /** The platform's own fee — grossAmountMinor - platformFeeMinor is what actually landed in the wallet (shown as the transaction's headline amount). */
+  platformFeeMinor: minorAmountSchema,
+  currencyCode: currencyCodeSchema,
+  /** Human-readable rate/local-amount strings as Yativo quoted them, e.g. "1 USD = 1346.4584 NGN". */
+  exchangeRate: z.string().nullable(),
+  localCurrency: z.string().nullable(),
+  localAmount: z.string().nullable(),
+});
+export type TransactionDetailDeposit = z.infer<typeof transactionDetailDepositSchema>;
 
 /** Full detail for one transaction — the customer-facing "view details / print receipt" view, for any transaction type (deposit, payout, fee, card top-up, adjustment, ...). */
 export const transactionDetailSchema = z.object({
@@ -140,5 +155,7 @@ export const transactionDetailSchema = z.object({
   entries: z.array(transactionDetailEntrySchema),
   /** Present only when type === "PAYOUT". */
   payout: transactionDetailPayoutSchema.nullable(),
+  /** Present only when type === "DEPOSIT" and this deposit went through the native gateway flow (not every deposit source populates this). */
+  deposit: transactionDetailDepositSchema.nullable(),
 });
 export type TransactionDetail = z.infer<typeof transactionDetailSchema>;

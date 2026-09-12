@@ -24,6 +24,25 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+/** Fee/rate breakdown rows shared by the on-screen detail list, the printed receipt, and the share text — deposits and payouts both carry a platform fee, but only deposits also have a gross-vs-net figure and an exchange rate to show. */
+function feeDetailRows(data: TransactionDetail): [string, string][] {
+  const rows: [string, string][] = [];
+  if (data.deposit) {
+    const d = data.deposit;
+    if (d.grossAmountMinor !== null) {
+      rows.push(["Amount received", `${formatMinorAmount(d.grossAmountMinor, 2)} ${d.currencyCode}`]);
+    }
+    if (Number(d.platformFeeMinor) > 0) {
+      rows.push(["Fee", `${formatMinorAmount(d.platformFeeMinor, 2)} ${d.currencyCode}`]);
+    }
+    if (d.exchangeRate) rows.push(["Exchange rate", d.exchangeRate]);
+    if (d.localAmount && d.localCurrency) rows.push(["Amount paid", `${d.localAmount} ${d.localCurrency}`]);
+  } else if (data.payout && Number(data.payout.platformFeeMinor) > 0) {
+    rows.push(["Fee", `${formatMinorAmount(data.payout.platformFeeMinor, 2)} ${data.payout.currencyCode}`]);
+  }
+  return rows;
+}
+
 /** Opens a dedicated print window with a minimal, self-contained receipt — sidesteps having to hide the rest of the app (nav, dialog chrome) via print CSS, and guarantees a clean printout regardless of the current theme. */
 function openReceiptWindow(data: TransactionDetail, productName: string, amountLabel: string) {
   const win = window.open("", "_blank", "width=680,height=860");
@@ -35,6 +54,7 @@ function openReceiptWindow(data: TransactionDetail, productName: string, amountL
     ...(data.description ? ([["Description", data.description]] as [string, string][]) : []),
     ...(data.payout ? ([["Recipient", data.payout.beneficiaryName]] as [string, string][]) : []),
     ...(data.payout?.yativoPayoutId ? ([["Payout reference", data.payout.yativoPayoutId]] as [string, string][]) : []),
+    ...feeDetailRows(data),
     ...(data.externalRef ? ([["Provider reference", data.externalRef]] as [string, string][]) : []),
     ["Transaction ID", data.id],
     ["Date", new Date(data.createdAt).toLocaleString()],
@@ -85,6 +105,7 @@ function buildReceiptText(data: TransactionDetail, productName: string, amountLa
     `Status: ${data.status}`,
     ...(data.description ? [`Description: ${data.description}`] : []),
     ...(data.payout ? [`Recipient: ${data.payout.beneficiaryName}`] : []),
+    ...feeDetailRows(data).map(([label, value]) => `${label}: ${value}`),
     `Transaction ID: ${data.id}`,
     `Date: ${new Date(data.createdAt).toLocaleString()}`,
   ];
@@ -151,6 +172,9 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
               <Row label="Type" value={humanizeType(data.type)} />
               {data.payout && <Row label="Recipient" value={data.payout.beneficiaryName} />}
               {data.payout?.yativoPayoutId && <Row label="Payout reference" value={data.payout.yativoPayoutId} mono />}
+              {feeDetailRows(data).map(([label, value]) => (
+                <Row key={label} label={label} value={value} />
+              ))}
               {data.externalRef && <Row label="Provider reference" value={data.externalRef} mono />}
               <Row label="Transaction ID" value={data.id} mono />
               <Row label="Date" value={new Date(data.createdAt).toLocaleString()} />

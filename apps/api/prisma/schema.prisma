@@ -880,6 +880,20 @@ model Deposit {
   /// Best-effort parse of Yativo's quoted transaction_fee, converted to this deposit's wallet
   /// currency minor units via the quoted exchange_rate — null if parsing failed or Yativo omitted it.
   yativoFeeMinor       BigInt?
+  /// The platform's own fee, locked in at creation time (not recomputed at settlement — see
+  /// settlePayoutCompleted's doc comment for why) so the wallet is credited the correct net
+  /// amount from the very first PENDING hold, not a gross figure later corrected by a second,
+  /// disconnected debit.
+  platformFeeMinor     BigInt             @default(0)
+  /// The gross wallet-currency amount Yativo quoted (before this platform's own fee, but net of
+  /// Yativo's own) — grossAmountMinor - platformFeeMinor is what actually lands in the wallet.
+  /// Persisted so the receipt can show "Amount / Fee / Net" even after settlement.
+  grossAmountMinor     BigInt?
+  /// Human-readable rate/local-amount fields, purely for receipt display — same strings Yativo
+  /// returned at initiate time ("1 USD = 1346.4584 NGN", "9000", "NGN").
+  exchangeRate         String?
+  localCurrency        String?
+  localAmount          String?
   /// The PENDING ledger transaction posted at initiate time (see deposits.routes.ts), so this
   /// deposit shows up in the customer's transaction history immediately, before Yativo's
   /// deposit.confirmed webhook ever lands. Settled (not just posted fresh) by that webhook's
