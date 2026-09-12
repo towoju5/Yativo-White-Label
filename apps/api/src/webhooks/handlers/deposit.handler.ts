@@ -21,11 +21,15 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
   }
 
   // Resolved via the local Deposit row (recorded at /portal/deposit/initiate) first — a more
-  // direct and reliable attribution than trusting Yativo's customer_id label. Falls back to the
-  // customer_id lookup only for a deposit this app never initiated a local record for (shouldn't
-  // normally happen for deposit.created/updated specifically, since every payin goes through that
-  // route first).
-  const payinRecord = await prisma.deposit.findUnique({ where: { yativoDepositId: payload.yativoDepositId } });
+  // direct and reliable attribution than trusting Yativo's customer_id label. Confirmed live:
+  // the webhook's own id/deposit_id doesn't always match what was captured as yativoDepositId at
+  // creation time, so this also tries the Idempotency-Key this app itself sent (echoed back
+  // verbatim as idempotency_key) before falling back to the customer_id lookup, which only
+  // applies to a deposit this app never initiated a local record for at all (e.g. one made
+  // directly against Yativo, bypassing this app's own deposit flow).
+  const payinRecord =
+    (await prisma.deposit.findUnique({ where: { yativoDepositId: payload.yativoDepositId } })) ??
+    (payload.idempotencyKey ? await prisma.deposit.findUnique({ where: { yativoIdempotencyKey: payload.idempotencyKey } }) : null);
   const customer = payinRecord
     ? await prisma.customer.findUnique({ where: { id: payinRecord.customerId } })
     : await prisma.customer.findFirst({ where: { yativoCustomerId: payload.yativoCustomerId } });

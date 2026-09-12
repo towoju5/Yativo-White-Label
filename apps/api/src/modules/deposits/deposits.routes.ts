@@ -58,6 +58,7 @@ export async function depositsRoutes(app: FastifyInstance) {
 
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
 
+      const idempotencyKey = randomUUID();
       const result = await yativoClient.fiat.deposits.create({
         yativoCustomerId,
         gatewayId: request.body.gatewayId,
@@ -65,7 +66,7 @@ export async function depositsRoutes(app: FastifyInstance) {
         amount: Number(request.body.amount),
         extraData: request.body.extraData,
         returnUrl: `${env.WEB_APP_URL}/portal/deposit`,
-        idempotencyKey: randomUUID(),
+        idempotencyKey,
       });
 
       // Only create the wallet once Yativo has actually accepted the deposit — creating it
@@ -146,6 +147,7 @@ export async function depositsRoutes(app: FastifyInstance) {
             customerId: customer.id,
             currencyCode: request.body.walletCurrencyCode,
             yativoDepositId: result.depositId,
+            yativoIdempotencyKey: idempotencyKey,
             yativoFeeMinor,
             transactionId: pendingTransactionId,
           },

@@ -29,6 +29,12 @@ const rawDepositEventSchema = z
     customer_id: z.string(),
     deposit_id: z.string().optional(),
     transaction_id: z.string().optional(),
+    // Confirmed against a live payload: some deposits arrive with neither `deposit_id` nor
+    // `transaction_id`, only this — the exact Idempotency-Key header this app itself sent when
+    // creating the deposit (see deposits.routes.ts's /portal/deposit/initiate), echoed back
+    // verbatim. The most reliable field to match against the local Deposit row when the id
+    // fields above don't line up with what was captured at creation time.
+    idempotency_key: z.string().optional(),
     created_at: z.string().optional(),
     updated_at: z.string().optional(),
   })
@@ -44,6 +50,7 @@ export const depositEventPayloadSchema = rawDepositEventSchema.transform((d) => 
   status: d.status,
   yativoCustomerId: d.customer_id,
   yativoDepositId: d.deposit_id ?? d.id,
+  idempotencyKey: d.idempotency_key,
   updatedAt: d.updated_at,
   createdAt: d.created_at,
 }));
@@ -125,6 +132,27 @@ export const cryptoDepositEventPayloadSchema = rawCryptoDepositSchema.transform(
   customerId: d.customer_id ?? null,
 }));
 export type CryptoDepositEventPayload = z.infer<typeof cryptoDepositEventPayloadSchema>;
+
+/** `crypto.wallet.created` — same field shape as the REST create-wallet endpoint (see crypto/wallets.ts's walletSchema), delivered as a webhook instead. */
+const rawCryptoWalletCreatedSchema = z
+  .object({
+    id: z.string(),
+    wallet_address: z.string(),
+    wallet_currency: z.string(),
+    wallet_network: z.string(),
+    coin_name: z.string().optional(),
+    customer_id: z.string().nullable().optional(),
+  })
+  .passthrough();
+
+export const cryptoWalletCreatedPayloadSchema = rawCryptoWalletCreatedSchema.transform((d) => ({
+  id: d.id,
+  address: d.wallet_address,
+  currency: d.wallet_currency,
+  network: d.wallet_network,
+  customerId: d.customer_id ?? null,
+}));
+export type CryptoWalletCreatedPayload = z.infer<typeof cryptoWalletCreatedPayloadSchema>;
 
 /**
  * `virtualcard.transaction.debit` — a card purchase. No envelope, and (per Yativo's own guide)
