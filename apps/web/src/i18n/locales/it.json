@@ -133,7 +133,6 @@
     "noDepositsYet": "Ancora nessun deposito crypto",
     "noWalletsYet": "Ancora nessun wallet crypto — genera un indirizzo qui sotto per iniziare.",
     "selectAssetPlaceholder": "Seleziona un asset",
-    "sharedAddressWarning": "Questo indirizzo potrebbe essere condiviso con altri utenti per lo stesso asset. I depositi vengono associati al tuo account e confermati dal nostro team prima che il saldo venga aggiornato.",
     "subtitle": "Indirizzi di deposito e cronologia dei depositi on-chain per gli asset supportati.",
     "title": "Wallet crypto",
     "transactionsDescription": "Ogni deposito on-chain associato al tuo account.",

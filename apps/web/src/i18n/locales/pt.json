@@ -133,7 +133,6 @@
     "noDepositsYet": "Ainda não há depósitos em cripto",
     "noWalletsYet": "Ainda não há carteiras cripto — gere um endereço abaixo para começar.",
     "selectAssetPlaceholder": "Selecione um ativo",
-    "sharedAddressWarning": "Este endereço pode ser partilhado com outros utilizadores para o mesmo ativo. Os depósitos são associados à sua conta e confirmados pela nossa equipa antes de o seu saldo ser atualizado.",
     "subtitle": "Endereços de depósito e histórico de depósitos on-chain para os ativos suportados.",
     "title": "Carteiras cripto",
     "transactionsDescription": "Todos os depósitos on-chain associados à sua conta.",

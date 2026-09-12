@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { fetchBranding, applyBrandingToDocument } from "@/theme/branding";
+import { applyPwaManifest, registerServiceWorker } from "@/theme/pwa";
 import { setStaffLoginPath } from "@/lib/api-client";
 import { TemplateProvider } from "@/templates/TemplateProvider";
 import { StaffAuthProvider } from "@/hooks/useStaffAuth";
@@ -26,9 +27,14 @@ export default function App() {
   useEffect(() => {
     if (branding) {
       applyBrandingToDocument(branding);
+      applyPwaManifest(branding);
       setStaffLoginPath(branding.adminLoginPath);
     }
   }, [branding]);
+
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   // Rebuilt only if the configured path actually changes — createBrowserRouter must not be
   // re-invoked on every render, since it owns its own history instance.

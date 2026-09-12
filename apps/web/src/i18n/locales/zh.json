@@ -133,7 +133,6 @@
     "noDepositsYet": "暂无加密货币充值记录",
     "noWalletsYet": "暂无加密钱包——请在下方生成一个地址以开始使用。",
     "selectAssetPlaceholder": "选择资产",
-    "sharedAddressWarning": "该地址可能与其他用户共用于同一资产。充值将根据您的账户进行匹配，并在我们团队确认后更新您的余额。",
     "subtitle": "支持资产的充值地址及链上充值记录。",
     "title": "加密钱包",
     "transactionsDescription": "与您账户匹配的每一笔链上充值。",

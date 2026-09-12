@@ -5,7 +5,7 @@ import { reverseTransaction } from "../ledger/reverseTransaction.js";
 import type { EntryLine } from "../ledger/types.js";
 
 type TxWithEntries = Prisma.LedgerTransactionGetPayload<{
-  include: { entries: { include: { account: { include: { customer: true } } } } };
+  include: { entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } } };
 }>;
 
 function toListItem(tx: TxWithEntries) {
@@ -91,7 +91,7 @@ export async function listTransactionsForCustomer(
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: { entries: { include: { account: { include: { customer: true } } } } },
+      include: { entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } } },
     }),
   ]);
 
@@ -118,7 +118,7 @@ export async function listLedgerTransactions(
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: { entries: { include: { account: { include: { customer: true } } } } },
+      include: { entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } } },
     }),
   ]);
 
@@ -177,7 +177,7 @@ export async function getTransactionDetailForAdmin(prisma: PrismaClient, transac
   const tx = await prisma.ledgerTransaction.findUnique({
     where: { id: transactionId },
     include: {
-      entries: { include: { account: { include: { customer: true } } } },
+      entries: { include: { account: { include: { customer: { select: { email: true } } } } } },
       payout: { include: { beneficiary: true } },
       deposit: true,
     },

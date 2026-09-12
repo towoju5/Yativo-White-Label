@@ -133,7 +133,6 @@
     "noDepositsYet": "No crypto deposits yet",
     "noWalletsYet": "No crypto wallets yet — generate an address below to get started.",
     "selectAssetPlaceholder": "Select an asset",
-    "sharedAddressWarning": "This address may be shared with other users for the same asset. Deposits are matched to your account and confirmed by our team before your balance updates.",
     "subtitle": "Deposit addresses and on-chain deposit history for supported assets.",
     "title": "Crypto wallets",
     "transactionsDescription": "Every on-chain deposit matched to your account.",

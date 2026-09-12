@@ -133,7 +133,6 @@
     "noDepositsYet": "아직 암호화폐 입금 내역이 없습니다",
     "noWalletsYet": "아직 암호화폐 지갑이 없습니다 — 아래에서 주소를 생성하여 시작하세요.",
     "selectAssetPlaceholder": "자산 선택",
-    "sharedAddressWarning": "이 주소는 동일한 자산에 대해 다른 사용자와 공유될 수 있습니다. 입금은 회원님의 계정과 매칭되며, 저희 팀의 확인을 거친 후 잔액에 반영됩니다.",
     "subtitle": "지원되는 자산의 입금 주소 및 온체인 입금 내역.",
     "title": "암호화폐 지갑",
     "transactionsDescription": "회원님의 계정과 매칭된 모든 온체인 입금 내역입니다.",

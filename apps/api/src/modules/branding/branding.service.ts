@@ -28,6 +28,8 @@ export function brandingToDto(config: BrandingConfig) {
     liveChatEnabled: config.liveChatEnabled,
     liveChatCode: config.liveChatCode,
     statementFooterText: config.statementFooterText,
+    pwaShortName: config.pwaShortName,
+    pwaBackgroundColor: config.pwaBackgroundColor,
     updatedAt: config.updatedAt.toISOString(),
   };
 }

@@ -270,7 +270,7 @@ export async function listAdminPayouts(
     prisma.payout.count({ where }),
     prisma.payout.findMany({
       where,
-      include: { transaction: true, customer: true },
+      include: { transaction: true, customer: { select: { fullName: true, businessName: true } } },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,

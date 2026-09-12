@@ -133,7 +133,6 @@
     "noDepositsYet": "Henüz kripto para yatırma işlemi yok",
     "noWalletsYet": "Henüz kripto cüzdanınız yok — başlamak için aşağıdan bir adres oluşturun.",
     "selectAssetPlaceholder": "Bir varlık seçin",
-    "sharedAddressWarning": "Bu adres aynı varlık için diğer kullanıcılarla paylaşılıyor olabilir. Yatırılan tutarlar hesabınızla eşleştirilir ve bakiyeniz güncellenmeden önce ekibimiz tarafından onaylanır.",
     "subtitle": "Desteklenen varlıklar için yatırma adresleri ve zincir üstü yatırma geçmişi.",
     "title": "Kripto cüzdanlar",
     "transactionsDescription": "Hesabınızla eşleştirilen her zincir üstü yatırma işlemi.",

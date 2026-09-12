@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { TransactionDetail } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
-import { Printer, Share2 } from "lucide-react";
+import { Printer, Share2, MessageCircle, Send, Mail, Copy, MoreHorizontal } from "lucide-react";
 import { portalApi } from "@/lib/api-client";
 import { fetchBranding } from "@/theme/branding";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
   POSTED: "success",
@@ -55,9 +56,7 @@ function openReceiptWindow(data: TransactionDetail, productName: string, amountL
     ["Status", data.status],
     ...(data.description ? ([["Description", data.description]] as [string, string][]) : []),
     ...(data.payout ? ([["Recipient", data.payout.beneficiaryName]] as [string, string][]) : []),
-    ...(data.payout?.yativoPayoutId ? ([["Payout reference", data.payout.yativoPayoutId]] as [string, string][]) : []),
     ...feeDetailRows(data),
-    ...(data.externalRef ? ([["Provider reference", data.externalRef]] as [string, string][]) : []),
     ["Transaction ID", data.id],
     ["Date", new Date(data.createdAt).toLocaleString()],
     ...(data.postedAt ? ([["Posted", new Date(data.postedAt).toLocaleString()]] as [string, string][]) : []),
@@ -123,19 +122,35 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
   });
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
 
-  const shareReceipt = async (txData: TransactionDetail, productName: string, amountLabel: string) => {
+  const shareNative = async (txData: TransactionDetail, productName: string, amountLabel: string) => {
     const text = buildReceiptText(txData, productName, amountLabel);
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: `Receipt · ${txData.id}`, text });
-      } catch (err) {
-        // AbortError just means the user closed the native share sheet — not a real failure.
-        if (err instanceof Error && err.name !== "AbortError") {
-          toast({ variant: "destructive", title: "Couldn't share", description: err.message });
-        }
+    try {
+      await navigator.share({ title: `Receipt · ${txData.id}`, text });
+    } catch (err) {
+      // AbortError just means the user closed the native share sheet — not a real failure.
+      if (err instanceof Error && err.name !== "AbortError") {
+        toast({ variant: "destructive", title: "Couldn't share", description: err.message });
       }
-      return;
     }
+  };
+
+  const shareToWhatsApp = (txData: TransactionDetail, productName: string, amountLabel: string) => {
+    const text = buildReceiptText(txData, productName, amountLabel);
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  };
+
+  const shareToTelegram = (txData: TransactionDetail, productName: string, amountLabel: string) => {
+    const text = buildReceiptText(txData, productName, amountLabel);
+    window.open(`https://t.me/share/url?url=&text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  };
+
+  const shareByEmail = (txData: TransactionDetail, productName: string, amountLabel: string) => {
+    const text = buildReceiptText(txData, productName, amountLabel);
+    window.location.href = `mailto:?subject=${encodeURIComponent(`Receipt · ${productName}`)}&body=${encodeURIComponent(text)}`;
+  };
+
+  const copyReceipt = async (txData: TransactionDetail, productName: string, amountLabel: string) => {
+    const text = buildReceiptText(txData, productName, amountLabel);
     try {
       await navigator.clipboard.writeText(text);
       toast({ title: "Receipt copied to clipboard" });
@@ -151,7 +166,7 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
 
   return (
     <Dialog open={!!transactionId} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent>
+      <DialogContent className="scrollbar-hidden sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Transaction details</DialogTitle>
         </DialogHeader>
@@ -173,24 +188,41 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
             <dl className="divide-y divide-border rounded-lg border border-border text-sm">
               <Row label="Type" value={humanizeType(data.type)} />
               {data.payout && <Row label="Recipient" value={data.payout.beneficiaryName} />}
-              {data.payout?.yativoPayoutId && <Row label="Payout reference" value={data.payout.yativoPayoutId} mono />}
               {feeDetailRows(data).map(([label, value]) => (
                 <Row key={label} label={label} value={value} />
               ))}
-              {data.externalRef && <Row label="Provider reference" value={data.externalRef} mono />}
               <Row label="Transaction ID" value={data.id} mono />
               <Row label="Date" value={new Date(data.createdAt).toLocaleString()} />
               {data.postedAt && <Row label="Posted" value={new Date(data.postedAt).toLocaleString()} />}
               {data.reversedAt && <Row label="Reversed" value={new Date(data.reversedAt).toLocaleString()} />}
             </dl>
             <div className="flex gap-2">
-              <Button
-                className="flex-1"
-                variant="outline"
-                onClick={() => shareReceipt(data, branding?.productName ?? "Receipt", amountLabel)}
-              >
-                <Share2 className="h-4 w-4" /> Share
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="flex-1" variant="outline">
+                    <Share2 className="h-4 w-4" /> Share
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => shareToWhatsApp(data, branding?.productName ?? "Receipt", amountLabel)}>
+                    <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => shareToTelegram(data, branding?.productName ?? "Receipt", amountLabel)}>
+                    <Send className="mr-2 h-4 w-4" /> Telegram
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => shareByEmail(data, branding?.productName ?? "Receipt", amountLabel)}>
+                    <Mail className="mr-2 h-4 w-4" /> Email
+                  </DropdownMenuItem>
+                  {typeof navigator !== "undefined" && !!navigator.share && (
+                    <DropdownMenuItem onClick={() => shareNative(data, branding?.productName ?? "Receipt", amountLabel)}>
+                      <MoreHorizontal className="mr-2 h-4 w-4" /> More apps…
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => copyReceipt(data, branding?.productName ?? "Receipt", amountLabel)}>
+                    <Copy className="mr-2 h-4 w-4" /> Copy to clipboard
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 className="flex-1"
                 variant="outline"

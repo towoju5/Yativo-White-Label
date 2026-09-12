@@ -165,7 +165,7 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
   const tx = await prisma.ledgerTransaction.findFirst({
     where: { id: transactionId, entries: { some: { account: { customerId } } } },
     include: {
-      entries: { include: { account: true } },
+      entries: { include: { account: { select: { type: true, customerId: true } } } },
       payout: { include: { beneficiary: true } },
       deposit: true,
     },
@@ -177,8 +177,9 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
     type: tx.type,
     status: tx.status,
     description: tx.description,
-    externalRef: tx.externalRef,
-    externalSource: tx.externalSource,
+    // No externalRef/externalSource here — those are the provider's own tracking id/name
+    // (can literally read "YATIVO_WEBHOOK"), and this is a customer-facing response. Kept on the
+    // admin-only equivalent (getTransactionDetailForAdmin) instead.
     createdAt: tx.createdAt.toISOString(),
     postedAt: tx.postedAt?.toISOString() ?? null,
     reversedAt: tx.reversedAt?.toISOString() ?? null,
@@ -190,7 +191,6 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
           id: tx.payout.id,
           beneficiaryName: tx.payout.beneficiary.name,
           beneficiaryDetails: tx.payout.beneficiary.details as Record<string, unknown>,
-          yativoPayoutId: tx.payout.yativoPayoutId,
           amountMinor: tx.payout.amountMinor.toString(),
           currencyCode: tx.payout.currencyCode,
           platformFeeMinor: tx.payout.platformFeeMinor.toString(),

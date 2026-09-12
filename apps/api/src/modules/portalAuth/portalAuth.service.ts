@@ -175,8 +175,9 @@ export async function loginCustomer(prisma: PrismaClient, email: string, passwor
   // Every customer is expected to be registered on Yativo — this is the self-healing checkpoint
   // for anyone who reached a usable state without going through a KYC submission (see
   // tryEnsureYativoCustomer's doc comment). Best-effort: never blocks login.
-  await tryEnsureYativoCustomer(prisma, customer);
-  await tryProvisionDefaultWallets(prisma, customer.id);
+  // Independent of each other (wallet provisioning never depends on yativoCustomerId) — run
+  // together instead of back-to-back on every login.
+  await Promise.all([tryEnsureYativoCustomer(prisma, customer), tryProvisionDefaultWallets(prisma, customer.id)]);
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
   return { requiresTwoFactor: false as const, principalType: "owner" as const, customer, accessToken, refreshToken };
@@ -215,8 +216,9 @@ export async function verifyTwoFactorLogin(prisma: PrismaClient, challengeToken:
   }
 
   await prisma.customer.update({ where: { id: customer.id }, data: { lastLoginAt: new Date() } });
-  await tryEnsureYativoCustomer(prisma, customer);
-  await tryProvisionDefaultWallets(prisma, customer.id);
+  // Independent of each other (wallet provisioning never depends on yativoCustomerId) — run
+  // together instead of back-to-back on every login.
+  await Promise.all([tryEnsureYativoCustomer(prisma, customer), tryProvisionDefaultWallets(prisma, customer.id)]);
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id);
   return { customer, accessToken, refreshToken, usedBackupCode };
@@ -225,7 +227,10 @@ export async function verifyTwoFactorLogin(prisma: PrismaClient, challengeToken:
 export async function refreshCustomerSession(prisma: PrismaClient, refreshToken: string) {
   const tokenHash = hashRefreshToken(refreshToken);
 
-  const existing = await prisma.customerRefreshToken.findUnique({ where: { tokenHash }, include: { customer: true } });
+  // No customer include here — every field this function needs (customerId) is already a plain
+  // column on the token row itself, so fetching the full related Customer (passwordHash,
+  // twoFactorSecret, ...) on every session refresh would be pure waste.
+  const existing = await prisma.customerRefreshToken.findUnique({ where: { tokenHash } });
   if (existing) {
     if (existing.revokedAt || existing.expiresAt < new Date()) throw new UnauthorizedError("Invalid or expired refresh token");
     await prisma.customerRefreshToken.update({ where: { id: existing.id }, data: { revokedAt: new Date() } });
@@ -233,7 +238,7 @@ export async function refreshCustomerSession(prisma: PrismaClient, refreshToken:
     await prisma.customerRefreshToken.create({
       data: { customerId: existing.customerId, tokenHash: newHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.PORTAL_JWT_REFRESH_TTL)) },
     });
-    const accessToken = signPortalAccessToken({ sub: existing.customer.id, permissions: [...PORTAL_PERMISSIONS] });
+    const accessToken = signPortalAccessToken({ sub: existing.customerId, permissions: [...PORTAL_PERMISSIONS] });
     return { accessToken, refreshToken: newRefreshToken };
   }
 
@@ -300,8 +305,7 @@ export async function verifyCustomerPasskeyLogin(prisma: PrismaClient, redis: Re
     data: { counter: verification.authenticationInfo.newCounter, lastUsedAt: new Date() },
   });
   await prisma.customer.update({ where: { id: passkey.customer.id }, data: { lastLoginAt: new Date() } });
-  await tryEnsureYativoCustomer(prisma, passkey.customer);
-  await tryProvisionDefaultWallets(prisma, passkey.customer.id);
+  await Promise.all([tryEnsureYativoCustomer(prisma, passkey.customer), tryProvisionDefaultWallets(prisma, passkey.customer.id)]);
 
   const { accessToken, refreshToken } = await issueSession(prisma, passkey.customer.id);
   return { customer: passkey.customer, accessToken, refreshToken };

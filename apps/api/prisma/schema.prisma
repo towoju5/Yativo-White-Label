@@ -148,6 +148,12 @@ model LedgerTransaction {
 
   @@index([externalRef])
   @@index([status])
+  // Both the portal and admin transaction lists always `orderBy: createdAt desc`, optionally
+  // filtered by status or type — these composites let Postgres satisfy the filter+sort together
+  // instead of a full sort after the fact, once this (the fastest-growing table) has real volume.
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([type, createdAt])
   @@map("ledger_transactions")
 }
 
@@ -664,6 +670,10 @@ model WebhookEvent {
 
   @@index([eventType])
   @@index([processingStatus])
+  // The admin webhook log filters by status/type while always sorting by receivedAt — these
+  // composites let that query use one index instead of filtering then sorting separately.
+  @@index([processingStatus, receivedAt])
+  @@index([eventType, receivedAt])
   @@map("webhook_events")
 }
 
@@ -723,6 +733,13 @@ model BrandingConfig {
   // Overrides the default Lead Bank/FDIC disclosure printed in the statement PDF footer (see
   // buildDisclosureText in statements.service.ts). Null keeps the built-in default text.
   statementFooterText String?  @db.Text
+  // ── PWA (installable web app) ──────────────────────────────────────────
+  // Shown under the home-screen icon once installed — kept short since Android/iOS truncate
+  // long names there. Falls back to productName when unset.
+  pwaShortName        String?
+  // The splash screen background Android shows while the installed app is loading (auto-generated
+  // by the OS from the manifest's icon + name + this color — no separate splash image needed).
+  pwaBackgroundColor  String   @default("#ffffff")
   updatedAt           DateTime @updatedAt
 
   @@map("branding_config")

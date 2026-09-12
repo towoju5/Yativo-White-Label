@@ -133,7 +133,6 @@
     "noDepositsYet": "Nog geen cryptostortingen",
     "noWalletsYet": "Nog geen cryptowallets — genereer hieronder een adres om te beginnen.",
     "selectAssetPlaceholder": "Selecteer een asset",
-    "sharedAddressWarning": "Dit adres kan worden gedeeld met andere gebruikers voor hetzelfde asset. Stortingen worden aan uw account gekoppeld en door ons team bevestigd voordat uw saldo wordt bijgewerkt.",
     "subtitle": "Stortingsadressen en on-chain stortingsgeschiedenis voor ondersteunde assets.",
     "title": "Cryptowallets",
     "transactionsDescription": "Elke on-chain storting die aan uw account is gekoppeld.",

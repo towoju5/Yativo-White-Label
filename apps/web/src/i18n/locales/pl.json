@@ -133,7 +133,6 @@
     "noDepositsYet": "Brak wpłat kryptowalut",
     "noWalletsYet": "Brak portfeli kryptowalut — wygeneruj adres poniżej, aby zacząć.",
     "selectAssetPlaceholder": "Wybierz aktywo",
-    "sharedAddressWarning": "Ten adres może być współdzielony z innymi użytkownikami dla tego samego aktywa. Wpłaty są przypisywane do Twojego konta i zatwierdzane przez nasz zespół, zanim zaktualizowane zostanie Twoje saldo.",
     "subtitle": "Adresy depozytowe i historia wpłat on-chain dla obsługiwanych aktywów.",
     "title": "Portfele kryptowalut",
     "transactionsDescription": "Każda wpłata on-chain przypisana do Twojego konta.",

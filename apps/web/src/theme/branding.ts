@@ -17,6 +17,8 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   liveChatEnabled: false,
   liveChatCode: null,
   statementFooterText: null,
+  pwaShortName: null,
+  pwaBackgroundColor: "#ffffff",
   updatedAt: new Date().toISOString(),
 };
 

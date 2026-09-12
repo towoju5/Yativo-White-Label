@@ -37,6 +37,11 @@ export const brandingConfigSchema = z.object({
   // Overrides the default Lead Bank/FDIC disclosure printed in the statement PDF footer. Null
   // keeps the built-in default text.
   statementFooterText: z.string().nullable(),
+  // ── PWA (installable web app) ──
+  /** Shown under the home-screen icon once installed — falls back to productName when unset. */
+  pwaShortName: z.string().nullable(),
+  /** Splash screen background the OS shows while the installed app loads. */
+  pwaBackgroundColor: hexColor,
   updatedAt: z.string(),
 });
 export type BrandingConfig = z.infer<typeof brandingConfigSchema>;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CryptoWallet, CryptoDeposit } from "@white-label/shared-types";
-import { AlertTriangle, Coins, Copy, ExternalLink } from "lucide-react";
+import { Coins, Copy, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
@@ -104,11 +104,6 @@ export default function CryptoWalletsPage() {
           <CardDescription>{t("crypto.generateDescription", "Generate a deposit address for any supported chain.")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-xs text-foreground">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
-            <p>{t("crypto.sharedAddressWarning", "This address may be shared with other users for the same asset. Deposits are matched to your account and confirmed by our team before your balance updates.")}</p>
-          </div>
-
           {walletsQuery.isLoading ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Skeleton className="h-20" />

@@ -335,7 +335,7 @@ export async function listAdminBusinessSpendCards(prisma: PrismaClient, page: nu
   const [total, cards] = await Promise.all([
     prisma.businessSpendCard.count(),
     prisma.businessSpendCard.findMany({
-      include: { customer: true },
+      include: { customer: { select: { fullName: true, businessName: true } } },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,

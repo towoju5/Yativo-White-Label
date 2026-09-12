@@ -6,6 +6,22 @@ import { listCustomerWallets } from "../wallets/wallets.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import logger from "../../lib/logger.js";
 
+/** Matches exactly what customerToDto reads — used as a `select` everywhere a full Customer row
+ * (including passwordHash, twoFactorSecret, twoFactorBackupCodeHashes) isn't actually needed. */
+export const CUSTOMER_DTO_SELECT = {
+  id: true,
+  type: true,
+  fullName: true,
+  businessName: true,
+  email: true,
+  emailVerifiedAt: true,
+  kycStatus: true,
+  status: true,
+  yativoCustomerId: true,
+  twoFactorEnabled: true,
+  createdAt: true,
+} as const;
+
 export function customerToDto(customer: {
   id: string;
   type: "INDIVIDUAL" | "BUSINESS";
@@ -56,16 +72,26 @@ export async function listCustomers(
 
   const [total, customers] = await Promise.all([
     prisma.customer.count({ where }),
-    prisma.customer.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+    prisma.customer.findMany({
+      where,
+      select: CUSTOMER_DTO_SELECT,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
   ]);
 
   return { items: customers.map(customerToDto), total, page, pageSize };
 }
 
 export async function getCustomerDetail(prisma: PrismaClient, customerId: string) {
-  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+  // The wallets query only needs customerId (already known), not the customer row — no need to
+  // wait for the first query before starting the second.
+  const [customer, wallets] = await Promise.all([
+    prisma.customer.findUnique({ where: { id: customerId }, select: CUSTOMER_DTO_SELECT }),
+    listCustomerWallets(prisma, customerId),
+  ]);
   if (!customer) throw new NotFoundError("Customer");
-  const wallets = await listCustomerWallets(prisma, customerId);
   return { ...customerToDto(customer), wallets };
 }
 

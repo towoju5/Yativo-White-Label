@@ -133,7 +133,6 @@
     "noDepositsYet": "Noch keine Krypto-Einzahlungen",
     "noWalletsYet": "Noch keine Krypto-Wallets — generieren Sie unten eine Adresse, um zu beginnen.",
     "selectAssetPlaceholder": "Asset auswählen",
-    "sharedAddressWarning": "Diese Adresse kann mit anderen Nutzern für dasselbe Asset geteilt werden. Einzahlungen werden Ihrem Konto zugeordnet und von unserem Team bestätigt, bevor Ihr Guthaben aktualisiert wird.",
     "subtitle": "Einzahlungsadressen und On-Chain-Einzahlungsverlauf für unterstützte Assets.",
     "title": "Krypto-Wallets",
     "transactionsDescription": "Jede Ihrem Konto zugeordnete On-Chain-Einzahlung.",

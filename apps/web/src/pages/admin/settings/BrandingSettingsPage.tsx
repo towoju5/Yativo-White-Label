@@ -77,6 +77,8 @@ export default function BrandingSettingsPage() {
         liveChatEnabled: data.liveChatEnabled,
         liveChatCode: data.liveChatCode,
         statementFooterText: data.statementFooterText,
+        pwaShortName: data.pwaShortName,
+        pwaBackgroundColor: data.pwaBackgroundColor,
       });
     }
   }, [data, draft]);
@@ -272,6 +274,43 @@ export default function BrandingSettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Progressive Web App</CardTitle>
+          <CardDescription>
+            Lets a customer install this site as an app on their phone or desktop — home screen icon, splash screen, no browser chrome. Uses the
+            logo/favicon and colors set above.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="pwaShortName">Home screen name</Label>
+            <Input
+              id="pwaShortName"
+              placeholder={draft.productName || "White Label"}
+              maxLength={30}
+              value={draft.pwaShortName ?? ""}
+              onChange={(e) => setDraft((d) => (d ? { ...d, pwaShortName: e.target.value || null } : d))}
+            />
+            <p className="text-xs text-muted-foreground">Shown under the icon once installed — kept short since phones truncate long names. Defaults to the product name above.</p>
+          </div>
+          <div className="max-w-[200px]">
+            <ColorField
+              label="Splash screen background"
+              value={draft.pwaBackgroundColor ?? "#ffffff"}
+              onChange={(v) => setDraft((d) => (d ? { ...d, pwaBackgroundColor: v } : d))}
+            />
+          </div>
+          <Button
+            onClick={() => saveMutation.mutate(draft)}
+            disabled={!canEdit || saveMutation.isPending}
+            title={canEdit ? undefined : "Only owners and admins can change branding"}
+          >
+            <Save className="h-4 w-4" /> {saveMutation.isPending ? "Saving…" : "Save branding"}
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -133,7 +133,6 @@
     "noDepositsYet": "Aucun dépôt crypto pour le moment",
     "noWalletsYet": "Aucun portefeuille crypto pour le moment — générez une adresse ci-dessous pour commencer.",
     "selectAssetPlaceholder": "Sélectionnez un actif",
-    "sharedAddressWarning": "Cette adresse peut être partagée avec d'autres utilisateurs pour le même actif. Les dépôts sont associés à votre compte et confirmés par notre équipe avant la mise à jour de votre solde.",
     "subtitle": "Adresses de dépôt et historique des dépôts on-chain pour les actifs pris en charge.",
     "title": "Portefeuilles crypto",
     "transactionsDescription": "Chaque dépôt on-chain associé à votre compte.",

@@ -36,7 +36,7 @@ export function AdminTransactionDetailDialog({ transactionId, onClose }: { trans
 
   return (
     <Dialog open={!!transactionId} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-xl scrollbar-hidden">
         <DialogHeader>
           <DialogTitle>Transaction details</DialogTitle>
         </DialogHeader>

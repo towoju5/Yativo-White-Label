@@ -119,7 +119,6 @@ export const transactionDetailPayoutSchema = z.object({
   id: z.string(),
   beneficiaryName: z.string(),
   beneficiaryDetails: z.record(z.unknown()),
-  yativoPayoutId: z.string().nullable(),
   amountMinor: minorAmountSchema,
   currencyCode: currencyCodeSchema,
   /** The platform's own fee, already reflected in amountMinor's debit but broken out here for the receipt. */
@@ -149,9 +148,6 @@ export const transactionDetailSchema = z.object({
   type: z.enum(LEDGER_TRANSACTION_TYPES),
   status: z.enum(LEDGER_TRANSACTION_STATUSES),
   description: z.string().nullable(),
-  /** The provider-side reference — a Yativo deposit id for a DEPOSIT, for example. */
-  externalRef: z.string().nullable(),
-  externalSource: z.enum(LEDGER_EXTERNAL_SOURCES),
   createdAt: z.string(),
   postedAt: z.string().nullable(),
   reversedAt: z.string().nullable(),
