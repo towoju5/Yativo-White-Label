@@ -2,6 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 import type { DepositEventPayload } from "@white-label/yativo-sdk";
 import { postTransaction } from "../../modules/ledger/postTransaction.js";
 import { settlePendingTransaction } from "../../modules/ledger/settlePendingTransaction.js";
+import { reverseTransaction } from "../../modules/ledger/reverseTransaction.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../../modules/ledger/accounts.js";
 import { getEffectiveFee } from "../../modules/pricing/pricing.service.js";
 import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
@@ -11,16 +12,15 @@ import type { EntryLine } from "../../modules/ledger/types.js";
 import type { WebhookHandlerResult } from "./result.js";
 
 /**
- * `deposit.created` / `deposit.updated` — a native gateway pay-in (see modules/deposits). Only
- * `status === "success"` credits the wallet; other statuses (pending/processing/failed/cancelled/
- * expired) are recorded (see yativo.routes.ts) but don't move money — a later `deposit.updated`
- * delivery for the same deposit id will fire this again once it does resolve to success.
+ * `deposit.created` / `deposit.updated` — a native gateway pay-in (see modules/deposits).
+ * `status === "success"` credits the wallet. `failed`/`cancelled`/`expired` are terminal — the
+ * PENDING hold placed at initiate time (see deposits.routes.ts) is released via reverseTransaction
+ * so the deposit stops showing as stuck PENDING forever; confirmed live, without this the
+ * transaction never updates once Yativo gives up on it. `pending`/`processing` are genuinely
+ * transient and stay IGNORED — a later `deposit.updated` delivery for the same id will fire this
+ * again once it resolves either way.
  */
 export async function handleDepositEvent(prisma: PrismaClient, payload: DepositEventPayload, externalEventId: string): Promise<WebhookHandlerResult> {
-  if (payload.status !== "success") {
-    return { status: "IGNORED", errorMessage: `Deposit status is ${payload.status}, not success — no ledger entry posted` };
-  }
-
   // Resolved via the local Deposit row (recorded at /portal/deposit/initiate) first — a more
   // direct and reliable attribution than trusting Yativo's customer_id label. Confirmed live:
   // the webhook's own id/deposit_id doesn't always match what was captured as yativoDepositId at
@@ -31,6 +31,21 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
   const payinRecord =
     (await prisma.deposit.findUnique({ where: { yativoDepositId: payload.yativoDepositId } })) ??
     (payload.idempotencyKey ? await prisma.deposit.findUnique({ where: { yativoIdempotencyKey: payload.idempotencyKey } }) : null);
+
+  if (payload.status === "failed" || payload.status === "cancelled" || payload.status === "expired") {
+    if (!payinRecord?.transactionId) {
+      return { status: "IGNORED", errorMessage: `Deposit ${payload.status} — no local pending transaction to release` };
+    }
+    // Idempotent on its own terms (reverseTransactionInTx no-ops if already reversed/settled), so
+    // a webhook replay after this already ran is safe regardless of externalEventId.
+    await reverseTransaction(prisma, payinRecord.transactionId, `Deposit ${payload.status} (webhook ${externalEventId})`);
+    return { status: "PROCESSED" };
+  }
+
+  if (payload.status !== "success") {
+    return { status: "IGNORED", errorMessage: `Deposit status is ${payload.status}, not success — no ledger entry posted` };
+  }
+
   const customer = payinRecord
     ? await prisma.customer.findUnique({ where: { id: payinRecord.customerId } })
     : await prisma.customer.findFirst({ where: { yativoCustomerId: payload.yativoCustomerId } });
