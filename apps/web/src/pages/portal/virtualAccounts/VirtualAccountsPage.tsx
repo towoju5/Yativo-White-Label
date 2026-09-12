@@ -82,7 +82,7 @@ export default function VirtualAccountsPage() {
       </div>
 
       <KycRequiredNotice service="VIRTUAL_ACCOUNT" />
-        <div className="flex col-span-2 gap-4 sm:col-span-1 sm:flex-col">
+      <div className="flex flex-col gap-4">
           <Card>
               <CardHeader>
                   <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export default function VirtualAccountsPage() {
               </CardHeader>
               <CardContent>
                   {currenciesQuery.isLoading ? (
-                  <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                       {Array.from({ length: 4 }).map((_, i) => (
                       <Skeleton key={i} className="h-20" />
                       ))}
@@ -164,7 +164,7 @@ export default function VirtualAccountsPage() {
                       {accounts.length > 0 ? t('virtualAccounts.allCurrenciesAdded', 'You already have an account for every available currency.') : t('virtualAccounts.noCurrenciesAvailable', 'No virtual account currencies are available yet.')}
                   </p>
                   ) : (
-                  <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                       {availableCurrencies.map((c) => {
                       const pending = creatingCurrency === c.currency && createMutation.isPending;
                       return (

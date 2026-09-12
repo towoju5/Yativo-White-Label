@@ -86,14 +86,14 @@ export default function SupportTicketsPage() {
         </Select>
       </div>
 
-      <div className="rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Customer</TableHead>
               <TableHead>Subject</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Last activity</TableHead>
+              <TableHead>Last reply</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -112,7 +112,10 @@ export default function SupportTicketsPage() {
                   </TableCell>
                   <TableCell className="max-w-[260px] truncate">{t.subject}</TableCell>
                   <TableCell><Badge variant={STATUS_VARIANT[t.status]}>{t.status.replace("_", " ")}</Badge></TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{new Date(t.lastMessageAt).toLocaleString()}</TableCell>
+                  <TableCell>
+                    <div className="text-sm">{t.lastMessageAuthorType === "STAFF" ? (t.lastMessageAuthorName ?? "Support") : t.lastMessageAuthorType === "CUSTOMER" ? t.customerName : "—"}</div>
+                    <div className="text-xs text-muted-foreground">{new Date(t.lastMessageAt).toLocaleString()}</div>
+                  </TableCell>
                 </TableRow>
               ))
             )}

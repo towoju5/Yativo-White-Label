@@ -46,7 +46,7 @@ export default function EndorsementsPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">Look up a customer's Yativo verification checklist by service.</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
         <Card className="h-fit">
           <CardHeader>
             <CardTitle className="text-sm">Find a customer</CardTitle>

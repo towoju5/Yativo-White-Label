@@ -144,7 +144,7 @@ export default function EmailTemplatesSettingsPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
         <nav className="space-y-5">
           {GROUPS.map((group) => (
             <div key={group}>

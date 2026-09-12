@@ -343,16 +343,16 @@ export function AddressFields({
   const stateProvinceLabel = t("kycShared.stateProvinceLabel", "State / province");
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
-      <div className="space-y-1.5 sm:col-span-2">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="space-y-1.5 lg:col-span-2">
         <Label>{t("kycShared.countryLabel", "Country")}</Label>
         <CountryField form={form} name={`${prefix}.country`} countries={countries} isLoading={countriesLoading} />
       </div>
-      <div className="space-y-1.5 sm:col-span-2">
+      <div className="space-y-1.5 lg:col-span-2">
         <Label>{t("kycShared.streetAddressLabel", "Street address")}</Label>
         <Input {...form.register(`${prefix}.streetLine1`)} placeholder={t("kycShared.streetAddressPlaceholder", "123 Main St")} />
       </div>
-      <div className="space-y-1.5 sm:col-span-2">
+      <div className="space-y-1.5 lg:col-span-2">
         <Label>{t("kycShared.streetAddress2Label", "Street address 2 (optional)")}</Label>
         <Input {...form.register(`${prefix}.streetLine2`)} />
       </div>
@@ -382,7 +382,7 @@ export function AddressFields({
         )}
       </div>
       {proofField && (
-        <div className="sm:col-span-2">
+        <div className="lg:col-span-2">
           <FileField
             form={form}
             name={proofField}
@@ -402,7 +402,7 @@ export function IndividualIdDocFields({ form, prefix, countries, countriesLoadin
   const idTypes = useKycIdentificationTypes(issuingCountry);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
       <div className="space-y-1.5">
         <Label>{t("kycShared.issuingCountryLabel", "Issuing country")}</Label>
         <CountryField form={form} name={`${prefix}.issuingCountry`} countries={countries} isLoading={countriesLoading} />
@@ -417,7 +417,7 @@ export function IndividualIdDocFields({ form, prefix, countries, countriesLoadin
           isLoading={idTypes.isFetching}
         />
       </div>
-      <div className="space-y-1.5 sm:col-span-2">
+      <div className="space-y-1.5 lg:col-span-2">
         <Label>{t("kycShared.documentNumberLabel", "Document number")}</Label>
         <Input {...form.register(`${prefix}.number`)} placeholder={t("kycShared.documentNumberPlaceholder", "e.g. P00012345")} />
       </div>
@@ -429,10 +429,10 @@ export function IndividualIdDocFields({ form, prefix, countries, countriesLoadin
         <Label>{t("kycShared.expirationDateLabel", "Expiration date")}</Label>
         <Input type="date" {...form.register(`${prefix}.expirationDate`)} />
       </div>
-      <div className="sm:col-span-2">
+      <div className="lg:col-span-2">
         <FileField form={form} name={`${prefix}.imageFront`} label={t("kycShared.documentFrontLabel", "Document — front")} />
       </div>
-      <div className="sm:col-span-2">
+      <div className="lg:col-span-2">
         <FileField form={form} name={`${prefix}.imageBack`} label={t("kycShared.documentBackOptionalLabel", "Document — back (optional)")} />
       </div>
     </div>
@@ -457,7 +457,7 @@ export function BusinessPhotoIdFields({
   const { t } = useTranslation();
   const idTypes = useKycIdentificationTypes(country);
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
       <div className="space-y-1.5">
         <Label>{t("kycShared.documentTypeLabel", "Document type")}</Label>
         <SearchableSelect
@@ -477,10 +477,10 @@ export function BusinessPhotoIdFields({
         <Input type="date" {...form.register(`${prefix}.expiration`)} />
       </div>
       <div className="hidden sm:block" />
-      <div className="sm:col-span-2">
+      <div className="lg:col-span-2">
         <FileField form={form} name={`${prefix}.imageFront`} label={t("kycShared.documentFrontLabel", "Document — front")} />
       </div>
-      <div className="sm:col-span-2">
+      <div className="lg:col-span-2">
         <FileField form={form} name={`${prefix}.imageBack`} label={t("kycShared.documentBackOptionalLabel", "Document — back (optional)")} />
       </div>
       {countriesLoading /* keep countries prop referenced without an unused-var lint even though this variant doesn't render a country field */ && null}

@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { CreateSupportTicketInput, SupportTicketStatus } from "@white-label/shared-types";
+import type { CreateSupportTicketInput, SupportTicketStatus, SupportTicketAuthorType } from "@white-label/shared-types";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
 import { getBranding } from "../branding/branding.service.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
@@ -63,16 +63,39 @@ type TicketWithMessages = {
   messages: { id: string; authorType: string; authorId: string; body: string; createdAt: Date }[];
 };
 
-function toListItemDto(t: { id: string; subject: string; status: string; createdAt: Date; updatedAt: Date; messages: { createdAt: Date }[] }) {
+/** Bulk-resolves staff ids to a display name (their email — StaffUser has no separate display-name field) in one query, for callers rendering many tickets/messages at once. */
+async function resolveStaffNames(prisma: PrismaClient, staffIds: string[]): Promise<Map<string, string>> {
+  if (staffIds.length === 0) return new Map();
+  const staffUsers = await prisma.staffUser.findMany({ where: { id: { in: staffIds } }, select: { id: true, email: true } });
+  return new Map(staffUsers.map((s) => [s.id, s.email]));
+}
+
+function toListItemDto(
+  t: { id: string; subject: string; status: string; createdAt: Date; updatedAt: Date; messages: { authorType: string; authorId: string; createdAt: Date }[] },
+  staffNameById: Map<string, string>,
+) {
   const lastMessage = t.messages.at(-1);
   const lastMessageAt = lastMessage ? lastMessage.createdAt : t.createdAt;
-  return { id: t.id, subject: t.subject, status: t.status as SupportTicketStatus, createdAt: t.createdAt.toISOString(), updatedAt: t.updatedAt.toISOString(), lastMessageAt: lastMessageAt.toISOString() };
+  const lastMessageAuthorType = (lastMessage?.authorType as SupportTicketAuthorType | undefined) ?? null;
+  // Only ever names a STAFF author (the useful piece — which agent replied last). A customer
+  // author's own display name/label ("You" in the portal, the ticket's customerName in admin) is
+  // context-dependent on who's viewing, so that's left to the caller rather than guessed here.
+  const lastMessageAuthorName = lastMessage?.authorType === "STAFF" ? (staffNameById.get(lastMessage.authorId) ?? "Support") : null;
+  return {
+    id: t.id,
+    subject: t.subject,
+    status: t.status as SupportTicketStatus,
+    createdAt: t.createdAt.toISOString(),
+    updatedAt: t.updatedAt.toISOString(),
+    lastMessageAt: lastMessageAt.toISOString(),
+    lastMessageAuthorType,
+    lastMessageAuthorName,
+  };
 }
 
 async function messagesToDto(prisma: PrismaClient, ticket: TicketWithMessages) {
   const staffIds = [...new Set(ticket.messages.filter((m) => m.authorType === "STAFF").map((m) => m.authorId))];
-  const staffUsers = staffIds.length > 0 ? await prisma.staffUser.findMany({ where: { id: { in: staffIds } }, select: { id: true, email: true } }) : [];
-  const staffNameById = new Map(staffUsers.map((s) => [s.id, s.email]));
+  const staffNameById = await resolveStaffNames(prisma, staffIds);
 
   return ticket.messages.map((m) => ({
     id: m.id,
@@ -116,9 +139,18 @@ export async function listMyTickets(prisma: PrismaClient, customerId: string) {
   const tickets = await prisma.supportTicket.findMany({
     where: { customerId },
     orderBy: { updatedAt: "desc" },
-    select: { id: true, subject: true, status: true, createdAt: true, updatedAt: true, messages: { select: { createdAt: true }, orderBy: { createdAt: "asc" } } },
+    select: {
+      id: true,
+      subject: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      messages: { select: { authorType: true, authorId: true, createdAt: true }, orderBy: { createdAt: "asc" } },
+    },
   });
-  return tickets.map(toListItemDto);
+  const staffIds = [...new Set(tickets.flatMap((t) => t.messages.filter((m) => m.authorType === "STAFF").map((m) => m.authorId)))];
+  const staffNameById = await resolveStaffNames(prisma, staffIds);
+  return tickets.map((t) => toListItemDto(t, staffNameById));
 }
 
 async function getTicketOrThrow(prisma: PrismaClient, ticketId: string, customerId?: string): Promise<TicketWithMessages> {
@@ -132,7 +164,9 @@ async function getTicketOrThrow(prisma: PrismaClient, ticketId: string, customer
 
 export async function getMyTicket(prisma: PrismaClient, customerId: string, ticketId: string) {
   const ticket = await getTicketOrThrow(prisma, ticketId, customerId);
-  return { ...toListItemDto(ticket), messages: await messagesToDto(prisma, ticket) };
+  const staffIds = [...new Set(ticket.messages.filter((m) => m.authorType === "STAFF").map((m) => m.authorId))];
+  const staffNameById = await resolveStaffNames(prisma, staffIds);
+  return { ...toListItemDto(ticket, staffNameById), messages: await messagesToDto(prisma, ticket) };
 }
 
 export async function addCustomerReply(prisma: PrismaClient, customerId: string, ticketId: string, body: string) {
@@ -167,10 +201,15 @@ export async function listTicketsForAdmin(prisma: PrismaClient, status?: Support
   const tickets = await prisma.supportTicket.findMany({
     where: status ? { status } : {},
     orderBy: { updatedAt: "desc" },
-    include: { customer: { select: { id: true, fullName: true, businessName: true, email: true } }, messages: { select: { createdAt: true }, orderBy: { createdAt: "asc" } } },
+    include: {
+      customer: { select: { id: true, fullName: true, businessName: true, email: true } },
+      messages: { select: { authorType: true, authorId: true, createdAt: true }, orderBy: { createdAt: "asc" } },
+    },
   });
+  const staffIds = [...new Set(tickets.flatMap((t) => t.messages.filter((m) => m.authorType === "STAFF").map((m) => m.authorId)))];
+  const staffNameById = await resolveStaffNames(prisma, staffIds);
   return tickets.map((t) => ({
-    ...toListItemDto(t),
+    ...toListItemDto(t, staffNameById),
     customerId: t.customer.id,
     customerName: t.customer.fullName ?? t.customer.businessName ?? t.customer.email,
     customerEmail: t.customer.email,
@@ -183,8 +222,10 @@ export async function getTicketForAdmin(prisma: PrismaClient, ticketId: string) 
     include: { customer: { select: { id: true, fullName: true, businessName: true, email: true } }, messages: { orderBy: { createdAt: "asc" } } },
   });
   if (!ticket) throw new NotFoundError("Support ticket");
+  const staffIds = [...new Set(ticket.messages.filter((m) => m.authorType === "STAFF").map((m) => m.authorId))];
+  const staffNameById = await resolveStaffNames(prisma, staffIds);
   return {
-    ...toListItemDto(ticket),
+    ...toListItemDto(ticket, staffNameById),
     customerId: ticket.customer.id,
     customerName: ticket.customer.fullName ?? ticket.customer.businessName ?? ticket.customer.email,
     customerEmail: ticket.customer.email,

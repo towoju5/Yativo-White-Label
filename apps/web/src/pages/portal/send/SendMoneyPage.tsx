@@ -395,7 +395,7 @@ export default function SendMoneyPage() {
                 })}
               </div>
               {payoutMethodsQuery.isLoading ? (
-                <div className="grid gap-3 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <Skeleton key={i} className="h-24" />
                   ))}
@@ -405,7 +405,7 @@ export default function SendMoneyPage() {
                   {t("send.step1.noMethods", "No active payout methods for this country yet.")}
                 </p>
               ) : (
-                <div className="grid gap-3 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                   {(payoutMethodsQuery.data ?? []).map((m) => {
                     const selected = m.gatewayId === gatewayId;
                     return (
@@ -458,7 +458,7 @@ export default function SendMoneyPage() {
                 {t("send.step2.prompt", "{{method}} details", { method: selectedMethod?.methodName ?? "" })}
               </div>
               {formQuery.isLoading ? (
-                <div className="grid gap-3 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <Skeleton key={i} className="h-16" />
                   ))}
@@ -468,7 +468,7 @@ export default function SendMoneyPage() {
                   {t("send.step2.noDetailsNeeded", "This payout method doesn't need any extra details.")}
                 </p>
               ) : (
-                <div className="grid gap-x-4 gap-y-4 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2">
                   {renderableFields.map((f) => (
                     <div key={f.key} className="space-y-1.5">
                       <Label>

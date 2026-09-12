@@ -603,6 +603,50 @@ until Yativo enables them.
       `MobileBottomNav`'s 5-tab bar (a fixed-role tab strip, not page content) and the tiny
       decorative `PreviewThumbnail` mockups in the admin template picker (not real responsive UI).
 
+## 6m. Grid-stacking regression, virtual accounts flex bug, support ticket last-reply, push notification hang (2026-09-13, user request)
+
+- [x] **Root cause of "cards too wide on mobile, going out of viewport"**: the entire responsive
+      grid pass in §6l was itself broken — CSS Grid's default (`grid-template-columns: none`) does
+      NOT stack children into one column the way `flex-col` would; it auto-places each child into
+      its own unbounded implicit column, side by side, in a single row. Every grid rewritten as a
+      bare `grid gap-X lg:grid-cols-2` (no explicit base `grid-cols-1`) was therefore laying its
+      children out horizontally on mobile instead of stacking — the opposite of the fix that batch
+      was supposed to be. Audited and corrected all ~65 occurrences across ~25 files (added an
+      explicit `grid-cols-1` before every `lg:grid-cols-N` override), plus two more of the same bug
+      found in components untouched by that batch: `Toaster`'s title+description block and
+      `EndorsementsTable`'s mobile card list. Also caught and fixed a `Button`-component regression
+      from the same stretch: giving `Button` a `loading` prop broke every `asChild` button
+      app-wide, since Radix's `Slot` requires exactly one child and the change always injected a
+      second (the conditionally-rendered spinner) even when `asChild` was true — this was the
+      actual cause of the deposit page (and others) crashing outright with a React error boundary.
+- [x] **Virtual accounts page mobile layout** — unrelated to the grid regression above: the two
+      card sections were wrapped in `flex col-span-2 gap-4 sm:col-span-1 sm:flex-col` — the
+      `col-span-*` classes were dead code (no grid parent), and the real effective classes were
+      `flex` (default `flex-row`) with `sm:flex-col`, meaning the layout was backwards — side by
+      side by default, only stacking at 640px+. Fixed to a plain `flex flex-col gap-4` (always
+      stacked; this page's two sections were never meant to sit side by side even on desktop).
+- [x] **More obvious loading feedback**: added a floating "Loading…" pill (large spinner + label,
+      bottom-right, above the mobile tab bar) that appears specifically while any mutation is in
+      flight, on top of the existing thin top-of-page progress bar — so a click always gets an
+      unmistakable, can't-miss reaction, not just a subtle 2px bar.
+- [x] **Support ticket list now shows who replied last and when** — `SupportTicketListItem` (both
+      customer and admin, shared base schema) gained `lastMessageAuthorType` /
+      `lastMessageAuthorName` (resolved to the staff member's email when the last reply was
+      STAFF); admin `SupportTicketsPage.tsx`'s table replaced its generic "Last activity" column
+      with "Last reply" showing who + when, and the table is now wrapped in `overflow-x-auto`.
+- [x] **Push notification toggle stuck disabled with zero feedback** — beyond the silent-failure
+      fix in §6l, found that `navigator.serviceWorker.ready` has no timeout: if service worker
+      registration itself never completes (e.g. a hosting/proxy misconfiguration serving `/sw.js`,
+      which `registerServiceWorker()` fails silently on), that promise never resolves, the
+      `loading` state it gates never clears, and the toggle stays disabled forever — clicks on a
+      disabled control don't even reach the click handler, which is why no error ever appeared.
+      Added an 8-second timeout so a broken service worker degrades to "clicking shows a real
+      error" instead of "the toggle does nothing, forever." If this is still the reported symptom
+      after this fix, the service worker registration itself needs checking on whatever host is
+      actually serving this deployment (confirm `/sw.js` is reachable and returns
+      `Content-Type: application/javascript` or `text/javascript`, not e.g. a SPA-fallback HTML
+      page) — that's outside what's fixable from application code alone.
+
 ## 6. Crypto integration
 
 - [x] Crypto wallet deposit flow (`packages/yativo-sdk/src/crypto/wallets.ts`) — real, live, on

@@ -72,7 +72,7 @@ export function PrimeDashboardLayout({
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {wallets && (
           <div className="rounded-lg border border-border bg-card lg:col-span-1">
             <div className="border-b border-border px-4 py-3">

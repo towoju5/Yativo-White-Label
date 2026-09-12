@@ -45,7 +45,7 @@ export function NovaDashboardLayout({
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-border bg-card/70 p-5 shadow-soft">
           <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("dashboardLayout.nova.balanceTrend", "Balance trend")}</p>
           {isLoading ? (
@@ -67,7 +67,7 @@ export function NovaDashboardLayout({
               <Skeleton className="h-28" />
             </>
           ) : wallets && wallets.length > 0 ? (
-            <div className="grid gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {wallets.map((w) => (
                 <NovaWalletBalanceCard key={w.currencyCode} {...w} />
               ))}

@@ -220,7 +220,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
     >
       {step < STEPS.length - 1 && <StepErrorSummary errors={errors} fields={getStepFields(step)} />}
       {step === 0 && (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycBusiness.steps.businessInfo.legalName", "Legal business name")}</Label>
             <Input {...form.register("businessLegalName")} />
@@ -229,7 +229,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
             <Label>{t("kycBusiness.steps.businessInfo.tradeName", "Trade name")}</Label>
             <Input {...form.register("businessTradeName")} />
           </div>
-          <div className="space-y-1.5 sm:col-span-2">
+          <div className="space-y-1.5 lg:col-span-2">
             <Label>{t("kycBusiness.steps.businessInfo.description", "Business description")}</Label>
             <Textarea {...form.register("businessDescription")} rows={2} />
           </div>
@@ -292,7 +292,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
             />
           </div>
           {(errors.businessLegalName || errors.businessTradeName || errors.registrationNumber || errors.businessType) && (
-            <p className="text-xs text-destructive sm:col-span-2">{t("kycBusiness.steps.businessInfo.requiredFieldsHint", "Fill in the required fields above.")}</p>
+            <p className="text-xs text-destructive lg:col-span-2">{t("kycBusiness.steps.businessInfo.requiredFieldsHint", "Fill in the required fields above.")}</p>
           )}
         </div>
       )}
@@ -338,7 +338,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
                   </Button>
                 )}
               </div>
-              <div className="grid gap-3 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label>{t("kycBusiness.steps.ownersDirectors.firstName", "First name")}</Label>
                   <Input {...form.register(`associatedPersons.${i}.firstName`)} />
@@ -372,7 +372,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
                   <Input type="number" min={0} max={100} {...form.register(`associatedPersons.${i}.ownershipPercentage`, { valueAsNumber: true })} />
                 </div>
               </div>
-              <div className="grid gap-2 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
                 {(
                   [
                     ["hasOwnership", t("kycBusiness.steps.ownersDirectors.hasOwnership", "Has ownership")],
@@ -415,8 +415,8 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
                 <h3 className="text-sm font-semibold">{personName || t("kycBusiness.steps.ownersDirectors.personFallbackName", "Owner / director {{index}}", { index: i + 1 })}</h3>
                 <div>
                   <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{t("kycBusiness.steps.ownersDirectors.taxIdHeading", "1. Tax ID")}</h4>
-                  <div className="grid gap-3 lg:grid-cols-2">
-                    <div className="space-y-1.5 sm:col-span-2">
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                    <div className="space-y-1.5 lg:col-span-2">
                       <Label>{t("kycBusiness.steps.ownersDirectors.taxId", "SSN / EIN / ITIN")}</Label>
                       <Input {...form.register(`associatedPersons.${i}.identifyingInformation.0.number`)} />
                     </div>
@@ -444,7 +444,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
       )}
 
       {step === 4 && (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycBusiness.steps.accountInfo.accountPurpose", "Account purpose")}</Label>
             <Select value={accountPurpose ?? ""} onValueChange={(v) => form.setValue("accountPurpose", v, { shouldValidate: true })}>
@@ -476,15 +476,15 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
             </Select>
           </div>
           {accountPurpose === "other" && (
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-1.5 lg:col-span-2">
               <Label>{t("kycBusiness.steps.accountInfo.describeAccountPurpose", "Describe account purpose")}</Label>
               <Input {...form.register("accountPurposeOther")} />
             </div>
           )}
 
-          <div className="space-y-2 sm:col-span-2">
+          <div className="space-y-2 lg:col-span-2">
             <Label>{t("kycBusiness.steps.accountInfo.highRiskActivities", "High-risk activities (select any that apply)")}</Label>
-            <div className="grid gap-1.5 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2">
               {HIGH_RISK_ACTIVITIES.map((a) => (
                 <label key={a} className="flex items-center gap-2 rounded-lg border border-border p-2.5 text-sm">
                   <Checkbox
@@ -506,7 +506,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
             )}
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:col-span-2">
+          <div className="flex items-center justify-between rounded-lg border border-border p-3 lg:col-span-2">
             <div>
               <p className="text-sm font-medium">{t("kycBusiness.steps.accountInfo.conductsMoneyServices", "Conducts money services")}</p>
               <p className="text-xs text-muted-foreground">
@@ -517,25 +517,25 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
           </div>
           {conductsMsb && (
             <>
-              <div className="space-y-1.5 sm:col-span-2">
+              <div className="space-y-1.5 lg:col-span-2">
                 <Label>{t("kycBusiness.steps.accountInfo.describeMoneyServicesActivity", "Describe the money services activity")}</Label>
                 <Textarea {...form.register("conductsMoneyServicesDescription")} rows={2} />
               </div>
-              <div className="space-y-1.5 sm:col-span-2">
+              <div className="space-y-1.5 lg:col-span-2">
                 <Label>{t("kycBusiness.steps.accountInfo.complianceScreeningProgram", "Compliance screening program")}</Label>
                 <Textarea {...form.register("complianceScreeningExplanation")} rows={2} />
               </div>
             </>
           )}
 
-          <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:col-span-2">
+          <div className="flex items-center justify-between rounded-lg border border-border p-3 lg:col-span-2">
             <div>
               <p className="text-sm font-medium">{t("kycBusiness.steps.accountInfo.pepStatus", "Politically exposed person (PEP)")}</p>
               <p className="text-xs text-muted-foreground">{t("kycBusiness.steps.accountInfo.pepStatusHint", "Any owner/director is a PEP or close associate of one.")}</p>
             </div>
             <Switch checked={form.watch("pepStatus")} onCheckedChange={(v) => form.setValue("pepStatus", v, { shouldValidate: true })} />
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:col-span-2">
+          <div className="flex items-center justify-between rounded-lg border border-border p-3 lg:col-span-2">
             <p className="text-sm font-medium">{t("kycBusiness.steps.accountInfo.thirdPartyMsbPayments", "Processes payments for third-party MSBs")}</p>
             <Switch checked={form.watch("thirdPartyMsbPayments")} onCheckedChange={(v) => form.setValue("thirdPartyMsbPayments", v, { shouldValidate: true })} />
           </div>
@@ -560,9 +560,9 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
             <Input {...form.register("estimatedAnnualRevenueUsd")} placeholder={t("kycBusiness.steps.accountInfo.estimatedAnnualRevenuePlaceholder", "e.g. 1000000_to_5000000")} />
           </div>
 
-          <div className="space-y-2 sm:col-span-2">
+          <div className="space-y-2 lg:col-span-2">
             <Label>{t("kycBusiness.steps.accountInfo.virtualAccountsToProvision", "Virtual accounts to provision")}</Label>
-            <div className="grid gap-2 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
               {(
                 [
                   ["usdVirtualAccount", "USD"],
@@ -598,7 +598,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
       )}
 
       {step === 5 && (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycBusiness.steps.documents.documentPurpose", "Document purpose")}</Label>
             <Select value={form.watch("documents.0.purpose") ?? ""} onValueChange={(v) => form.setValue("documents.0.purpose", v as BusinessKycSubmissionInput["documents"][number]["purpose"])}>
@@ -618,10 +618,10 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
             <Label>{t("kycBusiness.steps.documents.description", "Description")}</Label>
             <Input {...form.register("documents.0.description")} placeholder={t("kycBusiness.steps.documents.descriptionPlaceholder", "Certificate of Incorporation")} />
           </div>
-          <div className="sm:col-span-2">
+          <div className="lg:col-span-2">
             <FileField form={form} name="documents.0.file" label={t("kycBusiness.steps.documents.fileLabel", "File")} />
           </div>
-          <p className="text-xs text-muted-foreground sm:col-span-2">
+          <p className="text-xs text-muted-foreground lg:col-span-2">
             {t(
               "kycBusiness.steps.documents.businessRegistrationRequiredHint",
               'A document with purpose "Business registration" is required — the default above satisfies that.',

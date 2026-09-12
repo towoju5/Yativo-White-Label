@@ -30,6 +30,9 @@ export const supportTicketListItemSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   lastMessageAt: z.string(),
+  /** Who sent the most recent message — null only for a ticket with no messages at all (shouldn't happen in practice, every ticket starts with one). */
+  lastMessageAuthorType: supportTicketAuthorTypeSchema.nullable(),
+  lastMessageAuthorName: z.string().nullable(),
 });
 export type SupportTicketListItem = z.infer<typeof supportTicketListItemSchema>;
 

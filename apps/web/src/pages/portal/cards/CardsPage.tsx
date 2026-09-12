@@ -127,7 +127,7 @@ export default function PortalCardsPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {Array.from({ length: 2 }).map((_, i) => (
             <Skeleton key={i} className="h-40" />
           ))}
@@ -138,7 +138,7 @@ export default function PortalCardsPage() {
           <p className="text-sm text-muted-foreground">{t("cards.emptyState", "No cards yet. Request one to start spending.")}</p>
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {data.map((c) => (
             <button
               key={c.id}

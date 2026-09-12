@@ -137,7 +137,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
     >
       {step < STEPS.length - 1 && <StepErrorSummary errors={errors} fields={stepFields[step] ?? []} />}
       {step === 0 && (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycIndividual.steps.personalInfo.firstName", "First name")}</Label>
             <Input {...form.register("firstName")} />
@@ -185,7 +185,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             </div>
           </div>
           {(errors.callingCode || errors.phone) && (
-            <p className="text-xs text-destructive sm:col-span-2 sm:-mt-2">
+            <p className="text-xs text-destructive lg:col-span-2 lg:-mt-2">
               {t("kycIndividual.steps.personalInfo.phoneHint", 'Dial code like "+1", phone digits only (8-15 digits).')}
             </p>
           )}
@@ -253,7 +253,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
       )}
 
       {step === 3 && (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycIndividual.steps.financialProfile.employmentStatus", "Employment status")}</Label>
             <Select value={form.watch("employmentStatus") ?? ""} onValueChange={(v) => form.setValue("employmentStatus", v, { shouldValidate: true })}>
@@ -308,7 +308,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5 sm:col-span-2">
+          <div className="space-y-1.5 lg:col-span-2">
             <Label>{t("kycIndividual.steps.financialProfile.accountPurpose", "Account purpose")}</Label>
             <Select value={accountPurpose ?? ""} onValueChange={(v) => form.setValue("accountPurpose", v, { shouldValidate: true })}>
               <SelectTrigger>
@@ -324,13 +324,13 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             </Select>
           </div>
           {accountPurpose === "Other" && (
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-1.5 lg:col-span-2">
               <Label>{t("kycIndividual.steps.financialProfile.describeAccountPurpose", "Describe account purpose")}</Label>
               <Input {...form.register("accountPurposeOther")} />
             </div>
           )}
 
-          <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:col-span-2">
+          <div className="flex items-center justify-between rounded-lg border border-border p-3 lg:col-span-2">
             <div>
               <p className="text-sm font-medium">{t("kycIndividual.steps.financialProfile.actingAsIntermediary", "Acting as an intermediary")}</p>
               <p className="text-xs text-muted-foreground">
@@ -340,9 +340,9 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             <Switch checked={form.watch("actingAsIntermediary")} onCheckedChange={(v) => form.setValue("actingAsIntermediary", v)} />
           </div>
 
-          <div className="space-y-2 sm:col-span-2">
+          <div className="space-y-2 lg:col-span-2">
             <Label>{t("kycIndividual.steps.financialProfile.virtualAccounts", "Virtual accounts to provision")}</Label>
-            <div className="grid gap-2 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
               {(
                 [
                   ["usdVirtualAccount", "USD"],

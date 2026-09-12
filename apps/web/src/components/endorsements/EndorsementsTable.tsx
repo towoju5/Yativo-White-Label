@@ -128,7 +128,7 @@ export function EndorsementsTable({
         </Table>
       </div>
 
-      <div className="grid gap-3 sm:hidden">
+      <div className="grid grid-cols-1 gap-3 sm:hidden">
         {merged.map((e) => (
           <div key={e.service} className="rounded-lg border border-border bg-card p-4 shadow-soft">
             <div className="flex items-center justify-between gap-3">

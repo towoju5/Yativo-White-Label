@@ -5,6 +5,21 @@ function isPushSupported(): boolean {
   return typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
 }
 
+/**
+ * `navigator.serviceWorker.ready` never resolves at all if registration itself never completes
+ * (e.g. `/sw.js` 404s, or a hosting/proxy config serves it with the wrong MIME type) — since
+ * `registerServiceWorker()` swallows that failure silently, the symptom is the toggle staying
+ * disabled forever with no error, because the `loading` state it's gated on never clears. A
+ * timeout means a broken service worker degrades to "clicking shows a real error" instead of
+ * "clicking does nothing at all."
+ */
+function serviceWorkerReady(timeoutMs = 8000): Promise<ServiceWorkerRegistration> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<ServiceWorkerRegistration>((_, reject) => setTimeout(() => reject(new Error("Service worker never became ready")), timeoutMs)),
+  ]);
+}
+
 /** Standard VAPID-key base64url-to-Uint8Array conversion, required by PushManager.subscribe's applicationServerKey. */
 function urlBase64ToUint8Array(base64Url: string): Uint8Array {
   const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
@@ -29,9 +44,10 @@ export function usePushSubscription() {
       setLoading(false);
       return;
     }
-    navigator.serviceWorker.ready
+    serviceWorkerReady()
       .then((registration) => registration.pushManager.getSubscription())
       .then((sub) => setSubscribed(!!sub))
+      .catch(() => setSubscribed(false))
       .finally(() => setLoading(false));
   }, [supported]);
 
@@ -53,7 +69,7 @@ export function usePushSubscription() {
       const { publicKey } = await portalApi.get<{ publicKey: string | null }>("/portal/notifications/push/vapid-public-key");
       if (!publicKey) return { ok: false, reason: "not-configured" };
 
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await serviceWorkerReady();
       // A subscription left over from a previous VAPID key would make pushManager.subscribe()
       // below throw ("a subscription with a different applicationServerKey already exists") —
       // clear it first so re-subscribing always works.
@@ -76,7 +92,7 @@ export function usePushSubscription() {
   const unsubscribe = useCallback(async () => {
     if (!supported) return;
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await serviceWorkerReady();
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
         await portalApi.post("/portal/notifications/push-subscriptions/unsubscribe", { endpoint: subscription.endpoint });

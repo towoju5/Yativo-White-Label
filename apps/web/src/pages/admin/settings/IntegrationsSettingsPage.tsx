@@ -174,7 +174,7 @@ export default function IntegrationsSettingsPage() {
             </Select>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="fiatBaseUrl">Fiat base URL</Label>
               <Input id="fiatBaseUrl" value={config.yativo.fiatBaseUrl} onChange={(e) => updateYativo("fiatBaseUrl", e.target.value)} />
@@ -185,7 +185,7 @@ export default function IntegrationsSettingsPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="apiKey">API key</Label>
               <Input
@@ -239,13 +239,13 @@ export default function IntegrationsSettingsPage() {
             </Select>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="smtpFrom">From address</Label>
               <Input id="smtpFrom" value={config.smtp.fromAddress} onChange={(e) => updateSmtp("fromAddress", e.target.value)} />
             </div>
             {config.smtp.mode === "sendmail" && (
-              <div className="space-y-1.5 sm:col-span-2">
+              <div className="space-y-1.5 lg:col-span-2">
                 <Label htmlFor="sendmailPath">Sendmail binary path (optional)</Label>
                 <Input
                   id="sendmailPath"
@@ -259,7 +259,7 @@ export default function IntegrationsSettingsPage() {
 
           {config.smtp.mode === "smtp" && (
             <>
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="smtpHost">Host</Label>
                   <Input id="smtpHost" value={config.smtp.host} onChange={(e) => updateSmtp("host", e.target.value)} />
@@ -270,7 +270,7 @@ export default function IntegrationsSettingsPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="smtpUser">Username</Label>
                   <Input id="smtpUser" value={config.smtp.user} onChange={(e) => updateSmtp("user", e.target.value)} />
