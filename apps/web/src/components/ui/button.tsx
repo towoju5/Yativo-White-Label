@@ -40,12 +40,30 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
+    // Slot (asChild) clones its single child via React.Children.only — passing it more than one
+    // child (e.g. a loading-spinner element alongside the real children) throws at render time,
+    // so the spinner can only ever be injected on a real <button>, never through asChild.
+    if (asChild) {
+      // Slot's own type only knows about generic HTMLAttributes (it can wrap any element, not
+      // just a button) and doesn't list `disabled` — but every real caller of asChild here wraps
+      // an element that does accept it, same as this always worked before `disabled` was pulled
+      // out as its own named prop above.
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...(props as Record<string, unknown>)}
+          {...({ disabled: disabled || loading } as Record<string, unknown>)}
+        >
+          {children}
+        </Slot>
+      );
+    }
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} disabled={disabled || loading} {...props}>
-        {loading && !asChild && <Loader2 className="animate-spin" />}
+      <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} disabled={disabled || loading} {...props}>
+        {loading && <Loader2 className="animate-spin" />}
         {children}
-      </Comp>
+      </button>
     );
   },
 );
