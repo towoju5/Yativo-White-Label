@@ -3,6 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { createBullConnection } from "../connection.js";
 import { WEBHOOK_QUEUE_NAME } from "../queue.js";
 import { dispatchWebhookEvent } from "../../webhooks/dispatcher.js";
+import { describeError } from "../../lib/formatZodError.js";
 import logger from "../../lib/logger.js";
 
 type WebhookJobData = { webhookEventId: string };
@@ -27,7 +28,7 @@ export function startWebhookProcessorWorker(prisma: PrismaClient): Worker<Webhoo
           data: { processingStatus: result.status, processedAt: new Date(), errorMessage: result.errorMessage ?? null },
         });
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
+        const errorMessage = describeError(err);
         await prisma.webhookEvent.update({
           where: { id: event.id },
           data: { processingStatus: "FAILED", processedAt: new Date(), errorMessage },
