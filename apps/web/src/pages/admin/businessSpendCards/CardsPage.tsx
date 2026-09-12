@@ -229,7 +229,7 @@ function ManageCardDialog({ card, onClose, onChanged }: { card: AdminBusinessSpe
               <DialogTitle>Manage {card.maskedPan ?? "card"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="admin-fund">Fund (USD)</Label>
                   <Input id="admin-fund" type="number" min="0.01" step="0.01" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} />

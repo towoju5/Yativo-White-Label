@@ -568,6 +568,41 @@ until Yativo enables them.
       fixed). No visual/browser-based testing was available in this environment — all fixes here
       were found via static analysis of the Tailwind classes, not by rendering the pages.
 
+## 6l. Dialog width bug, global loading indicator, push-notification silent failure, strict grid rule (2026-09-12, user request)
+
+- [x] **Root cause of "deposit page not responsive"**: the shared `Dialog` component
+      (`components/ui/dialog.tsx`) had `w-full` with no side margin/gutter on `DialogContent` —
+      since it's `position: fixed`, `w-full` resolves to 100% of the *viewport*, so on a phone the
+      entire deposit wizard (and every other dialog in the app, both portal and admin) rendered
+      completely edge-to-edge with zero breathing room. Fixed at the source: `w-[calc(100%-2rem)]`
+      gives every dialog a consistent 1rem gutter on narrow screens; unaffected on desktop where
+      `max-w-*` already caps it well short of the viewport.
+- [x] **Global loading indicator**: new `GlobalLoadingBar` (top-of-viewport indeterminate progress
+      bar, `useIsFetching`/`useIsMutating` from React Query) mounted once in `App.tsx` — covers
+      every action across the whole app automatically, rather than requiring each of the ~60
+      mutation buttons to be individually retrofitted. Also gave `Button` a first-class `loading`
+      prop (spinner + auto-disable) for new/updated call sites to opt into per-action feedback on
+      top of the global bar.
+- [x] **Push notifications silently failing to enable**: `usePushSubscription.ts`'s `subscribe()`
+      had zero error handling — any failure (a stale subscription left over from before the
+      server's VAPID key last changed, which makes the browser throw "a subscription with a
+      different applicationServerKey already exists"; a network hiccup; permission request
+      throwing) became an unhandled promise rejection with no UI feedback at all — the toggle just
+      did nothing. Fixed: wrapped in try/catch, clears any stale subscription before re-subscribing,
+      and returns a typed reason (`unsupported`/`permission-denied`/`not-configured`/`error`) so the
+      UI shows what actually went wrong instead of a generic message. Also stopped hiding the whole
+      card on unsupported browsers — it now explains *why* (in particular: iOS Safari only exposes
+      push to a PWA actually installed to the home screen, not a regular browser tab — a very common
+      "why can't I enable this" case with no code fix available, just an explanation).
+- [x] **Strict 1-column-mobile / 2-column-max-desktop grid rule, applied with no exceptions per
+      explicit user confirmation**: audited and fixed every multi-column grid active below the `lg`
+      (1024px) breakpoint across the entire `apps/web/src` tree — form field pairs, KYC wizard
+      steps, settings pages, card/wallet grids, dashboard stat tiles (previously 2-4 per row on
+      phones), and the hero/chart/wallet split sections in all 5 dashboard templates (previously
+      3-column at `lg`, now 2, with `col-span` values adjusted to match). Deliberately left alone:
+      `MobileBottomNav`'s 5-tab bar (a fixed-role tab strip, not page content) and the tiny
+      decorative `PreviewThumbnail` mockups in the admin template picker (not real responsive UI).
+
 ## 6. Crypto integration
 
 - [x] Crypto wallet deposit flow (`packages/yativo-sdk/src/crypto/wallets.ts`) — real, live, on

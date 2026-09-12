@@ -39,8 +39,8 @@ export function AuroraDashboardLayout({
       </div>
 
       {/* Row 1 — balance hero + trend, minimum two blocks side by side */}
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-secondary/10 p-8 shadow-elevated lg:col-span-2">
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-secondary/10 p-8 shadow-elevated">
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-3xl" />
           <div className="relative">
@@ -79,13 +79,13 @@ export function AuroraDashboardLayout({
 
       {/* Row 2 — stat tiles, inherently multi-column */}
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {stats.map((s) => (
             <AuroraStatCard key={s.label} {...s} />
           ))}
@@ -98,12 +98,12 @@ export function AuroraDashboardLayout({
           <div className="rounded-3xl border border-border bg-card p-5 shadow-elevated">
             <p className="mb-4 text-sm font-semibold">{t("dashboardLayout.aurora.wallets", "Wallets")}</p>
             {isLoading ? (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 lg:grid-cols-2">
                 <Skeleton className="h-28 rounded-2xl" />
                 <Skeleton className="h-28 rounded-2xl" />
               </div>
             ) : wallets.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 lg:grid-cols-2">
                 {wallets.map((w) => (
                   <AuroraWalletBalanceCard key={w.currencyCode} {...w} />
                 ))}

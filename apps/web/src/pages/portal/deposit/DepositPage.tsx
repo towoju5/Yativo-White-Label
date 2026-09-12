@@ -437,7 +437,7 @@ function NativeDepositCard() {
                       </div>
 
                       {methodsQuery.isLoading ? (
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-3 lg:grid-cols-2">
                           {Array.from({ length: 4 }).map((_, i) => (
                             <Skeleton key={i} className="h-24" />
                           ))}
@@ -447,7 +447,7 @@ function NativeDepositCard() {
                           {t("deposit.step1.noMethods", "No active deposit methods for this country yet.")}
                         </p>
                       ) : (
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-3 lg:grid-cols-2">
                           {(methodsQuery.data ?? []).map((m) => {
                             const selected = m.gatewayId === gatewayId;
                             return (
@@ -499,7 +499,7 @@ function NativeDepositCard() {
                         {t("deposit.step2.prompt", "{{method}} — amount & details", { method: selectedMethod?.methodName ?? "" })}
                       </div>
 
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="grid gap-4 lg:grid-cols-2">
                         <div className="space-y-1.5">
                           <Label>{t("deposit.step2.walletLabel", "Wallet to credit")}</Label>
                           <Select value={walletCurrencyCode} onValueChange={setWalletCurrencyCode}>
@@ -540,7 +540,7 @@ function NativeDepositCard() {
                       </div>
 
                       {formFields.length > 0 && (
-                        <div className="grid gap-x-4 gap-y-4 border-t border-border pt-4 sm:grid-cols-2">
+                        <div className="grid gap-x-4 gap-y-4 border-t border-border pt-4 lg:grid-cols-2">
                           {formFields.map((f) => (
                             <div key={f.key} className="space-y-1.5">
                               <Label>

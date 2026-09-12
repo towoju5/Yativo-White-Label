@@ -21,7 +21,7 @@ export function KycRequiredNotice({ service }: { service: KycRequiredService }) 
   const isRejected = kycStatus === "REJECTED";
 
   return (
-    <div className="flex flex-col items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-start gap-2.5">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
         <p>

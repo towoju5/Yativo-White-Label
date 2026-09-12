@@ -35,34 +35,59 @@ export function usePushSubscription() {
       .finally(() => setLoading(false));
   }, [supported]);
 
-  const subscribe = useCallback(async () => {
-    if (!supported) return false;
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") return false;
+  /**
+   * Returns a reason on failure so the caller can show something more useful than a generic
+   * error — every step here used to run with no try/catch at all, so a stale subscription left
+   * over from before the server's VAPID key last changed (browsers throw when you subscribe with
+   * a *different* applicationServerKey while one is already active), a network hiccup fetching
+   * the key, or `Notification.requestPermission()` itself throwing (some browsers do, if it's
+   * called outside a direct user-gesture handler) all surfaced as an unhandled promise rejection
+   * with zero UI feedback — the toggle just silently did nothing.
+   */
+  const subscribe = useCallback(async (): Promise<{ ok: true } | { ok: false; reason: "unsupported" | "permission-denied" | "not-configured" | "error" }> => {
+    if (!supported) return { ok: false, reason: "unsupported" };
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return { ok: false, reason: "permission-denied" };
 
-    const { publicKey } = await portalApi.get<{ publicKey: string | null }>("/portal/notifications/push/vapid-public-key");
-    if (!publicKey) return false;
+      const { publicKey } = await portalApi.get<{ publicKey: string | null }>("/portal/notifications/push/vapid-public-key");
+      if (!publicKey) return { ok: false, reason: "not-configured" };
 
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
-    });
-    const json = subscription.toJSON();
-    await portalApi.post("/portal/notifications/push-subscriptions", { endpoint: json.endpoint, keys: json.keys });
-    setSubscribed(true);
-    return true;
+      const registration = await navigator.serviceWorker.ready;
+      // A subscription left over from a previous VAPID key would make pushManager.subscribe()
+      // below throw ("a subscription with a different applicationServerKey already exists") —
+      // clear it first so re-subscribing always works.
+      const existing = await registration.pushManager.getSubscription();
+      if (existing) await existing.unsubscribe();
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
+      });
+      const json = subscription.toJSON();
+      await portalApi.post("/portal/notifications/push-subscriptions", { endpoint: json.endpoint, keys: json.keys });
+      setSubscribed(true);
+      return { ok: true };
+    } catch {
+      return { ok: false, reason: "error" };
+    }
   }, [supported]);
 
   const unsubscribe = useCallback(async () => {
     if (!supported) return;
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    if (subscription) {
-      await portalApi.post("/portal/notifications/push-subscriptions/unsubscribe", { endpoint: subscription.endpoint });
-      await subscription.unsubscribe();
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        await portalApi.post("/portal/notifications/push-subscriptions/unsubscribe", { endpoint: subscription.endpoint });
+        await subscription.unsubscribe();
+      }
+    } finally {
+      // Reflect "off" locally even if the unsubscribe call itself failed partway — leaving the
+      // switch stuck in a stale "on" state after the user asked to turn it off is worse than a
+      // subscription row lingering server-side for an endpoint that no longer delivers anything.
+      setSubscribed(false);
     }
-    setSubscribed(false);
   }, [supported]);
 
   return { supported, subscribed, loading, subscribe, unsubscribe };

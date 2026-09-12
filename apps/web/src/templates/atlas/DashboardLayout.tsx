@@ -40,7 +40,7 @@ export function AtlasDashboardLayout({
         <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary via-primary to-secondary p-8 text-primary-foreground shadow-elevated">
           <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-medium opacity-80">{heroLabel ?? t("dashboardLayout.atlas.totalBalance", "Total balance")}</p>
               {isLoading ? (
@@ -59,7 +59,7 @@ export function AtlasDashboardLayout({
               )}
             </div>
             {chartData && chartData.length > 0 && (
-              <div className="w-full sm:w-64">
+              <div className="w-full lg:w-64">
                 <BalanceChart data={chartData} color="rgba(255,255,255,0.9)" height={80} />
               </div>
             )}
@@ -68,13 +68,13 @@ export function AtlasDashboardLayout({
       )}
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {stats.map((s) => (
             <AtlasStatCard key={s.label} {...s} />
           ))}

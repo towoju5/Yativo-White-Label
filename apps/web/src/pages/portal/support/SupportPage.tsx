@@ -154,7 +154,7 @@ export default function SupportPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">{t("support.subtitle", "Get help, chat with us, or browse frequently asked questions")}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t("support.contact", "Contact us")}</CardTitle>

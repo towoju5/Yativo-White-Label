@@ -71,7 +71,7 @@ export default function PortalWalletsPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -81,7 +81,7 @@ export default function PortalWalletsPage() {
           {t("wallets.empty", "No wallets yet. They'll appear here once you have a balance.")}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {data.map((w) => (
             <T.WalletBalanceCard
               key={w.walletId}

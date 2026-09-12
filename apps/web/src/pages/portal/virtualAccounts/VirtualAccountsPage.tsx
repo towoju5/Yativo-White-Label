@@ -154,7 +154,7 @@ export default function VirtualAccountsPage() {
               </CardHeader>
               <CardContent>
                   {currenciesQuery.isLoading ? (
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 lg:grid-cols-2">
                       {Array.from({ length: 4 }).map((_, i) => (
                       <Skeleton key={i} className="h-20" />
                       ))}
@@ -164,7 +164,7 @@ export default function VirtualAccountsPage() {
                       {accounts.length > 0 ? t('virtualAccounts.allCurrenciesAdded', 'You already have an account for every available currency.') : t('virtualAccounts.noCurrenciesAvailable', 'No virtual account currencies are available yet.')}
                   </p>
                   ) : (
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 lg:grid-cols-2">
                       {availableCurrencies.map((c) => {
                       const pending = creatingCurrency === c.currency && createMutation.isPending;
                       return (

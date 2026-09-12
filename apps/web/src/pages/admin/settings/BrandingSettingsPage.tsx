@@ -134,7 +134,7 @@ export default function BrandingSettingsPage() {
           <CardDescription>Structure and layout — nav placement, dashboard composition, landing page.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2" style={previewVars}>
+          <div className="grid gap-4 lg:grid-cols-2" style={previewVars}>
             {TEMPLATE_LIST.map((t) => (
               <button
                 key={t.id}
@@ -226,7 +226,7 @@ export default function BrandingSettingsPage() {
               />
               <p className="text-xs text-muted-foreground">Shown in the browser tab. Leave blank to keep the default icon.</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 lg:grid-cols-2">
               <ColorField label="Primary" value={draft.primaryColor ?? "#6366f1"} onChange={(v) => setDraft((d) => (d ? { ...d, primaryColor: v } : d))} />
               <ColorField
                 label="Secondary"

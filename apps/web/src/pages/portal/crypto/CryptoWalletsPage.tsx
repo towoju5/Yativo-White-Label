@@ -108,7 +108,7 @@ export default function CryptoWalletsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {walletsQuery.isLoading ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 lg:grid-cols-2">
               <Skeleton className="h-20" />
               <Skeleton className="h-20" />
             </div>
@@ -117,7 +117,7 @@ export default function CryptoWalletsPage() {
               {t("crypto.noWalletsYet", "No crypto wallets yet — generate an address below to get started.")}
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 lg:grid-cols-2">
               {wallets.map((w) => (
                 <div key={w.id} className="flex flex-col gap-2 rounded-lg border border-border p-3 text-sm">
                   <div className="flex items-center gap-1.5 font-medium">

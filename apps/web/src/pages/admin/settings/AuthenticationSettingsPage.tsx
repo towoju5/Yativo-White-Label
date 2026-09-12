@@ -338,7 +338,7 @@ function TwoFactorSection() {
               <p className="text-sm text-muted-foreground">
                 Store these somewhere safe — each one can be used once to sign in if you lose access to your authenticator app. They won't be shown again.
               </p>
-              <div className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/50 p-3 font-mono text-sm">
+              <div className="grid grid-cols-1 gap-2 rounded-lg border border-border bg-muted/50 p-3 font-mono text-sm lg:grid-cols-2">
                 {backupCodes.map((c) => (
                   <span key={c}>{c}</span>
                 ))}

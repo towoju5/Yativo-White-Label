@@ -343,7 +343,7 @@ export function AddressFields({
   const stateProvinceLabel = t("kycShared.stateProvinceLabel", "State / province");
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 lg:grid-cols-2">
       <div className="space-y-1.5 sm:col-span-2">
         <Label>{t("kycShared.countryLabel", "Country")}</Label>
         <CountryField form={form} name={`${prefix}.country`} countries={countries} isLoading={countriesLoading} />
@@ -402,7 +402,7 @@ export function IndividualIdDocFields({ form, prefix, countries, countriesLoadin
   const idTypes = useKycIdentificationTypes(issuingCountry);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 lg:grid-cols-2">
       <div className="space-y-1.5">
         <Label>{t("kycShared.issuingCountryLabel", "Issuing country")}</Label>
         <CountryField form={form} name={`${prefix}.issuingCountry`} countries={countries} isLoading={countriesLoading} />
@@ -457,7 +457,7 @@ export function BusinessPhotoIdFields({
   const { t } = useTranslation();
   const idTypes = useKycIdentificationTypes(country);
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 lg:grid-cols-2">
       <div className="space-y-1.5">
         <Label>{t("kycShared.documentTypeLabel", "Document type")}</Label>
         <SearchableSelect

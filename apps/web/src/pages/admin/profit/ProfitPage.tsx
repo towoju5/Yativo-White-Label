@@ -93,14 +93,14 @@ export default function ProfitPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-24" />
           ))}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {(data?.totalsByCurrency ?? []).length === 0 ? (
               <Card className="sm:col-span-2 lg:col-span-3">
                 <CardContent className="flex items-center justify-center p-8 text-sm text-muted-foreground">No platform fee revenue in this period</CardContent>

@@ -220,7 +220,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
     >
       {step < STEPS.length - 1 && <StepErrorSummary errors={errors} fields={getStepFields(step)} />}
       {step === 0 && (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycBusiness.steps.businessInfo.legalName", "Legal business name")}</Label>
             <Input {...form.register("businessLegalName")} />
@@ -338,7 +338,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
                   </Button>
                 )}
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 lg:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label>{t("kycBusiness.steps.ownersDirectors.firstName", "First name")}</Label>
                   <Input {...form.register(`associatedPersons.${i}.firstName`)} />
@@ -372,7 +372,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
                   <Input type="number" min={0} max={100} {...form.register(`associatedPersons.${i}.ownershipPercentage`, { valueAsNumber: true })} />
                 </div>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 lg:grid-cols-2">
                 {(
                   [
                     ["hasOwnership", t("kycBusiness.steps.ownersDirectors.hasOwnership", "Has ownership")],
@@ -415,7 +415,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
                 <h3 className="text-sm font-semibold">{personName || t("kycBusiness.steps.ownersDirectors.personFallbackName", "Owner / director {{index}}", { index: i + 1 })}</h3>
                 <div>
                   <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{t("kycBusiness.steps.ownersDirectors.taxIdHeading", "1. Tax ID")}</h4>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 lg:grid-cols-2">
                     <div className="space-y-1.5 sm:col-span-2">
                       <Label>{t("kycBusiness.steps.ownersDirectors.taxId", "SSN / EIN / ITIN")}</Label>
                       <Input {...form.register(`associatedPersons.${i}.identifyingInformation.0.number`)} />
@@ -444,7 +444,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
       )}
 
       {step === 4 && (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycBusiness.steps.accountInfo.accountPurpose", "Account purpose")}</Label>
             <Select value={accountPurpose ?? ""} onValueChange={(v) => form.setValue("accountPurpose", v, { shouldValidate: true })}>
@@ -484,7 +484,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
 
           <div className="space-y-2 sm:col-span-2">
             <Label>{t("kycBusiness.steps.accountInfo.highRiskActivities", "High-risk activities (select any that apply)")}</Label>
-            <div className="grid gap-1.5 sm:grid-cols-2">
+            <div className="grid gap-1.5 lg:grid-cols-2">
               {HIGH_RISK_ACTIVITIES.map((a) => (
                 <label key={a} className="flex items-center gap-2 rounded-lg border border-border p-2.5 text-sm">
                   <Checkbox
@@ -562,7 +562,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
 
           <div className="space-y-2 sm:col-span-2">
             <Label>{t("kycBusiness.steps.accountInfo.virtualAccountsToProvision", "Virtual accounts to provision")}</Label>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 lg:grid-cols-2">
               {(
                 [
                   ["usdVirtualAccount", "USD"],
@@ -598,7 +598,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
       )}
 
       {step === 5 && (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{t("kycBusiness.steps.documents.documentPurpose", "Document purpose")}</Label>
             <Select value={form.watch("documents.0.purpose") ?? ""} onValueChange={(v) => form.setValue("documents.0.purpose", v as BusinessKycSubmissionInput["documents"][number]["purpose"])}>

@@ -52,13 +52,13 @@ export function PrimeDashboardLayout({
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-20" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {stats.map((s) => (
             <PrimeStatCard key={s.label} {...s} />
           ))}
@@ -72,7 +72,7 @@ export function PrimeDashboardLayout({
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2">
         {wallets && (
           <div className="rounded-lg border border-border bg-card lg:col-span-1">
             <div className="border-b border-border px-4 py-3">
@@ -95,7 +95,7 @@ export function PrimeDashboardLayout({
           </div>
         )}
 
-        <div className={cn("rounded-lg border border-border bg-card", wallets ? "lg:col-span-2" : "lg:col-span-3")}>
+        <div className={cn("rounded-lg border border-border bg-card", wallets ? "lg:col-span-1" : "lg:col-span-2")}>
           <div className="border-b border-border px-4 py-3">
             <p className="text-sm font-medium">{resolvedActivityTitle}</p>
           </div>

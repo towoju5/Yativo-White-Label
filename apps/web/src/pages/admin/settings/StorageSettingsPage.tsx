@@ -43,7 +43,7 @@ function secretHint(configured: boolean) {
 function S3LikeFields({ value, onChange, endpointHint }: { value: S3LikeConfig; onChange: (next: S3LikeConfig) => void; endpointHint: string }) {
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-1.5">
           <Label>Bucket</Label>
           <Input value={value.bucket} onChange={(e) => onChange({ ...value, bucket: e.target.value })} />
@@ -53,7 +53,7 @@ function S3LikeFields({ value, onChange, endpointHint }: { value: S3LikeConfig; 
           <Input value={value.region} onChange={(e) => onChange({ ...value, region: e.target.value })} />
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-1.5">
           <Label>Access key ID</Label>
           <Input type="password" placeholder={secretHint(value.accessKeyIdConfigured)} value={value.accessKeyId ?? ""} onChange={(e) => onChange({ ...value, accessKeyId: e.target.value })} />
@@ -68,7 +68,7 @@ function S3LikeFields({ value, onChange, endpointHint }: { value: S3LikeConfig; 
           />
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-1.5">
           <Label>Endpoint</Label>
           <Input placeholder={endpointHint} value={value.endpoint} onChange={(e) => onChange({ ...value, endpoint: e.target.value })} />
@@ -199,7 +199,7 @@ export default function StorageSettingsPage() {
             <CardDescription>Public base URL is your pull zone's domain (or a custom domain in front of it).</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Storage zone</Label>
                 <Input value={config.bunny.storageZone} onChange={(e) => setConfig((c) => ({ ...c, bunny: { ...c.bunny, storageZone: e.target.value } }))} />
@@ -209,7 +209,7 @@ export default function StorageSettingsPage() {
                 <Input placeholder="ny, la, sg, de…" value={config.bunny.region} onChange={(e) => setConfig((c) => ({ ...c, bunny: { ...c.bunny, region: e.target.value } }))} />
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Access key (API key)</Label>
                 <Input
@@ -239,7 +239,7 @@ export default function StorageSettingsPage() {
             <CardDescription>Service-account credentials from a GCP JSON key file.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Project ID</Label>
                 <Input value={config.gcs.projectId} onChange={(e) => setConfig((c) => ({ ...c, gcs: { ...c.gcs, projectId: e.target.value } }))} />

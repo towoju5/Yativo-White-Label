@@ -10,6 +10,7 @@ import { CustomerAuthProvider } from "@/hooks/useCustomerAuth";
 import { useRealtimeWalletBridge } from "@/hooks/useRealtimeWallets";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { GlobalLoadingBar } from "@/components/GlobalLoadingBar";
 import { createRouter } from "@/router";
 
 function SplashScreen() {
@@ -50,6 +51,7 @@ export default function App() {
       <TooltipProvider>
         <StaffAuthProvider>
           <CustomerAuthProvider>
+            <GlobalLoadingBar />
             <RouterProvider router={router} />
             <Toaster />
           </CustomerAuthProvider>

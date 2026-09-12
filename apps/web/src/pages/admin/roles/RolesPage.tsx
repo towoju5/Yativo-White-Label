@@ -77,7 +77,7 @@ export default function RolesPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-40" />
           ))}
@@ -87,7 +87,7 @@ export default function RolesPage() {
           No custom roles yet — staff without one get the default STAFF permission set.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {data.map((role) => (
             <Card key={role.id}>
               <CardHeader>

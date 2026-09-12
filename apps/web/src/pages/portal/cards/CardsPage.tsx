@@ -127,7 +127,7 @@ export default function PortalCardsPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {Array.from({ length: 2 }).map((_, i) => (
             <Skeleton key={i} className="h-40" />
           ))}
@@ -138,7 +138,7 @@ export default function PortalCardsPage() {
           <p className="text-sm text-muted-foreground">{t("cards.emptyState", "No cards yet. Request one to start spending.")}</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {data.map((c) => (
             <button
               key={c.id}
@@ -324,7 +324,7 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                 <Skeleton className="h-16" />
               ) : (
                 <>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                     <div>
                       <p className="text-xs text-muted-foreground">{t("cards.cardholder", "Cardholder")}</p>
                       <p className="font-medium">{detail?.cardholderName ?? "—"}</p>
@@ -364,7 +364,7 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
 
             {!isClosed && (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="topup" className="flex items-center gap-1.5 text-xs">
                       <ArrowDownToLine className="h-3.5 w-3.5" /> {t("cards.topUp", "Top up")}
