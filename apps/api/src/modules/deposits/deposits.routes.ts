@@ -133,7 +133,9 @@ export async function depositsRoutes(app: FastifyInstance) {
             idempotencyKey: `deposit:${result.depositId}`,
             externalSource: "MANUAL",
             externalRef: result.depositId,
-            description: `Deposit initiated via Yativo (${result.depositId})`,
+            // No provider name here — this is customer-facing (shown as the transaction's
+            // subtitle); the reference id is already surfaced separately via externalRef.
+            description: "Deposit initiated",
             lines,
           });
           pendingTransactionId = pendingTx.id;

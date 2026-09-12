@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, LEDGER_TRANSACTION_STATUSES } from "@white-label/shared-types";
-import { CheckCircle2, ChevronLeft, ChevronRight, Undo2 } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, Eye, Undo2 } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { AdminTransactionRow, Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AdminTransactionDetailDialog } from "@/components/admin/AdminTransactionDetailDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ export default function TransactionsPage() {
   const [page, setPage] = useState(1);
   const [adjusting, setAdjusting] = useState<{ tx: AdminTransactionRow; action: "settle" | "reverse" } | null>(null);
   const [reason, setReason] = useState("");
+  const [viewingId, setViewingId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "transactions", { type, status, page }],
@@ -134,6 +136,7 @@ export default function TransactionsPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Details</TableHead>
                 {canAdjust && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
@@ -161,6 +164,11 @@ export default function TransactionsPage() {
                     ) : (
                       "—"
                     )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" title="View details" onClick={() => setViewingId(tx.id)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                   {canAdjust && (
                     <TableCell className="text-right">
@@ -225,6 +233,8 @@ export default function TransactionsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AdminTransactionDetailDialog transactionId={viewingId} onClose={() => setViewingId(null)} />
     </div>
   );
 }

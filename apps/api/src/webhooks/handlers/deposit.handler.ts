@@ -73,7 +73,9 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
       type: "DEPOSIT",
       externalSource: "YATIVO_WEBHOOK",
       externalRef: payload.yativoDepositId,
-      description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
+      // No provider name here — customer-facing; the reference id is already surfaced
+      // separately via externalRef.
+      description: "Deposit confirmed",
     });
   } else {
     // No local PENDING transaction to settle — either this deposit predates that column, or it
@@ -87,7 +89,9 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
       idempotencyKey: `webhook:${externalEventId}`,
       externalSource: "YATIVO_WEBHOOK",
       externalRef: payload.yativoDepositId,
-      description: `Deposit confirmed via Yativo (${payload.yativoDepositId})`,
+      // No provider name here — customer-facing; the reference id is already surfaced
+      // separately via externalRef.
+      description: "Deposit confirmed",
       lines: finalLines,
     });
   }

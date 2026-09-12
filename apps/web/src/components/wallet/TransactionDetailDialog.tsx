@@ -24,16 +24,18 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-/** Fee/rate breakdown rows shared by the on-screen detail list, the printed receipt, and the share text — deposits and payouts both carry a platform fee, but only deposits also have a gross-vs-net figure and an exchange rate to show. */
+/**
+ * Fee/rate breakdown rows shared by the on-screen detail list, the printed receipt, and the
+ * share text. The headline amount (from the customer's own ledger entry) is always the NET
+ * figure they actually received/paid — these rows only ever add a single combined "Fee" plus,
+ * for deposits, the rate/local-amount context. Never split into provider-vs-platform pieces.
+ */
 function feeDetailRows(data: TransactionDetail): [string, string][] {
   const rows: [string, string][] = [];
   if (data.deposit) {
     const d = data.deposit;
-    if (d.grossAmountMinor !== null) {
-      rows.push(["Amount received", `${formatMinorAmount(d.grossAmountMinor, 2)} ${d.currencyCode}`]);
-    }
-    if (Number(d.platformFeeMinor) > 0) {
-      rows.push(["Fee", `${formatMinorAmount(d.platformFeeMinor, 2)} ${d.currencyCode}`]);
+    if (Number(d.totalFeeMinor) > 0) {
+      rows.push(["Fee", `${formatMinorAmount(d.totalFeeMinor, 2)} ${d.currencyCode}`]);
     }
     if (d.exchangeRate) rows.push(["Exchange rate", d.exchangeRate]);
     if (d.localAmount && d.localCurrency) rows.push(["Amount paid", `${d.localAmount} ${d.localCurrency}`]);

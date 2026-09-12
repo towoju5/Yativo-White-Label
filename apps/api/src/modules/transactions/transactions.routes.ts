@@ -7,6 +7,7 @@ import {
   paginationQuerySchema,
   paginatedResponseSchema,
   transactionDetailSchema,
+  adminTransactionDetailSchema,
   LEDGER_TRANSACTION_TYPES,
   LEDGER_TRANSACTION_STATUSES,
   currencyCodeSchema,
@@ -15,7 +16,13 @@ import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
-import { listLedgerTransactions, listTransactionsForCustomer, adminSettleTransaction, adminReverseTransaction } from "./transactions.service.js";
+import {
+  listLedgerTransactions,
+  listTransactionsForCustomer,
+  adminSettleTransaction,
+  adminReverseTransaction,
+  getTransactionDetailForAdmin,
+} from "./transactions.service.js";
 import { getTransactionDetailForCustomer } from "../wallets/wallets.service.js";
 
 const adjustBodySchema = z.object({ reason: z.string().min(1, "A reason is required") });
@@ -74,6 +81,18 @@ export async function transactionsRoutes(app: FastifyInstance) {
       const { page, pageSize, type, status, customerId, currencyCode } = request.query;
       const result = await listLedgerTransactions(app.prisma, { type, status, customerId, currencyCode }, page, pageSize);
       return reply.send(result);
+    },
+  );
+
+  server.get(
+    "/admin/transactions/:id",
+    {
+      preHandler: requireStaffAuth,
+      schema: { params: z.object({ id: z.string() }), response: { 200: adminTransactionDetailSchema, 404: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      const detail = await getTransactionDetailForAdmin(app.prisma, request.params.id);
+      return reply.send(detail);
     },
   );
 

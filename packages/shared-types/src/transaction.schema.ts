@@ -128,12 +128,15 @@ export const transactionDetailPayoutSchema = z.object({
 export type TransactionDetailPayout = z.infer<typeof transactionDetailPayoutSchema>;
 
 export const transactionDetailDepositSchema = z.object({
-  /** Gross wallet-currency amount Yativo credited, before this platform's own fee. */
-  grossAmountMinor: minorAmountSchema.nullable(),
-  /** The platform's own fee — grossAmountMinor - platformFeeMinor is what actually landed in the wallet (shown as the transaction's headline amount). */
-  platformFeeMinor: minorAmountSchema,
+  /**
+   * Total fee actually absorbed by the customer (the provider's own cut plus this platform's
+   * markup, combined into one figure) — never broken out into pieces client-side. This platform
+   * is built on top of a payments provider, but that's an internal implementation detail: the
+   * customer should only ever see "you received X, fee was Y", never which portion went where.
+   */
+  totalFeeMinor: minorAmountSchema,
   currencyCode: currencyCodeSchema,
-  /** Human-readable rate/local-amount strings as Yativo quoted them, e.g. "1 USD = 1346.4584 NGN". */
+  /** Human-readable rate/local-amount strings, e.g. "1 USD = 1346.4584 NGN". */
   exchangeRate: z.string().nullable(),
   localCurrency: z.string().nullable(),
   localAmount: z.string().nullable(),
@@ -159,3 +162,60 @@ export const transactionDetailSchema = z.object({
   deposit: transactionDetailDepositSchema.nullable(),
 });
 export type TransactionDetail = z.infer<typeof transactionDetailSchema>;
+
+// ── Admin-only detail — the customer-facing schemas above deliberately combine/hide the
+// provider's own cut and identity; this is the one place that breakdown is allowed to surface. ──
+
+export const adminTransactionDetailEntrySchema = z.object({
+  accountId: z.string(),
+  accountType: z.string(),
+  /** null for a platform-side account (settlement, suspense, fee revenue, ...) with no owning customer. */
+  customerId: z.string().nullable(),
+  customerEmail: z.string().nullable(),
+  direction: z.enum(ENTRY_DIRECTIONS),
+  amountMinor: minorAmountSchema,
+  currencyCode: currencyCodeSchema,
+});
+export type AdminTransactionDetailEntry = z.infer<typeof adminTransactionDetailEntrySchema>;
+
+export const adminTransactionDetailDepositSchema = z.object({
+  yativoDepositId: z.string(),
+  grossAmountMinor: minorAmountSchema.nullable(),
+  yativoFeeMinor: minorAmountSchema.nullable(),
+  platformFeeMinor: minorAmountSchema,
+  currencyCode: currencyCodeSchema,
+  exchangeRate: z.string().nullable(),
+  localCurrency: z.string().nullable(),
+  localAmount: z.string().nullable(),
+});
+export type AdminTransactionDetailDeposit = z.infer<typeof adminTransactionDetailDepositSchema>;
+
+export const adminTransactionDetailPayoutSchema = z.object({
+  id: z.string(),
+  beneficiaryName: z.string(),
+  beneficiaryDetails: z.record(z.unknown()),
+  yativoPayoutId: z.string().nullable(),
+  amountMinor: minorAmountSchema,
+  platformFeeMinor: minorAmountSchema,
+  currencyCode: currencyCodeSchema,
+});
+export type AdminTransactionDetailPayout = z.infer<typeof adminTransactionDetailPayoutSchema>;
+
+export const adminTransactionDetailSchema = z.object({
+  id: z.string(),
+  type: z.enum(LEDGER_TRANSACTION_TYPES),
+  status: z.enum(LEDGER_TRANSACTION_STATUSES),
+  description: z.string().nullable(),
+  externalRef: z.string().nullable(),
+  externalSource: z.enum(LEDGER_EXTERNAL_SOURCES),
+  idempotencyKey: z.string(),
+  metadata: z.record(z.unknown()).nullable(),
+  createdAt: z.string(),
+  postedAt: z.string().nullable(),
+  reversedAt: z.string().nullable(),
+  /** Every entry this transaction touched, across every account — including platform-side ones a customer never sees. */
+  entries: z.array(adminTransactionDetailEntrySchema),
+  payout: adminTransactionDetailPayoutSchema.nullable(),
+  deposit: adminTransactionDetailDepositSchema.nullable(),
+});
+export type AdminTransactionDetail = z.infer<typeof adminTransactionDetailSchema>;

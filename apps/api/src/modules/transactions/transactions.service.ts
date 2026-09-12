@@ -165,3 +165,68 @@ export async function adminReverseTransaction(prisma: PrismaClient, transactionI
   }
   return reverseTransaction(prisma, transactionId, reason);
 }
+
+/**
+ * Full detail for one transaction, admin-only — every entry across every account (including
+ * platform-side ones like SUSPENSE_PENDING/YATIVO_SETTLEMENT/PLATFORM_FEE_REVENUE a customer
+ * never sees), plus the provider's own cut broken out separately from this platform's markup.
+ * The customer-facing equivalent (getTransactionDetailForCustomer in wallets.service.ts)
+ * deliberately combines/hides both of those — this is the one place staff can see the real split.
+ */
+export async function getTransactionDetailForAdmin(prisma: PrismaClient, transactionId: string) {
+  const tx = await prisma.ledgerTransaction.findUnique({
+    where: { id: transactionId },
+    include: {
+      entries: { include: { account: { include: { customer: true } } } },
+      payout: { include: { beneficiary: true } },
+      deposit: true,
+    },
+  });
+  if (!tx) throw new NotFoundError("LedgerTransaction");
+
+  return {
+    id: tx.id,
+    type: tx.type,
+    status: tx.status,
+    description: tx.description,
+    externalRef: tx.externalRef,
+    externalSource: tx.externalSource,
+    idempotencyKey: tx.idempotencyKey,
+    metadata: (tx.metadata as Record<string, unknown> | null) ?? null,
+    createdAt: tx.createdAt.toISOString(),
+    postedAt: tx.postedAt?.toISOString() ?? null,
+    reversedAt: tx.reversedAt?.toISOString() ?? null,
+    entries: tx.entries.map((e) => ({
+      accountId: e.accountId,
+      accountType: e.account.type,
+      customerId: e.account.customerId,
+      customerEmail: e.account.customer?.email ?? null,
+      direction: e.direction,
+      amountMinor: e.amountMinor.toString(),
+      currencyCode: e.currencyCode,
+    })),
+    payout: tx.payout
+      ? {
+          id: tx.payout.id,
+          beneficiaryName: tx.payout.beneficiary.name,
+          beneficiaryDetails: tx.payout.beneficiary.details as Record<string, unknown>,
+          yativoPayoutId: tx.payout.yativoPayoutId,
+          amountMinor: tx.payout.amountMinor.toString(),
+          platformFeeMinor: tx.payout.platformFeeMinor.toString(),
+          currencyCode: tx.payout.currencyCode,
+        }
+      : null,
+    deposit: tx.deposit
+      ? {
+          yativoDepositId: tx.deposit.yativoDepositId,
+          grossAmountMinor: tx.deposit.grossAmountMinor?.toString() ?? null,
+          yativoFeeMinor: tx.deposit.yativoFeeMinor?.toString() ?? null,
+          platformFeeMinor: tx.deposit.platformFeeMinor.toString(),
+          currencyCode: tx.deposit.currencyCode,
+          exchangeRate: tx.deposit.exchangeRate,
+          localCurrency: tx.deposit.localCurrency,
+          localAmount: tx.deposit.localAmount,
+        }
+      : null,
+  };
+}

@@ -52,7 +52,9 @@ export async function handleVirtualAccountDeposit(prisma: PrismaClient, payload:
     idempotencyKey: `webhook:${externalEventId}`,
     externalSource: "YATIVO_WEBHOOK",
     externalRef: payload.transactionId,
-    description: `Virtual account deposit confirmed via Yativo (${payload.transactionId})`,
+    // No provider name here — customer-facing; the reference id is already surfaced
+    // separately via externalRef.
+    description: "Virtual account deposit confirmed",
     lines: [
       { accountId: settlement.id, direction: "DEBIT", amountMinor, currencyCode: payload.currencyCode },
       { accountId: wallet.id, direction: "CREDIT", amountMinor, currencyCode: payload.currencyCode },

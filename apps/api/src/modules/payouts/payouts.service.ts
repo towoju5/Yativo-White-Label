@@ -124,7 +124,7 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   const beneficiary = await prisma.beneficiary.findFirst({ where: { id: input.beneficiaryId, customerId, archivedAt: null } });
   if (!beneficiary) throw new NotFoundError("Beneficiary");
   if (!beneficiary.yativoBeneficiaryId) {
-    throw new AppError("This beneficiary was never linked to Yativo — remove it and add it again.", 409, "BENEFICIARY_NOT_LINKED");
+    throw new AppError("This beneficiary was never fully set up — remove it and add it again.", 409, "BENEFICIARY_NOT_LINKED");
   }
   // Throws if this beneficiary is missing its Yativo gateway details. Note the payout method
   // used below is always derived from *this* beneficiary — the same way /portal/quotes derives
@@ -236,7 +236,7 @@ export async function getLivePayoutStatus(prisma: PrismaClient, customerId: stri
   const payout = await prisma.payout.findFirst({ where: { id: payoutId, customerId } });
   if (!payout) throw new NotFoundError("Payout");
   if (!payout.yativoPayoutId) {
-    throw new AppError("This payout was never submitted to Yativo.", 409, "PAYOUT_NOT_SUBMITTED");
+    throw new AppError("This payout was never submitted for processing.", 409, "PAYOUT_NOT_SUBMITTED");
   }
   return yativoClient.fiat.payouts.getStatus(payout.yativoPayoutId);
 }

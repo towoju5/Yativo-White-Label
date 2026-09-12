@@ -198,8 +198,9 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
       : null,
     deposit: tx.deposit
       ? {
-          grossAmountMinor: tx.deposit.grossAmountMinor?.toString() ?? null,
-          platformFeeMinor: tx.deposit.platformFeeMinor.toString(),
+          // Combined here, server-side, so the split between the provider's own cut and this
+          // platform's markup never even reaches the response — the customer sees one fee number.
+          totalFeeMinor: ((tx.deposit.yativoFeeMinor ?? 0n) + tx.deposit.platformFeeMinor).toString(),
           currencyCode: tx.deposit.currencyCode,
           exchangeRate: tx.deposit.exchangeRate,
           localCurrency: tx.deposit.localCurrency,

@@ -164,7 +164,7 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
 async function findOwnedCard(prisma: PrismaClient, cardId: string, scopeCustomerId?: string): Promise<Card> {
   const card = await prisma.card.findFirst({ where: { id: cardId, ...(scopeCustomerId ? { customerId: scopeCustomerId } : {}) } });
   if (!card) throw new NotFoundError("Card");
-  if (!card.yativoCardId) throw new AppError("This card was never linked to Yativo.", 409, "CARD_NOT_LINKED");
+  if (!card.yativoCardId) throw new AppError("This card was never fully set up.", 409, "CARD_NOT_LINKED");
   return card;
 }
 
