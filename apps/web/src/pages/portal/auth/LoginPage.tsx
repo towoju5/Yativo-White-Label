@@ -9,6 +9,7 @@ import { portalLoginSchema, type PortalLoginInput, type PortalAuthConfig } from 
 import { fetchBranding } from "@/theme/branding";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { BrandLogo } from "@/components/BrandLogo";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,12 +126,9 @@ export default function PortalLoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="absolute right-4 top-4">
-        <LanguageSwitcher />
-      </div>
+    <AuthShell branding={branding} topRight={<LanguageSwitcher />}>
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-2 text-center">
+        <div className="mb-6 flex flex-col items-center gap-2 text-center lg:hidden">
           <BrandLogo branding={branding} className="h-10" badgeClassName="rounded-xl text-sm" textClassName="text-lg" />
         </div>
         <Card>
@@ -292,6 +290,6 @@ export default function PortalLoginPage() {
           )}
         </Card>
       </div>
-    </div>
+    </AuthShell>
   );
 }

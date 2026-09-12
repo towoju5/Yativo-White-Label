@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError } from "@/lib/api-client";
 import { BrandLogo } from "@/components/BrandLogo";
+import { AdminAuthShell } from "@/components/auth/AdminAuthShell";
 
 export default function AdminLoginPage() {
   const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp } = useStaffAuth();
@@ -93,11 +94,9 @@ export default function AdminLoginPage() {
   };
 
   return (
-    // Forced dark regardless of the app's light/dark setting — this screen's background and Card
-    // styling below are hardcoded for a dark surface, so `dark:` logo variants must match that.
-    <div className="dark flex min-h-screen items-center justify-center bg-[#0b1120] px-4">
+    <AdminAuthShell branding={branding}>
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-2 text-center">
+        <div className="mb-6 flex flex-col items-center gap-2 text-center lg:hidden">
           <BrandLogo branding={branding} className="h-10" badgeClassName="rounded-xl text-sm" textClassName="text-lg text-white" />
           <p className="text-xs text-slate-400">Staff &amp; operator access only</p>
         </div>
@@ -208,6 +207,6 @@ export default function AdminLoginPage() {
           )}
         </Card>
       </div>
-    </div>
+    </AdminAuthShell>
   );
 }

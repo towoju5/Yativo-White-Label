@@ -23,7 +23,7 @@ export function AuroraWalletBalanceCard({ currencyCode, decimals, symbol, availa
       </div>
       <div>
         <p className="text-xs font-medium text-muted-foreground">{label ?? t("walletBalanceCard.wallet", "Wallet")}</p>
-        <p className="font-heading text-lg font-bold tracking-tight">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
+        <p className="truncate font-heading text-lg font-bold tracking-tight">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
         {BigInt(pendingMinor || "0") !== 0n && (
           <p className="mt-0.5 text-xs text-warning">
             {t("walletBalanceCard.pending", "+{{amount}} pending", { amount: formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode) })}

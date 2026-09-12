@@ -14,16 +14,16 @@ export function PrimeWalletBalanceCard({ currencyCode, decimals, symbol, availab
         className,
       )}
     >
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-muted font-mono text-[10px] font-semibold uppercase text-muted-foreground">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted font-mono text-[10px] font-semibold uppercase text-muted-foreground">
           {currencyCode.slice(0, 2)}
         </span>
-        <div>
-          <p className="text-sm font-medium">{label ?? t("walletBalanceCard.wallet", "Wallet")}</p>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{label ?? t("walletBalanceCard.wallet", "Wallet")}</p>
           <p className="font-mono text-xs text-muted-foreground">{currencyCode}</p>
         </div>
       </div>
-      <div className="text-right">
+      <div className="shrink-0 text-right">
         <p className="font-mono text-sm font-semibold tabular-nums">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
         {BigInt(pendingMinor || "0") !== 0n && (
           <p className="text-xs text-warning">

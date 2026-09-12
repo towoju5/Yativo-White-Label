@@ -9,7 +9,7 @@ export function MeridianStatCard({ label, value, hint, icon: Icon, trend, classN
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
       </div>
-      <p className="mt-2 font-heading text-2xl font-bold tracking-tight">{value}</p>
+      <p className="mt-2 truncate font-heading text-2xl font-bold tracking-tight">{value}</p>
       {(trend || hint) && (
         <div className="mt-1.5 flex items-center gap-1.5 text-xs">
           {trend && (

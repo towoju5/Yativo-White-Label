@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, LedgerTransactionType } from "@prisma/client";
 import { KYC_STATUSES, type ConfigReminderDto } from "@white-label/shared-types";
 import { smtpConfig } from "../../lib/mailer.js";
 import { notificationChannelConfig } from "../../lib/notificationChannelConfig.js";
@@ -44,6 +44,49 @@ function getConfigReminders(prisma: PrismaClient): Promise<ConfigReminderDto[]> 
     }
     return reminders;
   });
+}
+
+/**
+ * The platform's own markup revenue — CREDIT entries to the PLATFORM_FEE_REVENUE account,
+ * excluding whatever Yativo itself charges (that's the provider's cut, never this platform's).
+ * Grouped by transaction type + currency in JS rather than via Prisma's groupBy, since the type
+ * breakdown lives on the related LedgerTransaction, not on LedgerEntry itself — groupBy can't
+ * span a relation. Fee-revenue entries are a small slice of total ledger volume, so this stays
+ * cheap even without a raw SQL aggregate.
+ */
+export async function getPlatformProfitReport(prisma: PrismaClient, filters: { dateFrom?: Date; dateTo?: Date }) {
+  const entries = await prisma.ledgerEntry.findMany({
+    where: {
+      account: { type: "PLATFORM_FEE_REVENUE" },
+      direction: "CREDIT",
+      transaction: {
+        status: "POSTED",
+        ...(filters.dateFrom || filters.dateTo
+          ? { createdAt: { ...(filters.dateFrom ? { gte: filters.dateFrom } : {}), ...(filters.dateTo ? { lte: filters.dateTo } : {}) } }
+          : {}),
+      },
+    },
+    select: { amountMinor: true, currencyCode: true, transaction: { select: { type: true } } },
+  });
+
+  const byTypeCurrency = new Map<string, bigint>();
+  const byCurrency = new Map<string, bigint>();
+  for (const e of entries) {
+    const typeKey = `${e.transaction.type}:${e.currencyCode}`;
+    byTypeCurrency.set(typeKey, (byTypeCurrency.get(typeKey) ?? 0n) + e.amountMinor);
+    byCurrency.set(e.currencyCode, (byCurrency.get(e.currencyCode) ?? 0n) + e.amountMinor);
+  }
+
+  const byType = [...byTypeCurrency.entries()]
+    .map(([key, amountMinor]) => {
+      const [type, currencyCode] = key.split(":") as [LedgerTransactionType, string];
+      return { type, currencyCode, amountMinor: amountMinor.toString() };
+    })
+    .sort((a, b) => (a.amountMinor < b.amountMinor ? 1 : -1));
+
+  const totalsByCurrency = [...byCurrency.entries()].map(([currencyCode, amountMinor]) => ({ currencyCode, amountMinor: amountMinor.toString() }));
+
+  return { byType, totalsByCurrency };
 }
 
 export async function getDashboardSummary(prisma: PrismaClient) {

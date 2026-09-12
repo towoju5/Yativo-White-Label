@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { findCurrentPageLabel } from "@/lib/currentPageLabel";
 import type { NavSection } from "./Sidebar";
 
 interface TopbarProps {
@@ -14,9 +15,11 @@ interface TopbarProps {
 
 export function NovaTopbar({ sections, productName, right }: TopbarProps) {
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const pageLabel = findCurrentPageLabel(sections.flatMap((s) => s.items), pathname, productName);
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border bg-card/60 px-4 backdrop-blur-xl lg:hidden">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/60 px-4 backdrop-blur-xl lg:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger className="rounded-md p-2 hover:bg-muted">
           <Menu className="h-5 w-5" />
@@ -52,7 +55,7 @@ export function NovaTopbar({ sections, productName, right }: TopbarProps) {
           </div>
         </SheetContent>
       </Sheet>
-      <span className="font-heading text-sm font-semibold">{productName}</span>
+      <span className="truncate font-heading text-sm font-semibold">{pageLabel}</span>
       <div className="flex items-center gap-2">{right}</div>
     </header>
   );

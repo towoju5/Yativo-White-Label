@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { fetchBranding } from "@/theme/branding";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { BrandLogo } from "@/components/BrandLogo";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError } from "@/lib/api-client";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -39,12 +40,9 @@ export default function MagicLinkPage() {
   }, [token]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="absolute right-4 top-4">
-        <LanguageSwitcher />
-      </div>
+    <AuthShell branding={branding} topRight={<LanguageSwitcher />}>
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-2 text-center">
+        <div className="mb-6 flex flex-col items-center gap-2 text-center lg:hidden">
           <BrandLogo branding={branding} className="h-10" badgeClassName="rounded-xl text-sm" textClassName="text-lg" />
         </div>
         <Card>
@@ -63,6 +61,6 @@ export default function MagicLinkPage() {
           )}
         </Card>
       </div>
-    </div>
+    </AuthShell>
   );
 }

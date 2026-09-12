@@ -27,7 +27,7 @@ export function NovaWalletBalanceCard({ currencyCode, decimals, symbol, availabl
         </div>
       </div>
       <div>
-        <p className="font-heading text-xl font-semibold tracking-tight">
+        <p className="truncate font-heading text-xl font-semibold tracking-tight">
           {symbol ? (
             <>
               {formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}

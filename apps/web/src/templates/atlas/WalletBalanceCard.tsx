@@ -19,7 +19,7 @@ export function AtlasWalletBalanceCard({ currencyCode, decimals, symbol, availab
         <span className="text-xs text-muted-foreground">{label ?? t("walletBalanceCard.wallet", "Wallet")}</span>
       </div>
       <div>
-        <p className="font-heading text-xl font-semibold tracking-tight">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
+        <p className="truncate font-heading text-xl font-semibold tracking-tight">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
         {BigInt(pendingMinor || "0") !== 0n && (
           <p className="mt-0.5 text-xs text-warning">
             {t("walletBalanceCard.pending", "+{{amount}} pending", { amount: formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode) })}

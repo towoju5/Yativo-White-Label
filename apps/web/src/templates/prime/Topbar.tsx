@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Menu, LogOut, Sun, Moon } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -8,6 +8,7 @@ import { getStoredColorScheme, setStoredColorScheme } from "@/templates/Template
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { findCurrentPageLabel } from "@/lib/currentPageLabel";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +32,8 @@ interface TopbarProps {
 export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, onLogout, showNotifications }: TopbarProps) {
   const template = useTemplate();
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+  const pageLabel = findCurrentPageLabel(sections.flatMap((s) => s.items), pathname, productName);
   const [open, setOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => (getStoredColorScheme(template.id) ?? (template.id === "nova" ? "dark" : "light")) === "dark");
 
@@ -78,7 +81,7 @@ export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, on
             </div>
           </SheetContent>
         </Sheet>
-        <span className="text-sm font-medium text-muted-foreground lg:hidden">{productName}</span>
+        <span className="truncate text-sm font-medium text-muted-foreground lg:hidden">{pageLabel}</span>
       </div>
 
       <div className="flex items-center gap-1.5">

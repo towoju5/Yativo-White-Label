@@ -10,11 +10,11 @@ export function PrimeStatCard({ label, value, hint, icon: Icon, trend, className
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
       </div>
       <div className="mt-2 flex items-baseline gap-2">
-        <p className="font-mono text-xl font-semibold tabular-nums tracking-tight">{value}</p>
+        <p className="min-w-0 truncate font-mono text-xl font-semibold tabular-nums tracking-tight">{value}</p>
         {trend && (
           <span
             className={cn(
-              "flex items-center gap-0.5 text-xs font-medium",
+              "flex shrink-0 items-center gap-0.5 text-xs font-medium",
               trend.direction === "up" && "text-success",
               trend.direction === "down" && "text-destructive",
               trend.direction === "flat" && "text-muted-foreground",

@@ -27,6 +27,7 @@ import {
   Plug,
   HardDrive,
   History,
+  TrendingUp,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { AtlasTopbar, type NavItem } from "./Topbar";
@@ -37,6 +38,7 @@ const items: NavItem[] = [
   { to: "/admin/endorsements", label: "Endorsements", icon: BadgeCheck },
   { to: "/admin/transactions", label: "Ledger", icon: ArrowLeftRight },
   { to: "/admin/payouts", label: "Payouts", icon: Send },
+  { to: "/admin/profit", label: "Platform profit", icon: TrendingUp },
   { to: "/admin/cards", label: "Cards", icon: CreditCard },
   { to: "/admin/business-spend-cards", label: "Business Spend Cards", icon: CreditCard },
   { to: "/admin/crypto", label: "Crypto wallets", icon: Coins },

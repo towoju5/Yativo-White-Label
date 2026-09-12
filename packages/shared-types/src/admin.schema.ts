@@ -26,6 +26,7 @@ export type AdjustWalletInput = z.infer<typeof adjustWalletSchema>;
 
 export const payoutListItemSchema = payoutSchema.extend({
   customerName: z.string().nullable(),
+  beneficiaryName: z.string().nullable(),
 });
 export type PayoutListItem = z.infer<typeof payoutListItemSchema>;
 

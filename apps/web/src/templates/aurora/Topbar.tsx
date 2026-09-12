@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, Menu, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { findCurrentPageLabel } from "@/lib/currentPageLabel";
 import type { NavSection } from "./Sidebar";
 
 interface TopbarProps {
@@ -19,10 +20,12 @@ interface TopbarProps {
 export function AuroraTopbar({ sections, productName, userLabel, onLogout, profileTo }: TopbarProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+  const pageLabel = findCurrentPageLabel(sections.flatMap((s) => s.items), pathname, productName);
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
-      <span className="font-heading text-sm font-semibold">{productName}</span>
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
+      <span className="truncate font-heading text-sm font-semibold">{pageLabel}</span>
       <div className="flex items-center gap-2">
         {profileTo && (
           <NavLink

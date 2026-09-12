@@ -14,7 +14,7 @@ export function AuroraStatCard({ label, value, hint, icon: Icon, trend, classNam
         )}
       </div>
       <div>
-        <p className="font-heading text-2xl font-bold tracking-tight">{value}</p>
+        <p className="truncate font-heading text-2xl font-bold tracking-tight">{value}</p>
         {(trend || hint) && (
           <div className="mt-1 flex items-center gap-1.5 text-xs">
             {trend && (

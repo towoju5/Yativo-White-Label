@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
+import { TransactionDetailDialog } from "@/components/wallet/TransactionDetailDialog";
 import { cn } from "@/lib/utils";
 
 function defaultDateFrom(): string {
@@ -162,6 +163,7 @@ export default function StatementsPage() {
 
 function StatementPreview({ walletId, range, decimals, currencyCode }: { walletId: string; range: { dateFrom: string; dateTo: string } | null; decimals: number; currencyCode: string }) {
   const { t } = useTranslation();
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
   // The export endpoint returns a rendered file, not JSON — the on-screen preview reuses the
   // same read-side statement data via the wallet's ordinary (paginated) statement endpoint,
   // filtered client-side to the chosen dates, so no separate "preview" backend route is needed.
@@ -202,7 +204,7 @@ function StatementPreview({ walletId, range, decimals, currencyCode }: { walletI
                 </TableHeader>
                 <TableBody>
                   {lines.map((line) => (
-                    <TableRow key={line.entryId}>
+                    <TableRow key={line.entryId} className="cursor-pointer" onClick={() => setSelectedTransactionId(line.transactionId)}>
                       <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(line.createdAt).toLocaleString()}</TableCell>
                       <TableCell className="max-w-[220px] truncate">{line.description ?? line.transactionType}</TableCell>
                       <TableCell className={line.direction === "CREDIT" ? "text-success" : "text-foreground"}>{line.direction === "CREDIT" ? t("statements.credit", "Credit") : t("statements.debit", "Debit")}</TableCell>
@@ -229,12 +231,14 @@ function StatementPreview({ walletId, range, decimals, currencyCode }: { walletI
                   decimals={decimals}
                   currencyCode={currencyCode}
                   balanceMinor={line.runningBalanceMinor}
+                  onClick={() => setSelectedTransactionId(line.transactionId)}
                 />
               ))}
             </div>
           </>
         )}
       </CardContent>
+      <TransactionDetailDialog transactionId={selectedTransactionId} onClose={() => setSelectedTransactionId(null)} />
     </Card>
   );
 }

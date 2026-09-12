@@ -276,7 +276,7 @@ export async function listAdminPayouts(
     prisma.payout.count({ where }),
     prisma.payout.findMany({
       where,
-      include: { transaction: true, customer: { select: { fullName: true, businessName: true } } },
+      include: { transaction: true, customer: { select: { fullName: true, businessName: true } }, beneficiary: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -286,6 +286,7 @@ export async function listAdminPayouts(
   const items = payouts.map((p) => ({
     ...payoutToDto(p, statuses.get(p.id)!),
     customerName: p.customer.fullName ?? p.customer.businessName ?? null,
+    beneficiaryName: p.beneficiary.name,
   }));
   return { items, total, page, pageSize };
 }

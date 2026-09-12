@@ -13,7 +13,7 @@ export function AtlasStatCard({ label, value, hint, icon: Icon, trend, className
           </div>
         )}
       </div>
-      <p className="font-heading text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="truncate font-heading text-2xl font-semibold tracking-tight">{value}</p>
       {(trend || hint) && (
         <div className="flex items-center gap-1.5 text-xs">
           {trend && (

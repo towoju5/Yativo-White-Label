@@ -5,6 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { fetchBranding } from "@/theme/branding";
 import { publicApi, ApiError } from "@/lib/api-client";
 import { BrandLogo } from "@/components/BrandLogo";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,12 +40,13 @@ export default function AdminAcceptInvitePage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-16">
-      <div className="mb-8">
-        <BrandLogo branding={branding} className="h-7" badgeClassName="rounded-md bg-none bg-primary text-xs" textClassName="text-sm" />
-      </div>
+    <AuthShell branding={branding} tagline="Join the team">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 flex justify-center lg:hidden">
+          <BrandLogo branding={branding} className="h-7" badgeClassName="rounded-md bg-none bg-primary text-xs" textClassName="text-sm" />
+        </div>
 
-      <Card className="w-full max-w-sm">
+        <Card className="w-full">
         {!token ? (
           <CardContent className="pt-6 text-center text-sm text-muted-foreground">This invite link is missing its token — please use the link from your invite email.</CardContent>
         ) : done ? (
@@ -84,7 +86,8 @@ export default function AdminAcceptInvitePage() {
             </CardContent>
           </>
         )}
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </AuthShell>
   );
 }

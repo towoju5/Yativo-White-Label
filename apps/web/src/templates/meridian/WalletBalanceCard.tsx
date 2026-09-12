@@ -25,7 +25,7 @@ export function MeridianWalletBalanceCard({ currencyCode, decimals, symbol, avai
         <span className="font-mono text-xs text-muted-foreground">{currencyCode}</span>
       </div>
       <div>
-        <p className="font-heading text-xl font-bold tracking-tight">
+        <p className="truncate font-heading text-xl font-bold tracking-tight">
           {symbol ? (
             formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)
           ) : (

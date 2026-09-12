@@ -18,7 +18,7 @@ export function NovaStatCard({ label, value, hint, icon: Icon, trend, className 
           </div>
         )}
       </div>
-      <p className="mt-2.5 font-heading text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-2.5 truncate font-heading text-2xl font-semibold tracking-tight">{value}</p>
       <div className="mt-1.5 flex items-center gap-1.5 text-xs">
         {trend && (
           <span

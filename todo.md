@@ -532,6 +532,42 @@ until Yativo enables them.
       overview — dismissal is session-only (not persisted), so an actually-still-unconfigured item
       resurfaces next visit rather than being permanently silenceable.
 
+## 6k. UI polish batch: auth pages, transaction detail gaps, platform profit, mobile responsiveness (2026-09-12, user request)
+
+- [x] **Auth pages redesigned**: new shared `AuthShell`/`AdminAuthShell` (`components/auth/`) — a
+      two-column layout (brand gradient panel + form, lg+ only; collapses to the original centered
+      column below `lg`) replacing the flat centered card every login/signup/forgot-password/
+      reset-password/magic-link/verify-email/accept-invite page (portal + admin, 9 pages total) used
+      before. One shell change instead of touching each page's visual design individually.
+- [x] **Admin payouts had no detail view at all** — `AdminPayoutsPage.tsx` now has a "View details"
+      button per row opening the existing `AdminTransactionDetailDialog` via the payout's
+      `transactionId` (already on the `Payout` model, just never surfaced). Also resolved
+      `beneficiaryName` server-side (`payouts.service.ts`) instead of showing a raw beneficiary id.
+- [x] **Customer statements had no detail view** — `StatementsPage.tsx`'s preview table/card rows
+      had no click handler and no `TransactionDetailDialog` at all, unlike the main Transactions
+      page and Wallet Detail page which already had this wired. Fixed to match.
+- [x] **New "Platform profit" admin report** — `GET /admin/dashboard/profit` (date-range filterable)
+      sums CREDIT entries to the `PLATFORM_FEE_REVENUE` account (this platform's own markup, never
+      Yativo's cut), grouped by transaction type + currency. New `/admin/profit` page with date
+      pickers, a type filter, and per-currency total cards.
+- [x] **Mobile responsiveness fixes**: found and fixed a real bug present in 4 of 5 templates —
+      `StatCard`'s balance/count value (`text-xl`–`text-2xl`) had no `truncate`, so a long currency
+      amount could overflow a narrow 2-column mobile stat grid; same fix applied to
+      `WalletBalanceCard` amounts. Mobile topbar header (`nova`/`meridian`/`aurora` — `prime`/`atlas`
+      already had this) was missing `sticky top-0`, so it scrolled away with page content instead of
+      staying pinned; fixed across all three. Mobile header also showed a static "Portal"/"Admin"
+      label — now shows the current page's own nav label (new `lib/currentPageLabel.ts` helper,
+      matches the current route against each shell's own nav item list) via all 4 templates that
+      show a text label (`atlas` shows the real brand logo image there instead, so needed no change).
+- [x] Portal `SettingsPage.tsx` converted from a single centered column (`max-w-lg`, all cards
+      stacked) to a `grid-cols-1 lg:grid-cols-2` layout (`max-w-4xl`) — less scrolling on desktop,
+      unchanged single-column stack on mobile.
+- [ ] **Not done — explicitly out of scope for this pass given the size of "check all pages"**: a
+      full responsive audit of every remaining page (only Dashboard/Settings and the shared
+      StatCard/WalletBalanceCard/Topbar chrome used by every portal page were actually checked and
+      fixed). No visual/browser-based testing was available in this environment — all fixes here
+      were found via static analysis of the Tailwind classes, not by rendering the pages.
+
 ## 6. Crypto integration
 
 - [x] Crypto wallet deposit flow (`packages/yativo-sdk/src/crypto/wallets.ts`) — real, live, on
