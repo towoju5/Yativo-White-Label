@@ -22,21 +22,23 @@ const rawDepositEventSchema = z
     currency: z.string(),
     // The wallet-side currency, when it differs from the gateway's local `currency` — falls back
     // to `currency` since not every corridor's example payload includes this field.
-    deposit_currency: z.string().optional(),
+    deposit_currency: z.string().nullable().optional(),
     amount: z.union([z.string(), z.number()]),
-    receive_amount: z.union([z.string(), z.number()]).optional(),
+    receive_amount: z.union([z.string(), z.number()]).nullable().optional(),
     status: z.enum(DEPOSIT_STATUSES),
     customer_id: z.string(),
-    deposit_id: z.string().optional(),
-    transaction_id: z.string().optional(),
+    deposit_id: z.string().nullable().optional(),
+    transaction_id: z.string().nullable().optional(),
     // Confirmed against a live payload: some deposits arrive with neither `deposit_id` nor
     // `transaction_id`, only this — the exact Idempotency-Key header this app itself sent when
     // creating the deposit (see deposits.routes.ts's /portal/deposit/initiate), echoed back
     // verbatim. The most reliable field to match against the local Deposit row when the id
-    // fields above don't line up with what was captured at creation time.
-    idempotency_key: z.string().optional(),
-    created_at: z.string().optional(),
-    updated_at: z.string().optional(),
+    // fields above don't line up with what was captured at creation time. Confirmed live: this
+    // (like several other optional fields here) arrives as an explicit JSON `null` rather than
+    // being omitted on some deliveries — `.optional()` alone rejects that, hence `.nullable()`.
+    idempotency_key: z.string().nullable().optional(),
+    created_at: z.string().nullable().optional(),
+    updated_at: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -46,13 +48,13 @@ export const depositEventPayloadSchema = rawDepositEventSchema.transform((d) => 
   // Decimal major-unit string — NOT minor units, unlike almost everything else in this app.
   // Convert via majorToMinor(amount, currency.decimals) once the currency's decimals are known.
   amount: String(d.amount),
-  receiveAmount: d.receive_amount !== undefined ? String(d.receive_amount) : undefined,
+  receiveAmount: d.receive_amount !== undefined && d.receive_amount !== null ? String(d.receive_amount) : undefined,
   status: d.status,
   yativoCustomerId: d.customer_id,
   yativoDepositId: d.deposit_id ?? d.id,
-  idempotencyKey: d.idempotency_key,
-  updatedAt: d.updated_at,
-  createdAt: d.created_at,
+  idempotencyKey: d.idempotency_key ?? undefined,
+  updatedAt: d.updated_at ?? undefined,
+  createdAt: d.created_at ?? undefined,
 }));
 export type DepositEventPayload = z.infer<typeof depositEventPayloadSchema>;
 
@@ -68,14 +70,14 @@ export const PAYOUT_STATUSES = ["pending", "processing", "completed", "failed", 
 const rawPayoutEventSchema = z
   .object({
     id: z.string(),
-    payout_id: z.string().optional(),
+    payout_id: z.string().nullable().optional(),
     customer_id: z.string(),
-    beneficiary_id: z.union([z.string(), z.number()]).optional(),
+    beneficiary_id: z.union([z.string(), z.number()]).nullable().optional(),
     currency: z.string(),
     amount: z.union([z.string(), z.number()]),
     status: z.union([z.enum(PAYOUT_STATUSES), z.literal("success")]),
-    created_at: z.string().optional(),
-    updated_at: z.string().optional(),
+    created_at: z.string().nullable().optional(),
+    updated_at: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -86,8 +88,8 @@ export const payoutEventPayloadSchema = rawPayoutEventSchema.transform((d) => ({
   // Decimal major-unit string, same caveat as deposits above.
   amount: String(d.amount),
   status: d.status === "success" ? ("completed" as const) : d.status,
-  updatedAt: d.updated_at,
-  createdAt: d.created_at,
+  updatedAt: d.updated_at ?? undefined,
+  createdAt: d.created_at ?? undefined,
 }));
 export type PayoutEventPayload = z.infer<typeof payoutEventPayloadSchema>;
 
@@ -97,10 +99,13 @@ const rawVirtualAccountDepositSchema = z
     transaction_id: z.string(),
     currency: z.string(),
     amount: z.union([z.string(), z.number()]),
-    amount_recevied: z.union([z.string(), z.number()]).optional(),
+    amount_recevied: z.union([z.string(), z.number()]).nullable().optional(),
     status: z.string(),
-    account_number: z.string().optional(),
-    customer: z.object({ customer_id: z.string(), customer_name: z.string().optional(), customer_email: z.string().optional() }).optional(),
+    account_number: z.string().nullable().optional(),
+    customer: z
+      .object({ customer_id: z.string(), customer_name: z.string().nullable().optional(), customer_email: z.string().nullable().optional() })
+      .nullable()
+      .optional(),
   })
   .passthrough();
 
@@ -108,10 +113,10 @@ export const virtualAccountDepositPayloadSchema = rawVirtualAccountDepositSchema
   transactionId: d.transaction_id,
   currencyCode: d.currency,
   amount: String(d.amount),
-  grossAmount: d.amount_recevied !== undefined ? String(d.amount_recevied) : undefined,
+  grossAmount: d.amount_recevied !== undefined && d.amount_recevied !== null ? String(d.amount_recevied) : undefined,
   status: d.status,
   yativoCustomerId: d.customer?.customer_id,
-  accountNumber: d.account_number,
+  accountNumber: d.account_number ?? undefined,
 }));
 export type VirtualAccountDepositPayload = z.infer<typeof virtualAccountDepositPayloadSchema>;
 
@@ -146,7 +151,7 @@ const rawCryptoWalletCreatedSchema = z
     wallet_address: z.string(),
     wallet_currency: z.string(),
     wallet_network: z.string(),
-    coin_name: z.string().optional(),
+    coin_name: z.string().nullable().optional(),
     customer_id: z.string().nullable().optional(),
   })
   .passthrough();
@@ -172,11 +177,11 @@ const rawVirtualCardTransactionSchema = z
     id: z.string(),
     amount: z.union([z.string(), z.number()]),
     cardId: z.string(),
-    reason: z.string().optional(),
-    status: z.string().optional(),
-    companyId: z.string().optional(),
-    narrative: z.string().optional(),
-    reference: z.string().optional(),
+    reason: z.string().nullable().optional(),
+    status: z.string().nullable().optional(),
+    companyId: z.string().nullable().optional(),
+    narrative: z.string().nullable().optional(),
+    reference: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -185,15 +190,15 @@ export const virtualCardTransactionPayloadSchema = rawVirtualCardTransactionSche
   // Already minor units (cents) — our cards are always USD/2-decimals, so no conversion needed.
   amountMinor: String(Math.round(Number(d.amount))),
   yativoCardId: d.cardId,
-  merchantName: d.narrative,
-  reference: d.reference,
+  merchantName: d.narrative ?? undefined,
+  reference: d.reference ?? undefined,
 }));
 export type VirtualCardTransactionPayload = z.infer<typeof virtualCardTransactionPayloadSchema>;
 
 /** `virtualcard.deactivated` — the one event in the virtualcard.* family that DOES carry an explicit `event` field, sent when Yativo auto-freezes a card after repeated failed charge attempts. */
 export const virtualCardDeactivatedPayloadSchema = z.object({
   cardId: z.string(),
-  reason: z.string().optional(),
+  reason: z.string().nullable().optional(),
 });
 export type VirtualCardDeactivatedPayload = z.infer<typeof virtualCardDeactivatedPayloadSchema>;
 
@@ -206,7 +211,7 @@ export const swapCompletedPayloadSchema = z.object({
   targetCurrency: z.string(),
   sourceAmountMinor: z.string(),
   targetAmountMinor: z.string(),
-  externalRef: z.string().optional(),
+  externalRef: z.string().nullable().optional(),
 });
 export type SwapCompletedPayload = z.infer<typeof swapCompletedPayloadSchema>;
 
@@ -223,18 +228,18 @@ const rawBusinessSpendCardEventSchema = z
   .object({
     card_id: z.string(),
     customer_id: z.string(),
-    amount: z.union([z.string(), z.number()]).optional(),
-    reason: z.string().optional(),
-    limits: z.array(z.record(z.unknown())).optional(),
+    amount: z.union([z.string(), z.number()]).nullable().optional(),
+    reason: z.string().nullable().optional(),
+    limits: z.array(z.record(z.unknown())).nullable().optional(),
   })
   .passthrough();
 
 export const businessSpendCardEventPayloadSchema = rawBusinessSpendCardEventSchema.transform((d) => ({
   yativoCardId: d.card_id,
   yativoCustomerId: d.customer_id,
-  amount: d.amount !== undefined ? String(d.amount) : undefined,
-  reason: d.reason,
-  limits: d.limits,
+  amount: d.amount !== undefined && d.amount !== null ? String(d.amount) : undefined,
+  reason: d.reason ?? undefined,
+  limits: d.limits ?? undefined,
 }));
 export type BusinessSpendCardEventPayload = z.infer<typeof businessSpendCardEventPayloadSchema>;
 
