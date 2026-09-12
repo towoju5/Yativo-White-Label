@@ -5,7 +5,6 @@ import { PrimeAdminShell } from "./AdminShell";
 import { PrimeDashboardLayout } from "./DashboardLayout";
 import { PrimeWalletBalanceCard } from "./WalletBalanceCard";
 import { PrimeStatCard } from "./StatCard";
-import { PrimeLandingPage } from "./LandingPage";
 import { PrimePreviewThumbnail } from "./PreviewThumbnail";
 
 export const primeTemplate: TemplateComponents = {
@@ -17,7 +16,6 @@ export const primeTemplate: TemplateComponents = {
   DashboardLayout: PrimeDashboardLayout,
   WalletBalanceCard: PrimeWalletBalanceCard,
   StatCard: PrimeStatCard,
-  LandingPage: PrimeLandingPage,
   PreviewThumbnail: PrimePreviewThumbnail,
   tokens: primeTokens,
 };

@@ -22,9 +22,20 @@ export const DEFAULT_BRANDING: BrandingConfig = {
   updatedAt: new Date().toISOString(),
 };
 
+const BRANDING_CACHE_KEY = "cached-branding";
+
 export async function fetchBranding(): Promise<BrandingConfig> {
   try {
-    return await publicApi.get<BrandingConfig>("/branding");
+    const branding = await publicApi.get<BrandingConfig>("/branding");
+    // Read synchronously by an inline script in index.html on the *next* load, before React
+    // mounts — lets a returning visitor skip the generic-title/favicon flash this fetch would
+    // otherwise cause every time. Never blocks on failure (private browsing, storage disabled).
+    try {
+      localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(branding));
+    } catch {
+      // Ignored — this is a pure optimization, not a correctness requirement.
+    }
+    return branding;
   } catch {
     return DEFAULT_BRANDING;
   }

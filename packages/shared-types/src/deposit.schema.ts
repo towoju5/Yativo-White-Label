@@ -38,14 +38,50 @@ export const depositMethodSchema = z.object({
 });
 export type DepositMethod = z.infer<typeof depositMethodSchema>;
 
+// ── Rate-lock quote (POST /exchange-rate, method_type "payin") ──
+
+export const depositQuoteRequestSchema = z.object({
+  gatewayId: z.string(),
+  /** Wallet currency to credit — from the customer's own wallets (GET /portal/wallets). */
+  walletCurrencyCode: currencyCodeSchema,
+  /** The chosen method's LOCAL currency (DepositMethod.currency) — what the customer is actually paying with. */
+  localCurrency: z.string(),
+  /** Decimal amount (major units) in `localCurrency`. */
+  amount: z.string().regex(/^\d+(\.\d+)?$/, "must be a decimal amount"),
+});
+export type DepositQuoteRequest = z.infer<typeof depositQuoteRequestSchema>;
+
+export const depositQuoteSchema = z.object({
+  quoteId: z.string(),
+  walletCurrencyCode: currencyCodeSchema,
+  localCurrency: z.string(),
+  rate: z.string(),
+  localAmount: z.string(),
+  /** Yativo's own total fee (fixed + percentage combined), in `walletCurrencyCode` major units. */
+  yativoFee: z.string(),
+  /** localAmount converted to wallet currency minus yativoFee — what would land in the wallet before this platform's own fee. Can be negative when Yativo's fees exceed the deposit; shown as-is, never clamped. */
+  creditedAmount: z.string(),
+  /** This platform's own fee (admin-configured, global default or per-customer override), in `walletCurrencyCode` major units. Null only if it couldn't be computed. */
+  platformFee: z.string().nullable(),
+  /** Same fee as `platformFee`, converted to `localCurrency` at this quote's `rate` — shown alongside it so the customer sees the fee in the currency they're actually paying with. */
+  platformFeeLocal: z.string().nullable(),
+  /** `creditedAmount` minus `platformFee` — the actual final amount that will land in the wallet once this deposit settles. Can be negative; this is the number that matters most to the customer. */
+  netReceiveAmount: z.string().nullable(),
+  /** Yativo locks the rate behind this quoteId for ~5 minutes — the deposit UI re-quotes once this passes. */
+  expiresAt: z.string(),
+});
+export type DepositQuote = z.infer<typeof depositQuoteSchema>;
+
 // ── Initiate deposit ──
 
 export const createDepositSchema = z.object({
   gatewayId: z.string(),
   /** Wallet currency to credit — from the customer's own wallets (GET /portal/wallets). */
   walletCurrencyCode: currencyCodeSchema,
-  /** Decimal amount (major units) in the chosen method's LOCAL currency (DepositMethod.currency), not the wallet currency. */
-  amount: z.string().regex(/^\d+(\.\d+)?$/, "must be a decimal amount"),
+  /** Decimal amount (major units) in the chosen method's LOCAL currency (DepositMethod.currency), not the wallet currency. Optional when quoteId is given — Yativo derives it from the locked quote instead. */
+  amount: z.string().regex(/^\d+(\.\d+)?$/, "must be a decimal amount").optional(),
+  /** Rate-locked quote id from POST /portal/deposit/quote — when present, this is what actually gets sent to Yativo instead of a fresh amount. */
+  quoteId: z.string().optional(),
   /** Values for the method's formFields, keyed by field.key — required whenever formFields is non-empty. */
   extraData: z.record(z.string()).optional(),
 });

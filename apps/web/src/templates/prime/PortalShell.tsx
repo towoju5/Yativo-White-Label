@@ -44,7 +44,7 @@ export function PrimePortalShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-background">
       <PrimeSidebar sections={sections} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <PrimeTopbar sections={sections} productName={t("nav.portal", "Portal")} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} />
+        <PrimeTopbar sections={sections} productName={t("nav.portal", "Portal")} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} showNotifications />
         <main className="flex-1 p-6 pb-24 lg:pb-6">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>

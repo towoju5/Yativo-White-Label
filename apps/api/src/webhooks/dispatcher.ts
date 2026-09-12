@@ -27,8 +27,16 @@ export async function dispatchWebhookEvent(
   switch (eventType) {
     case "deposit.created":
     case "deposit.updated":
+    // `deposit.completed` has no documented payload example of its own (docs.yativo.com only lists
+    // it in the event-type table), but it's the same resource family as created/updated — same
+    // convention as business_spend_card.* below, where every lifecycle event for one resource
+    // shares one payload shape.
+    case "deposit.completed":
       return handleDepositEvent(prisma, depositEventPayloadSchema.parse(payload), externalEventId);
     case "payout.updated":
+    // Same reasoning as deposit.completed above — undocumented payload, same resource family as
+    // payout.updated (confirmed field set: payout_id/amount/currency/status/beneficiary_id).
+    case "payout.completed":
       return handlePayoutEvent(prisma, payoutEventPayloadSchema.parse(payload), externalEventId);
     case "virtual_account.deposit":
       return handleVirtualAccountDeposit(prisma, virtualAccountDepositPayloadSchema.parse(payload), externalEventId);
@@ -68,6 +76,20 @@ export async function dispatchWebhookEvent(
     // "unrecognized" event, but intentionally a no-op.
     case "endorsement.updated":
       return { status: "IGNORED", errorMessage: "Endorsement status is always read live from Yativo — nothing to update locally" };
+    // Same reasoning as endorsement.updated: KYC status is always read live from Yativo (see
+    // requireKycApproved.ts / customers.service.ts), never cached locally, so there's nothing for
+    // these to update. Recognized (per docs.yativo.com's event table) so they log as expected
+    // rather than "unrecognized".
+    case "customer.kyc.approved":
+    case "customer.kyc.rejected":
+      return { status: "IGNORED", errorMessage: "KYC status is always read live from Yativo — nothing to update locally" };
+    // Documented as a distinct event from virtual_account.deposit, but docs.yativo.com gives no
+    // payload example for it — unlike virtual_account.deposit's confirmed nested customer/source
+    // shape. Recognized so it's visible in the admin webhook log instead of looking unrecognized,
+    // but not auto-processed until a real delivery shows what it actually carries (same posture as
+    // the ambiguous virtualcard.* events below).
+    case "virtual_account.funded":
+      return { status: "IGNORED", errorMessage: "virtual_account.funded has no documented payload shape yet — not auto-processed" };
     default:
       if (eventType.startsWith("virtualcard.")) {
         return { status: "IGNORED", errorMessage: `Ambiguous virtualcard.* event, not auto-processed: ${eventType}` };

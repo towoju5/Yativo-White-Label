@@ -14,7 +14,6 @@ export type IntegrationSettings = {
   yativo: {
     mode: "mock" | "sandbox" | "live";
     fiatBaseUrl: string;
-    cryptoBaseUrl: string;
     kycBaseUrl: string;
     apiKey: string;
     apiSecret: string;
@@ -43,7 +42,6 @@ export function applyIntegrationSettings(settings: IntegrationSettings): void {
   Object.assign(yativoClient.config, {
     mode: settings.yativo.mode,
     fiatBaseUrl: settings.yativo.fiatBaseUrl,
-    cryptoBaseUrl: settings.yativo.cryptoBaseUrl,
     kycBaseUrl: settings.yativo.kycBaseUrl,
     apiKey: settings.yativo.apiKey,
     apiSecret: settings.yativo.apiSecret,
@@ -115,7 +113,6 @@ export async function syncWebhookSecretIfRotated(prisma: PrismaClient): Promise<
           yativo: {
             mode: env.YATIVO_MODE,
             fiatBaseUrl: env.YATIVO_FIAT_BASE_URL,
-            cryptoBaseUrl: env.YATIVO_CRYPTO_BASE_URL,
             kycBaseUrl: env.YATIVO_KYC_BASE_URL,
             apiKey: env.YATIVO_API_KEY,
             apiSecret: env.YATIVO_API_SECRET,

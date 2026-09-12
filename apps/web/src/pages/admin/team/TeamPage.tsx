@@ -24,8 +24,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
-interface InviteResult extends StaffUserDto {
-  tempPassword?: string;
+interface InviteResult {
+  user: StaffUserDto;
 }
 
 const ROLE_VARIANT: Record<string, "success" | "warning" | "secondary"> = {
@@ -129,16 +129,8 @@ export default function TeamPage() {
               {inviteResult ? (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Share this temporary password with <span className="font-medium text-foreground">{inviteResult.email}</span>. It won't be shown again.
+                    An invite email was sent to <span className="font-medium text-foreground">{inviteResult.user.email}</span> with a link to set their password. It expires in 7 days.
                   </p>
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-3 font-mono text-sm">
-                    {inviteResult.tempPassword ?? "(password issued — check invite email)"}
-                    {inviteResult.tempPassword && (
-                      <button onClick={() => copy(inviteResult.tempPassword!)} className="text-muted-foreground hover:text-foreground">
-                        <Copy className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
                   <Button className="w-full" onClick={() => setInviteOpen(false)}>
                     Done
                   </Button>
@@ -238,7 +230,11 @@ export default function TeamPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={s.isActive ? "success" : "secondary"}>{s.isActive ? "Active" : "Deactivated"}</Badge>
+                    {s.invitePending ? (
+                      <Badge variant="warning">Invite pending</Badge>
+                    ) : (
+                      <Badge variant={s.isActive ? "success" : "secondary"}>{s.isActive ? "Active" : "Deactivated"}</Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">{new Date(s.createdAt).toLocaleDateString()}</TableCell>
                   {canManage && (

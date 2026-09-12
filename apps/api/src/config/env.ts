@@ -28,7 +28,6 @@ const envSchema = z.object({
 
   YATIVO_MODE: z.enum(["mock", "sandbox", "live"]).default("mock"),
   YATIVO_FIAT_BASE_URL: z.string().url(),
-  YATIVO_CRYPTO_BASE_URL: z.string().url(),
   YATIVO_KYC_BASE_URL: z.string().url().default("https://kyc.yativo.com"),
   YATIVO_API_KEY: z.string().optional().default(""),
   YATIVO_API_SECRET: z.string().optional().default(""),

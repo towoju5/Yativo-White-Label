@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
-import LandingPage from "@/pages/marketing/LandingPage";
+import NotFoundPage from "@/pages/NotFoundPage";
 
 function FullScreenSpinner() {
   return (
@@ -28,7 +28,7 @@ export function RequireStaffAuth({ children }: { children: ReactNode }) {
   // Deliberately does not redirect to the configured admin login path: doing so would let anyone
   // discover the (possibly custom, meant-to-be-hidden) login URL just by hitting /admin unauthenticated.
   // Render the same thing an unknown route would, so /admin looks exactly like it doesn't exist.
-  if (!isAuthenticated) return <LandingPage />;
+  if (!isAuthenticated) return <NotFoundPage />;
   return <>{children}</>;
 }
 

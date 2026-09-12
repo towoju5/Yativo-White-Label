@@ -5,7 +5,6 @@ import { AtlasAdminShell } from "./AdminShell";
 import { AtlasDashboardLayout } from "./DashboardLayout";
 import { AtlasWalletBalanceCard } from "./WalletBalanceCard";
 import { AtlasStatCard } from "./StatCard";
-import { AtlasLandingPage } from "./LandingPage";
 import { AtlasPreviewThumbnail } from "./PreviewThumbnail";
 
 export const atlasTemplate: TemplateComponents = {
@@ -17,7 +16,6 @@ export const atlasTemplate: TemplateComponents = {
   DashboardLayout: AtlasDashboardLayout,
   WalletBalanceCard: AtlasWalletBalanceCard,
   StatCard: AtlasStatCard,
-  LandingPage: AtlasLandingPage,
   PreviewThumbnail: AtlasPreviewThumbnail,
   tokens: atlasTokens,
 };

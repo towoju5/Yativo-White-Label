@@ -1,9 +1,12 @@
 import type { PrismaClient } from "@prisma/client";
 import sanitizeHtml from "sanitize-html";
-import { EMAIL_NOTIFICATION_TYPES, type EmailNotificationType, type UpdateNotificationSettingsInput, type UpdateEmailTemplateInput } from "@white-label/shared-types";
+import { EMAIL_NOTIFICATION_TYPES, EMAIL_NOTIFICATION_CATALOG, type EmailNotificationType, type UpdateNotificationSettingsInput, type UpdateEmailTemplateInput } from "@white-label/shared-types";
 import { getBranding } from "../branding/branding.service.js";
 import { renderTemplate } from "../../lib/renderTemplate.js";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
+import { sendWebPush } from "./channels/webPush.js";
+import { sendSms } from "./channels/sms.js";
+import { sendWhatsApp } from "./channels/whatsapp/index.js";
 import logger from "../../lib/logger.js";
 
 // Same allowlist StaticPage uses for admin-authored HTML (see pages.service.ts), plus `style` —
@@ -475,9 +478,13 @@ export async function renderSampleEmail(prisma: PrismaClient, type: EmailNotific
 }
 
 /**
- * The one function every customer-action hook site calls. Never throws — a notification failure
- * (missing SMTP config, a bad template, a DB hiccup) must never fail the business action that
- * triggered it, so every error is logged and swallowed here rather than propagated to the caller.
+ * The one function every customer-action hook site calls — despite the name (kept for the ~15
+ * existing call sites), this now dispatches across every enabled channel for the customer, not
+ * just email: it always persists an in-app Notification row, always attempts email, and fans out
+ * to web push / SMS / WhatsApp for whichever channels are configured and available to this
+ * customer (a push subscription on file, a phone number on file). Never throws — a notification
+ * failure (missing SMTP config, a bad template, a DB hiccup, a down SMS provider) must never fail
+ * the business action that triggered it, so every error is logged and swallowed here.
  */
 export async function sendNotificationEmail(
   prisma: PrismaClient,
@@ -498,11 +505,18 @@ export async function sendNotificationEmail(
     const firstName = customer.fullName?.split(" ")[0] || customer.businessName || "there";
     const allVars = { ...vars, firstName, productName: branding.productName, supportEmail: branding.supportEmail ?? "", ...buildBrandVars(branding) };
 
-    await enqueueEmail({
-      to: customer.email,
-      subject: renderTemplate(template.subject, allVars),
-      html: renderTemplate(template.bodyHtml, allVars),
-    });
+    // The rendered subject already reads as a good one-line summary ("Deposit received — 250.00
+    // USD") — reused as the in-app/push/SMS title so this doesn't need its own separate copy.
+    const title = renderTemplate(template.subject, allVars);
+    const body = EMAIL_NOTIFICATION_CATALOG.find((c) => c.type === type)?.description ?? title;
+
+    await Promise.all([
+      enqueueEmail({ to: customer.email, subject: title, html: renderTemplate(template.bodyHtml, allVars) }),
+      prisma.notification.create({ data: { customerId, type, title, body } }),
+      sendWebPush(prisma, customerId, { title, body }),
+      sendSms(customer.phone, { title, body }),
+      sendWhatsApp(customer.phone, { title, body }),
+    ]);
   } catch (err) {
     logger.error({ err, type, customerId }, "Couldn't send notification email");
   }

@@ -12,7 +12,6 @@ const settingsSchema = z.object({
   yativo: z.object({
     mode: z.enum(["mock", "sandbox", "live"]),
     fiatBaseUrl: z.string().url(),
-    cryptoBaseUrl: z.string().url(),
     kycBaseUrl: z.string().url(),
     apiKey: z.string().optional().default(""),
     apiSecret: z.string().optional().default(""),
@@ -36,7 +35,6 @@ const envDefaults: Settings = {
   yativo: {
     mode: env.YATIVO_MODE,
     fiatBaseUrl: env.YATIVO_FIAT_BASE_URL,
-    cryptoBaseUrl: env.YATIVO_CRYPTO_BASE_URL,
     kycBaseUrl: env.YATIVO_KYC_BASE_URL,
     apiKey: env.YATIVO_API_KEY,
     apiSecret: env.YATIVO_API_SECRET,

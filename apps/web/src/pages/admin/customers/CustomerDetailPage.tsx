@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Customer, StatementLine, WalletBalance, CustomerEndorsement, Beneficiary, CustomerPricingRule, UpsertPricingOverrideInput } from "@white-label/shared-types";
+import type { Customer, StatementLine, WalletBalance, CustomerEndorsement, Beneficiary, CustomerPricingRule, UpsertPricingOverrideInput, CustomerLimitDto } from "@white-label/shared-types";
 import { formatCurrencyAmount } from "@white-label/shared-types";
-import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon, DollarSign, RotateCcw, Pencil } from "lucide-react";
+import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon, DollarSign, RotateCcw, Pencil, Gauge, Trash2 } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
@@ -457,6 +457,8 @@ export default function CustomerDetailPage() {
         </CardContent>
       </Card>
 
+      {customerId && <CustomerLimitsCard customerId={customerId} wallets={wallets} />}
+
       <PricingRuleDialog
         rule={editingPricing}
         onOpenChange={(v) => !v && setEditingPricing(null)}
@@ -466,5 +468,153 @@ export default function CustomerDetailPage() {
         title={editingPricing ? `Custom pricing — ${SERVICE_LABELS[editingPricing.service]}` : ""}
       />
     </div>
+  );
+}
+
+function minorToMajorInput(minor: string | null, decimals: number): string {
+  if (minor === null) return "";
+  return (Number(minor) / 10 ** decimals).toFixed(decimals);
+}
+function majorInputToMinor(major: string, decimals: number): string | null {
+  const trimmed = major.trim();
+  if (!trimmed) return null;
+  const n = Number(trimmed);
+  if (!Number.isFinite(n)) return null;
+  return Math.round(n * 10 ** decimals).toString();
+}
+
+/** Per-customer override on top of the platform's default withdrawal limits (see admin/settings/LimitsSettingsPage) — a currency here with no override just inherits the platform default. */
+function CustomerLimitsCard({ customerId, wallets }: { customerId: string; wallets: WalletBalance[] }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [addCurrency, setAddCurrency] = useState("");
+  const [drafts, setDrafts] = useState<Record<string, { daily: string; monthly: string }>>({});
+
+  const limitsQuery = useQuery({
+    queryKey: ["admin", "customers", customerId, "limits"],
+    queryFn: () => staffApi.get<CustomerLimitDto[]>(`/admin/customers/${customerId}/limits`),
+    enabled: !!customerId,
+  });
+
+  const decimalsByCode = new Map(wallets.map((w) => [w.currencyCode, w.decimals]));
+  const limits = limitsQuery.data ?? [];
+  const configuredCodes = new Set(limits.map((l) => l.currencyCode));
+  const availableToAdd = wallets.filter((w) => !configuredCodes.has(w.currencyCode));
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin", "customers", customerId, "limits"] });
+
+  const saveMutation = useMutation({
+    mutationFn: ({ currencyCode, dailyLimitMinor, monthlyLimitMinor }: { currencyCode: string; dailyLimitMinor: string | null; monthlyLimitMinor: string | null }) =>
+      staffApi.put<CustomerLimitDto[]>(`/admin/customers/${customerId}/limits`, { currencyCode, dailyLimitMinor, monthlyLimitMinor }),
+    onSuccess: () => {
+      invalidate();
+      toast({ title: "Limit saved" });
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't save limit", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const addMutation = useMutation({
+    mutationFn: (currencyCode: string) => staffApi.put<CustomerLimitDto[]>(`/admin/customers/${customerId}/limits`, { currencyCode, dailyLimitMinor: null, monthlyLimitMinor: null }),
+    onSuccess: () => {
+      invalidate();
+      setAddCurrency("");
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't add currency", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const draftFor = (l: CustomerLimitDto) => {
+    const decimals = decimalsByCode.get(l.currencyCode) ?? 2;
+    return drafts[l.currencyCode] ?? { daily: minorToMajorInput(l.dailyLimitMinor, decimals), monthly: minorToMajorInput(l.monthlyLimitMinor, decimals) };
+  };
+  const updateDraft = (code: string, field: "daily" | "monthly", value: string, l: CustomerLimitDto) => {
+    setDrafts((d) => ({ ...d, [code]: { ...draftFor(l), [field]: value } }));
+  };
+  const save = (l: CustomerLimitDto) => {
+    const decimals = decimalsByCode.get(l.currencyCode) ?? 2;
+    const draft = draftFor(l);
+    saveMutation.mutate({ currencyCode: l.currencyCode, dailyLimitMinor: majorInputToMinor(draft.daily, decimals), monthlyLimitMinor: majorInputToMinor(draft.monthly, decimals) });
+  };
+
+  // Only overrides are actionable here — a plain platform-default row has nothing to edit/remove per-customer.
+  const overrides = limits.filter((l) => l.isOverride);
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Gauge className="h-4 w-4 text-primary" />
+          <CardTitle className="text-sm">Withdrawal limit overrides</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {limitsQuery.isLoading ? (
+          <Skeleton className="h-10" />
+        ) : (
+          <>
+            {overrides.length > 0 && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Currency</TableHead>
+                    <TableHead>Daily limit</TableHead>
+                    <TableHead>Monthly limit</TableHead>
+                    <TableHead className="w-20" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {overrides.map((l) => {
+                    const draft = draftFor(l);
+                    return (
+                      <TableRow key={l.currencyCode}>
+                        <TableCell className="font-medium">{l.currencyCode}</TableCell>
+                        <TableCell>
+                          <Input className="w-28" placeholder="No limit" value={draft.daily} onChange={(e) => updateDraft(l.currencyCode, "daily", e.target.value, l)} onBlur={() => save(l)} />
+                        </TableCell>
+                        <TableCell>
+                          <Input className="w-28" placeholder="No limit" value={draft.monthly} onChange={(e) => updateDraft(l.currencyCode, "monthly", e.target.value, l)} onBlur={() => save(l)} />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => saveMutation.mutate({ currencyCode: l.currencyCode, dailyLimitMinor: null, monthlyLimitMinor: null })}
+                            disabled={saveMutation.isPending}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+            {availableToAdd.length > 0 && (
+              <div className="flex items-end gap-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Add an override</Label>
+                  <Select value={addCurrency} onValueChange={setAddCurrency}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableToAdd.map((w) => (
+                        <SelectItem key={w.currencyCode} value={w.currencyCode}>
+                          {w.currencyCode}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="outline" size="sm" disabled={!addCurrency || addMutation.isPending} onClick={() => addMutation.mutate(addCurrency)}>
+                  Add
+                </Button>
+              </div>
+            )}
+            {overrides.length === 0 && availableToAdd.length === 0 && <p className="text-sm text-muted-foreground">No wallets to set an override for yet.</p>}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }

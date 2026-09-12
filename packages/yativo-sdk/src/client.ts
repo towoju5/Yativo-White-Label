@@ -20,15 +20,7 @@ import { createKycReferenceResource } from "./fiat/kycReference.js";
 import { createCurrenciesResource } from "./fiat/currencies.js";
 import { createBusinessWebhooksResource } from "./fiat/businessWebhooks.js";
 
-import { createAccountsResource } from "./crypto/accounts.js";
 import { createCryptoWalletsResource } from "./crypto/wallets.js";
-import { createSendResource } from "./crypto/send.js";
-import { createCryptoSwapResource } from "./crypto/swap.js";
-import { createCryptoCardsResource } from "./crypto/cards.js";
-import { createGatewayResource } from "./crypto/gateway.js";
-import { createIbanAccountResource } from "./crypto/ibanAccount.js";
-import { createForwardingRulesResource } from "./crypto/forwardingRules.js";
-import { createComplianceResource } from "./crypto/compliance.js";
 
 /**
  * Thrown whenever Yativo returns a non-2xx response — carries enough for the
@@ -214,15 +206,7 @@ export interface YativoClient {
     currencies: ReturnType<typeof createCurrenciesResource>;
   };
   crypto: {
-    accounts: ReturnType<typeof createAccountsResource>;
     wallets: ReturnType<typeof createCryptoWalletsResource>;
-    send: ReturnType<typeof createSendResource>;
-    swap: ReturnType<typeof createCryptoSwapResource>;
-    cards: ReturnType<typeof createCryptoCardsResource>;
-    gateway: ReturnType<typeof createGatewayResource>;
-    ibanAccount: ReturnType<typeof createIbanAccountResource>;
-    forwardingRules: ReturnType<typeof createForwardingRulesResource>;
-    compliance: ReturnType<typeof createComplianceResource>;
   };
 }
 
@@ -257,15 +241,7 @@ export function createYativoClient(config: YativoConfig): YativoClient {
       currencies: createCurrenciesResource(ctx),
     },
     crypto: {
-      accounts: createAccountsResource(ctx),
       wallets: createCryptoWalletsResource(ctx),
-      send: createSendResource(ctx),
-      swap: createCryptoSwapResource(ctx),
-      cards: createCryptoCardsResource(ctx),
-      gateway: createGatewayResource(ctx),
-      ibanAccount: createIbanAccountResource(ctx),
-      forwardingRules: createForwardingRulesResource(ctx),
-      compliance: createComplianceResource(ctx),
     },
   };
 }

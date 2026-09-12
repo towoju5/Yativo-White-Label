@@ -50,8 +50,14 @@ export type CreateFiatDepositInput = {
   gatewayId: string;
   /** Wallet currency to credit (e.g. "USD") — confirmed live this is currently restricted to whichever currencies the business's deposit product is enabled for; Yativo returns a clear "Supported deposit wallets are: X" error if not. */
   walletCurrencyCode: string;
-  /** Amount in the GATEWAY's local currency's major unit (e.g. pesos, not centavos) — not the wallet currency. */
-  amount: number;
+  /**
+   * Rate-locked quote id from POST /exchange-rate (method_type "payin" — see fiat/quotes.ts).
+   * When present, this is sent instead of `amount` — Yativo derives the amount from the locked
+   * quote itself, per the documented "amount required if quote_id absent" contract.
+   */
+  quoteId?: string;
+  /** Amount in the GATEWAY's local currency's major unit (e.g. pesos, not centavos) — not the wallet currency. Required when quoteId is absent. */
+  amount?: number;
   /**
    * Flat, dot-notation values for the chosen method's form fields (e.g. "payer.type": "INDIVIDUAL")
    * — confirmed live these are sent as top-level body keys, NOT nested under a payment_data
@@ -69,6 +75,9 @@ export type CreateFiatDepositInput = {
 export function createDepositsResource(ctx: YativoContext) {
   return {
     async create(input: CreateFiatDepositInput): Promise<FiatDepositResult> {
+      if (!input.quoteId && input.amount === undefined) {
+        throw new Error("createDepositsResource.create: either quoteId or amount is required");
+      }
       const res = await ctx.request({
         baseUrl: ctx.config.fiatBaseUrl,
         path: "/wallet/deposits/new",
@@ -76,10 +85,11 @@ export function createDepositsResource(ctx: YativoContext) {
         headers: { "Idempotency-Key": input.idempotencyKey },
         body: {
           gateway: input.gatewayId,
-          amount: input.amount,
           currency: input.walletCurrencyCode,
           customer_id: input.yativoCustomerId,
           redirect_url: input.returnUrl,
+          // Mutually exclusive per Yativo's docs — quote_id already fixes the amount server-side.
+          ...(input.quoteId ? { quote_id: input.quoteId } : { amount: input.amount }),
           ...input.extraData,
         },
         schema: yativoEnvelope(depositDataSchema),

@@ -5,7 +5,6 @@ import { AuroraAdminShell } from "./AdminShell";
 import { AuroraDashboardLayout } from "./DashboardLayout";
 import { AuroraWalletBalanceCard } from "./WalletBalanceCard";
 import { AuroraStatCard } from "./StatCard";
-import { AuroraLandingPage } from "./LandingPage";
 import { AuroraPreviewThumbnail } from "./PreviewThumbnail";
 
 export const auroraTemplate: TemplateComponents = {
@@ -17,7 +16,6 @@ export const auroraTemplate: TemplateComponents = {
   DashboardLayout: AuroraDashboardLayout,
   WalletBalanceCard: AuroraWalletBalanceCard,
   StatCard: AuroraStatCard,
-  LandingPage: AuroraLandingPage,
   PreviewThumbnail: AuroraPreviewThumbnail,
   tokens: auroraTokens,
 };

@@ -5,7 +5,6 @@ import { MeridianAdminShell } from "./AdminShell";
 import { MeridianDashboardLayout } from "./DashboardLayout";
 import { MeridianWalletBalanceCard } from "./WalletBalanceCard";
 import { MeridianStatCard } from "./StatCard";
-import { MeridianLandingPage } from "./LandingPage";
 import { MeridianPreviewThumbnail } from "./PreviewThumbnail";
 
 export const meridianTemplate: TemplateComponents = {
@@ -17,7 +16,6 @@ export const meridianTemplate: TemplateComponents = {
   DashboardLayout: MeridianDashboardLayout,
   WalletBalanceCard: MeridianWalletBalanceCard,
   StatCard: MeridianStatCard,
-  LandingPage: MeridianLandingPage,
   PreviewThumbnail: MeridianPreviewThumbnail,
   tokens: meridianTokens,
 };

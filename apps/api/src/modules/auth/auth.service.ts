@@ -8,6 +8,8 @@ import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { signStaffAccessToken } from "../../lib/jwt.js";
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
+import { enqueueEmail } from "../../jobs/emailQueue.js";
+import { getBranding } from "../branding/branding.service.js";
 import { UnauthorizedError, ConflictError, ForbiddenError, NotFoundError, AppError } from "../../lib/errors.js";
 
 const staffWithRole = { include: { customRole: true } } as const;
@@ -42,7 +44,7 @@ export async function registerFirstOwner(prisma: PrismaClient, email: string, pa
 
 export async function loginStaff(prisma: PrismaClient, email: string, password: string) {
   const user = await prisma.staffUser.findUnique({ where: { email }, ...staffWithRole });
-  if (!user || !(await verifyPassword(password, user.passwordHash))) {
+  if (!user || !user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
     throw new UnauthorizedError("Invalid email or password");
   }
   if (!user.isActive) throw new UnauthorizedError("This account has been deactivated");
@@ -117,9 +119,7 @@ export async function verifyStaffPasskeyLogin(prisma: PrismaClient, redis: Redis
   return { user: passkey.staffUser, accessToken, refreshToken };
 }
 
-function generateTempPassword(): string {
-  return generateRefreshToken().token.slice(0, 16);
-}
+const STAFF_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — same as the customer-team-member invite TTL.
 
 export async function inviteStaff(
   prisma: PrismaClient,
@@ -136,14 +136,51 @@ export async function inviteStaff(
   if (existing) throw new ConflictError("A staff user with this email already exists");
   if (customRoleId && !(await prisma.role.findUnique({ where: { id: customRoleId } }))) throw new NotFoundError("Role");
 
-  // Scaffold: issues a temporary password instead of a real email invite flow (TODO: wire to an email provider).
-  const tempPassword = generateTempPassword();
-  const passwordHash = await hashPassword(tempPassword);
+  // Real emailed invite link, mirroring customerTeam.service.ts's inviteTeamMember — passwordHash
+  // stays null until the invite is accepted, same as a pending CustomerTeamMember.
+  const { token, tokenHash } = generateRefreshToken();
   const user = await prisma.staffUser.create({
-    data: { email, passwordHash, role, invitedById, customRoleId: role === "STAFF" ? (customRoleId ?? null) : null },
+    data: {
+      email,
+      role,
+      invitedById,
+      customRoleId: role === "STAFF" ? (customRoleId ?? null) : null,
+      inviteTokenHash: tokenHash,
+      inviteExpiresAt: new Date(Date.now() + STAFF_INVITE_TTL_MS),
+    },
     ...staffWithRole,
   });
-  return { user, tempPassword };
+
+  const branding = await getBranding(prisma);
+  const acceptUrl = `${env.WEB_APP_URL}/admin/accept-invite?token=${token}`;
+  try {
+    await enqueueEmail({
+      to: email,
+      subject: `You've been invited to join ${branding.productName}`,
+      html: `<p>You've been invited to join ${branding.productName}'s admin team as ${role.toLowerCase()}.</p><p><a href="${acceptUrl}">Accept your invite</a> to set a password and get started. This link expires in 7 days.</p>`,
+    });
+  } catch {
+    // Falls through to the tempPassword-less response below regardless — an admin can always
+    // regenerate/resend from Team settings if the email genuinely never arrives (out of scope for
+    // this pass; logged so it's at least visible why someone might report a missing invite email).
+  }
+  return { user };
+}
+
+/** Redeems a staff invite link — sets the real password, mirrors acceptTeamInvite. */
+export async function acceptStaffInvite(prisma: PrismaClient, token: string, password: string): Promise<void> {
+  const tokenHash = hashRefreshToken(token);
+  const user = await prisma.staffUser.findUnique({ where: { inviteTokenHash: tokenHash } });
+  if (!user || !user.inviteExpiresAt || user.inviteExpiresAt < new Date()) {
+    throw new UnauthorizedError("This invite link is invalid or has expired");
+  }
+  if (!user.isActive) throw new AppError("This invite has been revoked", 410, "INVITE_REVOKED");
+
+  const passwordHash = await hashPassword(password);
+  await prisma.staffUser.update({
+    where: { id: user.id },
+    data: { passwordHash, acceptedAt: new Date(), inviteTokenHash: null, inviteExpiresAt: null },
+  });
 }
 
 async function ownerCount(prisma: PrismaClient, excludeId?: string) {
@@ -228,7 +265,7 @@ export async function deleteStaff(prisma: PrismaClient, actingStaffId: string, t
 export async function changePassword(prisma: PrismaClient, staffId: string, currentPassword: string, newPassword: string) {
   const user = await prisma.staffUser.findUnique({ where: { id: staffId } });
   if (!user) throw new NotFoundError("Staff member");
-  if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+  if (!user.passwordHash || !(await verifyPassword(currentPassword, user.passwordHash))) {
     throw new UnauthorizedError("Current password is incorrect");
   }
   const passwordHash = await hashPassword(newPassword);
@@ -236,6 +273,11 @@ export async function changePassword(prisma: PrismaClient, staffId: string, curr
     prisma.staffUser.update({ where: { id: staffId }, data: { passwordHash } }),
     prisma.refreshToken.updateMany({ where: { staffUserId: staffId, revokedAt: null }, data: { revokedAt: new Date() } }),
   ]);
+}
+
+/** Only for resetStaffPassword below — an admin-initiated reset relayed out-of-band to the staff member, distinct from the invite flow's real emailed link. */
+function generateTempPassword(): string {
+  return generateRefreshToken().token.slice(0, 16);
 }
 
 export async function resetStaffPassword(prisma: PrismaClient, targetId: string) {

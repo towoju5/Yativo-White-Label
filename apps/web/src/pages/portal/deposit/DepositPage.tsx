@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import type { DepositCountry, DepositMethod, DepositFormField, DepositResult, WalletBalance } from "@white-label/shared-types";
-import { ArrowLeft, ArrowRight, Banknote, Check, Coins, Copy, ExternalLink, Landmark, Loader2, Wallet as WalletIcon } from "lucide-react";
+import type { DepositCountry, DepositMethod, DepositFormField, DepositResult, DepositQuote, WalletBalance, CustomerTransactionListItem } from "@white-label/shared-types";
+import { ArrowLeft, ArrowRight, Banknote, Check, Clock, Coins, Copy, ExternalLink, Landmark, Loader2, RefreshCw, Wallet as WalletIcon } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import type { Paginated } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
+import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
+import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
 
 export default function DepositPage() {
   const { t } = useTranslation();
@@ -27,6 +30,8 @@ export default function DepositPage() {
           {t("deposit.subtitle", "Fund your wallet with a one-time payment via a local rail, or crypto.")}
         </p>
       </div>
+
+      <KycRequiredNotice service="DEPOSIT" />
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <NativeDepositCard />
@@ -50,7 +55,60 @@ export default function DepositPage() {
           </CardContent>
         </Card>
       </div>
+
+      <RecentDepositsCard />
     </div>
+  );
+}
+
+function RecentDepositsCard() {
+  const { t } = useTranslation();
+  const historyQuery = useQuery({
+    queryKey: ["portal", "transactions", "recent-deposits"],
+    queryFn: () => portalApi.get<Paginated<CustomerTransactionListItem>>("/portal/transactions", { type: "DEPOSIT", page: 1, pageSize: 5 }),
+  });
+  const items = historyQuery.data?.items ?? [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">{t("deposit.recent.title", "Recent deposits")}</CardTitle>
+          </div>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/portal/transactions">{t("deposit.recent.viewAll", "View all")}</Link>
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        {historyQuery.isLoading ? (
+          <div className="space-y-2 p-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-14" />
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <p className="p-6 text-center text-sm text-muted-foreground">{t("deposit.recent.empty", "No deposits yet.")}</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {items.map((tx) => (
+              <TransactionCardRow
+                key={tx.id}
+                date={tx.createdAt}
+                description={tx.description ?? tx.type}
+                type={tx.type}
+                status={tx.status}
+                direction={tx.direction}
+                amountMinor={tx.amountMinor}
+                currencyCode={tx.currencyCode ?? ""}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -71,11 +129,11 @@ function NativeDepositCard() {
   const [extraData, setExtraData] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<DepositResult | null>(null);
-  // Yativo has no separate "quote" call for deposits — the numbers below (rate, fee, amounts)
-  // only exist because `result` was already created via /portal/deposit/initiate. This gate just
-  // holds the payment link back from the customer until they've reviewed those numbers and
-  // explicitly confirmed, rather than surfacing it immediately alongside the quote.
-  const [confirmed, setConfirmed] = useState(false);
+  // Rate-locked via POST /portal/deposit/quote (Yativo's /exchange-rate, method_type "payin") —
+  // holds the payment link back from the customer until they've reviewed the locked rate/fee and
+  // explicitly confirmed within the ~5 minute window, rather than surfacing it immediately.
+  const [quote, setQuote] = useState<DepositQuote | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const countriesQuery = useQuery({
     queryKey: ["portal", "deposit", "countries"],
@@ -110,15 +168,42 @@ function NativeDepositCard() {
     setExtraData({});
     setFieldErrors({});
     setResult(null);
-    setConfirmed(false);
+    setQuote(null);
   };
+
+  // Ticks once a second only while a quote is actually being shown, so its countdown stays live.
+  useEffect(() => {
+    if (!quote || result) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [quote, result]);
+
+  const quoteExpired = quote ? now >= new Date(quote.expiresAt).getTime() : false;
+  const msRemaining = quote ? Math.max(0, new Date(quote.expiresAt).getTime() - now) : 0;
+
+  const quoteMutation = useMutation({
+    mutationFn: () =>
+      portalApi.post<DepositQuote>("/portal/deposit/quote", {
+        gatewayId,
+        walletCurrencyCode,
+        localCurrency: selectedMethod!.currency,
+        amount,
+      }),
+    onSuccess: (q) => setQuote(q),
+    onError: (e) =>
+      toast({
+        variant: "destructive",
+        title: t("deposit.toast.quoteFailed", "Couldn't get a quote"),
+        description: e instanceof ApiError ? e.message : undefined,
+      }),
+  });
 
   const initiateMutation = useMutation({
     mutationFn: () =>
       portalApi.post<DepositResult>("/portal/deposit/initiate", {
         gatewayId,
         walletCurrencyCode,
-        amount,
+        quoteId: quote!.quoteId,
         extraData: Object.keys(extraData).length > 0 ? extraData : undefined,
       }),
     onSuccess: (r) => setResult(r),
@@ -168,8 +253,11 @@ function NativeDepositCard() {
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    initiateMutation.mutate();
+    quoteMutation.mutate();
   };
+
+  const confirmDeposit = () => initiateMutation.mutate();
+  const reQuote = () => quoteMutation.mutate();
 
   const copy = async (value: string) => {
     try {
@@ -206,7 +294,7 @@ function NativeDepositCard() {
           <DialogContent className="max-w-lg overflow-hidden p-0 sm:max-w-2xl">
             <DialogHeader className="border-b border-border px-6 py-5">
               <DialogTitle className="font-heading text-xl">{t("deposit.dialog.title", "Deposit funds")}</DialogTitle>
-              {!result && (
+              {!result && !quote && (
                 <div className="pt-2">
                   <Stepper steps={DEPOSIT_STEPS} current={step} />
                 </div>
@@ -218,7 +306,7 @@ function NativeDepositCard() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-success">
                     <Check className="h-4 w-4" />
-                    {confirmed ? t("deposit.dialog.initiated", "Deposit initiated") : t("deposit.dialog.reviewQuote", "Review your quote")}
+                    {t("deposit.dialog.initiated", "Deposit initiated")}
                   </div>
                   <dl className="divide-y divide-border rounded-lg border border-border">
                     {result.localAmount && result.localCurrency && (
@@ -249,7 +337,7 @@ function NativeDepositCard() {
                       <Row label={t("deposit.dialog.estimatedDelivery", "Estimated delivery")} value={result.estimatedDelivery} />
                     )}
                   </dl>
-                  {confirmed && result.depositUrl && (
+                  {result.depositUrl && (
                     <div className="space-y-2">
                       <Button asChild className="w-full">
                         <a href={result.depositUrl} target="_blank" rel="noreferrer">
@@ -276,6 +364,44 @@ function NativeDepositCard() {
                       </div>
                     </div>
                   )}
+                </div>
+              ) : quote ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Clock className="h-4 w-4" /> {t("deposit.dialog.reviewQuote", "Review your quote")}
+                  </div>
+                  <dl className="divide-y divide-border rounded-lg border border-border">
+                    <Row label={t("deposit.dialog.amountToPay", "Amount to pay")} value={`${quote.localAmount} ${quote.localCurrency}`} />
+                    <Row label={t("deposit.dialog.exchangeRate", "Exchange rate")} value={quote.rate} />
+                    <Row
+                      label={t("deposit.dialog.fee", "Fee")}
+                      value={
+                        quote.platformFee
+                          ? `${quote.platformFee} ${quote.walletCurrencyCode}` + (quote.platformFeeLocal ? ` (≈ ${quote.platformFeeLocal} ${quote.localCurrency})` : "")
+                          : `${quote.yativoFee} ${quote.walletCurrencyCode}`
+                      }
+                    />
+                    {(quote.netReceiveAmount ?? quote.creditedAmount) && (
+                      <Row
+                        label={t("deposit.dialog.youllReceive", "You'll receive")}
+                        value={`${quote.netReceiveAmount ?? quote.creditedAmount} ${quote.walletCurrencyCode}`}
+                        warn={Number(quote.netReceiveAmount ?? quote.creditedAmount) < 0}
+                      />
+                    )}
+                  </dl>
+                  {Number(quote.netReceiveAmount ?? quote.creditedAmount) < 0 && (
+                    <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-center text-xs font-medium text-destructive">
+                      {t(
+                        "deposit.dialog.negativeCredit",
+                        "Fees exceed this deposit amount — you would receive less than nothing. Try a larger amount.",
+                      )}
+                    </p>
+                  )}
+                  <p className={cn("text-center text-xs", quoteExpired ? "font-medium text-destructive" : "text-muted-foreground")}>
+                    {quoteExpired
+                      ? t("deposit.dialog.quoteExpired", "This quote has expired — get a fresh rate to continue.")
+                      : t("deposit.dialog.quoteExpiresIn", "Rate locked for {{seconds}}s.", { seconds: Math.ceil(msRemaining / 1000) })}
+                  </p>
                 </div>
               ) : (
                 <>
@@ -464,16 +590,16 @@ function NativeDepositCard() {
               )}
             </div>
 
-            {!result && (
+            {!result && !quote && (
               <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
-                <Button type="button" variant="ghost" onClick={goBack} disabled={step === 0 || initiateMutation.isPending}>
+                <Button type="button" variant="ghost" onClick={goBack} disabled={step === 0 || quoteMutation.isPending}>
                   <ArrowLeft className="h-4 w-4" /> {t("deposit.buttons.back", "Back")}
                 </Button>
-                <Button type="button" onClick={goNext} disabled={initiateMutation.isPending}>
-                  {initiateMutation.isPending ? (
+                <Button type="button" onClick={goNext} disabled={quoteMutation.isPending}>
+                  {quoteMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : step === 2 ? (
-                    t("deposit.buttons.startDeposit", "Start deposit")
+                    t("deposit.buttons.getQuote", "Get quote")
                   ) : (
                     <>
                       {t("deposit.buttons.continue", "Continue")} <ArrowRight className="h-4 w-4" />
@@ -483,14 +609,24 @@ function NativeDepositCard() {
               </div>
             )}
 
-            {result && !confirmed && (
+            {quote && !result && (
               <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
                 <Button type="button" variant="ghost" onClick={resetWizard}>
                   {t("deposit.buttons.startOver", "Start over")}
                 </Button>
-                <Button type="button" onClick={() => setConfirmed(true)}>
-                  {t("deposit.buttons.confirmQuote", "Confirm & get payment link")}
-                </Button>
+                {quoteExpired ? (
+                  <Button type="button" onClick={reQuote} disabled={quoteMutation.isPending}>
+                    {quoteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><RefreshCw className="h-4 w-4" /> {t("deposit.buttons.requote", "Re-quote")}</>}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={confirmDeposit}
+                    disabled={initiateMutation.isPending || (!!quote && Number(quote.netReceiveAmount ?? quote.creditedAmount) < 0)}
+                  >
+                    {initiateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("deposit.buttons.confirmQuote", "Confirm & get payment link")}
+                  </Button>
+                )}
               </div>
             )}
           </DialogContent>

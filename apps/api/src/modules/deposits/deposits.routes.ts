@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { depositCountrySchema, depositMethodSchema, createDepositSchema, depositResultSchema } from "@white-label/shared-types";
+import { depositCountrySchema, depositMethodSchema, createDepositSchema, depositResultSchema, depositQuoteRequestSchema, depositQuoteSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
@@ -47,6 +47,72 @@ export async function depositsRoutes(app: FastifyInstance) {
   );
 
   server.post(
+    "/portal/deposit/quote",
+    {
+      preHandler: [requireCustomerAuth, requirePortalPermission("deposits.manage")],
+      schema: { body: depositQuoteRequestSchema, response: { 200: depositQuoteSchema } },
+    },
+    async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
+      await requireKycApprovedForService(app.prisma, "DEPOSIT", customer);
+
+      const yativoQuote = await yativoClient.fiat.quotes.createPayin({
+        fromCurrency: request.body.localCurrency,
+        toCurrency: request.body.walletCurrencyCode,
+        methodId: Number(request.body.gatewayId),
+        amount: Number(request.body.amount),
+      });
+
+      const walletCurrency = await app.prisma.currency.findUnique({ where: { code: request.body.walletCurrencyCode } });
+
+      // Everything below is in walletCurrencyCode major units unless noted — confirmed live
+      // 2026-09-12 that Yativo's own arithmetic is `credited_amount = deposit_amount *
+      // exchange_rate - total_fees` (a 100 COP deposit at exchange_rate 1 with total_fees 3152.23
+      // produced credited_amount -3052.23, exactly matching), so `credited_amount` is already in
+      // the TO currency (the wallet) — used as-is rather than recomputed.
+      let platformFee: string | null = null;
+      let platformFeeLocal: string | null = null;
+      let netReceiveAmount: string | null = null;
+      if (walletCurrency) {
+        const creditedAmountMinor = majorToMinor(yativoQuote.creditedAmount, walletCurrency.decimals);
+        const yativoFeeMinor = majorToMinor(yativoQuote.totalFees, walletCurrency.decimals);
+
+        // This platform's own fee (admin-configured global default, or a per-customer override),
+        // computed on top of the amount that would actually land after Yativo's own fees — the
+        // exact same base + upstream-fee convention /portal/deposit/initiate already uses, so the
+        // number shown here at quote time never drifts from what actually settles.
+        const platformFeeMinor = await getEffectiveFee(app.prisma, "PAYIN", customer.id, creditedAmountMinor, yativoFeeMinor);
+        const netReceiveAmountMinor = creditedAmountMinor - platformFeeMinor;
+
+        const feeMajorInWallet = Number(platformFeeMinor) / 10 ** walletCurrency.decimals;
+        platformFee = feeMajorInWallet.toFixed(walletCurrency.decimals);
+        // Inverse of the local->wallet direction confirmed above (deposit_amount * exchange_rate
+        // = amount in wallet currency) — dividing a wallet-currency figure by exchange_rate
+        // converts it back to local-currency terms. Left null if the rate is zero/unparseable.
+        const rate = Number(yativoQuote.exchangeRate);
+        if (Number.isFinite(rate) && rate > 0) {
+          platformFeeLocal = (feeMajorInWallet / rate).toFixed(2);
+        }
+        netReceiveAmount = (Number(netReceiveAmountMinor) / 10 ** walletCurrency.decimals).toFixed(walletCurrency.decimals);
+      }
+
+      return reply.send({
+        quoteId: yativoQuote.quoteId,
+        walletCurrencyCode: request.body.walletCurrencyCode,
+        localCurrency: request.body.localCurrency,
+        rate: yativoQuote.exchangeRate,
+        localAmount: request.body.amount,
+        yativoFee: yativoQuote.totalFees,
+        creditedAmount: yativoQuote.creditedAmount,
+        platformFee,
+        platformFeeLocal,
+        netReceiveAmount,
+        expiresAt: yativoQuote.expiresAt,
+      });
+    },
+  );
+
+  server.post(
     "/portal/deposit/initiate",
     {
       preHandler: [requireCustomerAuth, requirePortalPermission("deposits.manage")],
@@ -63,7 +129,8 @@ export async function depositsRoutes(app: FastifyInstance) {
         yativoCustomerId,
         gatewayId: request.body.gatewayId,
         walletCurrencyCode: request.body.walletCurrencyCode,
-        amount: Number(request.body.amount),
+        quoteId: request.body.quoteId,
+        amount: request.body.amount !== undefined ? Number(request.body.amount) : undefined,
         extraData: request.body.extraData,
         returnUrl: `${env.WEB_APP_URL}/portal/deposit`,
         idempotencyKey,
@@ -173,7 +240,7 @@ export async function depositsRoutes(app: FastifyInstance) {
       // the deposit.confirmed webhook lands (and today, that webhook path is unreachable in local
       // dev, so this is the one confirmation a customer reliably gets for now).
       await sendNotificationEmail(app.prisma, "DEPOSIT_CREATED", customer.id, {
-        amount: result.receiveAmount ?? request.body.amount,
+        amount: result.receiveAmount ?? request.body.amount ?? result.localAmount ?? "",
         currency: request.body.walletCurrencyCode,
       });
 

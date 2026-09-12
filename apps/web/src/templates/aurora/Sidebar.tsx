@@ -7,6 +7,7 @@ import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BrandLogo } from "@/components/BrandLogo";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface NavItem {
   to: string;
@@ -29,9 +30,11 @@ interface SidebarProps {
   onLogout: () => void;
   /** Route the bottom user row links to — when omitted, the row is static (e.g. staff have no profile page). */
   profileTo?: string;
+  /** Only the portal shell passes this — the admin console has no customer session for the bell's /portal/notifications calls to work against. */
+  showNotifications?: boolean;
 }
 
-export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, profileTo }: SidebarProps) {
+export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, profileTo, showNotifications }: SidebarProps) {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { t } = useTranslation();
 
@@ -49,13 +52,14 @@ export function AuroraSidebar({ sections, userLabel, userSubLabel, onLogout, pro
 
   return (
     <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col gap-5 bg-muted/30 p-4 lg:flex">
-      <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-elevated">
+      <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-elevated">
         <BrandLogo
           branding={branding}
           className="h-8"
           badgeClassName="rounded-xl from-primary to-secondary text-sm text-white shadow-soft"
           textClassName="text-sm"
         />
+        {showNotifications && <NotificationBell />}
       </div>
 
       <nav className="scrollbar-thin flex-1 space-y-4 overflow-y-auto">

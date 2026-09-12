@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BrandLogo } from "@/components/BrandLogo";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,9 +33,11 @@ interface TopbarProps {
   userLabel: string;
   userSubLabel: string;
   onLogout: () => void;
+  /** Only the portal shell passes this — the admin console has no customer session for the bell's /portal/notifications calls to work against. */
+  showNotifications?: boolean;
 }
 
-export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: TopbarProps) {
+export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout, showNotifications }: TopbarProps) {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -70,6 +73,8 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout }: Topbar
           <div className="hidden md:block">
             <LanguageSwitcher />
           </div>
+
+          {showNotifications && <NotificationBell />}
 
           <DropdownMenu>
             <DropdownMenuTrigger className="hidden items-center gap-2 rounded-full border border-border bg-card px-2 py-1.5 pr-3 text-sm shadow-soft md:flex">

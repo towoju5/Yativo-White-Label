@@ -29,3 +29,4 @@ export * from "./storage.schema.js";
 export * from "./portalPermissions.js";
 export * from "./customerTeam.schema.js";
 export * from "./pricing.schema.js";
+export * from "./security.schema.js";

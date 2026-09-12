@@ -24,6 +24,7 @@ import {
   getStaffPasskeyLoginOptions,
   verifyStaffPasskeyLogin,
   inviteStaff,
+  acceptStaffInvite,
   updateStaff,
   deactivateStaff,
   reactivateStaff,
@@ -52,6 +53,8 @@ type StaffRow = {
   customRole?: { name: string; permissions: string[] } | null;
   invitedBy?: { email: string } | null;
   createdAt: Date;
+  acceptedAt?: Date | null;
+  inviteTokenHash?: string | null;
 };
 
 function toDto(user: StaffRow) {
@@ -65,6 +68,10 @@ function toDto(user: StaffRow) {
     permissions: resolveStaffPermissions({ role: user.role, customRole: user.customRole ?? null }),
     invitedByEmail: user.invitedBy?.email ?? null,
     createdAt: user.createdAt.toISOString(),
+    // A pending invite has a still-unredeemed inviteTokenHash — registerFirstOwner/direct-create
+    // rows (no invite flow) have neither an invite token nor an acceptedAt, so they must default
+    // to "not pending" rather than being misread as stuck invites.
+    invitePending: !!user.inviteTokenHash && !user.acceptedAt,
   };
 }
 
@@ -83,7 +90,9 @@ export async function authRoutes(app: FastifyInstance) {
 
   server.post(
     "/auth/login",
-    { schema: { body: staffLoginSchema, response: { 200: authTokensSchema } } },
+    // Tighter than the global 200/min default (app.ts) — login is the one endpoint worth
+    // throttling specifically against brute-forcing, independent of whatever else this IP is doing.
+    { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: staffLoginSchema, response: { 200: authTokensSchema } } },
     async (request, reply) => {
       const { accessToken, refreshToken } = await loginStaff(app.prisma, request.body.email, request.body.password);
       reply.setCookie(REFRESH_COOKIE, refreshToken, {
@@ -180,10 +189,10 @@ export async function authRoutes(app: FastifyInstance) {
     "/staff/invite",
     {
       preHandler: [requireStaffAuth, requirePermission("team.manage")],
-      schema: { body: inviteStaffSchema, response: { 200: z.object({ user: staffUserSchema, tempPassword: z.string() }) } },
+      schema: { body: inviteStaffSchema, response: { 200: z.object({ user: staffUserSchema }) } },
     },
     async (request, reply) => {
-      const { user, tempPassword } = await inviteStaff(
+      const { user } = await inviteStaff(
         app.prisma,
         request.staffUser!.sub,
         request.staffUser!.role,
@@ -191,7 +200,19 @@ export async function authRoutes(app: FastifyInstance) {
         request.body.role,
         request.body.customRoleId,
       );
-      return reply.send({ user: toDto(user), tempPassword });
+      return reply.send({ user: toDto(user) });
+    },
+  );
+
+  server.post(
+    "/auth/accept-invite",
+    {
+      config: { rateLimit: { max: 10, timeWindow: "1 minute" } },
+      schema: { body: changePasswordSchema.omit({ currentPassword: true }).extend({ token: z.string().min(1) }), response: { 204: z.void(), 401: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      await acceptStaffInvite(app.prisma, request.body.token, request.body.newPassword);
+      return reply.code(204).send();
     },
   );
 

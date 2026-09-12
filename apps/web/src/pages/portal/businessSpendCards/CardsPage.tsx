@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
   ACTIVE: "success",
@@ -60,6 +61,11 @@ export default function PortalBusinessSpendCardsPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("businessSpendCards.title", "Business Spend Cards")}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{t("businessSpendCards.subtitle", "Cards for your business, funded from your USD wallet")}</p>
         </div>
+      </div>
+
+      <KycRequiredNotice service="BUSINESS_SPEND_CARD" />
+
+      <div className="flex items-center justify-end">
         <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
           <DialogTrigger asChild>
             <Button size="sm">

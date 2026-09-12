@@ -24,6 +24,8 @@ export type PortalAccessClaims = {
   /** Only meaningful for a member token — ADMIN bypasses `permissions` entirely, same as OWNER. */
   role?: "ADMIN" | "MEMBER";
   permissions?: string[];
+  /** The CustomerRefreshToken row id this access token was issued alongside — lets the "active sessions" list (security/sessions.routes.ts) identify which row is the caller's own current session. Optional so a token issued before this existed keeps working (just never matches as current). */
+  sessionId?: string;
 };
 
 export function signStaffAccessToken(payload: Omit<StaffAccessClaims, "aud">): string {

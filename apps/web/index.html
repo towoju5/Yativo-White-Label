@@ -11,6 +11,30 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>White Label</title>
+    <!-- Applies last-known branding (cached by src/theme/branding.ts after every successful fetch)
+         synchronously, before React mounts — so a RETURNING visitor never sees the generic
+         "White Label" title/icon flash while the live branding fetch is in flight. A first-ever
+         visit (nothing cached yet) still shows the placeholder briefly; unavoidable without
+         server-side rendering, which this static SPA doesn't have. -->
+    <script>
+      (function () {
+        try {
+          var b = JSON.parse(localStorage.getItem("cached-branding") || "null");
+          if (!b) return;
+          if (b.productName) document.title = b.productName;
+          if (b.faviconUrl) {
+            var favicon = document.getElementById("app-favicon");
+            if (favicon) favicon.href = b.faviconUrl;
+          }
+          if (b.primaryColor) {
+            var theme = document.querySelector('meta[name="theme-color"]');
+            if (theme) theme.content = b.primaryColor;
+          }
+        } catch (e) {
+          // Corrupt/blocked storage — the live fetch will still apply real branding shortly.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

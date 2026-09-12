@@ -25,6 +25,7 @@ export const staffUserSchema = z.object({
   permissions: z.array(staffPermissionSchema),
   invitedByEmail: z.string().nullable(),
   createdAt: z.string(),
+  invitePending: z.boolean(),
 });
 export type StaffUserDto = z.infer<typeof staffUserSchema>;
 
@@ -110,6 +111,27 @@ export const resendVerificationSchema = z.object({
   email: z.string().email(),
 });
 export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
+
+export const requestPasswordResetSchema = z.object({
+  email: z.string().email(),
+});
+export type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>;
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  newPassword: z.string().min(8),
+});
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const requestMagicLinkSchema = z.object({
+  email: z.string().email(),
+});
+export type RequestMagicLinkInput = z.infer<typeof requestMagicLinkSchema>;
+
+export const verifyMagicLinkSchema = z.object({
+  token: z.string().min(1),
+});
+export type VerifyMagicLinkInput = z.infer<typeof verifyMagicLinkSchema>;
 
 export const verifyTwoFactorSchema = z.object({
   challengeToken: z.string(),

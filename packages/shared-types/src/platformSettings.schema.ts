@@ -20,11 +20,16 @@ export const adminCurrencySchema = z.object({
 });
 export type AdminCurrency = z.infer<typeof adminCurrencySchema>;
 
+export const CUSTOMER_LOGIN_METHODS = ["PASSWORD", "MAGIC_LINK"] as const;
+export const customerLoginMethodSchema = z.enum(CUSTOMER_LOGIN_METHODS);
+export type CustomerLoginMethod = z.infer<typeof customerLoginMethodSchema>;
+
 export const platformSettingsSchema = z.object({
   walletCurrencyMode: walletCurrencyModeSchema,
   defaultCurrencyCode: z.string(),
   kycRequiredServices: z.array(kycRequiredServiceSchema),
   requireEmailVerification: z.boolean(),
+  customerLoginMethod: customerLoginMethodSchema,
   updatedAt: z.string(),
 });
 export type PlatformSettings = z.infer<typeof platformSettingsSchema>;
@@ -38,6 +43,17 @@ export const updateEmailVerificationSchema = z.object({
   requireEmailVerification: z.boolean(),
 });
 export type UpdateEmailVerificationInput = z.infer<typeof updateEmailVerificationSchema>;
+
+export const updateCustomerLoginMethodSchema = z.object({
+  customerLoginMethod: customerLoginMethodSchema,
+});
+export type UpdateCustomerLoginMethodInput = z.infer<typeof updateCustomerLoginMethodSchema>;
+
+/** Public — fetched by the portal login page before the customer authenticates, to know which form to show. */
+export const portalAuthConfigSchema = z.object({
+  loginMethod: customerLoginMethodSchema,
+});
+export type PortalAuthConfig = z.infer<typeof portalAuthConfigSchema>;
 
 export const walletCurrencySettingsSchema = z.object({
   settings: platformSettingsSchema,

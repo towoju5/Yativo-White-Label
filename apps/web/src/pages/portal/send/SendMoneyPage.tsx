@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
+import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 
 const QUOTE_LIFETIME_MS = 5 * 60_000;
 
@@ -291,11 +292,7 @@ export default function SendMoneyPage() {
               {t("send.result.statusLabel", "Status:")} <span className="font-medium">{statusQuery.data?.status ?? "pending"}</span>
               {statusQuery.isFetching && ` ${t("send.result.refreshing", "(refreshing…)")}`}
             </p>
-            {submittedPayout.yativoPayoutId && (
-              <p className="text-xs text-muted-foreground">
-                {t("send.result.payoutId", "Payout ID: {{id}}", { id: submittedPayout.yativoPayoutId })}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground">{t("send.result.payoutId", "Payout ID: {{id}}", { id: submittedPayout.id })}</p>
             <div className="mt-2 flex gap-2">
               <Button variant="outline" onClick={() => navigate("/portal/wallets")}>
                 {t("send.result.viewWallets", "View wallets")}
@@ -316,6 +313,8 @@ export default function SendMoneyPage() {
           {t("send.subtitle", "Pick a country and how they get paid, then confirm the amount.")}
         </p>
       </div>
+
+      <KycRequiredNotice service="PAYOUT" />
 
       {step === 0 && (
         <div className="flex gap-2 rounded-lg border border-border bg-muted/30 p-1">

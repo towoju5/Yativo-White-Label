@@ -7,6 +7,8 @@ import {
   updateCurrencyEnabledSchema,
   updateKycRequirementsSchema,
   updateEmailVerificationSchema,
+  updateCustomerLoginMethodSchema,
+  portalAuthConfigSchema,
   adminCurrencySchema,
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
@@ -17,6 +19,8 @@ import {
   updatePlatformSettings,
   updateKycRequirements,
   updateEmailVerificationSetting,
+  updateCustomerLoginMethod,
+  getPortalAuthConfig,
   setCurrencyEnabled,
 } from "./platformSettings.service.js";
 
@@ -75,6 +79,24 @@ export async function platformSettingsRoutes(app: FastifyInstance) {
       const settings = await updateEmailVerificationSetting(app.prisma, request.body);
       return reply.send(settings);
     },
+  );
+
+  server.patch(
+    "/admin/settings/customer-login-method",
+    {
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      schema: { body: updateCustomerLoginMethodSchema, response: { 200: walletCurrencySettingsSchema.shape.settings } },
+    },
+    async (request, reply) => {
+      const settings = await updateCustomerLoginMethod(app.prisma, request.body);
+      return reply.send(settings);
+    },
+  );
+
+  server.get(
+    "/portal/auth/config",
+    { schema: { response: { 200: portalAuthConfigSchema } } },
+    async (_request, reply) => reply.send(await getPortalAuthConfig(app.prisma)),
   );
 
   server.patch(

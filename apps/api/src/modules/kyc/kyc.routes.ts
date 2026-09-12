@@ -21,6 +21,8 @@ import { AppError } from "../../lib/errors.js";
 import { parseMultipartKycRequest, injectFiles } from "../../lib/parseMultipartKyc.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { getCustomerEndorsements, regenerateCustomerEndorsementLink } from "../customers/customers.service.js";
+import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
+import { sendOpsAlert } from "../notifications/channels/opsAlert.js";
 import logger from "../../lib/logger.js";
 
 async function resolveCountryIso3(iso2: string): Promise<string> {
@@ -39,11 +41,15 @@ export async function kycRoutes(app: FastifyInstance) {
     "/portal/kyc",
     { preHandler: requireCustomerAuth, schema: { response: { 200: kycStatusResponseSchema } } },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const [customer, settings] = await Promise.all([
+        app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } }),
+        getPlatformSettings(app.prisma),
+      ]);
       return reply.send({
         kycStatus: customer.kycStatus,
         kycSubmissionId: customer.kycSubmissionId,
         kycSubmittedAt: customer.kycSubmittedAt?.toISOString() ?? null,
+        requiredServices: settings.kycRequiredServices,
       });
     },
   );
@@ -194,7 +200,14 @@ export async function kycRoutes(app: FastifyInstance) {
           kycSubmittedAt: new Date(),
         },
       });
-      return reply.send({ kycStatus: updated.kycStatus, kycSubmissionId: updated.kycSubmissionId, kycSubmittedAt: updated.kycSubmittedAt!.toISOString() });
+      await sendOpsAlert(`🪪 Individual KYC submitted for review — customer ${updated.id} (${updated.email}).`);
+      const settings = await getPlatformSettings(app.prisma);
+      return reply.send({
+        kycStatus: updated.kycStatus,
+        kycSubmissionId: updated.kycSubmissionId,
+        kycSubmittedAt: updated.kycSubmittedAt!.toISOString(),
+        requiredServices: settings.kycRequiredServices,
+      });
     },
   );
 
@@ -231,7 +244,14 @@ export async function kycRoutes(app: FastifyInstance) {
           kycSubmittedAt: new Date(),
         },
       });
-      return reply.send({ kycStatus: updated.kycStatus, kycSubmissionId: updated.kycSubmissionId, kycSubmittedAt: updated.kycSubmittedAt!.toISOString() });
+      await sendOpsAlert(`🪪 Business KYB submitted for review — customer ${updated.id} (${updated.email}).`);
+      const settings = await getPlatformSettings(app.prisma);
+      return reply.send({
+        kycStatus: updated.kycStatus,
+        kycSubmissionId: updated.kycSubmissionId,
+        kycSubmittedAt: updated.kycSubmittedAt!.toISOString(),
+        requiredServices: settings.kycRequiredServices,
+      });
     },
   );
 }

@@ -6,6 +6,7 @@ import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
+import { logCustomerAction } from "../security/auditLog.service.js";
 import logger from "../../lib/logger.js";
 
 /**
@@ -89,6 +90,7 @@ export async function createBeneficiary(prisma: PrismaClient, customerId: string
 
   logger.info({ customerId, beneficiaryId, yativoBeneficiaryId: yativoResult.yativoBeneficiaryId }, "Created beneficiary");
   await sendNotificationEmail(prisma, "BENEFICIARY_ADDED", customerId, { beneficiaryName: input.name });
+  await logCustomerAction(prisma, customerId, `Added beneficiary "${input.name}"`);
   return beneficiaryToDto(beneficiary);
 }
 

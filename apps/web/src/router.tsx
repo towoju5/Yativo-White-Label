@@ -5,11 +5,14 @@ import AdminLayout from "@/layouts/AdminLayout";
 import { RequireCustomerAuth, RequireStaffAuth } from "@/router/guards";
 import { RouteErrorBoundary } from "@/components/errors/RouteErrorBoundary";
 
-import LandingPage from "@/pages/marketing/LandingPage";
 import StaticPageView from "@/pages/marketing/StaticPageView";
 import VerifyStatementPage from "@/pages/public/VerifyStatementPage";
 
 import PortalLoginPage from "@/pages/portal/auth/LoginPage";
+import ForgotPasswordPage from "@/pages/portal/auth/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/portal/auth/ResetPasswordPage";
+import MagicLinkPage from "@/pages/portal/auth/MagicLinkPage";
+import NotFoundPage from "@/pages/NotFoundPage";
 import PortalSignupPage from "@/pages/portal/auth/SignupPage";
 import VerifyEmailPage from "@/pages/portal/auth/VerifyEmailPage";
 import AcceptInvitePage from "@/pages/portal/auth/AcceptInvitePage";
@@ -32,6 +35,7 @@ import PortalSettingsPage from "@/pages/portal/settings/SettingsPage";
 import KycWizardPage from "@/pages/portal/kyc/KycWizardPage";
 
 import AdminLoginPage from "@/pages/admin/auth/LoginPage";
+import AdminAcceptInvitePage from "@/pages/admin/auth/AcceptInvitePage";
 import AdminDashboardPage from "@/pages/admin/dashboard/DashboardPage";
 import CustomersPage from "@/pages/admin/customers/CustomersPage";
 import CustomerDetailPage from "@/pages/admin/customers/CustomerDetailPage";
@@ -43,6 +47,7 @@ import AdminBusinessSpendCardsPage from "@/pages/admin/businessSpendCards/CardsP
 import TeamPage from "@/pages/admin/team/TeamPage";
 import RolesPage from "@/pages/admin/roles/RolesPage";
 import WebhooksPage from "@/pages/admin/webhooks/WebhooksPage";
+import SupportTicketsPage from "@/pages/admin/support/SupportTicketsPage";
 import ReconciliationPage from "@/pages/admin/reconciliation/ReconciliationPage";
 import CryptoWalletsPage from "@/pages/admin/crypto/CryptoWalletsPage";
 import PagesPage from "@/pages/admin/pages/PagesPage";
@@ -54,8 +59,10 @@ import PricingSettingsPage from "@/pages/admin/settings/PricingSettingsPage";
 import PaymentGatewaysSettingsPage from "@/pages/admin/settings/PaymentGatewaysSettingsPage";
 import IntegrationsSettingsPage from "@/pages/admin/settings/IntegrationsSettingsPage";
 import VerificationSettingsPage from "@/pages/admin/settings/VerificationSettingsPage";
+import LimitsSettingsPage from "@/pages/admin/settings/LimitsSettingsPage";
 import AuthenticationSettingsPage from "@/pages/admin/settings/AuthenticationSettingsPage";
 import NotificationSettingsPage from "@/pages/admin/settings/NotificationSettingsPage";
+import NotificationChannelsSettingsPage from "@/pages/admin/settings/NotificationChannelsSettingsPage";
 import EmailTemplatesSettingsPage from "@/pages/admin/settings/EmailTemplatesSettingsPage";
 import StorageSettingsPage from "@/pages/admin/settings/StorageSettingsPage";
 
@@ -66,12 +73,15 @@ export function createRouter(adminLoginPath: string) {
     // breaking). Every other route sits underneath so nothing escapes without at least this tier.
     errorElement: <RouteErrorBoundary />,
     children: [
-      { path: "/", element: <LandingPage /> },
+      { path: "/", element: <PortalLoginPage /> },
       { path: "/verify-statement/:token", element: <VerifyStatementPage /> },
 
       { path: "/portal/login", element: <PortalLoginPage /> },
       { path: "/portal/signup", element: <PortalSignupPage /> },
       { path: "/portal/verify-email", element: <VerifyEmailPage /> },
+      { path: "/portal/forgot-password", element: <ForgotPasswordPage /> },
+      { path: "/portal/reset-password", element: <ResetPasswordPage /> },
+      { path: "/portal/magic-link", element: <MagicLinkPage /> },
       { path: "/portal/accept-invite", element: <AcceptInvitePage /> },
       {
         path: "/portal/verify",
@@ -117,6 +127,7 @@ export function createRouter(adminLoginPath: string) {
       },
 
       { path: adminLoginPath, element: <AdminLoginPage /> },
+      { path: "/admin/accept-invite", element: <AdminAcceptInvitePage /> },
       {
         path: "/admin",
         element: (
@@ -140,6 +151,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "team", element: <TeamPage /> },
               { path: "roles", element: <RolesPage /> },
               { path: "webhooks", element: <WebhooksPage /> },
+              { path: "support", element: <SupportTicketsPage /> },
               { path: "reconciliation", element: <ReconciliationPage /> },
               { path: "crypto", element: <CryptoWalletsPage /> },
               { path: "pages", element: <PagesPage /> },
@@ -150,9 +162,11 @@ export function createRouter(adminLoginPath: string) {
               { path: "settings/pricing", element: <PricingSettingsPage /> },
               { path: "settings/payment-gateways", element: <PaymentGatewaysSettingsPage /> },
               { path: "settings/verification", element: <VerificationSettingsPage /> },
+              { path: "settings/limits", element: <LimitsSettingsPage /> },
               { path: "settings/integrations", element: <IntegrationsSettingsPage /> },
               { path: "settings/authentication", element: <AuthenticationSettingsPage /> },
               { path: "settings/notifications", element: <NotificationSettingsPage /> },
+              { path: "settings/notification-channels", element: <NotificationChannelsSettingsPage /> },
               { path: "settings/email-templates", element: <EmailTemplatesSettingsPage /> },
               { path: "settings/storage", element: <StorageSettingsPage /> },
             ],
@@ -165,7 +179,7 @@ export function createRouter(adminLoginPath: string) {
       // regardless of registration order, but keeping it last here matches that intent for readers).
       { path: "/:slug", element: <StaticPageView /> },
 
-      { path: "*", element: <LandingPage /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
   ]);

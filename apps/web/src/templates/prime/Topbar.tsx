@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Menu, LogOut, Sun, Moon, Bell } from "lucide-react";
+import { Menu, LogOut, Sun, Moon } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useTemplate } from "@/templates/useTemplate";
 import { getStoredColorScheme, setStoredColorScheme } from "@/templates/TemplateProvider";
 import { cn } from "@/lib/utils";
@@ -23,9 +24,11 @@ interface TopbarProps {
   userLabel: string;
   userSubLabel: string;
   onLogout: () => void;
+  /** Only the portal shell passes this — the admin console has no customer session for the bell's /portal/notifications calls to work against. */
+  showNotifications?: boolean;
 }
 
-export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, onLogout }: TopbarProps) {
+export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, onLogout, showNotifications }: TopbarProps) {
   const template = useTemplate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -87,13 +90,7 @@ export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, on
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
-        <button
-          aria-label={t("topbar.prime.notifications", "Notifications")}
-          title={t("topbar.prime.notifications", "Notifications")}
-          className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <Bell className="h-4 w-4" />
-        </button>
+        {showNotifications && <NotificationBell />}
 
         <DropdownMenu>
           <DropdownMenuTrigger className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold uppercase text-primary hover:bg-primary/15">

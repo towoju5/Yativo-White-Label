@@ -79,7 +79,6 @@ export interface TemplateComponents {
   DashboardLayout: FC<DashboardLayoutProps>;
   WalletBalanceCard: FC<WalletBalanceCardProps>;
   StatCard: FC<StatCardProps>;
-  LandingPage: FC;
   /** A small self-contained illustration used by the branding template picker — no external assets. */
   PreviewThumbnail: ComponentType<{ className?: string }>;
   tokens: TemplateTokens;

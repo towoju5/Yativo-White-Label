@@ -77,8 +77,104 @@ function cleanNumericString(value: string | number): string {
   return typeof value === "number" ? String(value) : value.replace(/,/g, "");
 }
 
+// Confirmed live 2026-09-12 (COP->COP corridor, method_type "payin") — this is a COMPLETELY
+// different response shape from the payout quote above, not a subset/superset of it. No
+// `calculator`/`payout_data` nesting, no `rate` field (it's `exchange_rate`), and it carries its
+// own fee breakdown directly at the top level. `credited_amount` can be NEGATIVE when Yativo's
+// fees exceed the deposit amount (observed live: depositing 100 COP produced a -3052.23 credited
+// amount) — this must be surfaced to the customer, never clamped or hidden.
+const payinExchangeRateDataSchema = z
+  .object({
+    quote_id: z.string(),
+    quote_expire_at: z.string(),
+    from_currency: z.string(),
+    to_currency: z.string(),
+    deposit_amount: z.union([z.string(), z.number()]),
+    exchange_rate: z.union([z.string(), z.number()]),
+    // Exact composition of these three (fixed vs percentage vs "float") isn't documented anywhere
+    // found — only `total_fees` (their sum) is treated as authoritative; the individual
+    // breakdown fields are passed through for display only, never relied on arithmetically.
+    fixed_fee: z.union([z.string(), z.number()]).optional(),
+    float_fee: z.union([z.string(), z.number()]).optional(),
+    percentage_fee: z.union([z.string(), z.number()]).optional(),
+    total_fees: z.union([z.string(), z.number()]).optional(),
+    credited_amount: z.union([z.string(), z.number()]),
+  })
+  .passthrough();
+
+export const fiatPayinQuoteSchema = z.object({
+  quoteId: z.string(),
+  fromCurrency: z.string(),
+  toCurrency: z.string(),
+  /** In `fromCurrency` major units — what the customer pays. */
+  depositAmount: z.string(),
+  exchangeRate: z.string(),
+  /** Yativo's own total fee (fixed + percentage combined), in `toCurrency` (wallet) major units. "0" when Yativo didn't return a total_fees figure at all. */
+  totalFees: z.string(),
+  /** depositAmount converted to `toCurrency` minus totalFees — the amount that would land in the wallet before this platform's own fee. Can be negative; never clamp this. */
+  creditedAmount: z.string(),
+  expiresAt: z.string(),
+});
+export type FiatPayinQuote = z.infer<typeof fiatPayinQuoteSchema>;
+
+export type GetPayinQuoteInput = {
+  /** The deposit method's LOCAL currency — what the customer is paying with. */
+  fromCurrency: string;
+  /** The wallet currency being credited. */
+  toCurrency: string;
+  /** The payin gateway id. */
+  methodId: number;
+  /** In `fromCurrency` major units. */
+  amount: number;
+};
+
 export function createQuotesResource(ctx: YativoContext) {
   return {
+    /** For deposits (method_type "payin") — a structurally different response from the payout quote below, see payinExchangeRateDataSchema's comment. */
+    async createPayin(input: GetPayinQuoteInput): Promise<FiatPayinQuote> {
+      const res = await ctx.request({
+        baseUrl: ctx.config.fiatBaseUrl,
+        path: "/exchange-rate",
+        method: "POST",
+        headers: { "Idempotency-Key": randomUUID() },
+        body: {
+          from_currency: input.fromCurrency,
+          to_currency: input.toCurrency,
+          method_id: input.methodId,
+          method_type: "payin",
+          amount: input.amount,
+        },
+        schema: yativoEnvelope(payinExchangeRateDataSchema),
+        mockData: {
+          status: "success",
+          status_code: 200,
+          message: "mock",
+          data: {
+            quote_id: "quote-mock-payin-001",
+            quote_expire_at: new Date(Date.now() + 5 * 60_000).toISOString(),
+            from_currency: input.fromCurrency,
+            to_currency: input.toCurrency,
+            deposit_amount: input.amount,
+            exchange_rate: 1,
+            total_fees: 0,
+            credited_amount: input.amount,
+          },
+        },
+      });
+
+      return {
+        quoteId: res.data.quote_id,
+        fromCurrency: res.data.from_currency,
+        toCurrency: res.data.to_currency,
+        depositAmount: cleanNumericString(res.data.deposit_amount),
+        exchangeRate: cleanNumericString(res.data.exchange_rate),
+        totalFees: res.data.total_fees !== undefined ? cleanNumericString(res.data.total_fees) : "0",
+        creditedAmount: cleanNumericString(res.data.credited_amount),
+        expiresAt: res.data.quote_expire_at,
+      };
+    },
+
+    /** For payouts (method_type "payout") only — see createPayin above for the structurally different deposit case. */
     async create(input: GetFiatQuoteInput): Promise<FiatQuote> {
       const res = await ctx.request({
         baseUrl: ctx.config.fiatBaseUrl,

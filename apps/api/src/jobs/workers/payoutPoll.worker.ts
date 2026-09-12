@@ -6,6 +6,7 @@ import { yativoClient } from "../../lib/yativoClient.js";
 import { settlePayoutCompleted } from "../../modules/payouts/payouts.service.js";
 import { reverseTransaction } from "../../modules/ledger/reverseTransaction.js";
 import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
+import { sendOpsAlert } from "../../modules/notifications/channels/opsAlert.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
 import logger from "../../lib/logger.js";
 
@@ -69,11 +70,13 @@ export function startPayoutPollWorker(prisma: PrismaClient): Worker<PayoutPollJo
       }
       if (classification === "FAILURE") {
         await reverseTransaction(prisma, payout.transactionId, `Yativo poll reported status "${status}"`);
+        const displayAmount = await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor);
         await sendNotificationEmail(prisma, "PAYOUT_FAILED", payout.customerId, {
-          amount: await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor),
+          amount: displayAmount,
           currency: payout.currencyCode,
           reason: `Yativo poll reported status "${status}"`,
         });
+        await sendOpsAlert(`⚠️ Payout failed (detected via status poll, status "${status}"): ${displayAmount} ${payout.currencyCode} (payout ${payout.id}, customer ${payout.customerId})`);
         logger.info({ payoutId, attempt, status }, "payout reversed via status poll");
         return;
       }

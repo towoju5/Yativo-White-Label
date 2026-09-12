@@ -14,6 +14,7 @@ import { buildCorsOriginCheck } from "./lib/cors.js";
 import { prismaPlugin } from "./plugins/prisma.js";
 import { redisPlugin } from "./plugins/redis.js";
 import { loadIntegrationSettingsFromDb } from "./lib/integrationRuntimeConfig.js";
+import { loadNotificationChannelSettingsFromDb } from "./lib/notificationChannelConfig.js";
 import { loadStorageSettingsFromDb } from "./lib/storage/storageRuntimeConfig.js";
 import { bootstrapPlatformData } from "./lib/bootstrapPlatformData.js";
 import { realtimeRoutes } from "./modules/realtime/realtime.routes.js";
@@ -52,9 +53,15 @@ import { platformIntegrationsRoutes } from "./modules/integrations/platformInteg
 import { staffPasskeysRoutes } from "./modules/passkeys/staffPasskeys.routes.js";
 import { customerPasskeysRoutes } from "./modules/passkeys/customerPasskeys.routes.js";
 import { notificationsRoutes } from "./modules/notifications/notifications.routes.js";
+import { portalNotificationsRoutes } from "./modules/notifications/portalNotifications.routes.js";
+import { notificationChannelsRoutes } from "./modules/notifications/notificationChannels.routes.js";
 import { statementsRoutes } from "./modules/statements/statements.routes.js";
 import { publicStatementsRoutes } from "./modules/statements/publicStatements.routes.js";
 import { supportRoutes } from "./modules/support/support.routes.js";
+import { adminSupportRoutes } from "./modules/support/adminSupport.routes.js";
+import { sessionsRoutes } from "./modules/security/sessions.routes.js";
+import { customerAuditLogRoutes } from "./modules/security/auditLog.routes.js";
+import { limitsRoutes } from "./modules/security/limits.routes.js";
 import { storageSettingsRoutes } from "./modules/storage/storageSettings.routes.js";
 import { localAssetsRoutes } from "./modules/storage/localAssets.routes.js";
 import { customerTeamRoutes } from "./modules/customerTeam/customerTeam.routes.js";
@@ -99,6 +106,7 @@ export async function buildApp() {
   await bootstrapPlatformData(app.prisma);
   await loadIntegrationSettingsFromDb(app.prisma);
   await loadStorageSettingsFromDb(app.prisma);
+  await loadNotificationChannelSettingsFromDb(app.prisma);
 
   app.setErrorHandler((error: FastifyError | AppError | YativoApiError, _request, reply) => {
     if (error instanceof AppError) {
@@ -175,9 +183,15 @@ export async function buildApp() {
   await app.register(staffPasskeysRoutes);
   await app.register(customerPasskeysRoutes);
   await app.register(notificationsRoutes);
+  await app.register(portalNotificationsRoutes);
+  await app.register(notificationChannelsRoutes);
   await app.register(statementsRoutes);
   await app.register(publicStatementsRoutes);
   await app.register(supportRoutes);
+  await app.register(adminSupportRoutes);
+  await app.register(sessionsRoutes);
+  await app.register(customerAuditLogRoutes);
+  await app.register(limitsRoutes);
   await app.register(storageSettingsRoutes);
   await app.register(localAssetsRoutes);
   await app.register(customerTeamRoutes);

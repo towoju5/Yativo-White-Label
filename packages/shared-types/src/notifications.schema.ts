@@ -87,3 +87,96 @@ export const updateEmailTemplateSchema = z.object({
   bodyHtml: z.string().min(1),
 });
 export type UpdateEmailTemplateInput = z.infer<typeof updateEmailTemplateSchema>;
+
+// ── In-app notification center ──
+
+export const notificationSchema = z.object({
+  id: z.string(),
+  type: emailNotificationTypeSchema,
+  title: z.string(),
+  body: z.string(),
+  readAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type NotificationDto = z.infer<typeof notificationSchema>;
+
+// ── Web push subscriptions ──
+
+export const pushSubscriptionRequestSchema = z.object({
+  endpoint: z.string().url(),
+  keys: z.object({
+    p256dh: z.string(),
+    auth: z.string(),
+  }),
+});
+export type PushSubscriptionRequest = z.infer<typeof pushSubscriptionRequestSchema>;
+
+// ── Notification channels (SMS / WhatsApp / Slack / Telegram / web push) admin settings ──
+
+export const WHATSAPP_PROVIDERS = ["meta", "twilio", "custom_webhook"] as const;
+export const whatsappProviderSchema = z.enum(WHATSAPP_PROVIDERS);
+export type WhatsAppProviderKind = z.infer<typeof whatsappProviderSchema>;
+
+export const notificationChannelSettingsSchema = z.object({
+  webPush: z.object({
+    vapidPublicKey: z.string(),
+    vapidSubject: z.string(),
+  }),
+  sms: z.object({
+    enabled: z.boolean(),
+    twilioAccountSid: z.string(),
+    twilioAuthTokenConfigured: z.boolean(),
+    twilioFromNumber: z.string(),
+  }),
+  whatsapp: z.object({
+    enabled: z.boolean(),
+    provider: whatsappProviderSchema,
+    metaPhoneNumberId: z.string(),
+    metaAccessTokenConfigured: z.boolean(),
+    twilioFromNumber: z.string(),
+    customWebhookUrl: z.string(),
+    customWebhookAuthHeaderConfigured: z.boolean(),
+  }),
+  slack: z.object({
+    enabled: z.boolean(),
+    webhookUrlConfigured: z.boolean(),
+  }),
+  telegram: z.object({
+    enabled: z.boolean(),
+    botTokenConfigured: z.boolean(),
+    chatId: z.string(),
+  }),
+});
+export type NotificationChannelSettingsDto = z.infer<typeof notificationChannelSettingsSchema>;
+
+export const updateNotificationChannelSettingsSchema = z.object({
+  webPush: z.object({
+    vapidSubject: z.string(),
+  }),
+  sms: z.object({
+    enabled: z.boolean(),
+    twilioAccountSid: z.string(),
+    /** Omit (or send empty) to keep the previously-saved token. */
+    twilioAuthToken: z.string().optional(),
+    twilioFromNumber: z.string(),
+  }),
+  whatsapp: z.object({
+    enabled: z.boolean(),
+    provider: whatsappProviderSchema,
+    metaPhoneNumberId: z.string(),
+    metaAccessToken: z.string().optional(),
+    twilioFromNumber: z.string(),
+    customWebhookUrl: z.string(),
+    customWebhookAuthHeader: z.string().optional(),
+  }),
+  slack: z.object({
+    enabled: z.boolean(),
+    webhookUrl: z.string().optional(),
+  }),
+  telegram: z.object({
+    enabled: z.boolean(),
+    botToken: z.string().optional(),
+    chatId: z.string(),
+  }),
+});
+export type UpdateNotificationChannelSettingsInput = z.infer<typeof updateNotificationChannelSettingsSchema>;

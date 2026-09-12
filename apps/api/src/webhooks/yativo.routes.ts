@@ -7,6 +7,7 @@ import { verifyYativoSignature } from "@white-label/yativo-sdk";
 import { yativoWebhookConfig, syncWebhookSecretIfRotated } from "../lib/integrationRuntimeConfig.js";
 import logger from "../lib/logger.js";
 import { enqueueWebhookEvent } from "../jobs/queue.js";
+import { sendOpsAlert } from "../modules/notifications/channels/opsAlert.js";
 
 // Yativo's guide names this header literally `Signature` (not `X-Yativo-Signature` or similar) —
 // Fastify lowercases incoming header names, so this lowercase key is what actually matches it.
@@ -196,6 +197,13 @@ export async function webhookRoutes(app: FastifyInstance) {
 
       if (failureReason) {
         logger.warn({ eventId: event.id, eventType, failureReason }, "Rejected Yativo webhook — recorded, not processed");
+        // Only for signature problems, and only once the auto-resync above has already had its
+        // chance to self-heal a routine secret rotation — reaching here means it didn't, which is
+        // the case actually worth paging someone about (malformed/unrecognized bodies are just
+        // logged, not alerted, since those are far more likely to be a stray probe than an outage).
+        if (!signatureValid) {
+          await sendOpsAlert(`🚨 Yativo webhook signature verification is failing (${failureReason}) — deliveries are being rejected. Check the configured webhook secret under Settings → Integrations.`);
+        }
         return reply.code(400).send({ message: failureReason });
       }
 

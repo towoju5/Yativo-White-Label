@@ -121,9 +121,9 @@ export function createCryptoWalletsResource(ctx: YativoContext) {
      */
     async createWallet(input: CreateCryptoWalletInput): Promise<CryptoWallet> {
       const res = await ctx.request({
-        // NOTE: despite the name, these endpoints live under the fiat host (api.yativo.com/api/v1),
-        // not config.cryptoBaseUrl — confirmed live; cryptoBaseUrl (crypto.yativo.com) serves the
-        // marketing site's HTML, not this API, for every path tried.
+        // NOTE: despite the name, these endpoints live under the fiat host (api.yativo.com/api/v1).
+        // crypto.yativo.com is a separate Yativo product this app doesn't use — there is no
+        // cryptoBaseUrl in config at all.
         baseUrl: ctx.config.fiatBaseUrl,
         path: "/crypto/create-wallet",
         method: "POST",

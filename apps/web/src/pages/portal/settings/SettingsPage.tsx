@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
-import type { TwoFactorStatus, TwoFactorSetupResult, PasskeyDto } from "@white-label/shared-types";
-import { Copy, ShieldAlert, ShieldCheck, KeyRound, Trash2 } from "lucide-react";
+import type { TwoFactorStatus, TwoFactorSetupResult, PasskeyDto, SessionDto, CustomerAuditLogEntryDto } from "@white-label/shared-types";
+import { Copy, ShieldAlert, ShieldCheck, KeyRound, Trash2, Laptop, Smartphone, History } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,8 +15,158 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { InstallAppCard } from "@/components/pwa/InstallAppCard";
+import { PushNotificationsCard } from "@/components/notifications/PushNotificationsCard";
 
 type SetupStep = "qr" | "confirm" | "backupCodes";
+
+function ChangePasswordCard() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: () => portalApi.post("/portal/auth/change-password", { currentPassword, newPassword }),
+    onSuccess: () => {
+      toast({ title: t("settings.changePassword.success", "Password updated — please sign in again") });
+      navigate("/portal/login", { replace: true });
+    },
+    onError: (e) => toast({ variant: "destructive", title: t("settings.changePassword.error", "Couldn't update password"), description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast({ variant: "destructive", title: t("settings.changePassword.tooShort", "New password must be at least 8 characters") });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ variant: "destructive", title: t("settings.changePassword.mismatch", "Passwords don't match") });
+      return;
+    }
+    mutation.mutate();
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t("settings.changePassword.title", "Change password")}</CardTitle>
+        <CardDescription>{t("settings.changePassword.description", "Choose a strong password you don't use elsewhere.")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form className="space-y-4" onSubmit={onSubmit}>
+          <div className="space-y-1.5">
+            <Label htmlFor="current">{t("settings.changePassword.currentPasswordLabel", "Current password")}</Label>
+            <Input id="current" type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new">{t("settings.changePassword.newPasswordLabel", "New password")}</Label>
+            <Input id="new" type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm">{t("settings.changePassword.confirmPasswordLabel", "Confirm new password")}</Label>
+            <Input id="confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} />
+          </div>
+          <Button type="submit" className="w-full" disabled={mutation.isPending}>
+            {mutation.isPending ? t("settings.changePassword.updating", "Updating…") : t("settings.changePassword.submit", "Update password")}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ActiveSessionsCard() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: sessions, isLoading } = useQuery({
+    queryKey: ["portal", "security", "sessions"],
+    queryFn: () => portalApi.get<SessionDto[]>("/portal/security/sessions"),
+  });
+
+  const revokeMutation = useMutation({
+    mutationFn: (id: string) => portalApi.del(`/portal/security/sessions/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["portal", "security", "sessions"] }),
+    onError: (e) => toast({ variant: "destructive", title: t("settings.sessions.revokeError", "Couldn't sign out that device"), description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const isMobile = (userAgent: string | null) => !!userAgent && /mobile|android|iphone/i.test(userAgent);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t("settings.sessions.title", "Active sessions")}</CardTitle>
+        <CardDescription>{t("settings.sessions.description", "Devices currently signed in to your account.")}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">{t("common.loading", "Loading…")}</p>
+        ) : (sessions ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("settings.sessions.empty", "No active sessions found.")}</p>
+        ) : (
+          (sessions ?? []).map((s) => (
+            <div key={s.id} className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2.5">
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                {isMobile(s.userAgent) ? <Smartphone className="h-4 w-4 shrink-0 text-muted-foreground" /> : <Laptop className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{s.userAgent ?? t("settings.sessions.unknownDevice", "Unknown device")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {s.ip ?? t("settings.sessions.unknownIp", "Unknown location")} · {s.lastUsedAt ? new Date(s.lastUsedAt).toLocaleString() : "—"}
+                    {s.isCurrent && <span className="ml-1.5 font-medium text-primary">{t("settings.sessions.thisDevice", "This device")}</span>}
+                  </p>
+                </div>
+              </div>
+              {!s.isCurrent && (
+                <Button variant="ghost" size="sm" onClick={() => revokeMutation.mutate(s.id)} disabled={revokeMutation.isPending}>
+                  {t("settings.sessions.signOut", "Sign out")}
+                </Button>
+              )}
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function SecurityActivityCard() {
+  const { t } = useTranslation();
+  const { data: entries, isLoading } = useQuery({
+    queryKey: ["portal", "security", "activity"],
+    queryFn: () => portalApi.get<CustomerAuditLogEntryDto[]>("/portal/security/activity"),
+  });
+
+  if (!isLoading && (entries ?? []).length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <History className="h-4 w-4 text-primary" />
+          <CardTitle className="text-base">{t("settings.activity.title", "Security activity")}</CardTitle>
+        </div>
+        <CardDescription>{t("settings.activity.description", "Recent security-relevant events on your account.")}</CardDescription>
+      </CardHeader>
+      <CardContent className="max-h-64 space-y-2 overflow-y-auto">
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">{t("common.loading", "Loading…")}</p>
+        ) : (
+          (entries ?? []).map((e) => (
+            <div key={e.id} className="flex items-center justify-between border-b border-border pb-2 text-sm last:border-0">
+              <span>{e.action}</span>
+              <span className="text-xs text-muted-foreground">{new Date(e.createdAt).toLocaleString()}</span>
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 function PasskeysCard() {
   const { t } = useTranslation();
@@ -228,6 +379,9 @@ export default function PortalSettingsPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">{t("settings.subtitle", "Manage your account security")}</p>
       </div>
 
+      <InstallAppCard />
+      <PushNotificationsCard />
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t("common.language", "Language")}</CardTitle>
@@ -237,37 +391,9 @@ export default function PortalSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t("settings.changePassword.title", "Change password")}</CardTitle>
-          <CardDescription>{t("settings.changePassword.description", "Choose a strong password you don't use elsewhere.")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              toast({ title: t("settings.changePassword.toastTitle", "Not available yet"), description: t("settings.changePassword.toastDescription", "Password changes aren't wired up in this build.") });
-            }}
-          >
-            <div className="space-y-1.5">
-              <Label htmlFor="current">{t("settings.changePassword.currentPasswordLabel", "Current password")}</Label>
-              <Input id="current" type="password" autoComplete="current-password" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="new">{t("settings.changePassword.newPasswordLabel", "New password")}</Label>
-              <Input id="new" type="password" autoComplete="new-password" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="confirm">{t("settings.changePassword.confirmPasswordLabel", "Confirm new password")}</Label>
-              <Input id="confirm" type="password" autoComplete="new-password" />
-            </div>
-            <Button type="submit" className="w-full">
-              {t("settings.changePassword.submit", "Update password")}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      <ChangePasswordCard />
+      <ActiveSessionsCard />
+      <SecurityActivityCard />
 
       {isOwner && (
         <>

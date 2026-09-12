@@ -5,7 +5,6 @@ import { NovaAdminShell } from "./AdminShell";
 import { NovaDashboardLayout } from "./DashboardLayout";
 import { NovaWalletBalanceCard } from "./WalletBalanceCard";
 import { NovaStatCard } from "./StatCard";
-import { NovaLandingPage } from "./LandingPage";
 import { NovaPreviewThumbnail } from "./PreviewThumbnail";
 
 export const novaTemplate: TemplateComponents = {
@@ -17,7 +16,6 @@ export const novaTemplate: TemplateComponents = {
   DashboardLayout: NovaDashboardLayout,
   WalletBalanceCard: NovaWalletBalanceCard,
   StatCard: NovaStatCard,
-  LandingPage: NovaLandingPage,
   PreviewThumbnail: NovaPreviewThumbnail,
   tokens: novaTokens,
 };

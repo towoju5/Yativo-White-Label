@@ -15,6 +15,7 @@ import { getEffectiveFee } from "../pricing/pricing.service.js";
 import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
+import { checkPayoutLimit } from "../security/limits.service.js";
 
 type PayoutWithTransaction = Payout & { transaction: { status: "PENDING" | "POSTED" | "REVERSED" } };
 
@@ -148,6 +149,11 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   // /portal/quotes previewed to the customer as platformFeeMinor.
   const platformFeeMinor = await getEffectiveFee(prisma, "PAYOUT", customerId, amountMinor);
   const totalMinor = amountMinor + platformFeeMinor;
+
+  // Velocity limit — opt-in per currency (platform default, or a per-customer override); a
+  // currency with neither has no limit at all. Checked against amountMinor (the payout principal,
+  // not the platform fee) to match what the limit is meant to represent.
+  await checkPayoutLimit(prisma, customerId, input.currencyCode, amountMinor);
 
   // Fast, non-authoritative fail-fast for the common uncontested case — skips
   // creating a payout id/hold when it's obviously insufficient. Not a

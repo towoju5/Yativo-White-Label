@@ -1,5 +1,5 @@
 import type { Currency, PlatformSettings, PrismaClient } from "@prisma/client";
-import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput, UpdateEmailVerificationInput } from "@white-label/shared-types";
+import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput, UpdateEmailVerificationInput, UpdateCustomerLoginMethodInput } from "@white-label/shared-types";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 
@@ -22,6 +22,7 @@ function settingsToDto(s: PlatformSettings) {
     defaultCurrencyCode: s.defaultCurrencyCode,
     kycRequiredServices: s.kycRequiredServices,
     requireEmailVerification: s.requireEmailVerification,
+    customerLoginMethod: s.customerLoginMethod,
     updatedAt: s.updatedAt.toISOString(),
   };
 }
@@ -71,6 +72,17 @@ export async function updateKycRequirements(prisma: PrismaClient, input: UpdateK
 export async function updateEmailVerificationSetting(prisma: PrismaClient, input: UpdateEmailVerificationInput) {
   const settings = await prisma.platformSettings.update({ where: { id: 1 }, data: { requireEmailVerification: input.requireEmailVerification } });
   return settingsToDto(settings);
+}
+
+export async function updateCustomerLoginMethod(prisma: PrismaClient, input: UpdateCustomerLoginMethodInput) {
+  const settings = await prisma.platformSettings.update({ where: { id: 1 }, data: { customerLoginMethod: input.customerLoginMethod } });
+  return settingsToDto(settings);
+}
+
+/** Public — no staff auth, fetched by the portal login page before the customer authenticates. */
+export async function getPortalAuthConfig(prisma: PrismaClient) {
+  const settings = await getPlatformSettings(prisma);
+  return { loginMethod: settings.customerLoginMethod };
 }
 
 export async function setCurrencyEnabled(prisma: PrismaClient, code: string, isEnabledForCustomers: boolean) {

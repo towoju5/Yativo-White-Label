@@ -3,6 +3,7 @@ import type { PayoutEventPayload } from "@white-label/yativo-sdk";
 import { settlePayoutCompleted } from "../../modules/payouts/payouts.service.js";
 import { reverseTransaction } from "../../modules/ledger/reverseTransaction.js";
 import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
+import { sendOpsAlert } from "../../modules/notifications/channels/opsAlert.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
 import type { WebhookHandlerResult } from "./result.js";
 
@@ -34,11 +35,13 @@ export async function handlePayoutEvent(prisma: PrismaClient, payload: PayoutEve
       const settlement = await prisma.ledgerTransaction.findUnique({ where: { idempotencyKey: `settle:${payout.transactionId}` } });
       const toReverse = settlement?.status === "POSTED" ? settlement.id : payout.transactionId;
       await reverseTransaction(prisma, toReverse, `Payout ${payload.status} (webhook ${externalEventId})`);
+      const displayAmount = await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor);
       await sendNotificationEmail(prisma, "PAYOUT_FAILED", payout.customerId, {
-        amount: await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor),
+        amount: displayAmount,
         currency: payout.currencyCode,
         reason: `Payout ${payload.status}`,
       });
+      await sendOpsAlert(`⚠️ Payout ${payload.status}: ${displayAmount} ${payout.currencyCode} (payout ${payout.id}, customer ${payout.customerId})`);
       return { status: "PROCESSED" };
     }
 

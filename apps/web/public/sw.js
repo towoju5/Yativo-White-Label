@@ -23,6 +23,42 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Web Push — the payload is the plain JSON `{title, body}` sent by sendWebPush() on the API side
+// (apps/api/src/modules/notifications/channels/webPush.ts). Shown via the Notifications API, not
+// cached or persisted here — the in-app notification center (GET /portal/notifications) is the
+// durable record; this is just the OS-level alert.
+self.addEventListener("push", (event) => {
+  let data = { title: "Notification", body: "" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {
+    if (event.data) data.body = event.data.text();
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      ...(data.icon ? { icon: data.icon, badge: data.icon } : {}),
+      data: { url: "/portal" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url ?? "/portal";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (new URL(client.url).origin === self.location.origin && "focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(targetUrl);
+    }),
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 

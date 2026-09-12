@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { WalletCurrencySettings, KycRequiredService } from "@white-label/shared-types";
+import type { WalletCurrencySettings, KycRequiredService, CustomerLoginMethod } from "@white-label/shared-types";
 import { KYC_REQUIRED_SERVICES } from "@white-label/shared-types";
-import { ShieldCheck, Users, MailCheck } from "lucide-react";
+import { ShieldCheck, Users, MailCheck, KeyRound } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const SERVICE_LABELS: Record<KycRequiredService, { title: string; description: string }> = {
   DEPOSIT: { title: "Deposits", description: "Initiating a native gateway deposit (CODI, SPEI, bank transfer, etc.)" },
@@ -35,6 +36,12 @@ export default function VerificationSettingsPage() {
 
   const emailVerificationMutation = useMutation({
     mutationFn: (requireEmailVerification: boolean) => staffApi.patch("/admin/settings/email-verification", { requireEmailVerification }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "settings", "wallet-currencies"] }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't update", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const loginMethodMutation = useMutation({
+    mutationFn: (customerLoginMethod: CustomerLoginMethod) => staffApi.patch("/admin/settings/customer-login-method", { customerLoginMethod }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "settings", "wallet-currencies"] }),
     onError: (e) => toast({ variant: "destructive", title: "Couldn't update", description: e instanceof ApiError ? e.message : undefined }),
   });
@@ -113,6 +120,33 @@ export default function VerificationSettingsPage() {
                 onCheckedChange={(checked) => emailVerificationMutation.mutate(checked)}
               />
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <KeyRound className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Customer login method</CardTitle>
+          </div>
+          <CardDescription>Which sign-in form the portal login page shows by default. Password login always keeps working either way — this only changes what customers see first.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <Skeleton className="h-10" />
+          ) : (
+            <Select
+              value={data?.settings.customerLoginMethod ?? "PASSWORD"}
+              disabled={loginMethodMutation.isPending}
+              onValueChange={(v) => loginMethodMutation.mutate(v as CustomerLoginMethod)}
+            >
+              <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PASSWORD">Email & password (default)</SelectItem>
+                <SelectItem value="MAGIC_LINK">Magic link (passwordless email)</SelectItem>
+              </SelectContent>
+            </Select>
           )}
         </CardContent>
       </Card>

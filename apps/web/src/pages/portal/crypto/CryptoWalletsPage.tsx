@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 
 function truncateAddress(address: string) {
   return address.length > 14 ? `${address.slice(0, 8)}…${address.slice(-6)}` : address;
@@ -94,6 +95,8 @@ export default function CryptoWalletsPage() {
         <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("crypto.title", "Crypto wallets")}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">{t("crypto.subtitle", "Deposit addresses and on-chain deposit history for supported assets.")}</p>
       </div>
+
+      <KycRequiredNotice service="CRYPTO_WALLET" />
 
       <Card>
         <CardHeader>

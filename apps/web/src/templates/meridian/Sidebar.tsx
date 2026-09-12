@@ -7,6 +7,7 @@ import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BrandLogo } from "@/components/BrandLogo";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface NavItem {
   to: string;
@@ -27,16 +28,19 @@ interface SidebarProps {
   userLabel: string;
   userSubLabel: string;
   onLogout: () => void;
+  /** Only the portal shell passes this — the admin console has no customer session for the bell's /portal/notifications calls to work against. */
+  showNotifications?: boolean;
 }
 
-export function MeridianSidebar({ sections, userLabel, userSubLabel, onLogout }: SidebarProps) {
+export function MeridianSidebar({ sections, userLabel, userSubLabel, onLogout, showNotifications }: SidebarProps) {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { t } = useTranslation();
 
   return (
     <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col gap-4 bg-muted/40 p-4 lg:flex">
-      <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-soft">
+      <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-soft">
         <BrandLogo branding={branding} className="h-8" badgeClassName="rounded-lg bg-none bg-primary text-sm" textClassName="text-sm" />
+        {showNotifications && <NotificationBell />}
       </div>
 
       <nav className="scrollbar-thin flex-1 space-y-4 overflow-y-auto">

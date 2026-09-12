@@ -14,7 +14,6 @@ type Config = {
   yativo: {
     mode: "mock" | "sandbox" | "live";
     fiatBaseUrl: string;
-    cryptoBaseUrl: string;
     kycBaseUrl: string;
     apiKeyConfigured: boolean;
     apiKey?: string;
@@ -41,7 +40,6 @@ const emptyConfig: Config = {
   yativo: {
     mode: "mock",
     fiatBaseUrl: "",
-    cryptoBaseUrl: "",
     kycBaseUrl: "",
     apiKeyConfigured: false,
     apiSecretConfigured: false,
@@ -180,10 +178,6 @@ export default function IntegrationsSettingsPage() {
             <div className="space-y-1.5">
               <Label htmlFor="fiatBaseUrl">Fiat base URL</Label>
               <Input id="fiatBaseUrl" value={config.yativo.fiatBaseUrl} onChange={(e) => updateYativo("fiatBaseUrl", e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cryptoBaseUrl">Crypto base URL</Label>
-              <Input id="cryptoBaseUrl" value={config.yativo.cryptoBaseUrl} onChange={(e) => updateYativo("cryptoBaseUrl", e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="kycBaseUrl">KYC base URL</Label>

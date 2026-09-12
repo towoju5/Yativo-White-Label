@@ -1,15 +1,19 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { VirtualAccount, VirtualAccountCurrency } from "@white-label/shared-types";
-import { CheckCircle2, Clock, Copy, ExternalLink, Landmark, ShieldCheck } from "lucide-react";
+import type { VirtualAccount, VirtualAccountCurrency, CustomerTransactionListItem } from "@white-label/shared-types";
+import { CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, Landmark, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import type { Paginated } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
+import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
 
 const FIELD_LABELS: Record<string, string> = {
   accountId: "Account ID",
@@ -32,6 +36,7 @@ export default function VirtualAccountsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [creatingCurrency, setCreatingCurrency] = useState<string | null>(null);
+  const [expandedAccountId, setExpandedAccountId] = useState<string | null>(null);
 
   const accountsQuery = useQuery({
     queryKey: ["portal", "virtual-accounts"],
@@ -75,6 +80,8 @@ export default function VirtualAccountsPage() {
         <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("virtualAccounts.title", "Virtual accounts")}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">{t("virtualAccounts.subtitle", "Dedicated bank details you can reuse for every incoming transfer, once per currency.")}</p>
       </div>
+
+      <KycRequiredNotice service="VIRTUAL_ACCOUNT" />
         <div className="flex col-span-2 gap-4 sm:col-span-1 sm:flex-col">
           <Card>
               <CardHeader>
@@ -97,7 +104,9 @@ export default function VirtualAccountsPage() {
                   </p>
                   ) : (
                   <div className="space-y-4">
-                      {accounts.map((a) => (
+                      {accounts.map((a) => {
+                      const isExpanded = expandedAccountId === a.accountId;
+                      return (
                       <div key={a.accountId} className="rounded-lg border border-border p-4">
                           <div className="mb-2 flex items-center justify-between">
                               <Badge variant="outline">{a.currencyCode}</Badge>
@@ -118,8 +127,18 @@ export default function VirtualAccountsPage() {
                               </div>
                               ))}
                           </dl>
+                          <button
+                              type="button"
+                              onClick={() => setExpandedAccountId(isExpanded ? null : a.accountId ?? null)}
+                              className="mt-3 flex w-full items-center justify-between border-t border-border pt-3 text-sm font-medium text-muted-foreground hover:text-foreground"
+                          >
+                              {t("virtualAccounts.recentActivity", "Recent activity")}
+                              <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                          </button>
+                          {isExpanded && a.currencyCode && <AccountActivity currencyCode={a.currencyCode} />}
                       </div>
-                      ))}
+                      );
+                      })}
                   </div>
                   )}
               </CardContent>
@@ -192,6 +211,51 @@ export default function VirtualAccountsPage() {
               </CardContent>
           </Card>
       </div>
+    </div>
+  );
+}
+
+function AccountActivity({ currencyCode }: { currencyCode: string }) {
+  const { t } = useTranslation();
+  // Virtual accounts are provisioned one-per-currency (get-or-create — see virtualAccounts.routes.ts),
+  // and incoming transfers land as DEPOSIT ledger entries in that same currency, so this filter
+  // reliably scopes to just this account without needing a dedicated per-account history endpoint.
+  const activityQuery = useQuery({
+    queryKey: ["portal", "transactions", "virtual-account", currencyCode],
+    queryFn: () => portalApi.get<Paginated<CustomerTransactionListItem>>("/portal/transactions", { type: "DEPOSIT", currencyCode, page: 1, pageSize: 5 }),
+  });
+  const items = activityQuery.data?.items ?? [];
+
+  return (
+    <div className="mt-2 rounded-lg border border-border">
+      {activityQuery.isLoading ? (
+        <div className="space-y-2 p-3">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-12" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <p className="p-4 text-center text-xs text-muted-foreground">{t("virtualAccounts.noActivity", "No incoming transfers yet.")}</p>
+      ) : (
+        <>
+          <div className="divide-y divide-border">
+            {items.map((tx) => (
+              <TransactionCardRow
+                key={tx.id}
+                date={tx.createdAt}
+                description={tx.description ?? tx.type}
+                status={tx.status}
+                direction={tx.direction}
+                amountMinor={tx.amountMinor}
+                currencyCode={tx.currencyCode ?? ""}
+              />
+            ))}
+          </div>
+          <Link to="/portal/transactions" className="block border-t border-border p-2 text-center text-xs font-medium text-primary hover:underline">
+            {t("virtualAccounts.viewAllActivity", "View all in Transactions")}
+          </Link>
+        </>
+      )}
     </div>
   );
 }

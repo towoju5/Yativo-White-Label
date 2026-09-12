@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { kycRequiredServiceSchema } from "./platformSettings.schema.js";
 
 /**
  * An optional string field with a format validator (`.url()`, `.length()`, `.regex()`, ...)
@@ -276,6 +277,10 @@ export const kycStatusResponseSchema = z.object({
   kycStatus: z.enum(["NOT_STARTED", "PENDING", "APPROVED", "REJECTED"]),
   kycSubmissionId: z.string().nullable(),
   kycSubmittedAt: z.string().nullable(),
+  /** The admin-configured list of services currently gated behind KYC approval (Settings →
+   * Verification) — lets the portal show a "this needs KYC" notice on exactly the pages that
+   * actually require it right now, without hardcoding that list client-side. */
+  requiredServices: z.array(kycRequiredServiceSchema),
 });
 
 export const kycCountrySchema = z.object({ code: z.string(), iso3: z.string(), name: z.string() });

@@ -42,6 +42,11 @@ enum WalletCurrencyMode {
   ALL_AUTOMATIC
 }
 
+enum CustomerLoginMethod {
+  PASSWORD
+  MAGIC_LINK
+}
+
 // Each value gates one customer-facing action behind requireKycApproved — admin can turn any
 // of these off if that action shouldn't require identity verification on this platform.
 enum KycRequiredService {
@@ -67,6 +72,10 @@ model PlatformSettings {
   // verification email regardless (see signupCustomer), this only decides whether login/session
   // issuance actually enforce it.
   requireEmailVerification Boolean              @default(false)
+  /// Which login form the portal shows by default — PASSWORD is the default so this never changes
+  /// behavior for an existing deployment. MAGIC_LINK doesn't remove password login server-side
+  /// (loginCustomer still works), it only changes which flow the login page presents.
+  customerLoginMethod      CustomerLoginMethod  @default(PASSWORD)
   updatedAt                DateTime             @updatedAt
 
   @@map("platform_settings")
@@ -318,6 +327,14 @@ model Customer {
   /// CustomerTeamMember's inviteTokenHash/inviteExpiresAt pattern. Hash, not the raw token.
   emailVerificationTokenHash String?        @unique
   emailVerificationExpiresAt DateTime?
+  /// Set only while a "forgot password" email has been sent and not yet redeemed — same hash-not-raw-token pattern as emailVerificationTokenHash.
+  passwordResetTokenHash     String?        @unique
+  passwordResetExpiresAt     DateTime?
+  /// Set only while a magic-link login email has been sent and not yet redeemed — short-lived
+  /// (15 min) and single-use, since redeeming it grants a real session immediately rather than
+  /// just confirming an address or gating a password change.
+  magicLinkTokenHash         String?        @unique
+  magicLinkExpiresAt         DateTime?
   lastLoginAt                DateTime?
   status                     CustomerStatus @default(ACTIVE)
   kycStatus                  KycStatus      @default(NOT_STARTED)
@@ -354,8 +371,137 @@ model Customer {
   virtualAccounts    VirtualAccount[]
   cryptoWallets      CryptoWallet[]
   cryptoDeposits     CryptoDeposit[]
+  notifications      Notification[]
+  pushSubscriptions  PushSubscription[]
+  supportTickets     SupportTicket[]
+  auditLogs          CustomerAuditLog[]
+  limits             CustomerLimits[]
 
   @@map("customers")
+}
+
+/// Customer-facing security activity log (login, password change, 2FA toggle, new beneficiary,
+/// payout created, etc.) — mirrors AdminAuditLog's shape for the staff side. Surfaced read-only in
+/// portal Settings ("Security activity").
+model CustomerAuditLog {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  action     String
+  /// Best-effort request context, purely informational — never used for anything security-critical itself.
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([customerId, createdAt])
+  @@map("customer_audit_logs")
+}
+
+/// Per-customer, per-currency payout/withdrawal velocity limit override — absence of a row for a
+/// given currency just means "use that currency's platform default" (PlatformLimitsDefault), not
+/// "no limit". Enforced in payouts.service.ts against the sum of completed+pending payouts in the
+/// window, same currency.
+model CustomerLimits {
+  customerId        String
+  customer          Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  currencyCode      String
+  dailyLimitMinor   BigInt?
+  monthlyLimitMinor BigInt?
+  updatedAt         DateTime @updatedAt
+
+  @@id([customerId, currencyCode])
+  @@map("customer_limits")
+}
+
+/// Platform-wide default payout limit per currency, applied to any customer without their own
+/// CustomerLimits override for that currency. Admin-editable; a currency with no row here has no
+/// default limit at all.
+model PlatformLimitsDefault {
+  currencyCode      String   @id
+  dailyLimitMinor   BigInt?
+  monthlyLimitMinor BigInt?
+  updatedAt         DateTime @updatedAt
+
+  @@map("platform_limits_defaults")
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketAuthorType {
+  CUSTOMER
+  STAFF
+}
+
+/// Replaces the old "email a ticket, nothing tracked" flow — support.service.ts still emails the
+/// support inbox on the first message (so nothing changes for how staff get paged), but now every
+/// message on both sides is persisted so the customer (and staff) can see a real thread + status.
+model SupportTicket {
+  id         String              @id @default(cuid())
+  customerId String
+  customer   Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  subject    String
+  status     SupportTicketStatus @default(OPEN)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  messages SupportTicketMessage[]
+
+  @@index([customerId, createdAt])
+  @@map("support_tickets")
+}
+
+model SupportTicketMessage {
+  id         String                  @id @default(cuid())
+  ticketId   String
+  ticket     SupportTicket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorType SupportTicketAuthorType
+  /// customerId or staffUser id, depending on authorType — not a Prisma relation since it points at one of two different tables.
+  authorId   String
+  body       String
+  createdAt  DateTime                @default(now())
+
+  @@index([ticketId, createdAt])
+  @@map("support_ticket_messages")
+}
+
+/// In-app notification-center row — persisted independently of whether any channel (email/push/
+/// SMS/WhatsApp) actually delivered successfully, so the customer always has a record of what
+/// happened even if e.g. their SMS provider is down. Title/body are pre-rendered plain text (not
+/// the HTML email template) — see notifyCustomer() in notifications.service.ts.
+model Notification {
+  id         String               @id @default(cuid())
+  customerId String
+  customer   Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type       EmailNotificationType
+  title      String
+  body       String
+  readAt     DateTime?
+  createdAt  DateTime             @default(now())
+
+  @@index([customerId, createdAt])
+  @@map("notifications")
+}
+
+/// One row per browser/device the customer has opted into web push on (a customer can have
+/// several — phone, laptop, etc.). `endpoint` is the push service URL the browser gave us, unique
+/// per subscription; `p256dh`/`auth` are the subscription's own encryption keys, required by the
+/// Web Push protocol to encrypt the payload — see channels/webPush.ts.
+model PushSubscription {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+  @@map("push_subscriptions")
 }
 
 // ── Business team members — additional logins scoped to a BUSINESS-type Customer's own data,
@@ -420,6 +566,12 @@ model CustomerRefreshToken {
   expiresAt  DateTime
   revokedAt  DateTime?
   createdAt  DateTime  @default(now())
+  /// Device/session metadata, captured at login and refreshed on every token rotation — backs the
+  /// "active sessions" list in portal Settings (see security/sessions.routes.ts). Nullable because
+  /// tokens issued before this column existed have none.
+  userAgent  String?
+  ip         String?
+  lastUsedAt DateTime?
 
   @@index([customerId])
   @@map("customer_refresh_tokens")
@@ -458,7 +610,10 @@ enum StaffRole {
 model StaffUser {
   id            String      @id @default(cuid())
   email         String      @unique
-  passwordHash  String
+  /// Null while an invite is pending and not yet accepted — mirrors CustomerTeamMember's own
+  /// invitedAt/acceptedAt/inviteTokenHash pattern. loginStaff/changePassword both guard against
+  /// null (a pending invite simply can't log in with a password yet).
+  passwordHash  String?
   role          StaffRole   @default(STAFF)
   // OWNER/ADMIN always retain full access regardless of this — it only narrows the STAFF tier.
   // Null means "no custom role assigned yet", which falls back to a fixed, backward-compatible
@@ -470,6 +625,10 @@ model StaffUser {
   invitedById   String?
   invitedBy     StaffUser?  @relation("Invites", fields: [invitedById], references: [id])
   invited       StaffUser[] @relation("Invites")
+  /// Set once the invite is accepted and a password chosen — null means the invite is still pending.
+  acceptedAt    DateTime?
+  inviteTokenHash String?   @unique
+  inviteExpiresAt DateTime?
   createdAt     DateTime    @default(now())
 
   refreshTokens RefreshToken[]

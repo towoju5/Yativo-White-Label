@@ -19,15 +19,7 @@ export * from "./fiat/deposits.js";
 export * from "./fiat/locations.js";
 export * from "./fiat/kycReference.js";
 
-export * from "./crypto/accounts.js";
 export * from "./crypto/wallets.js";
-export * from "./crypto/send.js";
-export * from "./crypto/swap.js";
-export * from "./crypto/cards.js";
-export * from "./crypto/gateway.js";
-export * from "./crypto/ibanAccount.js";
-export * from "./crypto/forwardingRules.js";
-export * from "./crypto/compliance.js";
 
 export * from "./webhooks/verify.js";
 export * from "./webhooks/types.js";

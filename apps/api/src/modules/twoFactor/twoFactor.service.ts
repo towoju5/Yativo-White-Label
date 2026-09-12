@@ -5,6 +5,7 @@ import { generateBase32Secret, buildOtpauthUrl, verifyTotp, generateBackupCodes 
 import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { getBranding } from "../branding/branding.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
+import { logCustomerAction } from "../security/auditLog.service.js";
 import { AppError, UnauthorizedError } from "../../lib/errors.js";
 
 const PENDING_TTL_SECONDS = 600;
@@ -45,6 +46,7 @@ export async function confirmTwoFactorSetup(prisma: PrismaClient, redis: Redis, 
   });
   await redis.del(pendingKey(customerId));
   await sendNotificationEmail(prisma, "TWO_FACTOR_ENABLED", customerId, {});
+  await logCustomerAction(prisma, customerId, "Enabled two-factor authentication");
 
   return { backupCodes };
 }
@@ -59,5 +61,6 @@ export async function disableTwoFactor(prisma: PrismaClient, customerId: string,
     data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorBackupCodeHashes: [] },
   });
   await sendNotificationEmail(prisma, "TWO_FACTOR_DISABLED", customerId, {});
+  await logCustomerAction(prisma, customerId, "Disabled two-factor authentication");
   return { enabled: false };
 }

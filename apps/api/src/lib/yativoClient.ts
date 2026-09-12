@@ -5,7 +5,6 @@ import { env } from "../config/env.js";
 export const yativoClient = createYativoClient({
   mode: env.YATIVO_MODE,
   fiatBaseUrl: env.YATIVO_FIAT_BASE_URL,
-  cryptoBaseUrl: env.YATIVO_CRYPTO_BASE_URL,
   kycBaseUrl: env.YATIVO_KYC_BASE_URL,
   apiKey: env.YATIVO_API_KEY,
   apiSecret: env.YATIVO_API_SECRET,

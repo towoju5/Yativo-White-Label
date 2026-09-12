@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
-import { portalLoginSchema, type PortalLoginInput } from "@white-label/shared-types";
+import { portalLoginSchema, type PortalLoginInput, type PortalAuthConfig } from "@white-label/shared-types";
 import { fetchBranding } from "@/theme/branding";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -20,6 +20,7 @@ export default function PortalLoginPage() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey, verifyTwoFactor } = useCustomerAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
+  const { data: authConfig } = useQuery({ queryKey: ["portal", "auth-config"], queryFn: () => publicApi.get<PortalAuthConfig>("/portal/auth/config"), staleTime: Infinity });
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +31,14 @@ export default function PortalLoginPage() {
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
   const [lastEmail, setLastEmail] = useState("");
+  const [magicEmail, setMagicEmail] = useState("");
+  const [magicSent, setMagicSent] = useState(false);
+
+  const magicLinkMutation = useMutation({
+    mutationFn: () => publicApi.post("/portal/auth/magic-link/request", { email: magicEmail }),
+    onSuccess: () => setMagicSent(true),
+    onError: (e) => setError(e instanceof ApiError ? e.message : t("login.genericError", "Unable to sign in. Check your credentials.")),
+  });
 
   const {
     register,
@@ -159,6 +168,48 @@ export default function PortalLoginPage() {
                 </form>
               </CardContent>
             </>
+          ) : authConfig?.loginMethod === "MAGIC_LINK" ? (
+            <>
+              <CardHeader>
+                <CardTitle>{t("login.welcomeBack", "Welcome back")}</CardTitle>
+                <CardDescription>
+                  {magicSent
+                    ? t("login.magicLinkSentDescription", "Check your email for a sign-in link.")
+                    : t("login.magicLinkDescription", "We'll email you a link to sign in — no password needed.")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {magicSent ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t("login.magicLinkSentBody", "If an account exists for {{email}}, a sign-in link is on its way. It expires in 15 minutes.", { email: magicEmail })}
+                  </p>
+                ) : (
+                  <form
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setError(null);
+                      magicLinkMutation.mutate();
+                    }}
+                  >
+                    <div className="space-y-1.5">
+                      <Label htmlFor="magicEmail">{t("login.emailLabel", "Email")}</Label>
+                      <Input id="magicEmail" type="email" autoComplete="email" required value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} />
+                    </div>
+                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    <Button type="submit" className="w-full" disabled={magicLinkMutation.isPending}>
+                      {magicLinkMutation.isPending ? t("login.magicLinkSending", "Sending…") : t("login.magicLinkSend", "Send sign-in link")}
+                    </Button>
+                  </form>
+                )}
+                <p className="mt-4 text-center text-sm text-muted-foreground">
+                  {t("login.newHere", "New here?")}{" "}
+                  <Link to="/portal/signup" className="font-medium text-primary hover:underline">
+                    {t("login.createAccount", "Create an account")}
+                  </Link>
+                </p>
+              </CardContent>
+            </>
           ) : (
             <>
               <CardHeader>
@@ -173,7 +224,12 @@ export default function PortalLoginPage() {
                     {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="password">{t("login.passwordLabel", "Password")}</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">{t("login.passwordLabel", "Password")}</Label>
+                      <Link to="/portal/forgot-password" className="text-xs font-medium text-primary hover:underline">
+                        {t("login.forgotPassword", "Forgot password?")}
+                      </Link>
+                    </div>
                     <Input id="password" type="password" autoComplete="current-password" {...register("password")} />
                     {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                   </div>
@@ -222,11 +278,6 @@ export default function PortalLoginPage() {
             </>
           )}
         </Card>
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          <Link to="/" className="hover:underline">
-            {t("login.backToHome", "← Back to home")}
-          </Link>
-        </p>
       </div>
     </div>
   );

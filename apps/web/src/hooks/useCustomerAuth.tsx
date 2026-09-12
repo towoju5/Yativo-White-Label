@@ -11,6 +11,7 @@ interface CustomerAuthState {
   login: (input: PortalLoginInput) => Promise<PortalLoginResult>;
   loginWithPasskey: () => Promise<void>;
   verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
+  verifyMagicLink: (token: string) => Promise<void>;
   /** Returns the raw signup result — the caller checks `pendingVerification` and, if true, shows a "check your email" state instead of navigating in. */
   signup: (input: CreateCustomerInput) => Promise<SignupResult>;
   logout: () => Promise<void>;
@@ -57,6 +58,16 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     setUser(me);
   };
 
+  const verifyMagicLink: CustomerAuthState["verifyMagicLink"] = async (token) => {
+    const { accessToken } = await apiFetch<{ accessToken: string }>("/portal/auth/magic-link/verify", {
+      method: "POST",
+      body: { token },
+    });
+    portalTokenStore.set(accessToken);
+    const me = await portalApi.get<Customer>("/portal/auth/me");
+    setUser(me);
+  };
+
   const loginWithPasskey: CustomerAuthState["loginWithPasskey"] = async () => {
     const { flowId, options } = await apiFetch<PasskeyLoginOptionsResult>("/portal/auth/passkey/login/options", { method: "POST" });
     const response = await startAuthentication({ optionsJSON: options as unknown as Parameters<typeof startAuthentication>[0]["optionsJSON"] });
@@ -88,7 +99,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CustomerAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, signup, logout }}>
+    <CustomerAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyMagicLink, signup, logout }}>
       {children}
     </CustomerAuthContext.Provider>
   );
