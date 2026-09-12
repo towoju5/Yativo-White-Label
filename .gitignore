@@ -9,6 +9,7 @@ build/
 apps/api/generated/
 apps/api/admin-login-path.txt
 coverage/
+*.tsbuildinfo
 .vscode/*
 !.vscode/extensions.json
 info.md
