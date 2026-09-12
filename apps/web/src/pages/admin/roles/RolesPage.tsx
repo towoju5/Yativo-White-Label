@@ -208,7 +208,11 @@ function RoleFormDialog({
           </div>
           <div className="space-y-3">
             <Label>Permissions</Label>
-            <div className="max-h-72 space-y-4 overflow-y-auto rounded-lg border border-border p-3">
+            {/* No height cap/scroll of its own — DialogContent already scrolls the whole modal
+                past 85vh (see components/ui/dialog.tsx), so nesting a second fixed-height scroll
+                box here only produced a short, artificially-truncated list sitting inside a much
+                taller, mostly-empty modal. One scrollbar, sized to actual content. */}
+            <div className="space-y-4 rounded-lg border border-border p-3">
               {GROUPS.map((group) => (
                 <div key={group}>
                   <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</p>

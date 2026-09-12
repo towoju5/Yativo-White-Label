@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Mail, ExternalLink, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -7,6 +7,8 @@ import type { SupportTicketListItem, SupportTicketDetail, SupportTicketStatus } 
 import { fetchBranding, fetchSupportPages } from "@/theme/branding";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { useSupportTicketRealtime } from "@/hooks/useSupportTicketRealtime";
+import { playChatBeep } from "@/lib/chatSound";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,7 @@ function MyTicketsCard() {
   const queryClient = useQueryClient();
   const [openTicketId, setOpenTicketId] = useState<string | null>(null);
   const [reply, setReply] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: tickets, isLoading } = useQuery({
     queryKey: ["portal", "support", "tickets"],
@@ -40,13 +43,27 @@ function MyTicketsCard() {
     enabled: !!openTicketId,
   });
 
+  // Instant delivery: the server publishes every new message (staff or the customer's own, from
+  // whichever tab/device sent it) over the ticket's realtime channel the moment it's persisted —
+  // patched straight into the cache here rather than waiting on the mutation's own response or a
+  // refetch, and de-duped by message id since a message this tab just sent arrives both ways.
+  useSupportTicketRealtime(openTicketId, "portal", (msg) => {
+    queryClient.setQueryData<SupportTicketDetail | undefined>(["portal", "support", "tickets", openTicketId], (prev) => {
+      if (!prev || prev.messages.some((m) => m.id === msg.message.id)) return prev;
+      return { ...prev, status: msg.status as SupportTicketStatus, messages: [...prev.messages, msg.message] };
+    });
+    queryClient.invalidateQueries({ queryKey: ["portal", "support", "tickets"] });
+    if (msg.message.authorType === "STAFF") playChatBeep();
+  });
+
   const replyMutation = useMutation({
     mutationFn: (body: string) => portalApi.post<SupportTicketDetail>(`/portal/support/tickets/${openTicketId}/messages`, { body }),
-    onSuccess: () => {
-      setReply("");
-      queryClient.invalidateQueries({ queryKey: ["portal", "support", "tickets"] });
-    },
+    onSuccess: () => setReply(""),
   });
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [detail?.messages.length]);
 
   if (!isLoading && (tickets ?? []).length === 0) return null;
 
@@ -91,6 +108,7 @@ function MyTicketsCard() {
                     <p className="whitespace-pre-wrap text-sm">{m.body}</p>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
               {detail.status !== "CLOSED" && (
                 <div className="space-y-2">

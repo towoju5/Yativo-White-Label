@@ -45,6 +45,7 @@ import { platformSettingsRoutes } from "./modules/platformSettings/platformSetti
 import { paymentGatewaysRoutes } from "./modules/paymentGateways/paymentGateways.routes.js";
 import { pricingRoutes } from "./modules/pricing/pricing.routes.js";
 import { twoFactorRoutes } from "./modules/twoFactor/twoFactor.routes.js";
+import { staffTwoFactorRoutes } from "./modules/twoFactor/staffTwoFactor.routes.js";
 import { pagesRoutes } from "./modules/pages/pages.routes.js";
 import { webhookRoutes } from "./webhooks/yativo.routes.js";
 import { adminWebhooksRoutes } from "./webhooks/adminWebhooks.routes.js";
@@ -61,6 +62,7 @@ import { supportRoutes } from "./modules/support/support.routes.js";
 import { adminSupportRoutes } from "./modules/support/adminSupport.routes.js";
 import { sessionsRoutes } from "./modules/security/sessions.routes.js";
 import { customerAuditLogRoutes } from "./modules/security/auditLog.routes.js";
+import { adminAuditLogRoutes } from "./modules/security/adminAuditLog.routes.js";
 import { limitsRoutes } from "./modules/security/limits.routes.js";
 import { storageSettingsRoutes } from "./modules/storage/storageSettings.routes.js";
 import { localAssetsRoutes } from "./modules/storage/localAssets.routes.js";
@@ -175,6 +177,7 @@ export async function buildApp() {
   await app.register(paymentGatewaysRoutes);
   await app.register(pricingRoutes);
   await app.register(twoFactorRoutes);
+  await app.register(staffTwoFactorRoutes);
   await app.register(pagesRoutes);
   await app.register(webhookRoutes);
   await app.register(adminWebhooksRoutes);
@@ -191,6 +194,7 @@ export async function buildApp() {
   await app.register(adminSupportRoutes);
   await app.register(sessionsRoutes);
   await app.register(customerAuditLogRoutes);
+  await app.register(adminAuditLogRoutes);
   await app.register(limitsRoutes);
   await app.register(storageSettingsRoutes);
   await app.register(localAssetsRoutes);

@@ -14,7 +14,15 @@ export type WalletUpdateMessage = {
   updatedAt: string;
 };
 
-type Listener = (msg: WalletUpdateMessage) => void;
+export type SupportTicketRealtimeMessage = {
+  type: "support-ticket.message";
+  ticketId: string;
+  message: { id: string; authorType: "CUSTOMER" | "STAFF"; authorName: string; body: string; createdAt: string };
+  status: string;
+};
+
+type RealtimeMessage = WalletUpdateMessage | SupportTicketRealtimeMessage;
+type Listener = (msg: RealtimeMessage) => void;
 type TokenStore = typeof staffTokenStore;
 
 /**
@@ -28,6 +36,7 @@ class RealtimeConnection {
   private ws: WebSocket | null = null;
   private listeners = new Set<Listener>();
   private watchedCustomerIds = new Set<string>();
+  private watchedTicketIds = new Set<string>();
   private reconnectAttempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private unsubscribeToken: (() => void) | null = null;
@@ -70,10 +79,13 @@ class RealtimeConnection {
       for (const customerId of this.watchedCustomerIds) {
         ws.send(JSON.stringify({ type: "watch", customerId }));
       }
+      for (const ticketId of this.watchedTicketIds) {
+        ws.send(JSON.stringify({ type: "watch-ticket", ticketId }));
+      }
     };
     ws.onmessage = (event) => {
       try {
-        const msg = JSON.parse(event.data) as WalletUpdateMessage;
+        const msg = JSON.parse(event.data) as RealtimeMessage;
         for (const listener of this.listeners) listener(msg);
       } catch {
         // ignore malformed frames
@@ -121,6 +133,18 @@ class RealtimeConnection {
     if (this.audience !== "staff") return;
     this.watchedCustomerIds.delete(customerId);
     if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ type: "unwatch", customerId }));
+  }
+
+  /** Both audiences — a customer may only watch their own ticket (enforced server-side), staff may watch any. */
+  watchTicket(ticketId: string) {
+    if (this.watchedTicketIds.has(ticketId)) return;
+    this.watchedTicketIds.add(ticketId);
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ type: "watch-ticket", ticketId }));
+  }
+
+  unwatchTicket(ticketId: string) {
+    this.watchedTicketIds.delete(ticketId);
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ type: "unwatch-ticket", ticketId }));
   }
 }
 

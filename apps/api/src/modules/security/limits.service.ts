@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { AppError } from "../../lib/errors.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
+import { logAdminAction } from "../../lib/adminAuditLog.js";
 
 function startOfDay(now: Date): Date {
   const d = new Date(now);
@@ -67,12 +68,13 @@ export async function listPlatformLimitDefaults(prisma: PrismaClient) {
   return rows.map((r) => ({ currencyCode: r.currencyCode, dailyLimitMinor: r.dailyLimitMinor?.toString() ?? null, monthlyLimitMinor: r.monthlyLimitMinor?.toString() ?? null }));
 }
 
-export async function setPlatformLimitDefault(prisma: PrismaClient, currencyCode: string, dailyLimitMinor: string | null | undefined, monthlyLimitMinor: string | null | undefined) {
+export async function setPlatformLimitDefault(prisma: PrismaClient, actorId: string, currencyCode: string, dailyLimitMinor: string | null | undefined, monthlyLimitMinor: string | null | undefined) {
   const row = await prisma.platformLimitsDefault.upsert({
     where: { currencyCode },
     create: { currencyCode, dailyLimitMinor: dailyLimitMinor ? BigInt(dailyLimitMinor) : null, monthlyLimitMinor: monthlyLimitMinor ? BigInt(monthlyLimitMinor) : null },
     update: { dailyLimitMinor: dailyLimitMinor === undefined ? undefined : dailyLimitMinor ? BigInt(dailyLimitMinor) : null, monthlyLimitMinor: monthlyLimitMinor === undefined ? undefined : monthlyLimitMinor ? BigInt(monthlyLimitMinor) : null },
   });
+  await logAdminAction(prisma, actorId, "platform_limit.updated", currencyCode, { dailyLimitMinor, monthlyLimitMinor });
   return { currencyCode: row.currencyCode, dailyLimitMinor: row.dailyLimitMinor?.toString() ?? null, monthlyLimitMinor: row.monthlyLimitMinor?.toString() ?? null };
 }
 
@@ -95,11 +97,12 @@ export async function listCustomerLimits(prisma: PrismaClient, customerId: strin
   });
 }
 
-export async function setCustomerLimit(prisma: PrismaClient, customerId: string, currencyCode: string, dailyLimitMinor: string | null | undefined, monthlyLimitMinor: string | null | undefined) {
+export async function setCustomerLimit(prisma: PrismaClient, actorId: string, customerId: string, currencyCode: string, dailyLimitMinor: string | null | undefined, monthlyLimitMinor: string | null | undefined) {
   await prisma.customerLimits.upsert({
     where: { customerId_currencyCode: { customerId, currencyCode } },
     create: { customerId, currencyCode, dailyLimitMinor: dailyLimitMinor ? BigInt(dailyLimitMinor) : null, monthlyLimitMinor: monthlyLimitMinor ? BigInt(monthlyLimitMinor) : null },
     update: { dailyLimitMinor: dailyLimitMinor === undefined ? undefined : dailyLimitMinor ? BigInt(dailyLimitMinor) : null, monthlyLimitMinor: monthlyLimitMinor === undefined ? undefined : monthlyLimitMinor ? BigInt(monthlyLimitMinor) : null },
   });
+  await logAdminAction(prisma, actorId, "customer_limit.updated", customerId, { currencyCode, dailyLimitMinor, monthlyLimitMinor });
   return listCustomerLimits(prisma, customerId);
 }

@@ -26,6 +26,7 @@ import {
   Mail,
   Plug,
   HardDrive,
+  History,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { AtlasTopbar, type NavItem } from "./Topbar";
@@ -42,6 +43,7 @@ const items: NavItem[] = [
   { to: "/admin/team", label: "Team", icon: UserPlus },
   { to: "/admin/roles", label: "Roles", icon: Lock },
   { to: "/admin/webhooks", label: "Webhooks", icon: Webhook },
+  { to: "/admin/audit-log", label: "Audit log", icon: History },
   { to: "/admin/support", label: "Support tickets", icon: LifeBuoy },
   { to: "/admin/reconciliation", label: "Reconciliation", icon: Scale },
   { to: "/admin/pages", label: "Pages", icon: FileText },

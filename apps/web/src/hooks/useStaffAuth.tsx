@@ -1,14 +1,17 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
-import type { StaffLoginInput, StaffUserDto, PasskeyLoginOptionsResult } from "@white-label/shared-types";
+import type { StaffLoginInput, StaffUserDto, StaffLoginResult, PasskeyLoginOptionsResult } from "@white-label/shared-types";
 import { apiFetch, staffApi, staffTokenStore } from "@/lib/api-client";
 
 interface StaffAuthState {
   user: StaffUserDto | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (input: StaffLoginInput) => Promise<void>;
+  /** Returns the raw login result — the caller checks `requiresTwoFactor`/`requiresEmailStepUp` and, if either, collects a code and calls the matching verify function with the returned challengeToken. */
+  login: (input: StaffLoginInput) => Promise<StaffLoginResult>;
   loginWithPasskey: () => Promise<void>;
+  verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
+  verifyEmailStepUp: (challengeToken: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -35,7 +38,23 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login: StaffAuthState["login"] = async (input) => {
-    const { accessToken } = await apiFetch<{ accessToken: string }>("/auth/login", { method: "POST", body: input });
+    const result = await apiFetch<StaffLoginResult>("/auth/login", { method: "POST", body: input });
+    if ("requiresTwoFactor" in result || "requiresEmailStepUp" in result) return result;
+    staffTokenStore.set(result.accessToken);
+    const me = await staffApi.get<StaffUserDto>("/auth/me");
+    setUser(me);
+    return result;
+  };
+
+  const verifyTwoFactor: StaffAuthState["verifyTwoFactor"] = async (challengeToken, code) => {
+    const { accessToken } = await apiFetch<{ accessToken: string }>("/auth/2fa/verify", { method: "POST", body: { challengeToken, code } });
+    staffTokenStore.set(accessToken);
+    const me = await staffApi.get<StaffUserDto>("/auth/me");
+    setUser(me);
+  };
+
+  const verifyEmailStepUp: StaffAuthState["verifyEmailStepUp"] = async (challengeToken, code) => {
+    const { accessToken } = await apiFetch<{ accessToken: string }>("/auth/step-up/verify", { method: "POST", body: { challengeToken, code } });
     staffTokenStore.set(accessToken);
     const me = await staffApi.get<StaffUserDto>("/auth/me");
     setUser(me);
@@ -63,7 +82,7 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <StaffAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, logout }}>
+    <StaffAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp, logout }}>
       {children}
     </StaffAuthContext.Provider>
   );

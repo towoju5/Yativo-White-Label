@@ -1,10 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import { verifyStaffAccessToken, verifyPortalAccessToken } from "../../lib/jwt.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
-import { watchWalletChannel } from "../../lib/realtime.js";
+import { watchWalletChannel, watchSupportTicketChannel, markTicketPresence } from "../../lib/realtime.js";
 import logger from "../../lib/logger.js";
 
-type ClientMessage = { type: "watch" | "unwatch"; customerId: string };
+type ClientMessage =
+  | { type: "watch" | "unwatch"; customerId: string }
+  | { type: "watch-ticket" | "unwatch-ticket"; ticketId: string };
 
 /**
  * One WS connection per browser tab, opened once at app root (see the web app's realtime hook) —
@@ -44,6 +46,7 @@ export async function realtimeRoutes(app: FastifyInstance) {
     }
 
     const unsubscribers = new Map<string, () => void>();
+    const ticketUnsubscribers = new Map<string, () => void>();
     const send = (data: unknown) => {
       if (socket.readyState === socket.OPEN) socket.send(JSON.stringify(data));
     };
@@ -61,6 +64,33 @@ export async function realtimeRoutes(app: FastifyInstance) {
       unsubscribers.delete(customerId);
     };
 
+    // A customer may only watch their own ticket (verified against the DB, not just their own
+    // claimed customerId — resolveEffectiveCustomerId already covers the business-team-member
+    // case). Staff may watch any ticket, same access model as watching any customer's wallet
+    // above. Presence is marked per "side" (see realtime.ts's TicketSide) so support.service.ts
+    // can tell whether to fall back to an ops alert / push notification when it publishes a reply.
+    const watchTicket = async (ticketId: string) => {
+      if (ticketUnsubscribers.has(ticketId)) return;
+      const side = isStaff ? "staff" : "customer";
+      if (!isStaff) {
+        const owns = await app.prisma.supportTicket.findFirst({ where: { id: ticketId, customerId: ownCustomerId! }, select: { id: true } });
+        if (!owns) return;
+      }
+      // Re-check after the async ownership lookup — the socket (or a racing unwatch) may have
+      // already gone away while that query was in flight.
+      if (ticketUnsubscribers.has(ticketId) || socket.readyState !== socket.OPEN) return;
+      const unsubChannel = watchSupportTicketChannel(ticketId, (msg) => send(msg));
+      ticketUnsubscribers.set(ticketId, () => {
+        unsubChannel();
+        void markTicketPresence(ticketId, side, -1);
+      });
+      void markTicketPresence(ticketId, side, 1);
+    };
+    const unwatchTicket = (ticketId: string) => {
+      ticketUnsubscribers.get(ticketId)?.();
+      ticketUnsubscribers.delete(ticketId);
+    };
+
     socket.on("message", (raw: Buffer) => {
       let parsed: ClientMessage;
       try {
@@ -68,14 +98,17 @@ export async function realtimeRoutes(app: FastifyInstance) {
       } catch {
         return;
       }
-      if (typeof parsed.customerId !== "string") return;
-      if (parsed.type === "watch") watch(parsed.customerId);
-      else if (parsed.type === "unwatch") unwatch(parsed.customerId);
+      if (parsed.type === "watch" && typeof parsed.customerId === "string") watch(parsed.customerId);
+      else if (parsed.type === "unwatch" && typeof parsed.customerId === "string") unwatch(parsed.customerId);
+      else if (parsed.type === "watch-ticket" && typeof parsed.ticketId === "string") void watchTicket(parsed.ticketId);
+      else if (parsed.type === "unwatch-ticket" && typeof parsed.ticketId === "string") unwatchTicket(parsed.ticketId);
     });
 
     socket.on("close", () => {
       for (const unsub of unsubscribers.values()) unsub();
       unsubscribers.clear();
+      for (const unsub of ticketUnsubscribers.values()) unsub();
+      ticketUnsubscribers.clear();
     });
 
     socket.on("error", (err: Error) => logger.warn({ err }, "Realtime WS connection error"));

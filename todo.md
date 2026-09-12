@@ -393,6 +393,145 @@ until Yativo enables them.
       every session, and logs it to the new audit trail. New `ForgotPasswordPage.tsx` /
       `ResetPasswordPage.tsx`, linked from a new "Forgot password?" link on the login form.
 
+## 6f. Realtime support chat (2026-09-12, user request)
+
+- [x] Instant delivery — reused the existing `/ws` + Redis pub/sub infrastructure built for live
+      wallet balances (`apps/api/src/lib/realtime.ts`) rather than building a parallel system: a
+      new `support-ticket:${ticketId}` channel, published to by `support.service.ts` right after
+      any message (customer submit, customer reply, staff reply) is persisted. Both
+      `SupportPage.tsx` (portal) and `SupportTicketsPage.tsx` (admin) patch the message straight
+      into the react-query cache on receipt — no polling, no refetch round-trip.
+- [x] Notification sound — `lib/chatSound.ts`, a short two-tone beep synthesized with the Web Audio
+      API (no bundled audio asset). Plays on the receiving side only (staff beep on customer
+      messages, customer beeps on staff replies) — never for your own just-sent message.
+- [x] "Not online" fallback notification — **reused existing infrastructure instead of adding
+      FCM**: presence is tracked per ticket per side (`TicketSide` in `realtime.ts`) via a
+      Redis counter incremented/decremented as WS connections watch/unwatch a ticket (correct
+      across multiple API instances, unlike the local EventEmitter). When a message is published
+      and the other side isn't currently watching: a customer message with no staff present goes
+      to the ops Slack/Telegram alert channels (already built in §6b); a staff reply with the
+      customer absent goes out via the existing customer web-push channel (also §6b, self-issued
+      VAPID — no new vendor).
+- [x] Access control: a customer can only watch their own ticket (verified against the DB on
+      `watch-ticket`, not just trusted from the client); staff can watch any, matching the existing
+      admin access model for wallet channels.
+
+## 6g. Live permission checks + role-modal scroll fix (2026-09-12, user request)
+
+- [x] **"Permissions must always be up to date"**: found and fixed a real gap — `requirePermission`/
+      `requireRole` (staff) and `requirePortalPermission` (business team members) all trusted the
+      role/permissions *claims baked into the JWT at login/refresh time*, explicitly documented in
+      their own old comments as "takes effect on next token refresh, not instantly." With a 15-
+      minute default access-token TTL, revoking a permission, demoting a role, or deactivating a
+      staff/team-member account could stay silently in effect for up to 15 minutes. Fixed: all
+      three now re-fetch the current role/permissions/`isActive` from the DB on every gated
+      request instead of trusting the token claim — a change now takes effect on the very next
+      request, not the next login. Removed `isPortalOwnerLevel()` (`lib/portalPrincipal.ts`) since
+      it was the one other place trusting a stale `role` claim, and had no other caller once
+      `requirePortalPermission` stopped using it.
+- [x] Permissions modal scroll bug: `RolesPage.tsx`'s `RoleFormDialog` had a `max-h-72
+      overflow-y-auto` permissions list nested INSIDE `DialogContent`'s own `max-h-[85vh]
+      overflow-y-auto` (a global default for every dialog in the app) — two independent scroll
+      containers, where the inner one's artificial 288px cap left the outer modal with a lot of
+      unused space around a small, separately-scrolling box. Removed the inner cap; the list now
+      flows naturally and the outer dialog is the only thing that scrolls, only when actual content
+      exceeds 85% of the viewport.
+
+## 6h. Admin action attribution — "who did this" audit trail (2026-09-12, user request)
+
+- [x] New `AdminAuditLog` model (`actorId`, `action`, `target`, `metadata Json?`, `createdAt`,
+      indexed on `[actorId, createdAt]` and `[target]`) + `logAdminAction(prisma, actorId, action,
+      target, metadata?)` helper in `apps/api/src/lib/adminAuditLog.ts` — swallows its own errors
+      (an audit-log failure must never fail the action it's describing), same posture as
+      `sendNotificationEmail`. `SYSTEM_ACTOR_ID = "system"` is the sentinel for anything automated.
+- [x] **Centralized rather than per-call-site**: `reverseTransaction()` and
+      `settlePendingTransaction()` (`apps/api/src/modules/ledger/`) — the shared primitives called
+      from ~12 places (admin routes, webhook handlers, the payout-poll worker, card
+      failure-cleanup paths) — now take an `actorId` parameter defaulting to `SYSTEM_ACTOR_ID` and
+      log the action themselves, once, right after their DB write commits. This means every
+      existing caller gets correct attribution automatically: admin-triggered calls pass
+      `request.staffUser!.sub` through `adminSettleTransaction`/`adminReverseTransaction`
+      (`transactions.service.ts`), and every other caller (webhook-driven settlement, poll-worker
+      reversal, etc.) needs no code change at all — it silently logs as "System." No future caller
+      of these two functions can forget to attribute the action.
+- [x] Extended the same `logAdminAction` call to the other admin-visible mutations a "who did this"
+      trail is actually for: KYC approve/reject (`customers.service.ts` — reject's reason, never
+      persisted to its own column before, is now captured queryably via the log's metadata),
+      customer freeze/unfreeze, staff role changes and deactivate/reactivate
+      (`auth.service.ts`), and platform-wide + per-customer withdrawal limit overrides
+      (`limits.service.ts`).
+- [x] New admin-only `GET /admin/audit-log` route (`modules/security/adminAuditLog.routes.ts`,
+      OWNER/ADMIN only) + `AuditLogPage.tsx` (`/admin/audit-log`, added to nav in all 5 templates)
+      — paginated, filterable by target id, resolves `actorId` to the staff member's email (or
+      "System"), with a detail sheet for the metadata.
+- [x] The admin transaction detail dialog (`AdminTransactionDetailDialog.tsx`) now shows "Settled
+      by" / "Reversed by" / "Released by" inline — `getTransactionDetailForAdmin` looks up the most
+      recent `AdminAuditLog` row targeting that transaction id and resolves the actor label. This
+      is the exact scenario the user asked for: "if admin A marks a deposit as reversed, other
+      admin members should be able to see it was done by admin A... when it was done by the system
+      it should also say it was the system."
+- [ ] Not yet covered by `logAdminAction`: card admin actions (freeze/unfreeze/terminate on
+      `cards.service.ts`/`businessSpendCards.service.ts`), branding/settings changes, webhook
+      replay. Lower priority than the ledger/KYC/customer-status/staff actions above since those
+      were the user's explicit example scenario.
+
+## 6j. New-location login step-up + staff TOTP (2026-09-12, user request)
+
+- [x] **New model `KnownLoginLocation`** (`principalType`, `principalId`, `country`, unique on the
+      triple) — one row per (customer or staff) × country a login has ever succeeded from.
+      Country-grained, not IP-grained, so normal ISP/VPN churn within the same country never false-
+      positives. `apps/api/src/lib/loginLocationGuard.ts`: `isNewLoginLocation()` (geoip-lite —
+      already a dependency, previously only used for language-detection — looks up the login IP's
+      country; returns false if ungeolocatable, or if this is the principal's very first login ever
+      since there's nothing yet to compare against) and `recordLoginLocation()` (upserts
+      lastSeenAt — called from every successful session issuance for both customer and staff).
+- [x] **Customer portal**: `loginCustomer` — 2FA-enabled accounts are unaffected (2FA already gates
+      every login regardless of location, satisfying "require email/2FA verification" already).
+      For accounts WITHOUT 2FA, a login from a never-seen country now returns
+      `{requiresEmailStepUp: true, challengeToken}` instead of a session; a 6-digit code (Redis,
+      10 min TTL, `lib/emailStepUp.ts`) is emailed, and `POST /portal/auth/step-up/verify`
+      (`verifyEmailStepUpLogin`) redeems it for the real session. `LoginPage.tsx` reuses the
+      existing 2FA challenge-code screen, keyed by a new `challengeMode: "2fa" | "stepup"` so both
+      cases share one UI with different copy.
+- [x] **Staff admin login — built from scratch, since none of this existed for staff before**:
+      - Full TOTP + backup-code 2FA for `StaffUser` (mirrors the customer's `twoFactor.service.ts`
+        exactly): schema fields `twoFactorEnabled/twoFactorSecret/twoFactorBackupCodeHashes`,
+        `staffTwoFactor.service.ts`, routes at `/auth/2fa/{status,setup,enable,disable}`, and a new
+        "Two-factor authentication" card in `AuthenticationSettingsPage.tsx` (staff's own
+        self-service settings page) — reuses the fully-generic `twoFactorStatusSchema` etc. from
+        shared-types rather than duplicating them.
+      - `RefreshToken` (staff) gained `ip`/`userAgent`/`lastUsedAt` columns (mirroring
+        `CustomerRefreshToken`) — staff logins captured **zero** device metadata before this.
+      - `loginStaff` now takes a `meta: SessionMeta` (ip/userAgent, via a new `requestMeta()`
+        helper in `auth.routes.ts` — didn't exist for staff at all before) and gets the identical
+        2FA-first / new-location-email-code-otherwise branching as the portal, via
+        `verifyStaffTwoFactorLogin`/`verifyStaffEmailStepUpLogin`. `AdminLoginPage.tsx` gained the
+        same challenge-code screen as the portal login page.
+      - Every staff login (success, 2FA, or step-up) now writes an `AdminAuditLog` row
+        (`staff.login` / `staff.login_2fa` / `staff.login_new_location_pending` /
+        `staff.login_new_location_verified`) — staff logins were completely unaudited before this.
+- [x] New JWT challenge-token audiences, all short-lived and unusable as real access tokens even if
+      leaked: `portal-stepup` (10 min), `admin-2fa` (5 min), `admin-stepup` (10 min) — see
+      `lib/jwt.ts`.
+- [ ] **Known gap, out of scope for this pass**: business team-member logins
+      (`CustomerTeamMember`/`CustomerTeamRefreshToken`) get neither the new-location check nor any
+      2FA verification at all, even though `CustomerTeamMember.twoFactorEnabled` already exists as
+      a column — `loginCustomer`'s member-fallback branch issues a session directly. Flagged, not
+      fixed, since the user's request named "customer/admin" (the account owner and staff), not
+      invited team members specifically.
+
+## 6i. Admin "unconfigured settings" reminders (2026-09-12, user request)
+
+- [x] `GET /admin/dashboard/summary` now includes `configReminders[]` — checked live against the
+      same mutable config objects every send path already reads (`smtpConfig`,
+      `notificationChannelConfig`), so it can never drift out of sync with what's actually
+      configured: no SMTP host/sendmail path set, no Slack/Telegram ops-alert channel enabled, no
+      branding logo uploaded. Each reminder carries an `actionPath` straight to the relevant
+      settings page.
+- [x] `DashboardPage.tsx` renders them as a dismissible-per-session banner above the platform
+      overview — dismissal is session-only (not persisted), so an actually-still-unconfigured item
+      resurfaces next visit rather than being permanently silenceable.
+
 ## 6. Crypto integration
 
 - [x] Crypto wallet deposit flow (`packages/yativo-sdk/src/crypto/wallets.ts`) — real, live, on

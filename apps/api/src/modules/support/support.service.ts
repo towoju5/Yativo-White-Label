@@ -3,9 +3,54 @@ import type { CreateSupportTicketInput, SupportTicketStatus } from "@white-label
 import { enqueueEmail } from "../../jobs/emailQueue.js";
 import { getBranding } from "../branding/branding.service.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
+import { publishSupportTicketMessage, isTicketSidePresent } from "../../lib/realtime.js";
+import { sendOpsAlert } from "../notifications/channels/opsAlert.js";
+import { sendWebPush } from "../notifications/channels/webPush.js";
 
 function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+type NewMessage = { id: string; authorType: "CUSTOMER" | "STAFF"; authorName: string; body: string; createdAt: Date };
+
+/**
+ * Pushes a new message out over the realtime WS channel for instant delivery, and falls back to
+ * an actual notification only when the OTHER side isn't currently watching this ticket (see
+ * TicketSide/markTicketPresence in realtime.ts) — no point paging someone who's already looking
+ * at the conversation. Customer messages alert the ops channels (Slack/Telegram, already wired up
+ * for other events); staff replies push to the customer's own devices via the same web-push
+ * channel notifications already use elsewhere. Never throws — a notification failure must never
+ * fail the reply that triggered it.
+ */
+async function notifyNewTicketMessage(
+  prisma: PrismaClient,
+  ticket: { id: string; subject: string; customerId: string },
+  message: NewMessage,
+  status: SupportTicketStatus,
+): Promise<void> {
+  try {
+    await publishSupportTicketMessage({
+      type: "support-ticket.message",
+      ticketId: ticket.id,
+      message: { id: message.id, authorType: message.authorType, authorName: message.authorName, body: message.body, createdAt: message.createdAt.toISOString() },
+      status,
+    });
+
+    const recipientSide = message.authorType === "CUSTOMER" ? "staff" : "customer";
+    const recipientPresent = await isTicketSidePresent(ticket.id, recipientSide);
+    if (recipientPresent) return;
+
+    const preview = message.body.length > 140 ? `${message.body.slice(0, 140)}…` : message.body;
+    if (message.authorType === "CUSTOMER") {
+      await sendOpsAlert(`💬 New support message on "${ticket.subject}" (#${ticket.id.slice(-6)}): ${preview}`);
+    } else {
+      await sendWebPush(prisma, ticket.customerId, { title: `Support reply: ${ticket.subject}`, body: preview });
+    }
+  } catch (err) {
+    // Deliberately swallowed — see doc comment above. Logged via the individual channel helpers
+    // themselves (sendOpsAlert/sendWebPush already log internally), nothing further needed here.
+    void err;
+  }
 }
 
 type TicketWithMessages = {
@@ -48,6 +93,7 @@ export async function submitSupportTicket(prisma: PrismaClient, customerId: stri
       subject: input.subject,
       messages: { create: { authorType: "CUSTOMER", authorId: customerId, body: input.message } },
     },
+    include: { messages: true },
   });
 
   if (branding.supportEmail) {
@@ -59,6 +105,9 @@ export async function submitSupportTicket(prisma: PrismaClient, customerId: stri
       html: `<p><strong>From:</strong> ${escapeHtml(name)} (${escapeHtml(customer.email)})</p><p><strong>Message:</strong></p><p>${escapeHtml(input.message).replace(/\n/g, "<br>")}</p>`,
     });
   }
+
+  const firstMessage = ticket.messages[0]!;
+  await notifyNewTicketMessage(prisma, ticket, { id: firstMessage.id, authorType: "CUSTOMER", authorName: "You", body: input.message, createdAt: firstMessage.createdAt }, "OPEN");
 
   return { id: ticket.id };
 }
@@ -90,9 +139,10 @@ export async function addCustomerReply(prisma: PrismaClient, customerId: string,
   const ticket = await getTicketOrThrow(prisma, ticketId, customerId);
   if (ticket.status === "CLOSED") throw new AppError("This ticket is closed — start a new one if you need further help.", 409, "TICKET_CLOSED");
 
-  await prisma.$transaction([
+  const nextStatus: SupportTicketStatus = ticket.status === "RESOLVED" ? "OPEN" : (ticket.status as SupportTicketStatus);
+  const [message] = await prisma.$transaction([
     prisma.supportTicketMessage.create({ data: { ticketId, authorType: "CUSTOMER", authorId: customerId, body } }),
-    prisma.supportTicket.update({ where: { id: ticketId }, data: { status: ticket.status === "RESOLVED" ? "OPEN" : (ticket.status as SupportTicketStatus) } }),
+    prisma.supportTicket.update({ where: { id: ticketId }, data: { status: nextStatus } }),
   ]);
 
   const branding = await getBranding(prisma);
@@ -105,6 +155,8 @@ export async function addCustomerReply(prisma: PrismaClient, customerId: string,
       html: `<p><strong>Reply from:</strong> ${escapeHtml(customer.email)}</p><p>${escapeHtml(body).replace(/\n/g, "<br>")}</p>`,
     });
   }
+
+  await notifyNewTicketMessage(prisma, ticket, { id: message.id, authorType: "CUSTOMER", authorName: "You", body, createdAt: message.createdAt }, nextStatus);
 
   return getMyTicket(prisma, customerId, ticketId);
 }
@@ -144,18 +196,20 @@ export async function addStaffReply(prisma: PrismaClient, staffId: string, ticke
   const ticket = await prisma.supportTicket.findUnique({ where: { id: ticketId }, include: { customer: true } });
   if (!ticket) throw new NotFoundError("Support ticket");
 
-  await prisma.$transaction([
+  const [message] = await prisma.$transaction([
     prisma.supportTicketMessage.create({ data: { ticketId, authorType: "STAFF", authorId: staffId, body } }),
     prisma.supportTicket.update({ where: { id: ticketId }, data: { status: "IN_PROGRESS" } }),
   ]);
 
-  const branding = await getBranding(prisma);
+  const [branding, staffUser] = await Promise.all([getBranding(prisma), prisma.staffUser.findUnique({ where: { id: staffId }, select: { email: true } })]);
   await enqueueEmail({
     to: ticket.customer.email,
     replyTo: branding.supportEmail ?? undefined,
     subject: `Re: [Support #${ticketId.slice(-6)}] ${ticket.subject}`,
     html: `<p>${escapeHtml(body).replace(/\n/g, "<br>")}</p><p style="color:#6b7280;font-size:12px;">Reply to this email, or reply from the Support page in your account.</p>`,
   });
+
+  await notifyNewTicketMessage(prisma, ticket, { id: message.id, authorType: "STAFF", authorName: staffUser?.email ?? "Support", body, createdAt: message.createdAt }, "IN_PROGRESS");
 
   return getTicketForAdmin(prisma, ticketId);
 }

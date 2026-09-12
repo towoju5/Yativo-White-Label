@@ -5,12 +5,19 @@ import { generateAuthenticationOptions, verifyAuthenticationResponse, type Authe
 import { STAFF_PERMISSIONS, DEFAULT_STAFF_PERMISSIONS, type StaffPermission, type CreateRoleInput, type UpdateRoleInput } from "@white-label/shared-types";
 import { env } from "../../config/env.js";
 import { hashPassword, verifyPassword } from "../../lib/passwords.js";
-import { signStaffAccessToken } from "../../lib/jwt.js";
+import { signStaffAccessToken, signStaffTwoFactorChallengeToken, verifyStaffTwoFactorChallengeToken, signStaffStepUpChallengeToken, verifyStaffStepUpChallengeToken } from "../../lib/jwt.js";
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
 import { getBranding } from "../branding/branding.service.js";
 import { UnauthorizedError, ConflictError, ForbiddenError, NotFoundError, AppError } from "../../lib/errors.js";
+import { logAdminAction } from "../../lib/adminAuditLog.js";
+import { verifyTotp } from "../../lib/totp.js";
+import { isNewLoginLocation, recordLoginLocation } from "../../lib/loginLocationGuard.js";
+import { issueEmailStepUpCode, verifyEmailStepUpCode } from "../../lib/emailStepUp.js";
+
+/** Best-effort request context — same shape/purpose as portalAuth's SessionMeta. */
+export type SessionMeta = { ip?: string; userAgent?: string };
 
 const staffWithRole = { include: { customRole: true } } as const;
 type StaffWithRole = { role: StaffRole; customRole: { permissions: string[] } | null };
@@ -26,12 +33,20 @@ export function resolveStaffPermissions(user: StaffWithRole): StaffPermission[] 
   return (user.customRole ? user.customRole.permissions : [...DEFAULT_STAFF_PERMISSIONS]) as StaffPermission[];
 }
 
-async function issueSession(prisma: PrismaClient, user: { id: string; role: StaffRole; customRole: { permissions: string[] } | null }) {
+async function issueSession(prisma: PrismaClient, user: { id: string; role: StaffRole; customRole: { permissions: string[] } | null }, meta: SessionMeta = {}) {
   const accessToken = signStaffAccessToken({ sub: user.id, role: user.role, permissions: resolveStaffPermissions(user) });
   const { token: refreshToken, tokenHash } = generateRefreshToken();
   await prisma.refreshToken.create({
-    data: { staffUserId: user.id, tokenHash, expiresAt: new Date(Date.now() + parseTtlToMs(env.JWT_REFRESH_TTL)) },
+    data: {
+      staffUserId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + parseTtlToMs(env.JWT_REFRESH_TTL)),
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      lastUsedAt: new Date(),
+    },
   });
+  await recordLoginLocation(prisma, "staff", user.id, meta.ip).catch(() => {});
   return { accessToken, refreshToken };
 }
 
@@ -42,13 +57,92 @@ export async function registerFirstOwner(prisma: PrismaClient, email: string, pa
   return prisma.staffUser.create({ data: { email, passwordHash, role: "OWNER" } });
 }
 
-export async function loginStaff(prisma: PrismaClient, email: string, password: string) {
+export async function loginStaff(prisma: PrismaClient, redis: Redis, email: string, password: string, meta: SessionMeta = {}) {
   const user = await prisma.staffUser.findUnique({ where: { email }, ...staffWithRole });
   if (!user || !user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
     throw new UnauthorizedError("Invalid email or password");
   }
   if (!user.isActive) throw new UnauthorizedError("This account has been deactivated");
-  const { accessToken, refreshToken } = await issueSession(prisma, user);
+
+  // A 2FA-enabled account gets step-up verification on every login regardless of location, so the
+  // new-location check below only ever applies to accounts without it — same precedent as the
+  // customer portal's loginCustomer.
+  if (user.twoFactorEnabled) {
+    return { requiresTwoFactor: true as const, requiresEmailStepUp: false as const, challengeToken: signStaffTwoFactorChallengeToken({ sub: user.id }) };
+  }
+
+  if (await isNewLoginLocation(prisma, "staff", user.id, meta.ip)) {
+    const code = await issueEmailStepUpCode(redis, "staff", user.id);
+    try {
+      await enqueueEmail({
+        to: user.email,
+        subject: "Verify this sign-in",
+        html: `<p>We noticed a sign-in to your admin account from a location you haven't used before.</p><p>Enter this code to continue: <b style="font-size:20px">${code}</b></p><p>This code expires in 10 minutes. If this wasn't you, contact another owner/admin immediately.</p>`,
+      });
+    } catch {
+      // Falls through regardless — same posture as every other auth email in this codebase.
+    }
+    await logAdminAction(prisma, user.id, "staff.login_new_location_pending", user.id, { ip: meta.ip });
+    return { requiresTwoFactor: false as const, requiresEmailStepUp: true as const, challengeToken: signStaffStepUpChallengeToken({ sub: user.id }) };
+  }
+
+  const { accessToken, refreshToken } = await issueSession(prisma, user, meta);
+  await logAdminAction(prisma, user.id, "staff.login", user.id, { ip: meta.ip });
+  return { requiresTwoFactor: false as const, requiresEmailStepUp: false as const, user, accessToken, refreshToken };
+}
+
+/** Redeems a login's TOTP challenge token for a real session — mirrors verifyTwoFactorLogin (portal) for staff. */
+export async function verifyStaffTwoFactorLogin(prisma: PrismaClient, challengeToken: string, code: string, meta: SessionMeta = {}) {
+  let staffId: string;
+  try {
+    staffId = verifyStaffTwoFactorChallengeToken(challengeToken).sub;
+  } catch {
+    throw new UnauthorizedError("This verification step has expired — please sign in again");
+  }
+
+  const user = await prisma.staffUser.findUnique({ where: { id: staffId }, ...staffWithRole });
+  if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+    throw new UnauthorizedError("Two-factor authentication is no longer enabled for this account");
+  }
+  if (!user.isActive) throw new UnauthorizedError("This account has been deactivated");
+
+  const normalizedCode = code.trim();
+  if (/^\d{6}$/.test(normalizedCode)) {
+    if (!verifyTotp(user.twoFactorSecret, normalizedCode)) throw new UnauthorizedError("Invalid verification code");
+  } else {
+    let matchedIndex = -1;
+    for (let i = 0; i < user.twoFactorBackupCodeHashes.length; i++) {
+      if (await verifyPassword(normalizedCode, user.twoFactorBackupCodeHashes[i]!)) {
+        matchedIndex = i;
+        break;
+      }
+    }
+    if (matchedIndex === -1) throw new UnauthorizedError("Invalid verification code");
+    const remaining = user.twoFactorBackupCodeHashes.filter((_, i) => i !== matchedIndex);
+    await prisma.staffUser.update({ where: { id: user.id }, data: { twoFactorBackupCodeHashes: remaining } });
+  }
+
+  const { accessToken, refreshToken } = await issueSession(prisma, user, meta);
+  await logAdminAction(prisma, user.id, "staff.login_2fa", user.id, { ip: meta.ip });
+  return { user, accessToken, refreshToken };
+}
+
+/** Redeems a new-location login's step-up challenge for a real session — mirrors verifyEmailStepUpLogin (portal) for staff. */
+export async function verifyStaffEmailStepUpLogin(prisma: PrismaClient, redis: Redis, challengeToken: string, code: string, meta: SessionMeta = {}) {
+  let staffId: string;
+  try {
+    staffId = verifyStaffStepUpChallengeToken(challengeToken).sub;
+  } catch {
+    throw new UnauthorizedError("This verification step has expired — please sign in again");
+  }
+
+  const user = await prisma.staffUser.findUnique({ where: { id: staffId }, ...staffWithRole });
+  if (!user) throw new UnauthorizedError("This verification step has expired — please sign in again");
+  if (!user.isActive) throw new UnauthorizedError("This account has been deactivated");
+  if (!(await verifyEmailStepUpCode(redis, "staff", staffId, code))) throw new UnauthorizedError("Invalid or expired code");
+
+  const { accessToken, refreshToken } = await issueSession(prisma, user, meta);
+  await logAdminAction(prisma, user.id, "staff.login_new_location_verified", user.id, { ip: meta.ip });
   return { user, accessToken, refreshToken };
 }
 
@@ -216,6 +310,7 @@ export async function updateStaff(
     },
     ...staffWithRole,
   });
+  await logAdminAction(prisma, actingStaffId, "staff.role_changed", targetId, { role: input.role, customRoleId: input.customRoleId });
   return updated;
 }
 
@@ -232,6 +327,7 @@ async function setActive(prisma: PrismaClient, actingStaffId: string, targetId: 
     ...staffWithRole,
   });
   if (!isActive) await prisma.refreshToken.updateMany({ where: { staffUserId: targetId, revokedAt: null }, data: { revokedAt: new Date() } });
+  await logAdminAction(prisma, actingStaffId, isActive ? "staff.reactivated" : "staff.deactivated", targetId);
   return updated;
 }
 

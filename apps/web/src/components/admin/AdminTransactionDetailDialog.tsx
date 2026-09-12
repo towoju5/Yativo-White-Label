@@ -61,6 +61,12 @@ export function AdminTransactionDetailDialog({ transactionId, onClose }: { trans
               <Row label="Date" value={new Date(data.createdAt).toLocaleString()} />
               {data.postedAt && <Row label="Posted" value={new Date(data.postedAt).toLocaleString()} />}
               {data.reversedAt && <Row label="Reversed" value={new Date(data.reversedAt).toLocaleString()} />}
+              {data.lastAction && (
+                <Row
+                  label={data.lastAction.action === "transaction.settled" ? "Settled by" : data.lastAction.action === "transaction.released" ? "Released by" : "Reversed by"}
+                  value={data.lastAction.actorLabel ?? "Unknown"}
+                />
+              )}
             </dl>
 
             {data.deposit && (

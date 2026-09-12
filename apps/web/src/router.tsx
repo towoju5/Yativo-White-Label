@@ -47,6 +47,7 @@ import AdminBusinessSpendCardsPage from "@/pages/admin/businessSpendCards/CardsP
 import TeamPage from "@/pages/admin/team/TeamPage";
 import RolesPage from "@/pages/admin/roles/RolesPage";
 import WebhooksPage from "@/pages/admin/webhooks/WebhooksPage";
+import AuditLogPage from "@/pages/admin/auditLog/AuditLogPage";
 import SupportTicketsPage from "@/pages/admin/support/SupportTicketsPage";
 import ReconciliationPage from "@/pages/admin/reconciliation/ReconciliationPage";
 import CryptoWalletsPage from "@/pages/admin/crypto/CryptoWalletsPage";
@@ -151,6 +152,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "team", element: <TeamPage /> },
               { path: "roles", element: <RolesPage /> },
               { path: "webhooks", element: <WebhooksPage /> },
+              { path: "audit-log", element: <AuditLogPage /> },
               { path: "support", element: <SupportTicketsPage /> },
               { path: "reconciliation", element: <ReconciliationPage /> },
               { path: "crypto", element: <CryptoWalletsPage /> },

@@ -58,3 +58,36 @@ export function signPortal2faChallengeToken(payload: Omit<Portal2faChallengeClai
 export function verifyPortal2faChallengeToken(token: string): Portal2faChallengeClaims {
   return jwt.verify(token, env.PORTAL_JWT_ACCESS_SECRET, { audience: "portal-2fa" }) as unknown as Portal2faChallengeClaims;
 }
+
+export type PortalStepUpChallengeClaims = { sub: string; aud: "portal-stepup" };
+
+/** Short-lived — issued when a 2FA-less customer logs in from a country they've never signed in from before. Redeemed by POST /portal/auth/step-up/verify against a one-time code emailed to them. */
+export function signPortalStepUpChallengeToken(payload: Omit<PortalStepUpChallengeClaims, "aud">): string {
+  return jwt.sign({ ...payload, aud: "portal-stepup" }, env.PORTAL_JWT_ACCESS_SECRET, { expiresIn: "10m" });
+}
+
+export function verifyPortalStepUpChallengeToken(token: string): PortalStepUpChallengeClaims {
+  return jwt.verify(token, env.PORTAL_JWT_ACCESS_SECRET, { audience: "portal-stepup" }) as unknown as PortalStepUpChallengeClaims;
+}
+
+export type StaffTwoFactorChallengeClaims = { sub: string; aud: "admin-2fa" };
+
+/** Staff-side counterpart of Portal2faChallengeClaims — issued by login when a staff account has TOTP enabled, redeemed by POST /auth/2fa/verify. */
+export function signStaffTwoFactorChallengeToken(payload: Omit<StaffTwoFactorChallengeClaims, "aud">): string {
+  return jwt.sign({ ...payload, aud: "admin-2fa" }, env.JWT_ACCESS_SECRET, { expiresIn: "5m" });
+}
+
+export function verifyStaffTwoFactorChallengeToken(token: string): StaffTwoFactorChallengeClaims {
+  return jwt.verify(token, env.JWT_ACCESS_SECRET, { audience: "admin-2fa" }) as unknown as StaffTwoFactorChallengeClaims;
+}
+
+export type StaffStepUpChallengeClaims = { sub: string; aud: "admin-stepup" };
+
+/** Staff-side counterpart of PortalStepUpChallengeClaims — issued when a non-2FA staff account logs in from a new country. Redeemed by POST /auth/step-up/verify. */
+export function signStaffStepUpChallengeToken(payload: Omit<StaffStepUpChallengeClaims, "aud">): string {
+  return jwt.sign({ ...payload, aud: "admin-stepup" }, env.JWT_ACCESS_SECRET, { expiresIn: "10m" });
+}
+
+export function verifyStaffStepUpChallengeToken(token: string): StaffStepUpChallengeClaims {
+  return jwt.verify(token, env.JWT_ACCESS_SECRET, { audience: "admin-stepup" }) as unknown as StaffStepUpChallengeClaims;
+}

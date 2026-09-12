@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdminSupportTicketListItem, AdminSupportTicketDetail, SupportTicketStatus } from "@white-label/shared-types";
 import { SUPPORT_TICKET_STATUSES } from "@white-label/shared-types";
 import { Send } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
+import { useSupportTicketRealtime } from "@/hooks/useSupportTicketRealtime";
+import { playChatBeep } from "@/lib/chatSound";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,12 +40,25 @@ export default function SupportTicketsPage() {
     enabled: !!selectedId,
   });
 
+  // Same instant-delivery pattern as the portal side (see SupportPage.tsx) — the server publishes
+  // every new message (from either side) the moment it's persisted.
+  useSupportTicketRealtime(selectedId, "staff", (msg) => {
+    queryClient.setQueryData<AdminSupportTicketDetail | undefined>(["admin", "support", "tickets", selectedId], (prev) => {
+      if (!prev || prev.messages.some((m) => m.id === msg.message.id)) return prev;
+      return { ...prev, status: msg.status as SupportTicketStatus, messages: [...prev.messages, msg.message] };
+    });
+    queryClient.invalidateQueries({ queryKey: ["admin", "support", "tickets", status] });
+    if (msg.message.authorType === "CUSTOMER") playChatBeep();
+  });
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [detail?.messages.length]);
+
   const replyMutation = useMutation({
     mutationFn: (body: string) => staffApi.post<AdminSupportTicketDetail>(`/admin/support/tickets/${selectedId}/messages`, { body }),
-    onSuccess: () => {
-      setReply("");
-      queryClient.invalidateQueries({ queryKey: ["admin", "support", "tickets"] });
-    },
+    onSuccess: () => setReply(""),
     onError: (e) => toast({ variant: "destructive", title: "Couldn't send reply", description: e instanceof ApiError ? e.message : undefined }),
   });
 
@@ -134,6 +149,7 @@ export default function SupportTicketsPage() {
                     <p className="whitespace-pre-wrap text-sm">{m.body}</p>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
 
               <div className="space-y-2">

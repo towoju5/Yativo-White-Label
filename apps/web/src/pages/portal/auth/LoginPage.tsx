@@ -18,7 +18,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function PortalLoginPage() {
   const { t } = useTranslation();
-  const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey, verifyTwoFactor } = useCustomerAuth();
+  const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp } = useCustomerAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { data: authConfig } = useQuery({ queryKey: ["portal", "auth-config"], queryFn: () => publicApi.get<PortalAuthConfig>("/portal/auth/config"), staleTime: Infinity });
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ export default function PortalLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [passkeySubmitting, setPasskeySubmitting] = useState(false);
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [challengeMode, setChallengeMode] = useState<"2fa" | "stepup">("2fa");
   const [code, setCode] = useState("");
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
@@ -59,6 +60,12 @@ export default function PortalLoginPage() {
     try {
       const result = await login(values);
       if ("requiresTwoFactor" in result) {
+        setChallengeMode("2fa");
+        setChallengeToken(result.challengeToken);
+        return;
+      }
+      if ("requiresEmailStepUp" in result) {
+        setChallengeMode("stepup");
         setChallengeToken(result.challengeToken);
         return;
       }
@@ -104,7 +111,11 @@ export default function PortalLoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await verifyTwoFactor(challengeToken, code);
+      if (challengeMode === "stepup") {
+        await verifyEmailStepUp(challengeToken, code);
+      } else {
+        await verifyTwoFactor(challengeToken, code);
+      }
       navigate("/portal", { replace: true });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("login.invalidCodeError", "Invalid code. Please try again."));
@@ -128,7 +139,9 @@ export default function PortalLoginPage() {
               <CardHeader>
                 <CardTitle>{t("login.verifyHeading", "Verify it's you")}</CardTitle>
                 <CardDescription>
-                  {t("login.verifyDescription", "Enter the 6-digit code from your authenticator app, or a backup code.")}
+                  {challengeMode === "stepup"
+                    ? t("login.stepUpDescription", "We noticed a sign-in from a new location. Enter the code we just emailed you.")
+                    : t("login.verifyDescription", "Enter the 6-digit code from your authenticator app, or a backup code.")}
                 </CardDescription>
               </CardHeader>
               <CardContent>

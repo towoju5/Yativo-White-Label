@@ -10,9 +10,3 @@ import type { PortalAccessClaims } from "./jwt.js";
 export function resolveEffectiveCustomerId(claims: PortalAccessClaims): string {
   return claims.principalType === "member" && claims.businessCustomerId ? claims.businessCustomerId : claims.sub;
 }
-
-/** True for the account owner's own token, or a member token whose role is ADMIN — both always
- * have full access to the business's data, mirroring the staff-side OWNER/ADMIN bypass. */
-export function isPortalOwnerLevel(claims: PortalAccessClaims): boolean {
-  return !claims.principalType || claims.principalType === "owner" || claims.role === "ADMIN";
-}

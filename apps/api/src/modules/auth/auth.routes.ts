@@ -1,10 +1,13 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import {
   staffLoginSchema,
   authTokensSchema,
+  staffLoginResultSchema,
+  verifyTwoFactorSchema,
+  verifyEmailStepUpSchema,
   staffUserSchema,
   inviteStaffSchema,
   updateStaffSchema,
@@ -19,6 +22,8 @@ import {
 import {
   registerFirstOwner,
   loginStaff,
+  verifyStaffTwoFactorLogin,
+  verifyStaffEmailStepUpLogin,
   refreshStaffSession,
   logoutStaff,
   getStaffPasskeyLoginOptions,
@@ -43,6 +48,10 @@ import { parseTtlToMs } from "../../lib/refreshTokens.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 
 const REFRESH_COOKIE = "admin_refresh_token";
+
+function requestMeta(request: FastifyRequest): { ip: string; userAgent: string | undefined } {
+  return { ip: request.ip, userAgent: request.headers["user-agent"] };
+}
 
 type StaffRow = {
   id: string;
@@ -88,20 +97,52 @@ export async function authRoutes(app: FastifyInstance) {
     },
   );
 
+  function setRefreshCookie(reply: import("fastify").FastifyReply, refreshToken: string) {
+    reply.setCookie(REFRESH_COOKIE, refreshToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/auth",
+      maxAge: parseTtlToMs(env.JWT_REFRESH_TTL) / 1000,
+    });
+  }
+
   server.post(
     "/auth/login",
     // Tighter than the global 200/min default (app.ts) — login is the one endpoint worth
     // throttling specifically against brute-forcing, independent of whatever else this IP is doing.
-    { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: staffLoginSchema, response: { 200: authTokensSchema } } },
+    { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: staffLoginSchema, response: { 200: staffLoginResultSchema } } },
     async (request, reply) => {
-      const { accessToken, refreshToken } = await loginStaff(app.prisma, request.body.email, request.body.password);
-      reply.setCookie(REFRESH_COOKIE, refreshToken, {
-        httpOnly: true,
-        secure: env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/auth",
-        maxAge: parseTtlToMs(env.JWT_REFRESH_TTL) / 1000,
-      });
+      const result = await loginStaff(app.prisma, app.redis, request.body.email, request.body.password, requestMeta(request));
+      if (result.requiresTwoFactor) {
+        return reply.send({ requiresTwoFactor: true, challengeToken: result.challengeToken });
+      }
+      if (result.requiresEmailStepUp) {
+        return reply.send({ requiresEmailStepUp: true, challengeToken: result.challengeToken });
+      }
+      setRefreshCookie(reply, result.refreshToken);
+      return reply.send({ accessToken: result.accessToken });
+    },
+  );
+
+  server.post(
+    "/auth/2fa/verify",
+    // A 6-digit TOTP code is guessable at a high enough request rate without this — tighter than
+    // login itself since there's no password to also get right first.
+    { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: verifyTwoFactorSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
+    async (request, reply) => {
+      const { accessToken, refreshToken } = await verifyStaffTwoFactorLogin(app.prisma, request.body.challengeToken, request.body.code, requestMeta(request));
+      setRefreshCookie(reply, refreshToken);
+      return reply.send({ accessToken });
+    },
+  );
+
+  server.post(
+    "/auth/step-up/verify",
+    { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: verifyEmailStepUpSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
+    async (request, reply) => {
+      const { accessToken, refreshToken } = await verifyStaffEmailStepUpLogin(app.prisma, app.redis, request.body.challengeToken, request.body.code, requestMeta(request));
+      setRefreshCookie(reply, refreshToken);
       return reply.send({ accessToken });
     },
   );

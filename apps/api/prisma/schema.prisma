@@ -631,6 +631,12 @@ model StaffUser {
   inviteExpiresAt DateTime?
   createdAt     DateTime    @default(now())
 
+  /// Mirrors Customer's own twoFactor* fields exactly — same TOTP + backup-code scheme, gated by
+  /// the same lib/totp.ts primitives, just scoped to staff instead of customers.
+  twoFactorEnabled          Boolean  @default(false)
+  twoFactorSecret           String?
+  twoFactorBackupCodeHashes String[] @default([])
+
   refreshTokens RefreshToken[]
   apiKeys       ApiKey[]
   passkeys      StaffPasskey[]
@@ -652,12 +658,19 @@ model SecureSetting {
 /// Append-only record of sensitive integration-setting changes. Values/secrets are never logged.
 model AdminAuditLog {
   id        String   @id @default(cuid())
+  /// A staff user id, or the literal string "system" for an automated action (webhook-triggered
+  /// settlement/reversal, a scheduled poll, etc.) — never left ambiguous, so "who did this" always
+  /// has an answer even when the answer is "nobody, this was automatic".
   actorId   String
   action    String
   target    String
+  /// Free-form context (a reason string, before/after values, etc.) — optional since not every
+  /// action has more to say than action+target already do.
+  metadata  Json?
   createdAt DateTime @default(now())
 
   @@index([actorId, createdAt])
+  @@index([target])
   @@map("admin_audit_logs")
 }
 
@@ -687,9 +700,33 @@ model RefreshToken {
   expiresAt   DateTime
   revokedAt   DateTime?
   createdAt   DateTime  @default(now())
+  /// Same device/session metadata as CustomerRefreshToken — nullable because tokens issued before
+  /// this column existed have none.
+  userAgent   String?
+  ip          String?
+  lastUsedAt  DateTime?
 
   @@index([staffUserId])
   @@map("staff_refresh_tokens")
+}
+
+/// One row per (principal, country) a login has ever succeeded from — the baseline "known
+/// locations" set used to detect a login from somewhere new and require step-up verification.
+/// Deliberately country-grained (not exact IP) so normal ISP/VPN IP churn within the same country
+/// doesn't trigger false positives. principalType is "customer" or "staff" rather than two
+/// separate tables, since the detection logic is identical for both.
+model KnownLoginLocation {
+  id            String   @id @default(cuid())
+  principalType String
+  principalId   String
+  /// ISO 3166-1 alpha-2 country code from geoip-lite's lookup.
+  country       String
+  firstSeenAt   DateTime @default(now())
+  lastSeenAt    DateTime @default(now())
+
+  @@unique([principalType, principalId, country])
+  @@index([principalType, principalId])
+  @@map("known_login_locations")
 }
 
 /// A WebAuthn credential (passkey) registered for passwordless staff login. See CustomerPasskey's

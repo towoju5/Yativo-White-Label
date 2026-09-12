@@ -7,10 +7,11 @@ interface CustomerAuthState {
   user: Customer | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  /** Returns the raw login result — the caller checks `requiresTwoFactor` and, if true, collects a code and calls verifyTwoFactor with the returned challengeToken. */
+  /** Returns the raw login result — the caller checks `requiresTwoFactor`/`requiresEmailStepUp` and, if either, collects a code and calls the matching verify function with the returned challengeToken. */
   login: (input: PortalLoginInput) => Promise<PortalLoginResult>;
   loginWithPasskey: () => Promise<void>;
   verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
+  verifyEmailStepUp: (challengeToken: string, code: string) => Promise<void>;
   verifyMagicLink: (token: string) => Promise<void>;
   /** Returns the raw signup result — the caller checks `pendingVerification` and, if true, shows a "check your email" state instead of navigating in. */
   signup: (input: CreateCustomerInput) => Promise<SignupResult>;
@@ -41,7 +42,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
 
   const login: CustomerAuthState["login"] = async (input) => {
     const result = await apiFetch<PortalLoginResult>("/portal/auth/login", { method: "POST", body: input });
-    if ("requiresTwoFactor" in result) return result;
+    if ("requiresTwoFactor" in result || "requiresEmailStepUp" in result) return result;
     portalTokenStore.set(result.accessToken);
     const me = await portalApi.get<Customer>("/portal/auth/me");
     setUser(me);
@@ -50,6 +51,16 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
 
   const verifyTwoFactor: CustomerAuthState["verifyTwoFactor"] = async (challengeToken, code) => {
     const { accessToken } = await apiFetch<{ accessToken: string }>("/portal/auth/2fa/verify", {
+      method: "POST",
+      body: { challengeToken, code },
+    });
+    portalTokenStore.set(accessToken);
+    const me = await portalApi.get<Customer>("/portal/auth/me");
+    setUser(me);
+  };
+
+  const verifyEmailStepUp: CustomerAuthState["verifyEmailStepUp"] = async (challengeToken, code) => {
+    const { accessToken } = await apiFetch<{ accessToken: string }>("/portal/auth/step-up/verify", {
       method: "POST",
       body: { challengeToken, code },
     });
@@ -99,7 +110,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CustomerAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyMagicLink, signup, logout }}>
+    <CustomerAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp, verifyMagicLink, signup, logout }}>
       {children}
     </CustomerAuthContext.Provider>
   );

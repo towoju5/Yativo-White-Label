@@ -32,7 +32,7 @@ export async function limitsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ currencyCode: z.string() }), body: updatePlatformLimitDefaultSchema, response: { 200: platformLimitDefaultSchema } },
     },
     async (request, reply) => {
-      const result = await setPlatformLimitDefault(app.prisma, request.params.currencyCode, request.body.dailyLimitMinor, request.body.monthlyLimitMinor);
+      const result = await setPlatformLimitDefault(app.prisma, request.staffUser!.sub, request.params.currencyCode, request.body.dailyLimitMinor, request.body.monthlyLimitMinor);
       return reply.send(result);
     },
   );
@@ -50,7 +50,7 @@ export async function limitsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ customerId: z.string() }), body: updateCustomerLimitSchema, response: { 200: z.array(customerLimitSchema) } },
     },
     async (request, reply) => {
-      const result = await setCustomerLimit(app.prisma, request.params.customerId, request.body.currencyCode, request.body.dailyLimitMinor, request.body.monthlyLimitMinor);
+      const result = await setCustomerLimit(app.prisma, request.staffUser!.sub, request.params.customerId, request.body.currencyCode, request.body.dailyLimitMinor, request.body.monthlyLimitMinor);
       return reply.send(result);
     },
   );

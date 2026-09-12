@@ -10,6 +10,14 @@ export const dashboardBalanceByCurrencySchema = z.object({
   totalPendingMinor: minorAmountSchema,
 });
 
+export const configReminderSchema = z.object({
+  key: z.string(),
+  title: z.string(),
+  description: z.string(),
+  actionPath: z.string(),
+});
+export type ConfigReminderDto = z.infer<typeof configReminderSchema>;
+
 export const dashboardSummarySchema = z.object({
   balancesByCurrency: z.array(dashboardBalanceByCurrencySchema),
   customersByKycStatus: z.record(z.enum(KYC_STATUSES), z.number().int()),
@@ -18,5 +26,7 @@ export const dashboardSummarySchema = z.object({
   postedVolumeLast30Days: z.array(
     z.object({ currencyCode: currencyCodeSchema, totalMinor: minorAmountSchema }),
   ),
+  /** Admin-actionable "you haven't set this up yet" nudges — SMTP, ops alerts, branding, etc. Empty once everything's configured. */
+  configReminders: z.array(configReminderSchema),
 });
 export type DashboardSummary = z.infer<typeof dashboardSummarySchema>;

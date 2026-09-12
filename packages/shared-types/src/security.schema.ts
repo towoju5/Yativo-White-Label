@@ -19,6 +19,20 @@ export const customerAuditLogEntrySchema = z.object({
 });
 export type CustomerAuditLogEntryDto = z.infer<typeof customerAuditLogEntrySchema>;
 
+// ── Admin audit trail — "who did this" for every admin-visible mutation ──
+
+export const adminAuditLogEntrySchema = z.object({
+  id: z.string(),
+  actorId: z.string(),
+  /** "System" for the SYSTEM_ACTOR_ID sentinel, otherwise the staff member's email. Null only if the staff account itself no longer exists. */
+  actorLabel: z.string().nullable(),
+  action: z.string(),
+  target: z.string(),
+  metadata: z.record(z.unknown()).nullable(),
+  createdAt: z.string(),
+});
+export type AdminAuditLogEntryDto = z.infer<typeof adminAuditLogEntrySchema>;
+
 // ── Withdrawal / payout velocity limits ──
 
 export const customerLimitSchema = z.object({

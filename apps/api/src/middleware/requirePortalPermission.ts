@@ -1,20 +1,27 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { PortalPermission } from "@white-label/shared-types";
 import { ForbiddenError, UnauthorizedError } from "../lib/errors.js";
-import { isPortalOwnerLevel } from "../lib/portalPrincipal.js";
+import { effectiveMemberPermissions } from "../modules/portalAuth/portalAuth.service.js";
 
 /**
- * Granular permission gate for a business's invited team members — the account owner (and an
- * ADMIN-tier member) always passes; a MEMBER-tier login must have the given permission in their
- * token's `permissions` claim (baked in at login from their assigned permission set — see
- * customerTeam.service.ts). Mirrors requirePermission() on the staff side. A permission change
- * takes effect on that member's next token refresh, not instantly.
+ * Granular permission gate for a business's invited team members — the account owner always
+ * passes (an owner's access is never a revocable "permission set", so nothing to go stale there).
+ * A member login's role/permissions are checked FRESH against the DB on every call rather than
+ * trusting the token's own `role`/`permissions` claims — those are only a snapshot from whenever
+ * the token was issued/refreshed, so without this a demotion or permission change would silently
+ * keep the old access working for up to PORTAL_JWT_ACCESS_TTL (15 minutes by default). Mirrors
+ * requirePermission() on the staff side.
  */
 export function requirePortalPermission(permission: PortalPermission) {
   return async (request: FastifyRequest, _reply: FastifyReply) => {
-    if (!request.customer) throw new UnauthorizedError();
-    if (isPortalOwnerLevel(request.customer)) return;
-    if (!request.customer.permissions?.includes(permission)) {
+    const claims = request.customer;
+    if (!claims) throw new UnauthorizedError();
+    if (!claims.principalType || claims.principalType === "owner") return;
+
+    const member = await request.server.prisma.customerTeamMember.findUnique({ where: { id: claims.sub } });
+    if (!member || !member.isActive) throw new UnauthorizedError("This team member account is no longer active");
+    if (member.role === "ADMIN") return;
+    if (!effectiveMemberPermissions(member).includes(permission)) {
       throw new ForbiddenError(`Requires permission: ${permission}`);
     }
   };

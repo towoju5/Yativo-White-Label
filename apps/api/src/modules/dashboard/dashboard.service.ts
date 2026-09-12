@@ -1,5 +1,50 @@
 import type { PrismaClient } from "@prisma/client";
-import { KYC_STATUSES } from "@white-label/shared-types";
+import { KYC_STATUSES, type ConfigReminderDto } from "@white-label/shared-types";
+import { smtpConfig } from "../../lib/mailer.js";
+import { notificationChannelConfig } from "../../lib/notificationChannelConfig.js";
+
+/**
+ * "You haven't set this up yet" nudges for an admin — checked live against the same mutable
+ * config objects every send path already reads (smtpConfig, notificationChannelConfig), so this
+ * can never drift out of sync with what's actually configured. Deliberately limited to things an
+ * admin can genuinely forget exists rather than every optional setting in the app.
+ */
+function getConfigReminders(prisma: PrismaClient): Promise<ConfigReminderDto[]> {
+  const reminders: ConfigReminderDto[] = [];
+
+  // Neither an SMTP host nor a custom sendmail path has ever been set — this is the untouched
+  // env default, not a deliberate admin choice, and password resets/verification/invites will
+  // silently no-op until it's configured.
+  if (!smtpConfig.host && !smtpConfig.sendmailPath) {
+    reminders.push({
+      key: "email",
+      title: "Email delivery isn't configured",
+      description: "Password resets, verification codes, and staff invites can't be delivered until SMTP is set up.",
+      actionPath: "/admin/settings/integrations",
+    });
+  }
+
+  if (!notificationChannelConfig.slack.enabled && !notificationChannelConfig.telegram.enabled) {
+    reminders.push({
+      key: "ops-alerts",
+      title: "No ops alert channel configured",
+      description: "Set up Slack or Telegram so your team hears about failed webhooks, payouts, and pending KYC in real time.",
+      actionPath: "/admin/settings/notification-channels",
+    });
+  }
+
+  return prisma.brandingConfig.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } }).then((branding) => {
+    if (!branding.logoUrl) {
+      reminders.push({
+        key: "branding-logo",
+        title: "No logo uploaded",
+        description: "Your product is still showing the default placeholder logo to customers.",
+        actionPath: "/admin/settings/branding",
+      });
+    }
+    return reminders;
+  });
+}
 
 export async function getDashboardSummary(prisma: PrismaClient) {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -43,5 +88,7 @@ export async function getDashboardSummary(prisma: PrismaClient) {
     totalMinor: (v._sum.amountMinor ?? 0n).toString(),
   }));
 
-  return { balancesByCurrency, customersByKycStatus, customerCount, pendingPayoutsCount, postedVolumeLast30Days };
+  const configReminders = await getConfigReminders(prisma);
+
+  return { balancesByCurrency, customersByKycStatus, customerCount, pendingPayoutsCount, postedVolumeLast30Days, configReminders };
 }

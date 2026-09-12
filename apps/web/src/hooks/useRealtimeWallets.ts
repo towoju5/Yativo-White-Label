@@ -58,8 +58,8 @@ export function useRealtimeWalletBridge() {
       });
     };
 
-    const unsubPortal = portalRealtime.subscribe(applyToPortalWallets);
-    const unsubStaff = staffRealtime.subscribe(applyToAdminCustomer);
+    const unsubPortal = portalRealtime.subscribe((msg) => msg.type === "wallet.updated" && applyToPortalWallets(msg));
+    const unsubStaff = staffRealtime.subscribe((msg) => msg.type === "wallet.updated" && applyToAdminCustomer(msg));
     return () => {
       unsubPortal();
       unsubStaff();

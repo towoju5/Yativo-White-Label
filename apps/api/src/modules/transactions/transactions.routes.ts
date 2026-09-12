@@ -103,7 +103,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), body: adjustBodySchema, response: { 200: z.object({ id: z.string(), status: z.string() }), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
-      const tx = await adminSettleTransaction(app.prisma, request.params.id, request.body.reason);
+      const tx = await adminSettleTransaction(app.prisma, request.staffUser!.sub, request.params.id, request.body.reason);
       return reply.send({ id: tx.id, status: tx.status });
     },
   );
@@ -115,7 +115,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), body: adjustBodySchema, response: { 200: z.object({ id: z.string(), status: z.string() }), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
-      const tx = await adminReverseTransaction(app.prisma, request.params.id, request.body.reason);
+      const tx = await adminReverseTransaction(app.prisma, request.staffUser!.sub, request.params.id, request.body.reason);
       return reply.send({ id: tx.id, status: tx.status });
     },
   );

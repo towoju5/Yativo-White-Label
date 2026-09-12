@@ -88,7 +88,14 @@ export const twoFactorChallengeSchema = z.object({
 });
 export type TwoFactorChallenge = z.infer<typeof twoFactorChallengeSchema>;
 
-export const portalLoginResultSchema = z.union([authTokensSchema, twoFactorChallengeSchema]);
+/** Returned from POST /portal/auth/login (in place of authTokensSchema) when a non-2FA customer logs in from a location they've never signed in from before. */
+export const emailStepUpChallengeSchema = z.object({
+  requiresEmailStepUp: z.literal(true),
+  challengeToken: z.string(),
+});
+export type EmailStepUpChallenge = z.infer<typeof emailStepUpChallengeSchema>;
+
+export const portalLoginResultSchema = z.union([authTokensSchema, twoFactorChallengeSchema, emailStepUpChallengeSchema]);
 export type PortalLoginResult = z.infer<typeof portalLoginResultSchema>;
 
 /** Returned from POST /portal/auth/signup in place of authTokensSchema when
@@ -139,3 +146,29 @@ export const verifyTwoFactorSchema = z.object({
   code: z.string().min(6),
 });
 export type VerifyTwoFactorInput = z.infer<typeof verifyTwoFactorSchema>;
+
+export const verifyEmailStepUpSchema = z.object({
+  challengeToken: z.string(),
+  /** The 6-digit code emailed for this new-location login. */
+  code: z.string().min(6).max(6),
+});
+export type VerifyEmailStepUpInput = z.infer<typeof verifyEmailStepUpSchema>;
+
+// ── Staff login step-up (2FA and new-location email code) ──
+
+/** Returned from POST /auth/login in place of authTokensSchema when the staff account has TOTP enabled. */
+export const staffTwoFactorChallengeSchema = z.object({
+  requiresTwoFactor: z.literal(true),
+  challengeToken: z.string(),
+});
+export type StaffTwoFactorChallenge = z.infer<typeof staffTwoFactorChallengeSchema>;
+
+/** Returned from POST /auth/login in place of authTokensSchema when a non-2FA staff account logs in from a location they've never signed in from before. */
+export const staffEmailStepUpChallengeSchema = z.object({
+  requiresEmailStepUp: z.literal(true),
+  challengeToken: z.string(),
+});
+export type StaffEmailStepUpChallenge = z.infer<typeof staffEmailStepUpChallengeSchema>;
+
+export const staffLoginResultSchema = z.union([authTokensSchema, staffTwoFactorChallengeSchema, staffEmailStepUpChallengeSchema]);
+export type StaffLoginResult = z.infer<typeof staffLoginResultSchema>;

@@ -3,6 +3,7 @@ import { NotFoundError, AppError } from "../../lib/errors.js";
 import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js";
 import { reverseTransaction } from "../ledger/reverseTransaction.js";
 import type { EntryLine } from "../ledger/types.js";
+import { SYSTEM_ACTOR_ID } from "../../lib/adminAuditLog.js";
 
 type TxWithEntries = Prisma.LedgerTransactionGetPayload<{
   include: { entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } } };
@@ -134,7 +135,7 @@ export async function listLedgerTransactions(
  * reverseTransactionInTx and postTransactionInTx (which settlePendingTransaction composes) are
  * independently idempotent per transaction id, so whichever runs second is a no-op.
  */
-export async function adminSettleTransaction(prisma: PrismaClient, transactionId: string, reason: string) {
+export async function adminSettleTransaction(prisma: PrismaClient, actorId: string, transactionId: string, reason: string) {
   const original = await prisma.ledgerTransaction.findUnique({ where: { id: transactionId }, include: { entries: true } });
   if (!original) throw new NotFoundError("LedgerTransaction");
   if (original.status !== "PENDING") {
@@ -148,22 +149,30 @@ export async function adminSettleTransaction(prisma: PrismaClient, transactionId
     currencyCode: e.currencyCode,
   }));
 
-  return settlePendingTransaction(prisma, transactionId, lines, {
-    type: original.type,
-    externalSource: "MANUAL",
-    externalRef: original.externalRef ?? undefined,
-    description: `Manually confirmed by admin: ${reason}`,
-  });
+  const result = await settlePendingTransaction(
+    prisma,
+    transactionId,
+    lines,
+    {
+      type: original.type,
+      externalSource: "MANUAL",
+      externalRef: original.externalRef ?? undefined,
+      description: `Manually confirmed by admin: ${reason}`,
+    },
+    actorId,
+  );
+  return result;
 }
 
 /** Releases (if PENDING) or reverses (if POSTED) a transaction — see reverseTransaction.ts for the full semantics of each case. */
-export async function adminReverseTransaction(prisma: PrismaClient, transactionId: string, reason: string) {
+export async function adminReverseTransaction(prisma: PrismaClient, actorId: string, transactionId: string, reason: string) {
   const original = await prisma.ledgerTransaction.findUnique({ where: { id: transactionId } });
   if (!original) throw new NotFoundError("LedgerTransaction");
   if (original.status === "REVERSED") {
     throw new AppError("This transaction is already reversed.", 409, "INVALID_STATUS_TRANSITION");
   }
-  return reverseTransaction(prisma, transactionId, reason);
+  const result = await reverseTransaction(prisma, transactionId, reason, actorId);
+  return result;
 }
 
 /**
@@ -183,6 +192,16 @@ export async function getTransactionDetailForAdmin(prisma: PrismaClient, transac
     },
   });
   if (!tx) throw new NotFoundError("LedgerTransaction");
+
+  const lastAuditEntry = await prisma.adminAuditLog.findFirst({ where: { target: transactionId }, orderBy: { createdAt: "desc" } });
+  let lastAction: { action: string; actorLabel: string | null; createdAt: string } | null = null;
+  if (lastAuditEntry) {
+    const actorLabel =
+      lastAuditEntry.actorId === SYSTEM_ACTOR_ID
+        ? "System"
+        : ((await prisma.staffUser.findUnique({ where: { id: lastAuditEntry.actorId }, select: { email: true } }))?.email ?? null);
+    lastAction = { action: lastAuditEntry.action, actorLabel, createdAt: lastAuditEntry.createdAt.toISOString() };
+  }
 
   return {
     id: tx.id,
@@ -228,5 +247,6 @@ export async function getTransactionDetailForAdmin(prisma: PrismaClient, transac
           localAmount: tx.deposit.localAmount,
         }
       : null,
+    lastAction,
   };
 }

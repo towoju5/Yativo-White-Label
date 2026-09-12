@@ -5,7 +5,7 @@ import { generateAuthenticationOptions, verifyAuthenticationResponse, type Authe
 import { PORTAL_PERMISSIONS } from "@white-label/shared-types";
 import { env } from "../../config/env.js";
 import { hashPassword, verifyPassword } from "../../lib/passwords.js";
-import { signPortalAccessToken, signPortal2faChallengeToken, verifyPortal2faChallengeToken } from "../../lib/jwt.js";
+import { signPortalAccessToken, signPortal2faChallengeToken, verifyPortal2faChallengeToken, signPortalStepUpChallengeToken, verifyPortalStepUpChallengeToken } from "../../lib/jwt.js";
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
@@ -16,6 +16,8 @@ import { provisionDefaultWallets, tryProvisionDefaultWallets } from "../wallets/
 import { verifyTotp } from "../../lib/totp.js";
 import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import { logCustomerAction } from "../security/auditLog.service.js";
+import { isNewLoginLocation, recordLoginLocation } from "../../lib/loginLocationGuard.js";
+import { issueEmailStepUpCode, verifyEmailStepUpCode } from "../../lib/emailStepUp.js";
 import logger from "../../lib/logger.js";
 import type { CreateCustomerInput } from "@white-label/shared-types";
 
@@ -34,6 +36,10 @@ async function issueSession(prisma: PrismaClient, customerId: string, meta: Sess
       lastUsedAt: new Date(),
     },
   });
+  // Every successful session issuance (password, magic link, 2FA, passkey) marks this IP's
+  // country as known for this customer — the growing baseline that a future login's new-location
+  // check compares against. Best-effort: never blocks a login.
+  await recordLoginLocation(prisma, "customer", customerId, meta.ip).catch(() => {});
   // Explicit, not just implied by isPortalOwnerLevel's bypass — mirrors resolveStaffPermissions
   // giving OWNER/ADMIN the full list outright, so any future permission check reading
   // `customer.permissions` directly (rather than going through the bypass) sees the account
@@ -43,7 +49,7 @@ async function issueSession(prisma: PrismaClient, customerId: string, meta: Sess
 }
 
 /** A team member's effective permission set — ADMIN gets everything, mirroring the staff-side OWNER/ADMIN bypass. */
-function effectiveMemberPermissions(member: CustomerTeamMember): string[] {
+export function effectiveMemberPermissions(member: CustomerTeamMember): string[] {
   return member.role === "ADMIN" ? [...PORTAL_PERMISSIONS] : member.permissions;
 }
 
@@ -227,7 +233,7 @@ export async function verifyMagicLink(prisma: PrismaClient, token: string, meta:
   return { customer, accessToken, refreshToken };
 }
 
-export async function loginCustomer(prisma: PrismaClient, email: string, password: string, meta: SessionMeta = {}) {
+export async function loginCustomer(prisma: PrismaClient, redis: Redis, email: string, password: string, meta: SessionMeta = {}) {
   const customer = await prisma.customer.findUnique({ where: { email } });
   if (!customer) {
     // Not a business account owner — check whether this is an invited team member's own login
@@ -239,7 +245,7 @@ export async function loginCustomer(prisma: PrismaClient, email: string, passwor
     }
     if (!member.isActive) throw new UnauthorizedError("This account has been deactivated — contact your business administrator");
     const { accessToken, refreshToken } = await issueMemberSession(prisma, member);
-    return { requiresTwoFactor: false as const, principalType: "member" as const, member, accessToken, refreshToken };
+    return { requiresTwoFactor: false as const, requiresEmailStepUp: false as const, principalType: "member" as const, member, accessToken, refreshToken };
   }
   if (!(await verifyPassword(password, customer.passwordHash))) {
     throw new UnauthorizedError("Invalid email or password");
@@ -252,8 +258,25 @@ export async function loginCustomer(prisma: PrismaClient, email: string, passwor
   // 2FA-enabled accounts don't get a session from password alone — the challenge token proves
   // the password step already passed, and POST /portal/auth/2fa/verify redeems it for the real
   // session once the TOTP/backup code checks out. lastLoginAt/Yativo self-heal happen there too.
+  // A 2FA-enabled account already gets step-up verification on every login regardless of
+  // location, so the new-location check below only ever applies to accounts without it.
   if (customer.twoFactorEnabled) {
-    return { requiresTwoFactor: true as const, challengeToken: signPortal2faChallengeToken({ sub: customer.id }) };
+    return { requiresTwoFactor: true as const, requiresEmailStepUp: false as const, challengeToken: signPortal2faChallengeToken({ sub: customer.id }) };
+  }
+
+  if (await isNewLoginLocation(prisma, "customer", customer.id, meta.ip)) {
+    const code = await issueEmailStepUpCode(redis, "portal", customer.id);
+    try {
+      await enqueueEmail({
+        to: customer.email,
+        subject: "Verify this sign-in",
+        html: `<p>We noticed a sign-in to your account from a location you haven't used before.</p><p>Enter this code to continue: <b style="font-size:20px">${code}</b></p><p>This code expires in 10 minutes. If this wasn't you, please reset your password immediately.</p>`,
+      });
+    } catch {
+      // Falls through regardless — same posture as every other auth email in this file.
+    }
+    await logCustomerAction(prisma, customer.id, "New-location sign-in — step-up required", meta);
+    return { requiresTwoFactor: false as const, requiresEmailStepUp: true as const, challengeToken: signPortalStepUpChallengeToken({ sub: customer.id }) };
   }
 
   await prisma.customer.update({ where: { id: customer.id }, data: { lastLoginAt: new Date() } });
@@ -267,7 +290,28 @@ export async function loginCustomer(prisma: PrismaClient, email: string, passwor
 
   const { accessToken, refreshToken } = await issueSession(prisma, customer.id, meta);
   await logCustomerAction(prisma, customer.id, "Signed in", meta);
-  return { requiresTwoFactor: false as const, principalType: "owner" as const, customer, accessToken, refreshToken };
+  return { requiresTwoFactor: false as const, requiresEmailStepUp: false as const, principalType: "owner" as const, customer, accessToken, refreshToken };
+}
+
+/** Redeems a new-location login's step-up challenge for a real session — mirrors verifyTwoFactorLogin's shape but checks the emailed one-time code instead of a TOTP/backup code. */
+export async function verifyEmailStepUpLogin(prisma: PrismaClient, redis: Redis, challengeToken: string, code: string, meta: SessionMeta = {}) {
+  let customerId: string;
+  try {
+    customerId = verifyPortalStepUpChallengeToken(challengeToken).sub;
+  } catch {
+    throw new UnauthorizedError("This verification step has expired — please sign in again");
+  }
+
+  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+  if (!customer) throw new UnauthorizedError("This verification step has expired — please sign in again");
+  if (!(await verifyEmailStepUpCode(redis, "portal", customerId, code))) throw new UnauthorizedError("Invalid or expired code");
+
+  await prisma.customer.update({ where: { id: customer.id }, data: { lastLoginAt: new Date() } });
+  await Promise.all([tryEnsureYativoCustomer(prisma, customer), tryProvisionDefaultWallets(prisma, customer.id)]);
+
+  const { accessToken, refreshToken } = await issueSession(prisma, customer.id, meta);
+  await logCustomerAction(prisma, customer.id, "Signed in (new-location verified)", meta);
+  return { customer, accessToken, refreshToken };
 }
 
 /** Redeems a login's 2FA challenge token for a real session — accepts either a live 6-digit TOTP code or a one-time backup code (removed from the account once used). */

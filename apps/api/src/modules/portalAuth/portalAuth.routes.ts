@@ -10,6 +10,7 @@ import {
   signupResultSchema,
   portalLoginResultSchema,
   verifyTwoFactorSchema,
+  verifyEmailStepUpSchema,
   verifyEmailSchema,
   resendVerificationSchema,
   requestPasswordResetSchema,
@@ -24,6 +25,7 @@ import {
   signupCustomer,
   loginCustomer,
   verifyTwoFactorLogin,
+  verifyEmailStepUpLogin,
   refreshCustomerSession,
   logoutCustomer,
   getCustomerPasskeyLoginOptions,
@@ -155,9 +157,12 @@ export async function portalAuthRoutes(app: FastifyInstance) {
     // throttling specifically against brute-forcing, independent of whatever else this IP is doing.
     { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: portalLoginSchema, response: { 200: portalLoginResultSchema } } },
     async (request, reply) => {
-      const result = await loginCustomer(app.prisma, request.body.email, request.body.password, requestMeta(request));
+      const result = await loginCustomer(app.prisma, app.redis, request.body.email, request.body.password, requestMeta(request));
       if (result.requiresTwoFactor) {
         return reply.send({ requiresTwoFactor: true, challengeToken: result.challengeToken });
+      }
+      if (result.requiresEmailStepUp) {
+        return reply.send({ requiresEmailStepUp: true, challengeToken: result.challengeToken });
       }
       setRefreshCookie(reply, result.refreshToken);
       return reply.send({ accessToken: result.accessToken });
@@ -171,6 +176,16 @@ export async function portalAuthRoutes(app: FastifyInstance) {
     { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: verifyTwoFactorSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
     async (request, reply) => {
       const { accessToken, refreshToken } = await verifyTwoFactorLogin(app.prisma, request.body.challengeToken, request.body.code, requestMeta(request));
+      setRefreshCookie(reply, refreshToken);
+      return reply.send({ accessToken });
+    },
+  );
+
+  server.post(
+    "/portal/auth/step-up/verify",
+    { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: verifyEmailStepUpSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
+    async (request, reply) => {
+      const { accessToken, refreshToken } = await verifyEmailStepUpLogin(app.prisma, app.redis, request.body.challengeToken, request.body.code, requestMeta(request));
       setRefreshCookie(reply, refreshToken);
       return reply.send({ accessToken });
     },

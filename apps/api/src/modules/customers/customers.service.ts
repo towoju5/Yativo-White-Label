@@ -5,6 +5,7 @@ import { yativoClient } from "../../lib/yativoClient.js";
 import { listCustomerWallets } from "../wallets/wallets.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import logger from "../../lib/logger.js";
+import { logAdminAction } from "../../lib/adminAuditLog.js";
 
 /** Matches exactly what customerToDto reads — used as a `select` everywhere a full Customer row
  * (including passwordHash, twoFactorSecret, twoFactorBackupCodeHashes) isn't actually needed. */
@@ -140,7 +141,7 @@ export async function regenerateCustomerEndorsementLink(prisma: PrismaClient, cu
   }
 }
 
-export async function approveKyc(prisma: PrismaClient, customerId: string) {
+export async function approveKyc(prisma: PrismaClient, actorId: string, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
   const updated = await prisma.customer.update({ where: { id: customerId }, data: { kycStatus: "APPROVED" } });
@@ -150,18 +151,20 @@ export async function approveKyc(prisma: PrismaClient, customerId: string) {
   // `updated` above would otherwise report a stale (pre-registration) snapshot to the caller.
   await tryEnsureYativoCustomer(prisma, updated);
   await sendNotificationEmail(prisma, "KYC_APPROVED", customerId, {});
+  await logAdminAction(prisma, actorId, "customer.kyc.approved", customerId);
   return prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
 }
 
-export async function rejectKyc(prisma: PrismaClient, customerId: string, reason: string) {
+export async function rejectKyc(prisma: PrismaClient, actorId: string, customerId: string, reason: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
-  // Scaffold: the rejection reason isn't persisted to a dedicated column (none exists on
-  // Customer) — it's accepted and validated so the API contract is stable for the frontend,
-  // and would be wired to an audit/notes table in a real deployment. It does reach the customer
-  // via the KYC_REJECTED email below even though it isn't stored anywhere queryable afterward.
+  // The rejection reason isn't persisted to a dedicated column (none exists on Customer) — it's
+  // accepted and validated so the API contract is stable for the frontend, and reaches the
+  // customer via the KYC_REJECTED email below. It IS captured queryably via the audit log entry
+  // below, so "who rejected this and why" has a real answer even without a dedicated column.
   const updated = await prisma.customer.update({ where: { id: customerId }, data: { kycStatus: "REJECTED" } });
   await sendNotificationEmail(prisma, "KYC_REJECTED", customerId, { reason });
+  await logAdminAction(prisma, actorId, "customer.kyc.rejected", customerId, { reason });
   return updated;
 }
 
@@ -180,14 +183,18 @@ export async function resubmitCustomerToYativo(prisma: PrismaClient, customerId:
   return prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
 }
 
-export async function freezeCustomer(prisma: PrismaClient, customerId: string) {
+export async function freezeCustomer(prisma: PrismaClient, actorId: string, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
-  return prisma.customer.update({ where: { id: customerId }, data: { status: "FROZEN" } });
+  const updated = await prisma.customer.update({ where: { id: customerId }, data: { status: "FROZEN" } });
+  await logAdminAction(prisma, actorId, "customer.frozen", customerId);
+  return updated;
 }
 
-export async function unfreezeCustomer(prisma: PrismaClient, customerId: string) {
+export async function unfreezeCustomer(prisma: PrismaClient, actorId: string, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
-  return prisma.customer.update({ where: { id: customerId }, data: { status: "ACTIVE" } });
+  const updated = await prisma.customer.update({ where: { id: customerId }, data: { status: "ACTIVE" } });
+  await logAdminAction(prisma, actorId, "customer.unfrozen", customerId);
+  return updated;
 }

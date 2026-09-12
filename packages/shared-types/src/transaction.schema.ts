@@ -213,5 +213,13 @@ export const adminTransactionDetailSchema = z.object({
   entries: z.array(adminTransactionDetailEntrySchema),
   payout: adminTransactionDetailPayoutSchema.nullable(),
   deposit: adminTransactionDetailDepositSchema.nullable(),
+  /** Who (or what) most recently settled/reversed this transaction — null if it's never been manually touched. */
+  lastAction: z
+    .object({
+      action: z.string(),
+      actorLabel: z.string().nullable(),
+      createdAt: z.string(),
+    })
+    .nullable(),
 });
 export type AdminTransactionDetail = z.infer<typeof adminTransactionDetailSchema>;

@@ -123,7 +123,7 @@ export async function customersRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const customer = await approveKyc(app.prisma, request.params.id);
+      const customer = await approveKyc(app.prisma, request.staffUser!.sub, request.params.id);
       return reply.send(customerToDto(customer));
     },
   );
@@ -139,7 +139,7 @@ export async function customersRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const customer = await rejectKyc(app.prisma, request.params.id, request.body.reason);
+      const customer = await rejectKyc(app.prisma, request.staffUser!.sub, request.params.id, request.body.reason);
       return reply.send(customerToDto(customer));
     },
   );
@@ -151,7 +151,7 @@ export async function customersRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const customer = await freezeCustomer(app.prisma, request.params.id);
+      const customer = await freezeCustomer(app.prisma, request.staffUser!.sub, request.params.id);
       return reply.send(customerToDto(customer));
     },
   );
@@ -163,7 +163,7 @@ export async function customersRoutes(app: FastifyInstance) {
       schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
-      const customer = await unfreezeCustomer(app.prisma, request.params.id);
+      const customer = await unfreezeCustomer(app.prisma, request.staffUser!.sub, request.params.id);
       return reply.send(customerToDto(customer));
     },
   );
