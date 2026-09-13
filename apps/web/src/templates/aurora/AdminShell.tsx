@@ -91,7 +91,7 @@ export function AuroraAdminShell({ children }: { children: ReactNode }) {
       <AuroraSidebar sections={sections} userLabel={user?.email ?? "Staff"} userSubLabel={user?.role ?? ""} onLogout={logout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AuroraTopbar sections={sections} productName="Admin" userLabel={user?.email ?? "Staff"} onLogout={logout} />
-        <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 overflow-x-hidden p-6">{children}</main>
       </div>
     </div>
   );

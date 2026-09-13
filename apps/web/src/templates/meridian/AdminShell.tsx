@@ -91,7 +91,7 @@ export function MeridianAdminShell({ children }: { children: ReactNode }) {
       <MeridianSidebar sections={sections} userLabel={user?.email ?? "Staff"} userSubLabel={user?.role ?? ""} onLogout={logout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MeridianTopbar sections={sections} productName="Admin" onLogout={logout} />
-        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 overflow-x-hidden p-6">{children}</main>
       </div>
     </div>
   );

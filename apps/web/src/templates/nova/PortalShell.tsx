@@ -45,7 +45,7 @@ export function NovaPortalShell({ children }: { children: ReactNode }) {
       <NovaSidebar sections={sections} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} showNotifications />
       <div className="flex min-w-0 flex-1 flex-col">
         <NovaTopbar sections={sections} productName={t("nav.portal", "Portal")} />
-        <main className="flex-1 overflow-y-auto px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pb-8 lg:pt-8">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pb-8 lg:pt-8">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>

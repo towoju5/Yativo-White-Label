@@ -43,16 +43,16 @@ export function TransactionCardRow({ date, description, type, status, direction,
           </div>
         )}
       </div>
-      <div className="shrink-0 text-right">
+      <div className="max-w-[45%] shrink-0 text-right">
         {amountMinor !== null && amountMinor !== undefined ? (
-          <p className={cn("font-mono text-sm font-medium", direction === "CREDIT" ? "text-success" : "text-foreground")}>
+          <p className={cn("truncate font-mono text-sm font-medium", direction === "CREDIT" ? "text-success" : "text-foreground")}>
             {direction === "CREDIT" ? "+" : direction === "DEBIT" ? "-" : ""}
             {formatMinorAmount(amountMinor, decimals)} {currencyCode ?? ""}
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">—</p>
         )}
-        {balanceMinor !== undefined && <p className="mt-0.5 text-xs text-muted-foreground">Bal {formatMinorAmount(balanceMinor, decimals)}</p>}
+        {balanceMinor !== undefined && <p className="mt-0.5 truncate text-xs text-muted-foreground">Bal {formatMinorAmount(balanceMinor, decimals)}</p>}
       </div>
     </div>
   );

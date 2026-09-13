@@ -32,7 +32,7 @@ export function AtlasPortalShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <AtlasTopbar items={items} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} showNotifications />
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 lg:pb-10 lg:pt-10">{children}</main>
+      <main className="mx-auto max-w-6xl overflow-x-hidden px-4 pb-24 pt-8 sm:px-6 lg:pb-10 lg:pt-10">{children}</main>
       <MobileBottomNav />
     </div>
   );

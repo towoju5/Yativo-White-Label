@@ -91,7 +91,7 @@ export function PrimeAdminShell({ children }: { children: ReactNode }) {
       <PrimeSidebar sections={sections} />
       <div className="flex min-w-0 flex-1 flex-col">
         <PrimeTopbar sections={sections} productName="Admin" userLabel={user?.email ?? "Staff"} userSubLabel={user?.role ?? ""} onLogout={logout} />
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-x-hidden p-6">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>

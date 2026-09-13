@@ -47,7 +47,7 @@ export function AuroraPortalShell({ children }: { children: ReactNode }) {
       <AuroraSidebar sections={sections} userLabel={name} userSubLabel={user?.email ?? ""} onLogout={logout} profileTo={PROFILE_PATH} showNotifications />
       <div className="flex min-w-0 flex-1 flex-col">
         <AuroraTopbar sections={sections} productName={t("nav.portal", "Portal")} userLabel={name} onLogout={logout} profileTo={PROFILE_PATH} />
-        <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6 pb-24 lg:pb-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 overflow-x-hidden p-6 pb-24 lg:pb-6">{children}</main>
       </div>
       <MobileBottomNav />
     </div>
