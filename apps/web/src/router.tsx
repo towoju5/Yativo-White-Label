@@ -12,6 +12,7 @@ import PortalLoginPage from "@/pages/portal/auth/LoginPage";
 import ForgotPasswordPage from "@/pages/portal/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/portal/auth/ResetPasswordPage";
 import MagicLinkPage from "@/pages/portal/auth/MagicLinkPage";
+import SetupPasswordPage from "@/pages/portal/auth/SetupPasswordPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import PortalSignupPage from "@/pages/portal/auth/SignupPage";
 import VerifyEmailPage from "@/pages/portal/auth/VerifyEmailPage";
@@ -90,6 +91,17 @@ export function createRouter(adminLoginPath: string) {
         element: (
           <RequireCustomerAuth>
             <KycWizardPage />
+          </RequireCustomerAuth>
+        ),
+      },
+      {
+        // Deliberately outside PortalLayout — reached straight off a magic-link login, before
+        // the customer has any business being in the full portal chrome yet. Exempted from its
+        // own redirect inside RequireCustomerAuth (see SETUP_PASSWORD_PATH there).
+        path: "/portal/setup-password",
+        element: (
+          <RequireCustomerAuth>
+            <SetupPasswordPage />
           </RequireCustomerAuth>
         ),
       },

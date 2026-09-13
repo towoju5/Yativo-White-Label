@@ -12,6 +12,7 @@ import { z } from "zod";
  */
 export const STAFF_PERMISSIONS = [
   "customers.write",
+  "customers.import",
   "kyc.review",
   "endorsements.manage",
   "cards.manage",
@@ -29,6 +30,7 @@ export type StaffPermission = z.infer<typeof staffPermissionSchema>;
 
 export const PERMISSION_CATALOG: { key: StaffPermission; label: string; group: string; description: string }[] = [
   { key: "customers.write", label: "Freeze / unfreeze customers", group: "Customers", description: "Freeze or unfreeze a customer's account." },
+  { key: "customers.import", label: "Import customers from Yativo", group: "Customers", description: "Trigger a sync that backfills local accounts for pre-existing Yativo customers." },
   { key: "kyc.review", label: "Review KYC", group: "Customers", description: "Approve or reject a customer's KYC submission." },
   { key: "endorsements.manage", label: "Manage endorsements", group: "Customers", description: "Regenerate a customer's hosted verification links." },
   { key: "cards.manage", label: "Manage cards", group: "Payments", description: "Issue, freeze, unfreeze, or terminate virtual cards." },

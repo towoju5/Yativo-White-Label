@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import type { Customer } from "@white-label/shared-types";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { staffApi } from "@/lib/api-client";
+import type { Customer, CustomerImportRun } from "@white-label/shared-types";
+import { ChevronLeft, ChevronRight, Search, Download, Loader2 } from "lucide-react";
+import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
+import { useStaffAuth } from "@/hooks/useStaffAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,52 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const PAGE_SIZE = 20;
+
+/** "Import from Yativo" trigger + live status — polls while a run is in flight, stops once it settles. */
+function ImportFromYativoButton() {
+  const { user } = useStaffAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const canImport = user?.role === "OWNER" || user?.role === "ADMIN" || (user?.permissions.includes("customers.import") ?? false);
+
+  const runsQuery = useQuery({
+    queryKey: ["admin", "customers", "import-runs"],
+    queryFn: () => staffApi.get<CustomerImportRun[]>("/admin/customers/import-runs"),
+    enabled: canImport,
+    refetchInterval: (query) => (query.state.data?.[0]?.status === "RUNNING" ? 2000 : false),
+  });
+  const latestRun = runsQuery.data?.[0];
+  const isRunning = latestRun?.status === "RUNNING";
+
+  const triggerMutation = useMutation({
+    mutationFn: () => staffApi.post<CustomerImportRun>("/admin/customers/import-from-yativo"),
+    onSuccess: () => {
+      toast({ title: "Import started", description: "Syncing customers from Yativo in the background…" });
+      queryClient.invalidateQueries({ queryKey: ["admin", "customers", "import-runs"] });
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't start import", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  if (!canImport) return null;
+
+  return (
+    <div className="flex items-center gap-3">
+      {latestRun && (
+        <span className="text-xs text-muted-foreground">
+          {isRunning
+            ? `Importing… ${latestRun.imported} imported, ${latestRun.skipped} skipped so far`
+            : latestRun.status === "FAILED"
+              ? `Last import failed: ${latestRun.error ?? "unknown error"}`
+              : `Last import: ${latestRun.imported} added, ${latestRun.skipped} already existed`}
+        </span>
+      )}
+      <Button variant="outline" size="sm" onClick={() => triggerMutation.mutate()} disabled={triggerMutation.isPending || isRunning}>
+        {isRunning || triggerMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+        Import from Yativo
+      </Button>
+    </div>
+  );
+}
 
 const KYC_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
   APPROVED: "success",
@@ -44,9 +92,12 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">Customers</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Onboard, review and manage your customers</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Customers</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Onboard, review and manage your customers</p>
+        </div>
+        <ImportFromYativoButton />
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -122,7 +173,14 @@ export default function CustomersPage() {
             <TableBody>
               {data.items.map((c) => (
                 <TableRow key={c.id} className="cursor-pointer" onClick={() => navigate(`/admin/customers/${c.id}`)}>
-                  <TableCell className="font-medium">{c.fullName ?? c.businessName ?? "—"}</TableCell>
+                  <TableCell className="font-medium">
+                    {c.fullName ?? c.businessName ?? "—"}
+                    {c.source === "IMPORTED" && (
+                      <Badge variant="secondary" className="ml-2 align-middle">
+                        Imported
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{c.email}</TableCell>
                   <TableCell>{c.type}</TableCell>
                   <TableCell>

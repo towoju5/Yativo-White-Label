@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
-import type { Customer, CreateCustomerInput, PortalLoginInput, PortalLoginResult, PasskeyLoginOptionsResult, SignupResult } from "@white-label/shared-types";
+import type { Customer, CreateCustomerInput, PortalLoginInput, PortalLoginResult, PasskeyLoginOptionsResult, SignupResult, AuthTokens } from "@white-label/shared-types";
 import { apiFetch, portalApi, portalTokenStore } from "@/lib/api-client";
 
 interface CustomerAuthState {
@@ -12,10 +12,13 @@ interface CustomerAuthState {
   loginWithPasskey: () => Promise<void>;
   verifyTwoFactor: (challengeToken: string, code: string) => Promise<void>;
   verifyEmailStepUp: (challengeToken: string, code: string) => Promise<void>;
-  verifyMagicLink: (token: string) => Promise<void>;
+  /** Returns true when this login redeemed a magic link for an account that still needs to choose its own password — caller should route to /portal/setup-password instead of the normal post-login destination. */
+  verifyMagicLink: (token: string) => Promise<boolean>;
   /** Returns the raw signup result — the caller checks `pendingVerification` and, if true, shows a "check your email" state instead of navigating in. */
   signup: (input: CreateCustomerInput) => Promise<SignupResult>;
   logout: () => Promise<void>;
+  /** Re-fetches /portal/auth/me and updates `user` in place — used after setup-password clears requiresPasswordSetup, so RequireCustomerAuth's redirect sees the change immediately instead of on next reload. */
+  refreshUser: () => Promise<void>;
 }
 
 const CustomerAuthContext = createContext<CustomerAuthState | null>(null);
@@ -70,13 +73,14 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const verifyMagicLink: CustomerAuthState["verifyMagicLink"] = async (token) => {
-    const { accessToken } = await apiFetch<{ accessToken: string }>("/portal/auth/magic-link/verify", {
+    const { accessToken, requiresPasswordSetup } = await apiFetch<AuthTokens>("/portal/auth/magic-link/verify", {
       method: "POST",
       body: { token },
     });
     portalTokenStore.set(accessToken);
     const me = await portalApi.get<Customer>("/portal/auth/me");
     setUser(me);
+    return requiresPasswordSetup ?? false;
   };
 
   const loginWithPasskey: CustomerAuthState["loginWithPasskey"] = async () => {
@@ -109,8 +113,15 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshUser: CustomerAuthState["refreshUser"] = async () => {
+    const me = await portalApi.get<Customer>("/portal/auth/me");
+    setUser(me);
+  };
+
   return (
-    <CustomerAuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp, verifyMagicLink, signup, logout }}>
+    <CustomerAuthContext.Provider
+      value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp, verifyMagicLink, signup, logout, refreshUser }}
+    >
       {children}
     </CustomerAuthContext.Provider>
   );

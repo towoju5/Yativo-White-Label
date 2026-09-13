@@ -315,13 +315,20 @@ enum KycStatus {
   REJECTED
 }
 
+enum CustomerSource {
+  SIGNUP
+  IMPORTED
+}
+
 model Customer {
   id                         String         @id @default(cuid())
   type                       CustomerType   @default(INDIVIDUAL)
   fullName                   String?
   businessName               String?
   email                      String         @unique
-  passwordHash               String
+  /// Null for an account created by the Yativo customer import (see requiresPasswordSetup) that
+  /// hasn't redeemed its first magic-link login yet — every other account always has one.
+  passwordHash               String?
   emailVerifiedAt            DateTime?
   /// Set only while a verification email has been sent and not yet redeemed — mirrors
   /// CustomerTeamMember's inviteTokenHash/inviteExpiresAt pattern. Hash, not the raw token.
@@ -354,6 +361,15 @@ model Customer {
   twoFactorSecret            String?
   /// bcrypt hashes of one-time recovery codes — each is removed from the array once used.
   twoFactorBackupCodeHashes  String[]       @default([])
+  /// Where this row came from — SIGNUP is the normal self-service path; IMPORTED means it was
+  /// created by the Yativo customer sync (see modules/customers/customerImport.service.ts) from a
+  /// pre-existing Yativo customer who never signed up on the platform directly.
+  source                     CustomerSource @default(SIGNUP)
+  /// True only for an IMPORTED row that hasn't chosen its own password yet — passwordHash is null
+  /// until then, so the account can only be reached via a magic-link login (see
+  /// verifyMagicLink/requestMagicLink), and POST /portal/auth/setup-password is the only way to
+  /// clear this flag. Never true for a SIGNUP account, which always has a password from creation.
+  requiresPasswordSetup      Boolean        @default(false)
   createdAt                  DateTime       @default(now())
   updatedAt                  DateTime       @updatedAt
 
@@ -395,6 +411,31 @@ model CustomerAuditLog {
 
   @@index([customerId, createdAt])
   @@map("customer_audit_logs")
+}
+
+enum CustomerImportStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+/// One row per "Import from Yativo" run (see POST /admin/customers/import-from-yativo) — tracks
+/// progress/outcome of the background job that pages through GET /customer on Yativo and creates a
+/// local Customer (source IMPORTED) for every one not already known locally by email. No relation
+/// to StaffUser, same posture as AdminAuditLog.actorId — just an id, looked up on demand.
+model CustomerImportRun {
+  id            String               @id @default(cuid())
+  status        CustomerImportStatus @default(RUNNING)
+  totalFetched  Int                  @default(0)
+  imported      Int                  @default(0)
+  skipped       Int                  @default(0)
+  failed        Int                  @default(0)
+  error         String?
+  triggeredById String
+  startedAt     DateTime             @default(now())
+  finishedAt    DateTime?
+
+  @@map("customer_import_runs")
 }
 
 /// Per-customer, per-currency payout/withdrawal velocity limit override — absence of a row for a

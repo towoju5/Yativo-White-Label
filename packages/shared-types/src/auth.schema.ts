@@ -78,6 +78,11 @@ export type UpdateRoleInput = z.infer<typeof updateRoleSchema>;
 
 export const authTokensSchema = z.object({
   accessToken: z.string(),
+  /** Only ever true on the portal audience — set when this login redeemed a magic link for an
+   * IMPORTED account that hasn't chosen its own password yet (see customer.schema.ts's
+   * requiresPasswordSetup). The frontend should route straight to /portal/setup-password instead
+   * of the normal post-login destination when this is true. */
+  requiresPasswordSetup: z.boolean().optional(),
 });
 export type AuthTokens = z.infer<typeof authTokensSchema>;
 
@@ -139,6 +144,13 @@ export const verifyMagicLinkSchema = z.object({
   token: z.string().min(1),
 });
 export type VerifyMagicLinkInput = z.infer<typeof verifyMagicLinkSchema>;
+
+/** POST /portal/auth/setup-password — the one-time counterpart to changePasswordSchema for an
+ * IMPORTED account with no existing password to confirm; only valid while requiresPasswordSetup is true. */
+export const setupPasswordSchema = z.object({
+  newPassword: z.string().min(8),
+});
+export type SetupPasswordInput = z.infer<typeof setupPasswordSchema>;
 
 export const verifyTwoFactorSchema = z.object({
   challengeToken: z.string(),

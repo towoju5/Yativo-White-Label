@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CUSTOMER_STATUSES, CUSTOMER_TYPES, KYC_STATUSES } from "./enums.js";
+import { CUSTOMER_SOURCES, CUSTOMER_STATUSES, CUSTOMER_TYPES, KYC_STATUSES } from "./enums.js";
 import { portalPermissionSchema } from "./portalPermissions.js";
 
 export const customerSchema = z.object({
@@ -14,6 +14,10 @@ export const customerSchema = z.object({
   yativoCustomerId: z.string().nullable(),
   twoFactorEnabled: z.boolean(),
   createdAt: z.string(),
+  /** SIGNUP (self-registered) or IMPORTED (backfilled from a pre-existing Yativo customer — see POST /admin/customers/import-from-yativo). */
+  source: z.enum(CUSTOMER_SOURCES),
+  /** True only for an IMPORTED account that hasn't chosen its own password yet — see POST /portal/auth/setup-password. */
+  requiresPasswordSetup: z.boolean(),
   // Every field above describes the BUSINESS account being operated on. These describe the
   // authenticated principal itself, and are present only when it's an invited team member rather
   // than the account owner — see resolveEffectiveCustomerId()/isPortalOwnerLevel() in the API.

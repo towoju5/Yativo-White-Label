@@ -21,6 +21,8 @@ export const CUSTOMER_DTO_SELECT = {
   yativoCustomerId: true,
   twoFactorEnabled: true,
   createdAt: true,
+  source: true,
+  requiresPasswordSetup: true,
 } as const;
 
 export function customerToDto(customer: {
@@ -35,6 +37,8 @@ export function customerToDto(customer: {
   yativoCustomerId: string | null;
   twoFactorEnabled: boolean;
   createdAt: Date;
+  source: "SIGNUP" | "IMPORTED";
+  requiresPasswordSetup: boolean;
 }) {
   return {
     id: customer.id,
@@ -48,6 +52,8 @@ export function customerToDto(customer: {
     yativoCustomerId: customer.yativoCustomerId,
     twoFactorEnabled: customer.twoFactorEnabled,
     createdAt: customer.createdAt.toISOString(),
+    source: customer.source,
+    requiresPasswordSetup: customer.requiresPasswordSetup,
   };
 }
 

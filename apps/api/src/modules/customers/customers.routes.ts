@@ -12,6 +12,7 @@ import {
   ledgerTransactionSchema,
   paginationQuerySchema,
   paginatedResponseSchema,
+  customerImportRunSchema,
   KYC_STATUSES,
   CUSTOMER_STATUSES,
 } from "@white-label/shared-types";
@@ -29,6 +30,7 @@ import {
   resubmitCustomerToYativo,
   customerToDto,
 } from "./customers.service.js";
+import { triggerCustomerImport, listCustomerImportRuns, customerImportRunToDto } from "./customerImport.service.js";
 import { getWalletForCustomer, getWalletStatement, adjustWallet } from "../wallets/wallets.service.js";
 import { listBeneficiaries, getBeneficiary } from "../beneficiaries/beneficiaries.service.js";
 
@@ -74,6 +76,31 @@ export async function customersRoutes(app: FastifyInstance) {
       const { page, pageSize, search, kycStatus, status } = request.query;
       const result = await listCustomers(app.prisma, { search, kycStatus, status }, page, pageSize);
       return reply.send(result);
+    },
+  );
+
+  // Fixed paths registered ahead of the "/:id" routes below so they can never be shadowed by them.
+  server.post(
+    "/admin/customers/import-from-yativo",
+    {
+      preHandler: [requireStaffAuth, requirePermission("customers.import")],
+      schema: { response: { 202: customerImportRunSchema, 409: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      const run = await triggerCustomerImport(app.prisma, request.staffUser!.sub);
+      return reply.code(202).send(customerImportRunToDto(run));
+    },
+  );
+
+  server.get(
+    "/admin/customers/import-runs",
+    {
+      preHandler: requireStaffAuth,
+      schema: { response: { 200: z.array(customerImportRunSchema) } },
+    },
+    async (_request, reply) => {
+      const runs = await listCustomerImportRuns(app.prisma);
+      return reply.send(runs.map(customerImportRunToDto));
     },
   );
 

@@ -40,6 +40,12 @@ export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
 export const KYC_STATUSES = ["NOT_STARTED", "PENDING", "APPROVED", "REJECTED"] as const;
 export type KycStatus = (typeof KYC_STATUSES)[number];
 
+export const CUSTOMER_SOURCES = ["SIGNUP", "IMPORTED"] as const;
+export type CustomerSource = (typeof CUSTOMER_SOURCES)[number];
+
+export const CUSTOMER_IMPORT_STATUSES = ["RUNNING", "COMPLETED", "FAILED"] as const;
+export type CustomerImportStatus = (typeof CUSTOMER_IMPORT_STATUSES)[number];
+
 export const STAFF_ROLES = ["OWNER", "ADMIN", "STAFF"] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 

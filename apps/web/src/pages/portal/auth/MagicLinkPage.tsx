@@ -29,8 +29,8 @@ export default function MagicLinkPage() {
     }
     (async () => {
       try {
-        await verifyMagicLink(token);
-        navigate("/portal", { replace: true });
+        const requiresPasswordSetup = await verifyMagicLink(token);
+        navigate(requiresPasswordSetup ? "/portal/setup-password" : "/portal", { replace: true });
       } catch (e) {
         setStatus("error");
         setError(e instanceof ApiError ? e.message : t("magicLink.genericError", "Couldn't sign you in with this link."));

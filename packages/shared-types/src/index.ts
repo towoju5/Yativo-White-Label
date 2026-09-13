@@ -28,6 +28,7 @@ export * from "./support.schema.js";
 export * from "./storage.schema.js";
 export * from "./portalPermissions.js";
 export * from "./customerTeam.schema.js";
+export * from "./customerImport.schema.js";
 export * from "./pricing.schema.js";
 export * from "./security.schema.js";
 export * from "./profit.schema.js";

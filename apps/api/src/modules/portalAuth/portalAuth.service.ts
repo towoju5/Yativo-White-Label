@@ -10,7 +10,7 @@ import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
-import { UnauthorizedError, ConflictError, EmailNotVerifiedError } from "../../lib/errors.js";
+import { AppError, UnauthorizedError, ConflictError, EmailNotVerifiedError } from "../../lib/errors.js";
 import { ensureYativoCustomer, tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { provisionDefaultWallets, tryProvisionDefaultWallets } from "../wallets/wallets.service.js";
 import { verifyTotp } from "../../lib/totp.js";
@@ -188,7 +188,12 @@ export async function resetPassword(prisma: PrismaClient, token: string, newPass
   }
   const passwordHash = await hashPassword(newPassword);
   await prisma.$transaction([
-    prisma.customer.update({ where: { id: customer.id }, data: { passwordHash, passwordResetTokenHash: null, passwordResetExpiresAt: null } }),
+    // requiresPasswordSetup: false covers an IMPORTED account choosing a password via "forgot
+    // password" instead of the dedicated setup-password flow — either path should equally satisfy it.
+    prisma.customer.update({
+      where: { id: customer.id },
+      data: { passwordHash, passwordResetTokenHash: null, passwordResetExpiresAt: null, requiresPasswordSetup: false },
+    }),
     prisma.customerRefreshToken.updateMany({ where: { customerId: customer.id, revokedAt: null }, data: { revokedAt: new Date() } }),
   ]);
   await logCustomerAction(prisma, customer.id, "Reset password", meta);
@@ -247,7 +252,9 @@ export async function loginCustomer(prisma: PrismaClient, redis: Redis, email: s
     const { accessToken, refreshToken } = await issueMemberSession(prisma, member);
     return { requiresTwoFactor: false as const, requiresEmailStepUp: false as const, principalType: "member" as const, member, accessToken, refreshToken };
   }
-  if (!(await verifyPassword(password, customer.passwordHash))) {
+  // An IMPORTED account that hasn't completed setup-password yet has no passwordHash at all —
+  // password login can never succeed for it, only a magic link (see requestMagicLink/verifyMagicLink).
+  if (!customer.passwordHash || !(await verifyPassword(password, customer.passwordHash))) {
     throw new UnauthorizedError("Invalid email or password");
   }
   if (customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
@@ -399,6 +406,11 @@ export async function refreshCustomerSession(prisma: PrismaClient, refreshToken:
 export async function changeCustomerPassword(prisma: PrismaClient, customerId: string, currentPassword: string, newPassword: string, meta: SessionMeta = {}) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new UnauthorizedError("Account not found");
+  // An IMPORTED account with no password yet has nothing to confirm here — setupCustomerPassword
+  // is the route for it, not this one.
+  if (!customer.passwordHash) {
+    throw new AppError("This account doesn't have a password yet — use setup-password instead.", 400, "PASSWORD_NOT_SET");
+  }
   if (!(await verifyPassword(currentPassword, customer.passwordHash))) {
     throw new UnauthorizedError("Current password is incorrect");
   }
@@ -408,6 +420,24 @@ export async function changeCustomerPassword(prisma: PrismaClient, customerId: s
     prisma.customerRefreshToken.updateMany({ where: { customerId, revokedAt: null }, data: { revokedAt: new Date() } }),
   ]);
   await logCustomerAction(prisma, customerId, "Changed password", meta);
+}
+
+/**
+ * One-time counterpart to changeCustomerPassword for an IMPORTED account that has never had a
+ * password to confirm — reachable only via a magic-link session (see verifyMagicLink), and only
+ * while requiresPasswordSetup is still true. Unlike changeCustomerPassword, no other sessions are
+ * revoked: there's no prior password that could have leaked, so the just-issued magic-link session
+ * itself should keep working right through this call.
+ */
+export async function setupCustomerPassword(prisma: PrismaClient, customerId: string, newPassword: string, meta: SessionMeta = {}): Promise<void> {
+  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+  if (!customer) throw new UnauthorizedError("Account not found");
+  if (!customer.requiresPasswordSetup) {
+    throw new AppError("This account already has a password — use change password instead.", 400, "PASSWORD_ALREADY_SET");
+  }
+  const passwordHash = await hashPassword(newPassword);
+  await prisma.customer.update({ where: { id: customerId }, data: { passwordHash, requiresPasswordSetup: false } });
+  await logCustomerAction(prisma, customerId, "Set up password", meta);
 }
 
 export async function logoutCustomer(prisma: PrismaClient, refreshToken: string) {

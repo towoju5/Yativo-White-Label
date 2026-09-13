@@ -17,6 +17,7 @@ import {
   resetPasswordSchema,
   requestMagicLinkSchema,
   verifyMagicLinkSchema,
+  setupPasswordSchema,
   customerSchema,
   passkeyLoginOptionsResultSchema,
   verifyPasskeyLoginSchema,
@@ -37,6 +38,7 @@ import {
   resetPassword,
   requestMagicLink,
   verifyMagicLink,
+  setupCustomerPassword,
 } from "./portalAuth.service.js";
 import { changePasswordSchema } from "@white-label/shared-types";
 import { AppError } from "../../lib/errors.js";
@@ -64,6 +66,8 @@ function toDto(customer: {
   yativoCustomerId: string | null;
   twoFactorEnabled: boolean;
   createdAt: Date;
+  source: "SIGNUP" | "IMPORTED";
+  requiresPasswordSetup: boolean;
 }) {
   return { ...customer, emailVerifiedAt: customer.emailVerifiedAt?.toISOString() ?? null, createdAt: customer.createdAt.toISOString() };
 }
@@ -145,9 +149,9 @@ export async function portalAuthRoutes(app: FastifyInstance) {
     "/portal/auth/magic-link/verify",
     { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: verifyMagicLinkSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
     async (request, reply) => {
-      const { accessToken, refreshToken } = await verifyMagicLink(app.prisma, request.body.token, requestMeta(request));
+      const { customer, accessToken, refreshToken } = await verifyMagicLink(app.prisma, request.body.token, requestMeta(request));
       setRefreshCookie(reply, refreshToken);
-      return reply.send({ accessToken });
+      return reply.send({ accessToken, requiresPasswordSetup: customer.requiresPasswordSetup });
     },
   );
 
@@ -250,6 +254,24 @@ export async function portalAuthRoutes(app: FastifyInstance) {
       }
       await changeCustomerPassword(app.prisma, request.customer!.sub, request.body.currentPassword, request.body.newPassword, requestMeta(request));
       reply.clearCookie(REFRESH_COOKIE, { path: "/portal/auth" });
+      return reply.code(204).send();
+    },
+  );
+
+  server.post(
+    "/portal/auth/setup-password",
+    {
+      preHandler: requireCustomerAuth,
+      config: { rateLimit: { max: 10, timeWindow: "1 minute" } },
+      schema: { body: setupPasswordSchema, response: { 204: z.void(), 400: errorResponseSchema, 401: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      // Same posture as change-password — team members have their own passwordHash on a
+      // different table, not supported by this route either.
+      if (request.customer!.principalType === "member") {
+        throw new AppError("Password setup for team members isn't supported yet — contact your business administrator.", 400, "NOT_SUPPORTED");
+      }
+      await setupCustomerPassword(app.prisma, request.customer!.sub, request.body.newPassword, requestMeta(request));
       return reply.code(204).send();
     },
   );

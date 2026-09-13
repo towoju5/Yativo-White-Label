@@ -12,12 +12,19 @@ function FullScreenSpinner() {
   );
 }
 
+const SETUP_PASSWORD_PATH = "/portal/setup-password";
+
 export function RequireCustomerAuth({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useCustomerAuth();
+  const { isAuthenticated, isLoading, user } = useCustomerAuth();
   const location = useLocation();
 
   if (isLoading) return <FullScreenSpinner />;
   if (!isAuthenticated) return <Navigate to="/portal/login" replace state={{ from: location.pathname }} />;
+  // An imported account that signed in via magic link but hasn't chosen its own password yet —
+  // every other portal page is blocked until this is done, same as an unauthenticated redirect.
+  if (user?.requiresPasswordSetup && location.pathname !== SETUP_PASSWORD_PATH) {
+    return <Navigate to={SETUP_PASSWORD_PATH} replace />;
+  }
   return <>{children}</>;
 }
 

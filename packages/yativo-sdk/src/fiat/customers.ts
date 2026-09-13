@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { YativoContext } from "../client.js";
-import { yativoEnvelope } from "../client.js";
+import { yativoEnvelope, yativoPaginatedEnvelope } from "../client.js";
 
 // Confirmed against the live API: GET /customer/{id} includes a per-service endorsement
 // checklist — `service` is a human-readable, Title Case name ("Faster payments", "Cobo pobo")
@@ -126,6 +126,55 @@ export type CreateFiatCustomerInput = {
   idempotencyKey: string;
 };
 
+// Confirmed against the live API: GET /customer (list, paginated) is a different shape from
+// GET /customer/{id} above — flat customer_name/customer_email/customer_phone/customer_country
+// fields, no endorsement checklist. `customer_id` is the stable UUID this codebase treats as
+// yativoCustomerId everywhere else; the numeric `id` is Yativo's own internal row id and unused.
+const customerListItemDataSchema = z
+  .object({
+    id: z.union([z.string(), z.number()]).optional(),
+    customer_id: z.string(),
+    customer_name: z.string().nullable().optional(),
+    customer_email: z.string().nullable().optional(),
+    customer_phone: z.string().nullable().optional(),
+    customer_country: z.string().nullable().optional(),
+    customer_type: z.string().nullable().optional(),
+    customer_status: z.string().nullable().optional(),
+    created_at: z.string().nullable().optional(),
+    updated_at: z.string().nullable().optional(),
+  })
+  .passthrough();
+
+export type FiatCustomerListItem = {
+  yativoCustomerId: string;
+  name: string | null;
+  email: string | null;
+  /** E.164, as reported by Yativo — not re-validated here. */
+  phone: string | null;
+  /** ISO 3166-1 alpha-3, e.g. "USA". */
+  countryIso3: string | null;
+  type: "individual" | "business";
+  /** Yativo's free-form status string (e.g. "active") — not normalized, callers decide what counts as active. */
+  status: string | null;
+  createdAt: string | null;
+};
+
+function toFiatCustomerListItem(d: z.infer<typeof customerListItemDataSchema>): FiatCustomerListItem {
+  return {
+    yativoCustomerId: d.customer_id,
+    name: d.customer_name ?? null,
+    email: d.customer_email ?? null,
+    phone: d.customer_phone ?? null,
+    countryIso3: d.customer_country ?? null,
+    type: d.customer_type === "business" ? "business" : "individual",
+    status: d.customer_status ?? null,
+    createdAt: d.created_at ?? null,
+  };
+}
+
+export type ListCustomersInput = { page?: number; perPage?: number };
+export type ListCustomersResult = { items: FiatCustomerListItem[]; total: number; page: number; perPage: number; lastPage: number };
+
 export function createCustomersResource(ctx: YativoContext) {
   return {
     async create(input: CreateFiatCustomerInput): Promise<FiatCustomer> {
@@ -187,6 +236,37 @@ export function createCustomersResource(ctx: YativoContext) {
         mockData: { status: "success", status_code: 200, message: "mock", data: [] },
       });
       return res.data[0] ? toFiatCustomer(res.data[0]) : null;
+    },
+
+    /**
+     * Paginated listing of every customer registered on Yativo — the whole platform's history,
+     * not scoped to any local account. Used by the customer import/sync (see
+     * modules/customers/customerImport.service.ts) to backfill local accounts for pre-existing
+     * Yativo customers; callers must page through `lastPage`/`total` themselves since Yativo
+     * caps `per_page` server-side rather than returning everything in one call.
+     */
+    async list(input: ListCustomersInput = {}): Promise<ListCustomersResult> {
+      const res = await ctx.request({
+        baseUrl: ctx.config.fiatBaseUrl,
+        path: "/customer",
+        method: "GET",
+        query: { page: input.page, per_page: input.perPage },
+        schema: yativoPaginatedEnvelope(customerListItemDataSchema),
+        mockData: {
+          status: "success",
+          status_code: 200,
+          message: "mock",
+          data: [],
+          pagination: { total: 0, per_page: input.perPage ?? 20, current_page: input.page ?? 1, last_page: 1 },
+        },
+      });
+      return {
+        items: res.data.map(toFiatCustomerListItem),
+        total: res.pagination.total,
+        page: res.pagination.currentPage ?? res.pagination.current_page ?? input.page ?? 1,
+        perPage: res.pagination.perPage ?? res.pagination.per_page ?? input.perPage ?? 20,
+        lastPage: res.pagination.lastPage ?? res.pagination.last_page ?? 1,
+      };
     },
 
     /**

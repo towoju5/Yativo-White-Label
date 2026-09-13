@@ -54,7 +54,7 @@ export async function confirmTwoFactorSetup(prisma: PrismaClient, redis: Redis, 
 export async function disableTwoFactor(prisma: PrismaClient, customerId: string, password: string) {
   const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
   if (!customer.twoFactorEnabled) throw new AppError("Two-factor authentication isn't enabled.", 409, "NOT_ENABLED");
-  if (!(await verifyPassword(password, customer.passwordHash))) throw new UnauthorizedError("Incorrect password");
+  if (!customer.passwordHash || !(await verifyPassword(password, customer.passwordHash))) throw new UnauthorizedError("Incorrect password");
 
   await prisma.customer.update({
     where: { id: customerId },
