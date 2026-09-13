@@ -8,6 +8,13 @@ const STATUS_VARIANT: Record<string, BadgeProps["variant"]> = {
   REVERSED: "destructive",
 };
 
+const MOBILE_DESCRIPTION_LIMIT = 20;
+
+/** Hard character cap, not just a CSS pixel-width clip — a guaranteed-short label regardless of font/zoom, since the full text is always one tap away via the row's own onClick (opens the transaction detail dialog). */
+function truncateChars(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max).trimEnd()}…` : text;
+}
+
 interface TransactionCardRowProps {
   date: string;
   description: string;
@@ -30,7 +37,10 @@ export function TransactionCardRow({ date, description, type, status, direction,
       onClick={onClick}
     >
       <div className="min-w-0 flex-1 overflow-hidden">
-        <p className="truncate text-sm font-medium">{description}</p>
+        <p className="truncate text-sm font-medium">
+          <span className="sm:hidden">{truncateChars(description, MOBILE_DESCRIPTION_LIMIT)}</span>
+          <span className="hidden sm:inline">{description}</span>
+        </p>
         <p className="mt-0.5 text-xs text-muted-foreground">{new Date(date).toLocaleString()}</p>
         {(status || type) && (
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
