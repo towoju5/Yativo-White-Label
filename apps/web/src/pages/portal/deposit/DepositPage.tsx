@@ -309,6 +309,7 @@ function NativeDepositCard() {
                     {t("deposit.dialog.initiated", "Deposit initiated")}
                   </div>
                   <dl className="divide-y divide-border rounded-lg border border-border">
+                    {result.depositId && <Row label={t("deposit.dialog.depositId", "Deposit ID")} value={result.depositId} />}
                     {result.localAmount && result.localCurrency && (
                       <Row label={t("deposit.dialog.amountToPay", "Amount to pay")} value={`${result.localAmount} ${result.localCurrency}`} />
                     )}
