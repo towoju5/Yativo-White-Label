@@ -97,7 +97,7 @@ function RecentDepositsCard() {
               <TransactionCardRow
                 key={tx.id}
                 date={tx.createdAt}
-                description={tx.description ?? tx.type}
+                description={tx.id ?? tx.type}
                 type={tx.type}
                 status={tx.status}
                 direction={tx.direction}
