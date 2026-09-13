@@ -112,23 +112,36 @@ fi
 
 # ── 2. Instance identity — lets multiple independent copies of this repo run ──
 # on the same VPS (different domains, different DB/Redis, different systemd unit and
-# Linux user) without colliding. Derived from the API domain unless --instance= is given.
+# Linux user) without colliding. Derived from the API domain unless --instance= is given —
+# but only ever derived ONCE, on this checkout's first deploy, then pinned to
+# .deploy-instance (untracked — see .gitignore) and simply read back on every rerun after
+# that. Never re-derived from "does apps/api/.env exist" on every run: that file existing is
+# equally true of ANY instance after its own first successful deploy, not just a genuinely
+# legacy (pre-multi-instance) one — trusting it as the signal meant every redeploy of a real,
+# already-correctly-named instance would misdetect itself as legacy, get silently reassigned
+# the shared "whitelabel"/"whitelabel-api" identity, and have `chown -R` hand its files to a
+# Linux user its systemd service doesn't actually run as — breaking it, not fixing it.
 #
-# Existing deployments (this exact directory was already deployed by an older version of
-# this script) are a special case: they're already running under the legacy fixed names
-# ("whitelabel-api" service/user, and whatever Docker Compose's implicit default project
-# name already is here). We deliberately keep using those on every rerun instead of
-# switching to the new per-instance scheme — otherwise a routine update would spin up a
-# second systemd service alongside the old one, and worse, point Docker Compose at a
-# brand-new empty project instead of your real running Postgres/Redis containers.
+# A genuinely legacy deployment (no .deploy-instance yet, but apps/api/.env already exists —
+# this directory was deployed by an older version of this script, before this file existed)
+# is still handled the same way as before: keep the fixed "whitelabel"/"whitelabel-api"
+# identity for continuity, so a routine update doesn't spin up a second systemd service
+# alongside the old one or point Docker Compose at a brand-new empty project. That decision is
+# then pinned too, exactly once, so every later rerun reads it back instead of re-detecting it.
 
 slugify() { echo -n "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'; }
 
 INSTANCE_SLUG="$(slugify "${INSTANCE_ARG:-$API_DOMAIN}")"
 INSTANCE_HASH="$(echo -n "$API_DOMAIN" | sha1sum | cut -c1-6)"
+INSTANCE_MARKER="$REPO_ROOT/.deploy-instance"
 
-if [ -f apps/api/.env ]; then
-  log "Existing deployment detected in this directory — keeping its legacy service/user/Compose project for continuity."
+if [ -f "$INSTANCE_MARKER" ]; then
+  log "Reading this checkout's pinned instance identity from .deploy-instance…"
+  # shellcheck disable=SC1090
+  source "$INSTANCE_MARKER"
+  { [ -n "${SERVICE_USER:-}" ] && [ -n "${SERVICE_NAME:-}" ]; } || die ".deploy-instance exists but is missing SERVICE_USER/SERVICE_NAME — fix or delete it and rerun."
+elif [ -f apps/api/.env ]; then
+  log "Existing deployment detected in this directory with no .deploy-instance marker yet — treating it as a legacy (pre-multi-instance) deployment and keeping its original service/user/Compose project for continuity."
   SERVICE_USER="whitelabel"
   SERVICE_NAME="whitelabel-api"
   # Left empty (and NOT exported) so docker compose keeps resolving its own existing
@@ -138,8 +151,18 @@ else
   SERVICE_USER="wl-${INSTANCE_HASH}"                                 # <=32 chars, unique per instance
   SERVICE_NAME="whitelabel-api-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
   COMPOSE_PROJECT_NAME="whitelabel-${INSTANCE_SLUG:0:40}-${INSTANCE_HASH}"
+fi
+if [ -n "$COMPOSE_PROJECT_NAME" ]; then
   export COMPOSE_PROJECT_NAME
 fi
+
+# Pin it now — idempotent (safe to rewrite the same values on every rerun) — so every future
+# run of THIS checkout reads its identity back above instead of re-deriving/guessing it.
+cat > "$INSTANCE_MARKER" <<EOF
+SERVICE_USER=${SERVICE_USER}
+SERVICE_NAME=${SERVICE_NAME}
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+EOF
 
 # ── 3. Ports — the actual "no port issues" guarantee ────────────────────────
 #

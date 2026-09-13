@@ -8,6 +8,8 @@ build/
 .DS_Store
 apps/api/generated/
 apps/api/admin-login-path.txt
+.deploy-instance
+.deploy-secrets.txt
 coverage/
 *.tsbuildinfo
 .vscode/*

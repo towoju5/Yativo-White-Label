@@ -5,15 +5,23 @@
 # there's a new commit to pick up — NOT the same as deploy.sh, which is one-time provisioning.
 #
 # Usage:
-#   ./redeploy.sh                        # uses the default service name (whitelabel-api.service)
-#   ./redeploy.sh my-other-service.service
+#   ./redeploy.sh                        # auto-detects which systemd service runs THIS checkout
+#   ./redeploy.sh my-other-service.service   # override, e.g. if detection is ambiguous
 #
 # Safe to re-run: git pull/pnpm install/migrate deploy/build are all naturally idempotent, and
 # this stops at the first failure (set -e) rather than restarting a service with a broken build.
+#
+# Multi-instance safety: this used to default to the fixed name "whitelabel-api.service" when
+# no argument was given — fine for a single deployment, but a real footgun with more than one
+# copy of this repo on the same box (see deploy.sh's "Running a second, fully independent copy"
+# section). Running this with no argument from a second checkout would rebuild ITS code but
+# restart the FIRST checkout's service instead — reporting success the whole time, while the
+# checkout you actually meant to redeploy never restarts. Instead, with no argument, this now
+# looks up whichever systemd unit has WorkingDirectory=<this repo>/apps/api — the one fact that's
+# unambiguous per checkout no matter what its service happens to be named — and refuses to guess
+# if that's not exactly one unit.
 
 set -euo pipefail
-
-SERVICE_NAME="${1:-whitelabel-api.service}"
 
 C_RESET='\033[0m'; C_BLUE='\033[1;34m'; C_GREEN='\033[1;32m'; C_RED='\033[1;31m'
 log()  { echo -e "${C_BLUE}==>${C_RESET} $*"; }
@@ -22,6 +30,32 @@ die()  { echo -e "${C_RED}✗ $*${C_RESET}" >&2; exit 1; }
 
 # Always operate from this script's own directory, regardless of where it's invoked from.
 cd "$(dirname "${BASH_SOURCE[0]}")"
+REPO_ROOT="$(pwd)"
+
+SERVICE_NAME="${1:-}"
+if [ -z "$SERVICE_NAME" ]; then
+  log "Detecting which systemd service runs this checkout (${REPO_ROOT})…"
+  MATCHES=()
+  for unit_file in /etc/systemd/system/*.service; do
+    [ -f "$unit_file" ] || continue
+    wd="$(grep -oP '^WorkingDirectory=\K.*' "$unit_file" 2>/dev/null || true)"
+    [ "$wd" = "${REPO_ROOT}/apps/api" ] && MATCHES+=("$(basename "$unit_file")")
+  done
+  case "${#MATCHES[@]}" in
+    1)
+      SERVICE_NAME="${MATCHES[0]}"
+      ok "Found: ${SERVICE_NAME}"
+      ;;
+    0)
+      die "No systemd service has WorkingDirectory=${REPO_ROOT}/apps/api — this checkout may not be deployed yet (run deploy.sh first), or pass the service name explicitly: ./redeploy.sh <service-name>.service"
+      ;;
+    *)
+      die "Multiple systemd services claim WorkingDirectory=${REPO_ROOT}/apps/api (${MATCHES[*]}) — refusing to guess. Pass the right one explicitly: ./redeploy.sh <service-name>.service"
+      ;;
+  esac
+else
+  log "Using explicitly given service: ${SERVICE_NAME}"
+fi
 
 log "Pulling latest code…"
 git pull
