@@ -65,17 +65,26 @@ export async function depositsRoutes(app: FastifyInstance) {
 
       const walletCurrency = await app.prisma.currency.findUnique({ where: { code: request.body.walletCurrencyCode } });
 
-      // Everything below is in walletCurrencyCode major units unless noted — confirmed live
-      // 2026-09-12 that Yativo's own arithmetic is `credited_amount = deposit_amount *
-      // exchange_rate - total_fees` (a 100 COP deposit at exchange_rate 1 with total_fees 3152.23
-      // produced credited_amount -3052.23, exactly matching), so `credited_amount` is already in
-      // the TO currency (the wallet) — used as-is rather than recomputed.
+      // `creditedAmount` is already in the TO currency (the wallet) — used as-is. `totalFees`,
+      // however, is denominated in the FROM currency (the local/method currency), confirmed
+      // against a live NGN quote (localAmount 6000, rate 1410.9832, totalFees 1530.98,
+      // creditedAmount 3.17): credited_amount = (deposit_amount - total_fees) / exchange_rate.
+      // (An earlier version of this code assumed totalFees was wallet-currency based on a COP
+      // test at exchange_rate 1 — a rate of 1 can't actually distinguish the two currencies, so
+      // that "confirmation" was inconclusive and the resulting conversion was wrong for any real
+      // rate, producing a wildly inflated platformFee and a negative netReceiveAmount.)
       let platformFee: string | null = null;
       let platformFeeLocal: string | null = null;
       let netReceiveAmount: string | null = null;
       if (walletCurrency) {
         const creditedAmountMinor = majorToMinor(yativoQuote.creditedAmount, walletCurrency.decimals);
-        const yativoFeeMinor = majorToMinor(yativoQuote.totalFees, walletCurrency.decimals);
+
+        // Convert totalFees from local currency into wallet-currency terms — same direction
+        // /portal/deposit/initiate uses for `transactionFee` below (divide by rate).
+        const rate = Number(yativoQuote.exchangeRate);
+        const yativoFeeMinor = Number.isFinite(rate) && rate > 0
+          ? majorToMinor(Number(yativoQuote.totalFees) / rate, walletCurrency.decimals)
+          : 0n;
 
         // This platform's own fee (admin-configured global default, or a per-customer override),
         // computed on top of the amount that would actually land after Yativo's own fees — the
@@ -86,12 +95,10 @@ export async function depositsRoutes(app: FastifyInstance) {
 
         const feeMajorInWallet = Number(platformFeeMinor) / 10 ** walletCurrency.decimals;
         platformFee = feeMajorInWallet.toFixed(walletCurrency.decimals);
-        // Inverse of the local->wallet direction confirmed above (deposit_amount * exchange_rate
-        // = amount in wallet currency) — dividing a wallet-currency figure by exchange_rate
-        // converts it back to local-currency terms. Left null if the rate is zero/unparseable.
-        const rate = Number(yativoQuote.exchangeRate);
+        // Same wallet->local direction /portal/deposit/initiate uses for its own platformFeeLocal
+        // (multiply by rate). Left null if the rate is zero/unparseable.
         if (Number.isFinite(rate) && rate > 0) {
-          platformFeeLocal = (feeMajorInWallet / rate).toFixed(2);
+          platformFeeLocal = (feeMajorInWallet * rate).toFixed(2);
         }
         netReceiveAmount = (Number(netReceiveAmountMinor) / 10 ** walletCurrency.decimals).toFixed(walletCurrency.decimals);
       }
