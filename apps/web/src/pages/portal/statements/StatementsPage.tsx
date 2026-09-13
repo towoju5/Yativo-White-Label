@@ -206,7 +206,9 @@ function StatementPreview({ walletId, range, decimals, currencyCode }: { walletI
                   {lines.map((line) => (
                     <TableRow key={line.entryId} className="cursor-pointer" onClick={() => setSelectedTransactionId(line.transactionId)}>
                       <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(line.createdAt).toLocaleString()}</TableCell>
-                      <TableCell className="max-w-[220px] truncate">{line.id ?? line.transactionType}</TableCell>
+                      <TableCell className="max-w-[220px] truncate" title={line.description ?? undefined}>
+                        {line.description ?? line.transactionType}
+                      </TableCell>
                       <TableCell className={line.direction === "CREDIT" ? "text-success" : "text-foreground"}>{line.direction === "CREDIT" ? t("statements.credit", "Credit") : t("statements.debit", "Debit")}</TableCell>
                       <TableCell className={cn("text-right font-mono", line.direction === "CREDIT" ? "text-success" : "text-foreground")}>
                         {line.direction === "CREDIT" ? "+" : "-"}
