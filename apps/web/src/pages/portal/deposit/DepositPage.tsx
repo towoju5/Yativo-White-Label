@@ -70,7 +70,7 @@ function RecentDepositsCard() {
   const items = historyQuery.data?.items ?? [];
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -82,7 +82,7 @@ function RecentDepositsCard() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="max-w-full overflow-hidden p-0">
         {historyQuery.isLoading ? (
           <div className="space-y-2 p-4">
             {Array.from({ length: 3 }).map((_, i) => (

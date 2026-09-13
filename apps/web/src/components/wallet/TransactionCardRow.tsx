@@ -26,10 +26,10 @@ interface TransactionCardRowProps {
 export function TransactionCardRow({ date, description, type, status, direction, amountMinor, decimals = 2, currencyCode, balanceMinor, onClick }: TransactionCardRowProps) {
   return (
     <div
-      className={cn("flex items-start justify-between gap-3 border-b border-border px-4 py-3 last:border-0", onClick && "cursor-pointer active:bg-muted/40")}
+      className={cn("flex w-full max-w-full items-start justify-between gap-3 overflow-hidden border-b border-border px-4 py-3 last:border-0", onClick && "cursor-pointer active:bg-muted/40")}
       onClick={onClick}
     >
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 overflow-hidden">
         <p className="truncate text-sm font-medium">{description}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{new Date(date).toLocaleString()}</p>
         {(status || type) && (
