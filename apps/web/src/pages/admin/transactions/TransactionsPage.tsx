@@ -145,7 +145,9 @@ export default function TransactionsPage() {
                 <TableRow key={tx.id}>
                   <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</TableCell>
                   <TableCell className="text-xs uppercase text-muted-foreground">{tx.type}</TableCell>
-                  <TableCell className="max-w-[260px] truncate">{tx.description ?? "—"}</TableCell>
+                  <TableCell className="max-w-[260px] truncate" title={tx.id ?? undefined}>
+                    {tx.id ?? "—"}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{tx.customerEmail ?? "—"}</TableCell>
                   <TableCell>
                     <Badge variant={STATUS_VARIANT[tx.status] ?? "secondary"}>{tx.status}</Badge>

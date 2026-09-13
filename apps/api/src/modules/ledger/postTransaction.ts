@@ -7,6 +7,12 @@ import { publishWalletUpdatesForAccounts } from "../../lib/realtime.js";
 
 type Tx = Prisma.TransactionClient;
 
+/** Idempotent — a description that was already tagged (e.g. a reversal's own description already quoting the original transaction id in prose) is left alone rather than getting a second "(TXN ...)" suffix appended. */
+function withTransactionId(description: string, transactionId: string): string {
+  const suffix = `(TXN ${transactionId})`;
+  return description.includes(suffix) ? description : `${description} ${suffix}`;
+}
+
 function assertBalanced(lines: EntryLine[]) {
   const byCurrency = new Map<string, { debit: bigint; credit: bigint }>();
   for (const line of lines) {
@@ -41,7 +47,7 @@ export async function postTransactionInTx(tx: Tx, input: PostTransactionInput): 
   const accountIds = [...new Set(input.lines.map((l) => l.accountId))].sort();
   await tx.$queryRaw`SELECT id FROM accounts WHERE id = ANY(${accountIds}) ORDER BY id FOR UPDATE`;
 
-  const transaction = await tx.ledgerTransaction.create({
+  let transaction = await tx.ledgerTransaction.create({
     data: {
       type: input.type,
       status: input.status,
@@ -54,6 +60,19 @@ export async function postTransactionInTx(tx: Tx, input: PostTransactionInput): 
       postedAt: input.status === "POSTED" ? new Date() : null,
     },
   });
+
+  // Every description should carry its own transaction id, so anything that only ever surfaces
+  // `description` (a table cell, a receipt, a notification email, a CSV export) still lets support
+  // — or the customer — pin down exactly which transaction it's talking about. Can't be included
+  // in the create() call above since `id` doesn't exist until create() assigns it; this is the one
+  // choke point every ledger posting goes through, so patching it here covers every caller
+  // (deposits, payouts, swaps, card top-ups, fees, adjustments, reversals, settlements, ...) at once.
+  if (transaction.description) {
+    transaction = await tx.ledgerTransaction.update({
+      where: { id: transaction.id },
+      data: { description: withTransactionId(transaction.description, transaction.id) },
+    });
+  }
 
   // Snapshot each touched account's current posted balance once, right after acquiring the
   // row locks above — this is the "before" balance for its first line in this posting. A

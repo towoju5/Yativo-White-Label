@@ -227,7 +227,9 @@ export default function PortalTransactionsPage() {
                 {data.items.map((tx) => (
                   <TableRow key={tx.id} className="cursor-pointer" onClick={() => setSelectedTransactionId(tx.id)}>
                     <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</TableCell>
-                    <TableCell className="max-w-[260px] truncate">{tx.description ?? tx.type}</TableCell>
+                    <TableCell className="max-w-[260px] truncate" title={tx.id ?? undefined}>
+                      {tx.id ?? tx.type}
+                    </TableCell>
                     <TableCell className="text-xs uppercase text-muted-foreground">{tx.type}</TableCell>
                     <TableCell>
                       <Badge variant={STATUS_VARIANT[tx.status] ?? "secondary"}>{tx.status}</Badge>
