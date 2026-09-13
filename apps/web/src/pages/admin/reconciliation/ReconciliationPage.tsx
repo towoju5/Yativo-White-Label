@@ -76,7 +76,7 @@ export default function ReconciliationPage() {
                 <TableHead className="text-right">Expected</TableHead>
                 <TableHead className="text-right">Actual</TableHead>
                 <TableHead className="text-right">Delta</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="hidden">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -91,7 +91,7 @@ export default function ReconciliationPage() {
                     {formatMinorAmount(r.deltaMinor, 2)}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={r.status === "MISMATCH" ? "destructive" : "success"} className="gap-1">
+                    <Badge variant={r.status === "MISMATCH" ? "destructive" : "success"} className="gap-1 hidden">
                       {r.status === "MISMATCH" && <AlertTriangle className="h-3 w-3" />}
                       {r.status}
                     </Badge>

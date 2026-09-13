@@ -31,7 +31,7 @@ export default function PortalDashboardPage() {
 
   const activity: ActivityItem[] = lines.map((l) => ({
     id: l.entryId,
-    title: l.description ?? l.transactionType,
+    title: l.id ?? l.transactionType,
     subtitle: new Date(l.createdAt).toLocaleDateString(),
     amountMinor: l.amountMinor,
     decimals: primary?.decimals ?? 2,

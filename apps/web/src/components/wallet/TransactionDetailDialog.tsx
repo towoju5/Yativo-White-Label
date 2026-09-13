@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { TransactionDetail } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
-import { Printer, Share2, MessageCircle, Send, Mail, Copy, MoreHorizontal } from "lucide-react";
+import { Printer, Share2, Download, Copy } from "lucide-react";
 import { portalApi } from "@/lib/api-client";
 import { fetchBranding } from "@/theme/branding";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { humanizeType, feeDetailRows, buildReceiptRows, renderReceiptPng, receiptFileName } from "./receiptImage";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
   POSTED: "success",
@@ -17,51 +18,16 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
   REVERSED: "destructive",
 };
 
-function humanizeType(type: string) {
-  return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-/**
- * Fee/rate breakdown rows shared by the on-screen detail list, the printed receipt, and the
- * share text. The headline amount (from the customer's own ledger entry) is always the NET
- * figure they actually received/paid — these rows only ever add a single combined "Fee" plus,
- * for deposits, the rate/local-amount context. Never split into provider-vs-platform pieces.
- */
-function feeDetailRows(data: TransactionDetail): [string, string][] {
-  const rows: [string, string][] = [];
-  if (data.deposit) {
-    const d = data.deposit;
-    if (Number(d.totalFeeMinor) > 0) {
-      rows.push(["Fee", `${formatMinorAmount(d.totalFeeMinor, 2)} ${d.currencyCode}`]);
-    }
-    if (d.exchangeRate) rows.push(["Exchange rate", d.exchangeRate]);
-    if (d.localAmount && d.localCurrency) rows.push(["Amount paid", `${d.localAmount} ${d.localCurrency}`]);
-  } else if (data.payout && Number(data.payout.platformFeeMinor) > 0) {
-    rows.push(["Fee", `${formatMinorAmount(data.payout.platformFeeMinor, 2)} ${data.payout.currencyCode}`]);
-  }
-  return rows;
-}
-
-/** Opens a dedicated print window with a minimal, self-contained receipt — sidesteps having to hide the rest of the app (nav, dialog chrome) via print CSS, and guarantees a clean printout regardless of the current theme. */
+/** Opens a dedicated print window with a minimal, self-contained receipt — sidesteps having to hide the rest of the app (nav, dialog chrome) via print CSS, and guarantees a clean printout regardless of the current theme. The browser's own "Save as PDF" print destination is this receipt's PDF path. */
 function openReceiptWindow(data: TransactionDetail, productName: string, amountLabel: string) {
   const win = window.open("", "_blank", "width=680,height=860");
   if (!win) return;
 
-  const rows: [string, string][] = [
-    ["Type", humanizeType(data.type)],
-    ["Status", data.status],
-    ...(data.description ? ([["Description", data.description]] as [string, string][]) : []),
-    ...(data.payout ? ([["Recipient", data.payout.beneficiaryName]] as [string, string][]) : []),
-    ...feeDetailRows(data),
-    ["Transaction ID", data.id],
-    ["Date", new Date(data.createdAt).toLocaleString()],
-    ...(data.postedAt ? ([["Posted", new Date(data.postedAt).toLocaleString()]] as [string, string][]) : []),
-    ...(data.reversedAt ? ([["Reversed", new Date(data.reversedAt).toLocaleString()]] as [string, string][]) : []),
-  ];
+  const rows = buildReceiptRows(data);
 
   win.document.write(`<!DOCTYPE html>
 <html>
@@ -97,20 +63,15 @@ function openReceiptWindow(data: TransactionDetail, productName: string, amountL
   setTimeout(() => win.print(), 300);
 }
 
-/** Plain-text summary for the Web Share API / clipboard fallback — same facts as the printed receipt, just without the HTML. */
-function buildReceiptText(data: TransactionDetail, productName: string, amountLabel: string): string {
-  const lines = [
-    `${productName} — transaction receipt`,
-    amountLabel,
-    `Type: ${humanizeType(data.type)}`,
-    `Status: ${data.status}`,
-    ...(data.description ? [`Description: ${data.description}`] : []),
-    ...(data.payout ? [`Recipient: ${data.payout.beneficiaryName}`] : []),
-    ...feeDetailRows(data).map(([label, value]) => `${label}: ${value}`),
-    `Transaction ID: ${data.id}`,
-    `Date: ${new Date(data.createdAt).toLocaleString()}`,
-  ];
-  return lines.join("\n");
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 export function TransactionDetailDialog({ transactionId, onClose }: { transactionId: string | null; onClose: () => void }) {
@@ -122,10 +83,26 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
   });
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
 
-  const shareNative = async (txData: TransactionDetail, productName: string, amountLabel: string) => {
-    const text = buildReceiptText(txData, productName, amountLabel);
+  // Every share/download/copy action below operates on the same rendered PNG — never plain text,
+  // so whatever the receipt is handed off to (a chat app, an email attachment, a clipboard paste)
+  // gets an actual image, not a wall of text it has to render itself.
+  const getReceiptFile = async (txData: TransactionDetail, productName: string, primaryColor: string | null | undefined, amountLabel: string, isCredit: boolean) => {
+    const blob = await renderReceiptPng(txData, { productName, primaryColor, amountLabel, isCredit });
+    return new File([blob], receiptFileName(txData.id), { type: "image/png" });
+  };
+
+  const shareImage = async (txData: TransactionDetail, productName: string, primaryColor: string | null | undefined, amountLabel: string, isCredit: boolean) => {
     try {
-      await navigator.share({ title: `Receipt · ${txData.id}`, text });
+      const file = await getReceiptFile(txData, productName, primaryColor, amountLabel, isCredit);
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Receipt · ${txData.id}` });
+        return;
+      }
+      // No file-sharing support in this browser (common on desktop) — an image can't reach
+      // another app without one, so fall back to a direct download instead of silently
+      // degrading to a text share.
+      downloadBlob(file, file.name);
+      toast({ title: "Receipt downloaded", description: "This browser can't share files directly — attach the downloaded image instead." });
     } catch (err) {
       // AbortError just means the user closed the native share sheet — not a real failure.
       if (err instanceof Error && err.name !== "AbortError") {
@@ -134,28 +111,22 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
     }
   };
 
-  const shareToWhatsApp = (txData: TransactionDetail, productName: string, amountLabel: string) => {
-    const text = buildReceiptText(txData, productName, amountLabel);
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
-  };
-
-  const shareToTelegram = (txData: TransactionDetail, productName: string, amountLabel: string) => {
-    const text = buildReceiptText(txData, productName, amountLabel);
-    window.open(`https://t.me/share/url?url=&text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
-  };
-
-  const shareByEmail = (txData: TransactionDetail, productName: string, amountLabel: string) => {
-    const text = buildReceiptText(txData, productName, amountLabel);
-    window.location.href = `mailto:?subject=${encodeURIComponent(`Receipt · ${productName}`)}&body=${encodeURIComponent(text)}`;
-  };
-
-  const copyReceipt = async (txData: TransactionDetail, productName: string, amountLabel: string) => {
-    const text = buildReceiptText(txData, productName, amountLabel);
+  const downloadImage = async (txData: TransactionDetail, productName: string, primaryColor: string | null | undefined, amountLabel: string, isCredit: boolean) => {
     try {
-      await navigator.clipboard.writeText(text);
-      toast({ title: "Receipt copied to clipboard" });
+      const file = await getReceiptFile(txData, productName, primaryColor, amountLabel, isCredit);
+      downloadBlob(file, file.name);
+    } catch (err) {
+      toast({ variant: "destructive", title: "Couldn't generate receipt image", description: err instanceof Error ? err.message : undefined });
+    }
+  };
+
+  const copyImage = async (txData: TransactionDetail, productName: string, primaryColor: string | null | undefined, amountLabel: string, isCredit: boolean) => {
+    try {
+      const file = await getReceiptFile(txData, productName, primaryColor, amountLabel, isCredit);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": file })]);
+      toast({ title: "Receipt image copied to clipboard" });
     } catch {
-      toast({ variant: "destructive", title: "Couldn't copy receipt" });
+      toast({ variant: "destructive", title: "Couldn't copy image", description: "Try downloading it instead." });
     }
   };
 
@@ -204,22 +175,20 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  <DropdownMenuItem onClick={() => shareToWhatsApp(data, branding?.productName ?? "Receipt", amountLabel)}>
-                    <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                  <DropdownMenuItem
+                    onClick={() => shareImage(data, branding?.productName ?? "Receipt", branding?.primaryColor, amountLabel, primaryEntry?.direction === "CREDIT")}
+                  >
+                    <Share2 className="mr-2 h-4 w-4" /> Share image
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => shareToTelegram(data, branding?.productName ?? "Receipt", amountLabel)}>
-                    <Send className="mr-2 h-4 w-4" /> Telegram
+                  <DropdownMenuItem
+                    onClick={() => downloadImage(data, branding?.productName ?? "Receipt", branding?.primaryColor, amountLabel, primaryEntry?.direction === "CREDIT")}
+                  >
+                    <Download className="mr-2 h-4 w-4" /> Download image
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => shareByEmail(data, branding?.productName ?? "Receipt", amountLabel)}>
-                    <Mail className="mr-2 h-4 w-4" /> Email
-                  </DropdownMenuItem>
-                  {typeof navigator !== "undefined" && !!navigator.share && (
-                    <DropdownMenuItem onClick={() => shareNative(data, branding?.productName ?? "Receipt", amountLabel)}>
-                      <MoreHorizontal className="mr-2 h-4 w-4" /> More apps…
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={() => copyReceipt(data, branding?.productName ?? "Receipt", amountLabel)}>
-                    <Copy className="mr-2 h-4 w-4" /> Copy to clipboard
+                  <DropdownMenuItem
+                    onClick={() => copyImage(data, branding?.productName ?? "Receipt", branding?.primaryColor, amountLabel, primaryEntry?.direction === "CREDIT")}
+                  >
+                    <Copy className="mr-2 h-4 w-4" /> Copy image
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -228,7 +197,7 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
                 variant="outline"
                 onClick={() => openReceiptWindow(data, branding?.productName ?? "Receipt", amountLabel)}
               >
-                <Printer className="h-4 w-4" /> Print receipt
+                <Printer className="h-4 w-4" /> Print receipt (PDF)
               </Button>
             </div>
           </div>
