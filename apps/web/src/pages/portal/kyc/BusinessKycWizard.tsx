@@ -130,7 +130,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
     if (draftApplied.current || !draftQuery.data) return;
     draftApplied.current = true;
     if (draftQuery.data.type !== "BUSINESS" || !draftQuery.data.draft) return;
-    form.reset(mergeKycDraft(BUSINESS_DEFAULT_VALUES, draftQuery.data.draft) as BusinessKycSubmissionInput);
+    form.reset(mergeKycDraft(BUSINESS_DEFAULT_VALUES, draftQuery.data.draft) as unknown as BusinessKycSubmissionInput);
   }, [draftQuery.data, form]);
 
   const { fields: personFields, append: appendPerson, remove: removePerson } = useFieldArray({

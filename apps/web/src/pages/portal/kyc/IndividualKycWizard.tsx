@@ -82,7 +82,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
     if (draftApplied.current || !draftQuery.data) return;
     draftApplied.current = true;
     if (draftQuery.data.type !== "INDIVIDUAL" || !draftQuery.data.draft) return;
-    form.reset(mergeKycDraft(INDIVIDUAL_DEFAULT_VALUES, draftQuery.data.draft) as IndividualKycSubmissionInput);
+    form.reset(mergeKycDraft(INDIVIDUAL_DEFAULT_VALUES, draftQuery.data.draft) as unknown as IndividualKycSubmissionInput);
   }, [draftQuery.data, form]);
 
   const submitMutation = useMutation({
