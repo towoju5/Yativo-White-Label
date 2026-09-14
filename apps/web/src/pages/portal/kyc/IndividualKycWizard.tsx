@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +11,7 @@ import {
   type KycCountry,
 } from "@white-label/shared-types";
 import { CheckCircle2 } from "lucide-react";
-import { portalApi, ApiError } from "@/lib/api-client";
+import { portalApi } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,9 +27,25 @@ import {
   WizardShell,
   SearchableSelect,
   StepErrorSummary,
+  ApiErrorSummary,
 } from "./kycShared";
-import { humanize, buildKycFormData } from "./kycUtils";
-import { useFileRegistry, useKycOccupations, useKycLabelMap } from "./kycHooks";
+import { humanize, buildKycFormData, mergeKycDraft } from "./kycUtils";
+import { useFileRegistry, useKycOccupations, useKycLabelMap, useKycDraft } from "./kycHooks";
+
+const INDIVIDUAL_DEFAULT_VALUES = {
+  callingCode: "+1",
+  gender: "male" as const,
+  currentEmployer: "",
+  residentialAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "", proofOfAddressFile: "" },
+  identifyingInformation: [{ type: "", issuingCountry: "", number: "", dateIssued: "", expirationDate: "", imageFront: "" }],
+  uploadedDocuments: [],
+  actingAsIntermediary: false,
+  selfieImage: "",
+  usdVirtualAccount: true,
+  eurVirtualAccount: false,
+  eurdeVirtualAccount: false,
+  gbpVirtualAccount: false,
+};
 
 export default function IndividualKycWizard({ countries, countriesLoading }: { countries: KycCountry[]; countriesLoading?: boolean }) {
   const { t } = useTranslation();
@@ -54,21 +70,20 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
 
   const form = useForm<IndividualKycSubmissionInput>({
     resolver: zodResolver(individualKycSubmissionSchema),
-    defaultValues: {
-      callingCode: "+1",
-      gender: "male",
-      currentEmployer: "",
-      residentialAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "", proofOfAddressFile: "" },
-      identifyingInformation: [{ type: "", issuingCountry: "", number: "", dateIssued: "", expirationDate: "", imageFront: "" }],
-      uploadedDocuments: [],
-      actingAsIntermediary: false,
-      selfieImage: "",
-      usdVirtualAccount: true,
-      eurVirtualAccount: false,
-      eurdeVirtualAccount: false,
-      gbpVirtualAccount: false,
-    },
+    defaultValues: INDIVIDUAL_DEFAULT_VALUES,
   });
+
+  // Pre-fills a retry with whatever non-sensitive data survived the customer's last attempt
+  // (rejected or failed) instead of making them start over — see GET /portal/kyc/draft. Applied
+  // once, the first time the draft loads, so it never clobbers in-progress edits on a refetch.
+  const draftQuery = useKycDraft();
+  const draftApplied = useRef(false);
+  useEffect(() => {
+    if (draftApplied.current || !draftQuery.data) return;
+    draftApplied.current = true;
+    if (draftQuery.data.type !== "INDIVIDUAL" || !draftQuery.data.draft) return;
+    form.reset(mergeKycDraft(INDIVIDUAL_DEFAULT_VALUES, draftQuery.data.draft) as IndividualKycSubmissionInput);
+  }, [draftQuery.data, form]);
 
   const submitMutation = useMutation({
     mutationFn: (input: IndividualKycSubmissionInput) => portalApi.post("/portal/kyc/individual", buildKycFormData(input, files)),
@@ -84,7 +99,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
       toast({
         variant: "destructive",
         title: t("kycIndividual.toast.submitFailed.title", "Submission failed"),
-        description: e instanceof ApiError ? e.message : undefined,
+        description: <ApiErrorSummary error={e} />,
       }),
   });
 

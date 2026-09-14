@@ -32,6 +32,35 @@ export function validateFile(file: File): string | null {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyForm = any;
 
+/**
+ * Overlays a saved draft (from GET /portal/kyc/draft — already stripped of sensitive fields
+ * server-side, see apps/api's kycDraft.ts) onto the wizard's hardcoded `defaultValues`. Recurses
+ * into plain objects and index-aligned arrays; any key the draft omits (every sensitive field, by
+ * construction) falls back to the base default rather than becoming `undefined`, since react-hook-
+ * form's controlled inputs need a defined value from first render.
+ */
+export function mergeKycDraft<T>(base: T, draft: unknown): T {
+  if (draft === undefined || draft === null) return base;
+  if (Array.isArray(base)) {
+    if (!Array.isArray(draft)) return base;
+    // Draft rows beyond the default template's length (e.g. a second business owner) reuse the
+    // template's shape (base[0]) rather than merging against `undefined` — otherwise a nested
+    // array a stripped-sensitive-field row depends on (e.g. an owner's identifyingInformation
+    // template) would go missing entirely instead of falling back to its blank default.
+    const template = base[0];
+    return draft.map((item, i) => mergeKycDraft(i < base.length ? base[i] : template, item)) as unknown as T;
+  }
+  if (base !== null && typeof base === "object") {
+    if (draft === null || typeof draft !== "object" || Array.isArray(draft)) return base;
+    const result = { ...base } as Record<string, unknown>;
+    for (const [key, value] of Object.entries(draft as Record<string, unknown>)) {
+      result[key] = mergeKycDraft((base as Record<string, unknown>)[key], value);
+    }
+    return result as T;
+  }
+  return (draft as T) ?? base;
+}
+
 /** Builds the multipart body: one `payload` JSON field (filenames in place of file values) plus one binary part per registered file. */
 export function buildKycFormData(values: unknown, files: Map<string, File>): FormData {
   const formData = new FormData();

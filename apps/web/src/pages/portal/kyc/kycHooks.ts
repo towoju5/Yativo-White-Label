@@ -51,3 +51,12 @@ export function useKycBusinessIndustries() {
 export function useKycLabelMap(kind: "individual/account-purposes" | "individual/source-of-funds" | "individual/expected-monthly-payments" | "business/account-purposes" | "business/source-of-funds") {
   return useQuery({ queryKey: ["portal", "kyc", "ref", kind], queryFn: () => portalApi.get<KycLabelMap>(`/portal/kyc/reference/${kind}`) });
 }
+
+/** Non-sensitive fields saved from the customer's last submission attempt — see kyc.routes.ts's
+ * GET /portal/kyc/draft. Used to pre-fill a retry instead of starting the wizard from scratch. */
+export function useKycDraft() {
+  return useQuery({
+    queryKey: ["portal", "kyc", "draft"],
+    queryFn: () => portalApi.get<{ type: "INDIVIDUAL" | "BUSINESS"; draft: Record<string, unknown> | null }>("/portal/kyc/draft"),
+  });
+}

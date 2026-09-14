@@ -6,7 +6,7 @@ import rateLimit from "@fastify/rate-limit";
 import multipart from "@fastify/multipart";
 import websocket from "@fastify/websocket";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
-import { YativoApiError, parseYativoErrorMessage } from "@white-label/yativo-sdk";
+import { YativoApiError, parseYativoErrorMessage, parseYativoErrorDetails } from "@white-label/yativo-sdk";
 import { env } from "./config/env.js";
 import logger from "./lib/logger.js";
 import { AppError } from "./lib/errors.js";
@@ -131,9 +131,14 @@ export async function buildApp() {
       // parseable (a true 5xx or an unexpected shape).
       if (error.upstreamStatus >= 400 && error.upstreamStatus < 500) {
         const upstreamMessage = parseYativoErrorMessage(error.upstreamBody);
+        // Additive only — existing consumers that only read `.message` are unaffected. Lets
+        // screens that want it (currently the KYC/KYB wizards) show every rejected field instead
+        // of the single flattened line in `message`.
+        const details = parseYativoErrorDetails(error.upstreamBody);
         return reply.code(error.upstreamStatus).send({
           message: upstreamMessage ?? "The payment provider rejected this request. Please check your details and try again.",
           code: "PROVIDER_ERROR",
+          ...(details ? { details } : {}),
         });
       }
       return reply.code(502).send({ message: "The payment provider is temporarily unavailable. Please try again shortly.", code: "PROVIDER_ERROR" });

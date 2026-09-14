@@ -110,11 +110,64 @@ export function parseYativoErrorMessage(rawBody: string): string | undefined {
     }
     // Unenveloped failure shape (e.g. cards/activate): a bare top-level `error` string.
     if (typeof top.error === "string") return top.error;
+    // Top-level Laravel validator shape used by the KYC/KYB submit endpoints:
+    // `{ success, message: "Validation error.", validation_errors: { field: ["msg", ...] } }`.
+    // The top-level `message` alone is a generic "Validation error." — the useful part is here.
+    const validationMessages = flattenValidationErrors(top.validation_errors);
+    if (validationMessages.length > 0) return validationMessages.join(" ");
     const message = top.message;
     return typeof message === "string" ? message : undefined;
   } catch {
     return undefined;
   }
+}
+
+function flattenValidationErrors(value: unknown): string[] {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return [];
+  return Object.values(value as Record<string, unknown>)
+    .filter((v): v is string[] => Array.isArray(v) && v.every((entry) => typeof entry === "string"))
+    .flat();
+}
+
+/**
+ * Structured, per-field failure detail for a raw Yativo error body, when the response carries one
+ * — currently only the KYC/KYB submit endpoints return this shape (see `parseYativoErrorMessage`'s
+ * comment above for the raw example). `parseYativoErrorMessage` collapses the same data into one
+ * flat string for logging/fallback; this is for callers (the KYC routes' error handling) that want
+ * to hand the full per-field breakdown to the client instead of a single line. Returns undefined
+ * when the body isn't JSON or carries neither key, so callers can omit the field entirely rather
+ * than send `{}`.
+ */
+export function parseYativoErrorDetails(rawBody: string): { validationErrors?: Record<string, string[]>; fieldHints?: Record<string, string> } | undefined {
+  try {
+    const parsed: unknown = JSON.parse(rawBody);
+    if (parsed === null || typeof parsed !== "object") return undefined;
+    const top = parsed as Record<string, unknown>;
+    const validationErrors = isStringArrayRecord(top.validation_errors) ? top.validation_errors : undefined;
+    const fieldHints = isStringRecord(top.field_hints) ? top.field_hints : undefined;
+    if (!validationErrors && !fieldHints) return undefined;
+    return { validationErrors, fieldHints };
+  } catch {
+    return undefined;
+  }
+}
+
+function isStringArrayRecord(value: unknown): value is Record<string, string[]> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.values(value as Record<string, unknown>).every((v) => Array.isArray(v) && v.every((entry) => typeof entry === "string"))
+  );
+}
+
+function isStringRecord(value: unknown): value is Record<string, string> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.values(value as Record<string, unknown>).every((v) => typeof v === "string")
+  );
 }
 
 /** Request options shared by every resource-level call. */

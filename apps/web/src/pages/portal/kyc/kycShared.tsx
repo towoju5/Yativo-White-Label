@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle, Check, ChevronsUpDown, Loader2, Upload, X } from "lucide-react";
 import { FILE_ACCEPT, type KycCountry } from "@white-label/shared-types";
+import { ApiError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,6 +77,34 @@ export function StepErrorSummary({ errors, fields }: { errors: Record<string, un
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Full-detail rendering of a failed submission's error, for use as a toast `description` — plain
+ * `e.message` alone collapses Yativo's per-field validation response into one generic line (often
+ * just "Validation error."); the backend's error handler (see apps/api's app.ts) now also forwards
+ * the structured `details.validationErrors` map when Yativo provides one, so this renders every
+ * rejected field instead. Falls back to the flat message when there's no structured detail (a
+ * non-validation failure, or an error that isn't an ApiError at all).
+ */
+export function ApiErrorSummary({ error }: { error: unknown }) {
+  if (!(error instanceof ApiError)) return null;
+  const body = error.body as { details?: { validationErrors?: Record<string, string[]> } } | null;
+  const validationErrors = body?.details?.validationErrors;
+  const entries = validationErrors ? Object.entries(validationErrors) : [];
+  if (entries.length === 0) return <>{error.message}</>;
+  return (
+    <div>
+      {error.message && <p>{error.message}</p>}
+      <ul className="mt-1 list-disc space-y-0.5 pl-4">
+        {entries.map(([field, messages]) => (
+          <li key={field}>
+            <span className="font-medium">{humanize(field.replace(/[._]/g, " "))}</span>: {messages.join(" ")}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

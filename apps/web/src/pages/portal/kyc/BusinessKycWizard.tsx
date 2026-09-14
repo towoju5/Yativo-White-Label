@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,7 +15,7 @@ import {
   type KycCountry,
 } from "@white-label/shared-types";
 import { CheckCircle2, Plus, Trash2 } from "lucide-react";
-import { portalApi, ApiError } from "@/lib/api-client";
+import { portalApi } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,9 +33,10 @@ import {
   WizardShell,
   SearchableSelect,
   StepErrorSummary,
+  ApiErrorSummary,
 } from "./kycShared";
-import { humanize, buildKycFormData } from "./kycUtils";
-import { useFileRegistry, useKycBusinessIndustries, useKycLabelMap } from "./kycHooks";
+import { humanize, buildKycFormData, mergeKycDraft } from "./kycUtils";
+import { useFileRegistry, useKycBusinessIndustries, useKycLabelMap, useKycDraft } from "./kycHooks";
 
 function emptyAssociatedPerson(): KycAssociatedPerson {
   return {
@@ -56,6 +57,41 @@ function emptyAssociatedPerson(): KycAssociatedPerson {
     isDirector: false,
   };
 }
+
+const BUSINESS_DEFAULT_VALUES = {
+  phoneCallingCode: "+1",
+  isDao: false,
+  registeredAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "" },
+  physicalAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "", proofOfAddressFile: "" },
+  associatedPersons: [
+    {
+      firstName: "",
+      lastName: "",
+      birthDate: "",
+      nationality: "",
+      email: "",
+      ownershipPercentage: 100,
+      residentialAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "" },
+      identifyingInformation: [
+        { type: "tax_id", number: "" },
+        { type: "", number: "", expiration: "", imageFront: "", imageBack: "" },
+      ],
+      hasOwnership: true,
+      hasControl: true,
+      isSigner: true,
+      isDirector: true,
+    },
+  ],
+  highRiskActivities: [],
+  conductsMoneyServices: false,
+  pepStatus: false,
+  thirdPartyMsbPayments: false,
+  documents: [{ purpose: "business_registration" as const, description: "", file: "" }],
+  usdVirtualAccount: true,
+  eurVirtualAccount: false,
+  eurdeVirtualAccount: false,
+  gbpVirtualAccount: false,
+};
 
 export default function BusinessKycWizard({ countries, countriesLoading }: { countries: KycCountry[]; countriesLoading?: boolean }) {
   const { t } = useTranslation();
@@ -82,41 +118,20 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
 
   const form = useForm<BusinessKycSubmissionInput>({
     resolver: zodResolver(businessKycSubmissionSchema),
-    defaultValues: {
-      phoneCallingCode: "+1",
-      isDao: false,
-      registeredAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "" },
-      physicalAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "", proofOfAddressFile: "" },
-      associatedPersons: [
-        {
-          firstName: "",
-          lastName: "",
-          birthDate: "",
-          nationality: "",
-          email: "",
-          ownershipPercentage: 100,
-          residentialAddress: { streetLine1: "", city: "", state: "", postalCode: "", country: "" },
-          identifyingInformation: [
-            { type: "tax_id", number: "" },
-            { type: "", number: "", expiration: "", imageFront: "", imageBack: "" },
-          ],
-          hasOwnership: true,
-          hasControl: true,
-          isSigner: true,
-          isDirector: true,
-        },
-      ],
-      highRiskActivities: [],
-      conductsMoneyServices: false,
-      pepStatus: false,
-      thirdPartyMsbPayments: false,
-      documents: [{ purpose: "business_registration", description: "", file: "" }],
-      usdVirtualAccount: true,
-      eurVirtualAccount: false,
-      eurdeVirtualAccount: false,
-      gbpVirtualAccount: false,
-    },
+    defaultValues: BUSINESS_DEFAULT_VALUES,
   });
+
+  // Pre-fills a retry with whatever non-sensitive data survived the customer's last attempt
+  // (rejected or failed) instead of making them start over — see GET /portal/kyc/draft. Applied
+  // once, the first time the draft loads, so it never clobbers in-progress edits on a refetch.
+  const draftQuery = useKycDraft();
+  const draftApplied = useRef(false);
+  useEffect(() => {
+    if (draftApplied.current || !draftQuery.data) return;
+    draftApplied.current = true;
+    if (draftQuery.data.type !== "BUSINESS" || !draftQuery.data.draft) return;
+    form.reset(mergeKycDraft(BUSINESS_DEFAULT_VALUES, draftQuery.data.draft) as BusinessKycSubmissionInput);
+  }, [draftQuery.data, form]);
 
   const { fields: personFields, append: appendPerson, remove: removePerson } = useFieldArray({
     control: form.control,
@@ -137,7 +152,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
       toast({
         variant: "destructive",
         title: t("kycBusiness.toast.submitFailed.title", "Submission failed"),
-        description: e instanceof ApiError ? e.message : undefined,
+        description: <ApiErrorSummary error={e} />,
       }),
   });
 

@@ -351,6 +351,12 @@ model Customer {
   countryCode                String?
   kycSubmissionId            String?
   kycSubmittedAt             DateTime?
+  /// Snapshot of the non-sensitive fields from the customer's most recent individual/business KYC
+  /// submission attempt (success or failure) — lets a retry (e.g. after a rejection or a validation
+  /// error) pre-fill the form instead of starting from scratch. Never contains tax IDs, ID document
+  /// numbers/images, proof-of-address files, or other uploaded documents — see stripSensitiveKycFields
+  /// in modules/kyc/kycDraft.ts, the only place that writes this column.
+  kycDraft                   Json?
   /// Set once POST /customer/virtual/cards/activate has been called for this customer — the card
   /// issuer requires that exactly once before their first card, and the guide doesn't document it
   /// as safely repeatable, so this avoids calling it again on every card issuance.

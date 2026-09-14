@@ -24,6 +24,12 @@ import { getCustomerEndorsements, regenerateCustomerEndorsementLink } from "../c
 import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import { sendOpsAlert } from "../notifications/channels/opsAlert.js";
 import logger from "../../lib/logger.js";
+import { buildIndividualKycDraft, buildBusinessKycDraft } from "./kycDraft.js";
+
+const kycDraftResponseSchema = z.object({
+  type: z.enum(["INDIVIDUAL", "BUSINESS"]),
+  draft: z.record(z.unknown()).nullable(),
+});
 
 async function resolveCountryIso3(iso2: string): Promise<string> {
   const countries = await yativoClient.fiat.kycReference.listCountries();
@@ -165,6 +171,15 @@ export async function kycRoutes(app: FastifyInstance) {
     async (_request, reply) => reply.send(await yativoClient.fiat.kycReference.listBusinessSourceOfFunds()),
   );
 
+  server.get(
+    "/portal/kyc/draft",
+    { preHandler: requireCustomerAuth, schema: { response: { 200: kycDraftResponseSchema } } },
+    async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      return reply.send({ type: customer.type, draft: (customer.kycDraft as Record<string, unknown> | null) ?? null });
+    },
+  );
+
   // --- Submission ---
 
   server.post(
@@ -182,6 +197,12 @@ export async function kycRoutes(app: FastifyInstance) {
         throw new AppError(parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "), 400, "VALIDATION_ERROR");
       }
       const body = injectFiles<typeof parsed.data, SubmitIndividualKycInput>(parsed.data, files);
+
+      // Best-effort — saved before the Yativo call so a rejected/failed attempt still leaves the
+      // non-sensitive fields available to pre-fill the next retry. Never blocks the actual submission.
+      await app.prisma.customer
+        .update({ where: { id: customer.id }, data: { kycDraft: buildIndividualKycDraft(parsed.data) } })
+        .catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to save individual KYC draft snapshot"));
 
       const countryIso3 = await resolveCountryIso3(parsed.data.residentialAddress.country);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer, {
@@ -226,6 +247,12 @@ export async function kycRoutes(app: FastifyInstance) {
         throw new AppError(parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "), 400, "VALIDATION_ERROR");
       }
       const body = injectFiles<typeof parsed.data, SubmitBusinessKycInput>(parsed.data, files);
+
+      // Best-effort — saved before the Yativo call so a rejected/failed attempt still leaves the
+      // non-sensitive fields available to pre-fill the next retry. Never blocks the actual submission.
+      await app.prisma.customer
+        .update({ where: { id: customer.id }, data: { kycDraft: buildBusinessKycDraft(parsed.data) } })
+        .catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to save business KYC draft snapshot"));
 
       const countryIso3 = await resolveCountryIso3(parsed.data.registeredAddress.country);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer, {
