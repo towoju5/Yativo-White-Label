@@ -43,6 +43,28 @@ export async function listCustomerImportRuns(prisma: PrismaClient, limit = 10): 
 }
 
 /**
+ * Best-effort live KYC lookup for a newly-imported customer — without this, every imported row
+ * would default to NOT_STARTED regardless of the customer's real status on Yativo, and
+ * requireKycApproved (deposits, payouts, beneficiaries, cards, business spend cards, crypto
+ * wallets, virtual accounts — see lib/requireKycApproved.ts) would then lock out an active,
+ * already-verified customer for no reason they could see. Only ever promotes to APPROVED on an
+ * exact, confirmed match ("approved" is the one value confirmed live — see fiat/customers.ts's
+ * own doc comment on this same ambiguity for endorsement status); anything else — pending,
+ * unrecognized, null, or the lookup call itself failing — stays NOT_STARTED rather than guessing
+ * at a PENDING/REJECTED mapping with no confirmed vocabulary to base it on. A failed lookup never
+ * fails the import of the customer itself, same posture as tryEnsureYativoCustomer.
+ */
+async function resolveImportedKycStatus(yativoCustomerId: string): Promise<"NOT_STARTED" | "APPROVED"> {
+  try {
+    const { kycStatus } = await yativoClient.fiat.customers.get(yativoCustomerId);
+    if (kycStatus?.trim().toLowerCase() === "approved") return "APPROVED";
+  } catch (err) {
+    logger.warn({ err, yativoCustomerId }, "customer import: couldn't fetch live KYC status — defaulting to NOT_STARTED");
+  }
+  return "NOT_STARTED";
+}
+
+/**
  * Creates a local account for one Yativo customer not already known locally — never touches an
  * existing row (a customer who already signed up directly keeps their own account untouched, even
  * if Yativo also has a record for the same email). The new row has no passwordHash and
@@ -59,6 +81,7 @@ async function importOneCustomer(prisma: PrismaClient, item: FiatCustomerListIte
   const isBusiness = item.type === "business";
   const status = item.status && INACTIVE_STATUSES.has(item.status.trim().toLowerCase()) ? "FROZEN" : "ACTIVE";
   const createdAt = item.createdAt ? new Date(item.createdAt) : undefined;
+  const kycStatus = await resolveImportedKycStatus(item.yativoCustomerId);
 
   try {
     await prisma.customer.create({
@@ -71,6 +94,7 @@ async function importOneCustomer(prisma: PrismaClient, item: FiatCustomerListIte
         phone: item.phone,
         countryCode: item.countryIso3,
         status,
+        kycStatus,
         yativoCustomerId: item.yativoCustomerId,
         source: "IMPORTED",
         requiresPasswordSetup: true,
