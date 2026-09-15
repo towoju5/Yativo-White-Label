@@ -13,7 +13,9 @@ export const yativoWebhookEnvelopeSchema = z.object({
 });
 export type YativoWebhookEnvelope = z.infer<typeof yativoWebhookEnvelopeSchema>;
 
-export const DEPOSIT_STATUSES = ["pending", "processing", "success", "failed", "cancelled", "expired"] as const;
+// "completed" accepted alongside "success" — deposit.completed events use it, deposit.created/
+// updated use "success"; both mean the same terminal, credit-eligible state.
+export const DEPOSIT_STATUSES = ["pending", "processing", "success", "completed", "failed", "cancelled", "expired"] as const;
 
 /** `deposit.created` / `deposit.updated` — a native gateway pay-in (see modules/deposits). Raw fields are snake_case; this transforms to the camelCase shape handlers consume. */
 const rawDepositEventSchema = z

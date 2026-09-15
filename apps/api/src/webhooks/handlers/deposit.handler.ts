@@ -12,13 +12,14 @@ import type { EntryLine } from "../../modules/ledger/types.js";
 import type { WebhookHandlerResult } from "./result.js";
 
 /**
- * `deposit.created` / `deposit.updated` — a native gateway pay-in (see modules/deposits).
- * `status === "success"` credits the wallet. `failed`/`cancelled`/`expired` are terminal — the
- * PENDING hold placed at initiate time (see deposits.routes.ts) is released via reverseTransaction
- * so the deposit stops showing as stuck PENDING forever; confirmed live, without this the
- * transaction never updates once Yativo gives up on it. `pending`/`processing` are genuinely
- * transient and stay IGNORED — a later `deposit.updated` delivery for the same id will fire this
- * again once it resolves either way.
+ * `deposit.created` / `deposit.updated` / `deposit.completed` — a native gateway pay-in (see
+ * modules/deposits). `status === "success"` or `"completed"` credits the wallet (both mean the
+ * same terminal state — different event names use different spellings). `failed`/`cancelled`/
+ * `expired` are terminal — the PENDING hold placed at initiate time (see deposits.routes.ts) is
+ * released via reverseTransaction so the deposit stops showing as stuck PENDING forever; confirmed
+ * live, without this the transaction never updates once Yativo gives up on it. `pending`/
+ * `processing` are genuinely transient and stay IGNORED — a later `deposit.updated` delivery for
+ * the same id will fire this again once it resolves either way.
  */
 export async function handleDepositEvent(prisma: PrismaClient, payload: DepositEventPayload, externalEventId: string): Promise<WebhookHandlerResult> {
   // Resolved via the local Deposit row (recorded at /portal/deposit/initiate) first — a more
@@ -42,8 +43,8 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
     return { status: "PROCESSED" };
   }
 
-  if (payload.status !== "success") {
-    return { status: "IGNORED", errorMessage: `Deposit status is ${payload.status}, not success — no ledger entry posted` };
+  if (payload.status !== "success" && payload.status !== "completed") {
+    return { status: "IGNORED", errorMessage: `Deposit status is ${payload.status}, not success/completed — no ledger entry posted` };
   }
 
   const customer = payinRecord
@@ -57,7 +58,13 @@ export async function handleDepositEvent(prisma: PrismaClient, payload: DepositE
   if (!currency) {
     return { status: "FAILED", errorMessage: `Unknown currency ${payload.currencyCode}` };
   }
-  const amountMinor = majorToMinor(payload.amount, currency.decimals);
+  // payload.currencyCode is deposit_currency (the wallet-side currency) — it must be paired with
+  // receiveAmount (also deposit_currency-denominated), never with the bare `amount` field, which
+  // is in the gateway's local/source currency (`currency`, e.g. NGN) and can be off by orders of
+  // magnitude once majorToMinor'd against the wrong currency's decimals. Falls back to `amount`
+  // only when Yativo hasn't sent a receive_amount at all, in which case currencyCode also fell
+  // back to the local `currency` (see depositEventPayloadSchema) — amount/currency stay paired.
+  const amountMinor = majorToMinor(payload.receiveAmount ?? payload.amount, currency.decimals);
 
   const settlement = await ensurePlatformAccount(prisma, "YATIVO_SETTLEMENT", payload.currencyCode);
   const wallet = await ensureCustomerWalletAccount(prisma, customer.id, payload.currencyCode);

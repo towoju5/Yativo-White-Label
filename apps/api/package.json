@@ -15,7 +15,8 @@
     "create-staff": "tsx scripts/createStaff.ts",
     "scrub-yativo-descriptions": "tsx scripts/scrubYativoDescriptions.ts",
     "bootstrap-platform-settings": "tsx scripts/bootstrapPlatformSettings.ts",
-    "backfill-ledger-entry-balances": "tsx scripts/backfillLedgerEntryBalances.ts"
+    "backfill-ledger-entry-balances": "tsx scripts/backfillLedgerEntryBalances.ts",
+    "correct-deposit-credits": "tsx scripts/correctDepositCredits.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
