@@ -159,8 +159,9 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
             {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label>{t("kycIndividual.steps.personalInfo.middleName", "Middle name (optional)")}</Label>
+            <Label>{t("kycIndividual.steps.personalInfo.middleName", "Middle name")}</Label>
             <Input {...form.register("middleName")} />
+            {errors.middleName && <p className="text-xs text-destructive">{errors.middleName.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label>{t("kycIndividual.steps.personalInfo.lastName", "Last name")}</Label>

@@ -30,11 +30,12 @@ export function EndorsementsTable({
   errorMessage?: string | null;
   /**
    * Fetches a fresh hosted verification link for one service and returns the customer's full,
-   * updated endorsement list — Yativo never includes a usable link on the passive endorsements
-   * fetch (confirmed live: always null/empty there), only from this dedicated regenerate call,
-   * and calling it for one pending service tends to refresh every other pending service's link
-   * too, which is why the whole list comes back rather than just one entry. Omit to render the
-   * table read-only (no generate/view actions) — used where the caller hasn't wired a mutation.
+   * updated endorsement list. Only shown for a service the passive endorsements fetch already
+   * reports a hostedKycUrl for (services that don't need hosted verification, or that Yativo
+   * hasn't set one up for, get no action at all) — calling it for one pending service tends to
+   * refresh every other pending service's link too, which is why the whole list comes back
+   * rather than just one entry. Omit to render the table read-only (no generate/view actions) —
+   * used where the caller hasn't wired a mutation.
    */
   onGenerateLink?: (service: string) => Promise<CustomerEndorsement[]>;
 }) {
@@ -87,18 +88,16 @@ export function EndorsementsTable({
   };
 
   const renderAction = (e: CustomerEndorsement) =>
-    e.status === "approved" ? (
+    e.status === "approved" || !e.hostedKycUrl ? (
       <span className="text-muted-foreground">—</span>
-    ) : e.hostedKycUrl ? (
-      <Button variant="ghost" size="sm" onClick={() => setViewing({ url: e.hostedKycUrl!, service: e.service })}>
-        View <ExternalLink className="h-3.5 w-3.5" />
-      </Button>
     ) : onGenerateLink ? (
       <Button variant="ghost" size="sm" disabled={generatingService === e.service} onClick={() => handleGenerate(e.service)}>
         {generatingService === e.service ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Generate link"}
       </Button>
     ) : (
-      <span className="text-muted-foreground">—</span>
+      <Button variant="ghost" size="sm" onClick={() => setViewing({ url: e.hostedKycUrl!, service: e.service })}>
+        View <ExternalLink className="h-3.5 w-3.5" />
+      </Button>
     );
 
   return (

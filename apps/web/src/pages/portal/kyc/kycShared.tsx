@@ -128,16 +128,26 @@ function formatBytes(n: number): string {
   return n < 1024 * 1024 ? `${Math.round(n / 1024)}KB` : `${(n / 1024 / 1024).toFixed(1)}MB`;
 }
 
-/** Strips a PHP/JS-style "/pattern/flags" regex string down to a usable RegExp, or null if unparseable. */
+/**
+ * Strips a "/pattern/flags" regex string down to a usable RegExp, or null if unparseable. Yativo's
+ * postal-code rule_regex is Ruby's `Regexp#inspect` output (e.g. `/\A\d{6}\Z/u`), not a JS-style
+ * pattern — Ruby's `\A`/`\Z` string anchors aren't recognized in JS, where outside unicode mode
+ * they're silently read as literal "A"/"Z" characters instead of anchors. That turned every valid
+ * postal code (e.g. NG's "839092") into a false "doesn't match" — the pattern was actually testing
+ * for a literal A...Z substring, never anchoring the digits — even though the server-side submit
+ * endpoint accepted it fine (confirmed live: postal_code is unvalidated there per the integration
+ * guide). Translating the anchors to `^`/`$` fixes it.
+ */
 function parseServerRegex(pattern: string | null): RegExp | null {
   if (!pattern) return null;
   const m = pattern.match(/^\/(.*)\/([a-z]*)$/i);
+  const translate = (body: string) => body.replace(/\\A/g, "^").replace(/\\[Zz]/g, "$");
   try {
     if (m) {
       const [, body, flags] = m;
-      return new RegExp(body ?? pattern, (flags ?? "").replace("u", ""));
+      return new RegExp(translate(body ?? pattern), (flags ?? "").replace("u", ""));
     }
-    return new RegExp(pattern);
+    return new RegExp(translate(pattern));
   } catch {
     return null;
   }

@@ -115,7 +115,7 @@ function refineVirtualAccountFlags<T extends z.infer<z.ZodObject<typeof virtualA
 export const individualKycSubmissionSchema = z
   .object({
     firstName: z.string().min(1).max(1024),
-    middleName: z.string().max(1024).optional(),
+    middleName: z.string().min(1).max(1024),
     lastName: z.string().min(1).max(1024),
     email: z.string().email(),
     /** E.164 dial code, e.g. "+1". */
