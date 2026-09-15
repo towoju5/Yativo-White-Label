@@ -79,6 +79,7 @@ const sections: NavSection[] = [
       { to: "/admin/settings/limits", label: "Withdrawal limits", icon: Gauge },
       { to: "/admin/settings/integrations", label: "Integrations", icon: Plug },
       { to: "/admin/settings/storage", label: "Storage", icon: HardDrive },
+      { to: "/admin/settings/endorsements", label: "Endorsements display", icon: BadgeCheck },
     ],
   },
 ];

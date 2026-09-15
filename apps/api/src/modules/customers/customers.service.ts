@@ -1,4 +1,6 @@
 import type { PrismaClient, KycStatus, CustomerStatus, Customer } from "@prisma/client";
+import type { FiatCustomerEndorsement } from "@white-label/yativo-sdk";
+import type { CustomerEndorsement } from "@white-label/shared-types";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { ensureYativoCustomer, tryEnsureYativoCustomer, isYativoCustomerNotFound } from "../../lib/ensureYativoCustomer.js";
 import { yativoClient } from "../../lib/yativoClient.js";
@@ -113,6 +115,23 @@ async function resubmitAfterCustomerNotFound(prisma: PrismaClient, customer: Cus
   return ensureYativoCustomer(prisma, customer, undefined, { force: true });
 }
 
+/**
+ * Merges in each service's admin-configured display override (see EndorsementDisplaySetting) —
+ * purely cosmetic labeling/visibility, never affects gating. Shared by both the raw fetch and the
+ * regenerate-link call below since both return the same shape to callers.
+ */
+async function enrichEndorsements(prisma: PrismaClient, endorsements: FiatCustomerEndorsement[]): Promise<CustomerEndorsement[]> {
+  if (endorsements.length === 0) return [];
+  const overrides = await prisma.endorsementDisplaySetting.findMany({
+    where: { service: { in: endorsements.map((e) => e.service) } },
+  });
+  const byService = new Map(overrides.map((o) => [o.service, o]));
+  return endorsements.map((e) => {
+    const override = byService.get(e.service);
+    return { ...e, displayName: override?.displayName ?? null, description: override?.description ?? null, isVisible: override?.isVisible ?? true };
+  });
+}
+
 /** Live from Yativo — the endorsement checklist isn't cached locally, so this always reflects Yativo's current view (see fiat/customers.ts's `get()`). */
 export async function getCustomerEndorsements(prisma: PrismaClient, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
@@ -122,12 +141,12 @@ export async function getCustomerEndorsements(prisma: PrismaClient, customerId: 
   }
   try {
     const { endorsements } = await yativoClient.fiat.customers.get(customer.yativoCustomerId);
-    return endorsements;
+    return enrichEndorsements(prisma, endorsements);
   } catch (err) {
     if (!isYativoCustomerNotFound(err)) throw err;
     const yativoCustomerId = await resubmitAfterCustomerNotFound(prisma, customer);
     const { endorsements } = await yativoClient.fiat.customers.get(yativoCustomerId);
-    return endorsements;
+    return enrichEndorsements(prisma, endorsements);
   }
 }
 
@@ -139,11 +158,13 @@ export async function regenerateCustomerEndorsementLink(prisma: PrismaClient, cu
     throw new AppError("This customer isn't registered on Yativo yet — no endorsement data is available.", 409, "NOT_REGISTERED");
   }
   try {
-    return await yativoClient.fiat.customers.regenerateEndorsementLink(customer.yativoCustomerId, service);
+    const endorsements = await yativoClient.fiat.customers.regenerateEndorsementLink(customer.yativoCustomerId, service);
+    return enrichEndorsements(prisma, endorsements);
   } catch (err) {
     if (!isYativoCustomerNotFound(err)) throw err;
     const yativoCustomerId = await resubmitAfterCustomerNotFound(prisma, customer);
-    return yativoClient.fiat.customers.regenerateEndorsementLink(yativoCustomerId, service);
+    const endorsements = await yativoClient.fiat.customers.regenerateEndorsementLink(yativoCustomerId, service);
+    return enrichEndorsements(prisma, endorsements);
   }
 }
 

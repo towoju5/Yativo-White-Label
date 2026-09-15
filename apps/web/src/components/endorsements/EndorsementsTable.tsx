@@ -24,6 +24,7 @@ export function EndorsementsTable({
   isLoading,
   errorMessage,
   onGenerateLink,
+  showHiddenBadge,
 }: {
   endorsements: CustomerEndorsement[] | undefined;
   isLoading: boolean;
@@ -38,6 +39,8 @@ export function EndorsementsTable({
    * used where the caller hasn't wired a mutation.
    */
   onGenerateLink?: (service: string) => Promise<CustomerEndorsement[]>;
+  /** Admin-only: flags a service an admin has hidden from the customer-facing checklist. The portal never renders those rows at all (they're already filtered out server-side), so this only makes sense here. */
+  showHiddenBadge?: boolean;
 }) {
   const { toast } = useToast();
   const [overrides, setOverrides] = useState<Record<string, CustomerEndorsement>>({});
@@ -87,6 +90,20 @@ export function EndorsementsTable({
     }
   };
 
+  const labelFor = (e: CustomerEndorsement) => e.displayName || formatServiceName(e.service);
+
+  const renderName = (e: CustomerEndorsement) => (
+    <>
+      <span>{labelFor(e)}</span>
+      {showHiddenBadge && !e.isVisible && (
+        <Badge variant="secondary" className="ml-2 align-middle text-[10px]">
+          Hidden from customers
+        </Badge>
+      )}
+      {e.description && <p className="mt-0.5 text-xs font-normal text-muted-foreground">{e.description}</p>}
+    </>
+  );
+
   const renderAction = (e: CustomerEndorsement) =>
     e.status === "approved" || !e.hostedKycUrl ? (
       <span className="text-muted-foreground">—</span>
@@ -115,7 +132,7 @@ export function EndorsementsTable({
           <TableBody>
             {merged.map((e) => (
               <TableRow key={e.service}>
-                <TableCell className="font-medium">{formatServiceName(e.service)}</TableCell>
+                <TableCell className="font-medium">{renderName(e)}</TableCell>
                 <TableCell>
                   <Badge variant={ENDORSEMENT_VARIANT[e.status] ?? "secondary"}>{formatServiceName(e.status)}</Badge>
                 </TableCell>
@@ -131,7 +148,7 @@ export function EndorsementsTable({
         {merged.map((e) => (
           <div key={e.service} className="rounded-lg border border-border bg-card p-4 shadow-soft">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium">{formatServiceName(e.service)}</p>
+              <p className="text-sm font-medium">{renderName(e)}</p>
               <Badge variant={ENDORSEMENT_VARIANT[e.status] ?? "secondary"}>{formatServiceName(e.status)}</Badge>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3">

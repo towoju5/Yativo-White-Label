@@ -49,5 +49,35 @@ export const customerEndorsementSchema = z.object({
   status: z.string(),
   hostedKycUrl: z.string().nullable(),
   updated: z.string().nullable(),
+  /** Admin-customized label/description for this service — see EndorsementDisplaySetting. Null means no override; render the auto-formatted service slug instead. */
+  displayName: z.string().nullable(),
+  description: z.string().nullable(),
+  /** False only when an admin has explicitly hidden this service from the customer-facing checklist — doesn't affect whether it gates any action. */
+  isVisible: z.boolean(),
 });
 export type CustomerEndorsement = z.infer<typeof customerEndorsementSchema>;
+
+export const endorsementDisplaySettingSchema = z.object({
+  service: z.string(),
+  displayName: z.string().nullable(),
+  description: z.string().nullable(),
+  isVisible: z.boolean(),
+  sortOrder: z.number().int(),
+  updatedAt: z.string(),
+});
+export type EndorsementDisplaySetting = z.infer<typeof endorsementDisplaySettingSchema>;
+
+export const upsertEndorsementDisplaySettingSchema = z.object({
+  displayName: z.string().min(1).nullable().optional(),
+  description: z.string().min(1).nullable().optional(),
+  isVisible: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+});
+export type UpsertEndorsementDisplaySettingInput = z.infer<typeof upsertEndorsementDisplaySettingSchema>;
+
+export const endorsementDisplaySettingsResponseSchema = z.object({
+  overrides: z.array(endorsementDisplaySettingSchema),
+  /** Every service slug this deployment currently knows about — every configured override plus every slug derived from live Yativo data (virtual-account rails, "virtual_card"). Not exhaustive: a brand-new slug can still show up on a live customer's endorsement list before it's ever seen here. */
+  knownServices: z.array(z.string()),
+});
+export type EndorsementDisplaySettingsResponse = z.infer<typeof endorsementDisplaySettingsResponseSchema>;

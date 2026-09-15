@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { AdminTransactionDetailDialog } from "@/components/admin/AdminTransactionDetailDialog";
 
 const STATUS_VARIANT: Record<SupportTicketStatus, "success" | "warning" | "destructive" | "secondary"> = {
   OPEN: "warning",
@@ -28,6 +29,7 @@ export default function SupportTicketsPage() {
   const [status, setStatus] = useState("ALL");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reply, setReply] = useState("");
+  const [viewingTransactionId, setViewingTransactionId] = useState<string | null>(null);
 
   const { data: tickets, isLoading } = useQuery({
     queryKey: ["admin", "support", "tickets", status],
@@ -110,7 +112,14 @@ export default function SupportTicketsPage() {
                     <div className="text-sm font-medium">{t.customerName}</div>
                     <div className="text-xs text-muted-foreground">{t.customerEmail}</div>
                   </TableCell>
-                  <TableCell className="max-w-[260px] truncate">{t.subject}</TableCell>
+                  <TableCell className="max-w-[260px] truncate">
+                    {t.subject}
+                    {t.transactionType && (
+                      <Badge variant="outline" className="ml-1.5 text-[10px]">
+                        {t.transactionType === "DEPOSIT" ? "Deposit" : "Payout"}
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell><Badge variant={STATUS_VARIANT[t.status]}>{t.status.replace("_", " ")}</Badge></TableCell>
                   <TableCell>
                     <div className="text-sm">{t.lastMessageAuthorType === "STAFF" ? (t.lastMessageAuthorName ?? "Support") : t.lastMessageAuthorType === "CUSTOMER" ? t.customerName : "—"}</div>
@@ -142,6 +151,12 @@ export default function SupportTicketsPage() {
                 </Select>
               </div>
 
+              {detail.transactionId && (
+                <Button variant="outline" size="sm" onClick={() => setViewingTransactionId(detail.transactionId)}>
+                  View transaction
+                </Button>
+              )}
+
               <div className="space-y-3 rounded-lg border border-border p-3">
                 {detail.messages.map((m) => (
                   <div key={m.id} className={m.authorType === "STAFF" ? "ml-6 rounded-md bg-primary/10 p-2.5" : "mr-6 rounded-md bg-muted p-2.5"}>
@@ -165,6 +180,8 @@ export default function SupportTicketsPage() {
           )}
         </SheetContent>
       </Sheet>
+
+      <AdminTransactionDetailDialog transactionId={viewingTransactionId} onClose={() => setViewingTransactionId(null)} />
     </div>
   );
 }

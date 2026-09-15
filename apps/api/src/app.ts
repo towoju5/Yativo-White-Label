@@ -42,6 +42,7 @@ import { adminCryptoWalletsRoutes } from "./modules/cryptoWallets/adminCryptoWal
 import { portalCryptoWalletsRoutes } from "./modules/cryptoWallets/portalCryptoWallets.routes.js";
 import { locationsRoutes } from "./modules/locations/locations.routes.js";
 import { platformSettingsRoutes } from "./modules/platformSettings/platformSettings.routes.js";
+import { endorsementSettingsRoutes } from "./modules/endorsementSettings/endorsementSettings.routes.js";
 import { paymentGatewaysRoutes } from "./modules/paymentGateways/paymentGateways.routes.js";
 import { pricingRoutes } from "./modules/pricing/pricing.routes.js";
 import { twoFactorRoutes } from "./modules/twoFactor/twoFactor.routes.js";
@@ -179,6 +180,7 @@ export async function buildApp() {
   await app.register(portalCryptoWalletsRoutes);
   await app.register(locationsRoutes);
   await app.register(platformSettingsRoutes);
+  await app.register(endorsementSettingsRoutes);
   await app.register(paymentGatewaysRoutes);
   await app.register(pricingRoutes);
   await app.register(twoFactorRoutes);

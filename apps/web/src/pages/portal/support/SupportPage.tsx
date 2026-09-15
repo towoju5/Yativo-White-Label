@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TransactionDetailDialog } from "@/components/wallet/TransactionDetailDialog";
 
 const STATUS_VARIANT: Record<SupportTicketStatus, "success" | "warning" | "destructive" | "secondary"> = {
   OPEN: "warning",
@@ -30,6 +31,7 @@ function MyTicketsCard() {
   const queryClient = useQueryClient();
   const [openTicketId, setOpenTicketId] = useState<string | null>(null);
   const [reply, setReply] = useState("");
+  const [viewingTransactionId, setViewingTransactionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: tickets, isLoading } = useQuery({
@@ -84,7 +86,14 @@ function MyTicketsCard() {
                 className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2.5 text-left text-sm hover:bg-muted"
               >
                 <span className="truncate pr-2">{ticket.subject}</span>
-                <Badge variant={STATUS_VARIANT[ticket.status]}>{ticket.status.replace("_", " ")}</Badge>
+                <span className="flex shrink-0 items-center gap-1.5">
+                  {ticket.transactionType && (
+                    <Badge variant="outline" className="text-[10px]">
+                      {ticket.transactionType === "DEPOSIT" ? t("support.deposit", "Deposit") : t("support.payout", "Payout")}
+                    </Badge>
+                  )}
+                  <Badge variant={STATUS_VARIANT[ticket.status]}>{ticket.status.replace("_", " ")}</Badge>
+                </span>
               </button>
             ))
           )}
@@ -98,6 +107,11 @@ function MyTicketsCard() {
           </DialogHeader>
           {detail && (
             <div className="space-y-4">
+              {detail.transactionId && (
+                <Button variant="outline" size="sm" onClick={() => setViewingTransactionId(detail.transactionId)}>
+                  {t("support.viewTransaction", "View transaction")}
+                </Button>
+              )}
               <div className="max-h-72 space-y-3 overflow-y-auto rounded-lg border border-border p-3">
                 {detail.messages.map((m) => (
                   <div key={m.id} className={m.authorType === "STAFF" ? "mr-6 rounded-md bg-muted p-2.5" : "ml-6 rounded-md bg-primary/10 p-2.5"}>
@@ -122,6 +136,8 @@ function MyTicketsCard() {
           )}
         </DialogContent>
       </Dialog>
+
+      <TransactionDetailDialog transactionId={viewingTransactionId} onClose={() => setViewingTransactionId(null)} />
     </>
   );
 }

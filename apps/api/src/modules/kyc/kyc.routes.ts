@@ -65,7 +65,9 @@ export async function kycRoutes(app: FastifyInstance) {
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(customerEndorsementSchema), 409: errorResponseSchema } } },
     async (request, reply) => {
       const endorsements = await getCustomerEndorsements(app.prisma, request.customer!.sub);
-      return reply.send(endorsements);
+      // Customer-facing only — an admin-hidden service is excluded from what the customer sees,
+      // but never from the live status checks that gate card/account/wallet creation elsewhere.
+      return reply.send(endorsements.filter((e) => e.isVisible));
     },
   );
 
@@ -80,7 +82,7 @@ export async function kycRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const endorsements = await regenerateCustomerEndorsementLink(app.prisma, request.customer!.sub, request.params.service);
-      return reply.send(endorsements);
+      return reply.send(endorsements.filter((e) => e.isVisible));
     },
   );
 

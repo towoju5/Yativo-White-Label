@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { TransactionDetail } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
-import { Printer, Share2, Download, Copy } from "lucide-react";
+import { Printer, Share2, Download, Copy, Flag } from "lucide-react";
 import { portalApi } from "@/lib/api-client";
 import { fetchBranding } from "@/theme/branding";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ReportTransactionIssueDialog } from "@/components/support/ReportTransactionIssueDialog";
 import { humanizeType, feeDetailRows, buildReceiptRows, renderReceiptPng, receiptFileName } from "./receiptImage";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
@@ -76,6 +78,7 @@ function downloadBlob(blob: Blob, filename: string) {
 
 export function TransactionDetailDialog({ transactionId, onClose }: { transactionId: string | null; onClose: () => void }) {
   const { toast } = useToast();
+  const [reporting, setReporting] = useState(false);
   const { data, isLoading } = useQuery({
     queryKey: ["portal", "transactions", transactionId],
     queryFn: () => portalApi.get<TransactionDetail>(`/portal/transactions/${transactionId}`),
@@ -134,6 +137,9 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
   const amountLabel = primaryEntry
     ? `${primaryEntry.direction === "CREDIT" ? "+" : "-"}${formatMinorAmount(primaryEntry.amountMinor, 2)} ${primaryEntry.currencyCode}`
     : "";
+  // Crypto deposits aren't LedgerTransactions at all, so this dialog never even renders for them —
+  // no crypto-specific guard is needed here, only the DEPOSIT/PAYOUT scoping "Report an issue" is for.
+  const reportableType = data && (data.type === "DEPOSIT" || data.type === "PAYOUT") ? data.type : null;
 
   return (
     <Dialog open={!!transactionId} onOpenChange={(v) => !v && onClose()}>
@@ -200,9 +206,15 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
                 <Printer className="h-4 w-4" /> Print receipt (PDF)
               </Button>
             </div>
+            {reportableType && (
+              <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setReporting(true)}>
+                <Flag className="h-4 w-4" /> Report an issue
+              </Button>
+            )}
           </div>
         )}
       </DialogContent>
+      <ReportTransactionIssueDialog transaction={reportableType && reporting ? { id: data!.id, type: reportableType } : null} onClose={() => setReporting(false)} />
     </Dialog>
   );
 }

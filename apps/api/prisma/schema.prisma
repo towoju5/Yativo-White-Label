@@ -59,6 +59,22 @@ enum KycRequiredService {
   BUSINESS_SPEND_CARD
 }
 
+/// Admin-customizable display for one Yativo endorsement service slug (e.g. "virtual_card",
+/// "faster_payments") — controls the label/description/visibility shown to customers on the
+/// endorsement checklist. Purely cosmetic: it never affects whether an endorsement gates a
+/// customer action (that's decided by the live status Yativo reports, checked independently at
+/// each gated action). A missing row means "use the auto-formatted service slug, visible."
+model EndorsementDisplaySetting {
+  service     String   @id
+  displayName String?
+  description String?
+  isVisible   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@map("endorsement_display_settings")
+}
+
 /// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
 model PlatformSettings {
   id                       Int                  @id @default(1)
@@ -151,9 +167,10 @@ model LedgerTransaction {
   postedAt       DateTime?
   reversedAt     DateTime?
 
-  entries LedgerEntry[]
-  payout  Payout?
-  deposit Deposit?
+  entries        LedgerEntry[]
+  payout         Payout?
+  deposit        Deposit?
+  supportTickets SupportTicket[]
 
   @@index([externalRef])
   @@index([status])
@@ -488,17 +505,24 @@ enum SupportTicketAuthorType {
 /// support inbox on the first message (so nothing changes for how staff get paged), but now every
 /// message on both sides is persisted so the customer (and staff) can see a real thread + status.
 model SupportTicket {
-  id         String              @id @default(cuid())
-  customerId String
-  customer   Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  subject    String
-  status     SupportTicketStatus @default(OPEN)
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
+  id            String              @id @default(cuid())
+  customerId    String
+  customer      Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  subject       String
+  status        SupportTicketStatus @default(OPEN)
+  /// Optional — set when a customer opens a ticket from a specific deposit or payout ("Report an
+  /// issue" on the transaction detail dialog) rather than the general contact form. Restricted to
+  /// DEPOSIT/PAYOUT at the point of creation (see submitSupportTicket) — crypto deposits aren't
+  /// LedgerTransactions at all, so they can never be linked here.
+  transactionId String?
+  transaction   LedgerTransaction?  @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   messages SupportTicketMessage[]
 
   @@index([customerId, createdAt])
+  @@index([transactionId])
   @@map("support_tickets")
 }
 
@@ -521,14 +545,14 @@ model SupportTicketMessage {
 /// happened even if e.g. their SMS provider is down. Title/body are pre-rendered plain text (not
 /// the HTML email template) — see notifyCustomer() in notifications.service.ts.
 model Notification {
-  id         String               @id @default(cuid())
+  id         String                @id @default(cuid())
   customerId String
-  customer   Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer   Customer              @relation(fields: [customerId], references: [id], onDelete: Cascade)
   type       EmailNotificationType
   title      String
   body       String
   readAt     DateTime?
-  createdAt  DateTime             @default(now())
+  createdAt  DateTime              @default(now())
 
   @@index([customerId, createdAt])
   @@map("notifications")
@@ -655,28 +679,28 @@ enum StaffRole {
 }
 
 model StaffUser {
-  id            String      @id @default(cuid())
-  email         String      @unique
+  id              String      @id @default(cuid())
+  email           String      @unique
   /// Null while an invite is pending and not yet accepted — mirrors CustomerTeamMember's own
   /// invitedAt/acceptedAt/inviteTokenHash pattern. loginStaff/changePassword both guard against
   /// null (a pending invite simply can't log in with a password yet).
-  passwordHash  String?
-  role          StaffRole   @default(STAFF)
+  passwordHash    String?
+  role            StaffRole   @default(STAFF)
   // OWNER/ADMIN always retain full access regardless of this — it only narrows the STAFF tier.
   // Null means "no custom role assigned yet", which falls back to a fixed, backward-compatible
   // default permission set (see DEFAULT_STAFF_PERMISSIONS) rather than losing access outright.
-  customRoleId  String?
-  customRole    Role?       @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
-  isActive      Boolean     @default(true)
-  deactivatedAt DateTime?
-  invitedById   String?
-  invitedBy     StaffUser?  @relation("Invites", fields: [invitedById], references: [id])
-  invited       StaffUser[] @relation("Invites")
+  customRoleId    String?
+  customRole      Role?       @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
+  isActive        Boolean     @default(true)
+  deactivatedAt   DateTime?
+  invitedById     String?
+  invitedBy       StaffUser?  @relation("Invites", fields: [invitedById], references: [id])
+  invited         StaffUser[] @relation("Invites")
   /// Set once the invite is accepted and a password chosen — null means the invite is still pending.
-  acceptedAt    DateTime?
-  inviteTokenHash String?   @unique
+  acceptedAt      DateTime?
+  inviteTokenHash String?     @unique
   inviteExpiresAt DateTime?
-  createdAt     DateTime    @default(now())
+  createdAt       DateTime    @default(now())
 
   /// Mirrors Customer's own twoFactor* fields exactly — same TOTP + backup-code scheme, gated by
   /// the same lib/totp.ts primitives, just scoped to staff instead of customers.

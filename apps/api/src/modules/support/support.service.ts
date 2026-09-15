@@ -58,6 +58,8 @@ type TicketWithMessages = {
   customerId: string;
   subject: string;
   status: string;
+  transactionId: string | null;
+  transaction: { type: string } | null;
   createdAt: Date;
   updatedAt: Date;
   messages: { id: string; authorType: string; authorId: string; body: string; createdAt: Date }[];
@@ -71,7 +73,16 @@ async function resolveStaffNames(prisma: PrismaClient, staffIds: string[]): Prom
 }
 
 function toListItemDto(
-  t: { id: string; subject: string; status: string; createdAt: Date; updatedAt: Date; messages: { authorType: string; authorId: string; createdAt: Date }[] },
+  t: {
+    id: string;
+    subject: string;
+    status: string;
+    transactionId: string | null;
+    transaction: { type: string } | null;
+    createdAt: Date;
+    updatedAt: Date;
+    messages: { authorType: string; authorId: string; createdAt: Date }[];
+  },
   staffNameById: Map<string, string>,
 ) {
   const lastMessage = t.messages.at(-1);
@@ -90,6 +101,8 @@ function toListItemDto(
     lastMessageAt: lastMessageAt.toISOString(),
     lastMessageAuthorType,
     lastMessageAuthorName,
+    transactionId: t.transactionId,
+    transactionType: (t.transaction?.type as "DEPOSIT" | "PAYOUT" | undefined) ?? null,
   };
 }
 
@@ -106,14 +119,35 @@ async function messagesToDto(prisma: PrismaClient, ticket: TicketWithMessages) {
   }));
 }
 
+/**
+ * Same ownership check as getTransactionDetailForCustomer (wallets.service.ts) — a ticket can
+ * only be linked to a transaction that's actually one of this customer's own entries, and only a
+ * DEPOSIT or PAYOUT (the two types "Report an issue" is shown for; crypto deposits aren't
+ * LedgerTransactions at all, so they can never reach here regardless).
+ */
+async function resolveLinkableTransactionId(prisma: PrismaClient, customerId: string, transactionId: string | undefined): Promise<string | undefined> {
+  if (!transactionId) return undefined;
+  const tx = await prisma.ledgerTransaction.findFirst({
+    where: { id: transactionId, type: { in: ["DEPOSIT", "PAYOUT"] }, entries: { some: { account: { customerId } } } },
+    select: { id: true },
+  });
+  if (!tx) throw new AppError("That transaction couldn't be found.", 404, "TRANSACTION_NOT_FOUND");
+  return tx.id;
+}
+
 /** Persists the ticket + first message, and forwards it to the support inbox exactly as before — nothing changes for how staff get paged, but now it's a real tracked thread rather than a one-way email. */
 export async function submitSupportTicket(prisma: PrismaClient, customerId: string, input: CreateSupportTicketInput): Promise<{ id: string }> {
-  const [customer, branding] = await Promise.all([prisma.customer.findUniqueOrThrow({ where: { id: customerId } }), getBranding(prisma)]);
+  const [customer, branding, transactionId] = await Promise.all([
+    prisma.customer.findUniqueOrThrow({ where: { id: customerId } }),
+    getBranding(prisma),
+    resolveLinkableTransactionId(prisma, customerId, input.transactionId),
+  ]);
 
   const ticket = await prisma.supportTicket.create({
     data: {
       customerId,
       subject: input.subject,
+      transactionId,
       messages: { create: { authorType: "CUSTOMER", authorId: customerId, body: input.message } },
     },
     include: { messages: true },
@@ -145,6 +179,8 @@ export async function listMyTickets(prisma: PrismaClient, customerId: string) {
       status: true,
       createdAt: true,
       updatedAt: true,
+      transactionId: true,
+      transaction: { select: { type: true } },
       messages: { select: { authorType: true, authorId: true, createdAt: true }, orderBy: { createdAt: "asc" } },
     },
   });
@@ -156,7 +192,7 @@ export async function listMyTickets(prisma: PrismaClient, customerId: string) {
 async function getTicketOrThrow(prisma: PrismaClient, ticketId: string, customerId?: string): Promise<TicketWithMessages> {
   const ticket = await prisma.supportTicket.findFirst({
     where: { id: ticketId, ...(customerId ? { customerId } : {}) },
-    include: { messages: { orderBy: { createdAt: "asc" } } },
+    include: { transaction: { select: { type: true } }, messages: { orderBy: { createdAt: "asc" } } },
   });
   if (!ticket) throw new NotFoundError("Support ticket");
   return ticket;
@@ -203,6 +239,7 @@ export async function listTicketsForAdmin(prisma: PrismaClient, status?: Support
     orderBy: { updatedAt: "desc" },
     include: {
       customer: { select: { id: true, fullName: true, businessName: true, email: true } },
+      transaction: { select: { type: true } },
       messages: { select: { authorType: true, authorId: true, createdAt: true }, orderBy: { createdAt: "asc" } },
     },
   });
@@ -219,7 +256,11 @@ export async function listTicketsForAdmin(prisma: PrismaClient, status?: Support
 export async function getTicketForAdmin(prisma: PrismaClient, ticketId: string) {
   const ticket = await prisma.supportTicket.findUnique({
     where: { id: ticketId },
-    include: { customer: { select: { id: true, fullName: true, businessName: true, email: true } }, messages: { orderBy: { createdAt: "asc" } } },
+    include: {
+      customer: { select: { id: true, fullName: true, businessName: true, email: true } },
+      transaction: { select: { type: true } },
+      messages: { orderBy: { createdAt: "asc" } },
+    },
   });
   if (!ticket) throw new NotFoundError("Support ticket");
   const staffIds = [...new Set(ticket.messages.filter((m) => m.authorType === "STAFF").map((m) => m.authorId))];

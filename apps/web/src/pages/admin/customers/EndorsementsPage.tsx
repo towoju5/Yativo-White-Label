@@ -113,6 +113,7 @@ export default function EndorsementsPage() {
                 isLoading={endorsementsQuery.isLoading}
                 errorMessage={endorsementsQuery.isError ? (endorsementsQuery.error instanceof ApiError ? endorsementsQuery.error.message : "Couldn't load endorsements.") : null}
                 onGenerateLink={canManage ? (service) => staffApi.post<CustomerEndorsement[]>(`/admin/customers/${selectedId}/endorsements/${service}/link`) : undefined}
+                showHiddenBadge
               />
             )}
           </CardContent>
