@@ -3,18 +3,41 @@ import { z } from "zod";
 import type { YativoContext } from "../client.js";
 import { yativoEnvelope, yativoPaginatedEnvelope, YativoApiError, parseYativoErrorMessage } from "../client.js";
 
-/**
- * Every value here is a combined COIN_NETWORK token, not a bare ticker — Yativo's crypto wallet
- * API has no lookup endpoint for this list, so it's hand-maintained from the integration guide.
- * If it drifts out of date, an invalid value comes back as a create-wallet validation error naming
- * the `currency` field (see parseYativoErrorMessage's Laravel-validator handling) rather than a
- * generic failure, so a stale entry here fails loudly instead of silently.
- */
-export const CRYPTO_DEPOSIT_CURRENCIES = [
-  "USDC_SOL",
-  "EURC_SOL",
-] as const;
-export type CryptoDepositCurrency = (typeof CRYPTO_DEPOSIT_CURRENCIES)[number];
+// Combined COIN_NETWORK tokens (e.g. "USDC_SOL"), not bare tickers — this is what `currency`
+// means everywhere in this file (createWallet, wallet/deposit records, supported-assets options).
+export type CryptoDepositCurrency = string;
+
+const networkSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  supported_currencies: z.array(z.string()),
+  currency_options: z.array(z.string()),
+  chain_identifier: z.string(),
+  gas_token: z.string(),
+  confirmation_blocks: z.number(),
+});
+
+const supportedAssetsSchema = z.object({
+  networks: z.array(networkSchema),
+  all_currency_options: z.array(z.string()),
+});
+
+export type CryptoNetwork = {
+  code: string;
+  name: string;
+  supportedCurrencies: string[];
+  /** Combined COIN_NETWORK tokens valid for createWallet()'s `currency` — e.g. "USDC_POL". */
+  currencyOptions: string[];
+  chainIdentifier: string;
+  gasToken: string;
+  confirmationBlocks: number;
+};
+
+export type CryptoSupportedAssets = {
+  networks: CryptoNetwork[];
+  /** Every valid createWallet() `currency` value across all networks — flattens networks[].currencyOptions. */
+  allCurrencyOptions: string[];
+};
 
 // Confirmed against the live API: the response carries more fields than the integration guide
 // documents (is_customer, wallet_status, a nested customer object) and wallet_network is a short
@@ -109,8 +132,53 @@ export type CreateCryptoWalletInput = {
   customerId?: string;
 };
 
+function toSupportedAssets(data: z.infer<typeof supportedAssetsSchema>): CryptoSupportedAssets {
+  return {
+    networks: data.networks.map((n) => ({
+      code: n.code,
+      name: n.name,
+      supportedCurrencies: n.supported_currencies,
+      currencyOptions: n.currency_options,
+      chainIdentifier: n.chain_identifier,
+      gasToken: n.gas_token,
+      confirmationBlocks: n.confirmation_blocks,
+    })),
+    allCurrencyOptions: data.all_currency_options,
+  };
+}
+
 export function createCryptoWalletsResource(ctx: YativoContext) {
   return {
+    /** The live replacement for the old hand-maintained currency list — every valid createWallet() `currency` value, grouped by network. */
+    async getSupportedAssets(): Promise<CryptoSupportedAssets> {
+      const res = await ctx.request({
+        baseUrl: ctx.config.fiatBaseUrl,
+        path: "/crypto/supported-assets",
+        method: "GET",
+        schema: yativoEnvelope(supportedAssetsSchema),
+        mockData: {
+          status: "success",
+          status_code: 200,
+          message: "mock",
+          data: {
+            networks: [
+              {
+                code: "SOL",
+                name: "Solana",
+                supported_currencies: ["USDC", "EURC"],
+                currency_options: ["USDC_SOL", "EURC_SOL"],
+                chain_identifier: "solana",
+                gas_token: "SOL",
+                confirmation_blocks: 32,
+              },
+            ],
+            all_currency_options: ["USDC_SOL", "EURC_SOL"],
+          },
+        },
+      });
+      return toSupportedAssets(res.data);
+    },
+
     /**
      * Idempotent: calling again with the same currency returns the existing wallet ("Wallet
      * already exists") rather than creating a duplicate, so no separate dedupe logic is needed

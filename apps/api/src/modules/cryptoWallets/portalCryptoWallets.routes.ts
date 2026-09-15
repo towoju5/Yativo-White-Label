@@ -1,12 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { CRYPTO_DEPOSIT_CURRENCIES, cryptoWalletSchema, cryptoDepositSchema, createCryptoWalletSchema } from "@white-label/shared-types";
+import { cryptoWalletSchema, cryptoDepositSchema, createCryptoWalletSchema } from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
-import { listMyCryptoWallets, getOrCreateMyCryptoWallet, listMyCryptoDeposits } from "./cryptoWallets.service.js";
+import { listMyCryptoWallets, getOrCreateMyCryptoWallet, listMyCryptoDeposits, listSupportedCryptoCurrencies } from "./cryptoWallets.service.js";
 
 export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -14,7 +14,7 @@ export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
   server.get(
     "/portal/crypto/currencies",
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(z.string()) } } },
-    async (_request, reply) => reply.send([...CRYPTO_DEPOSIT_CURRENCIES]),
+    async (_request, reply) => reply.send(await listSupportedCryptoCurrencies()),
   );
 
   server.get(

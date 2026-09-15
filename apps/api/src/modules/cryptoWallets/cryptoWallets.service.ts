@@ -1,14 +1,29 @@
 import type { PrismaClient } from "@prisma/client";
-import { YativoApiError, type CryptoDepositCurrency } from "@white-label/yativo-sdk";
+import { YativoApiError } from "@white-label/yativo-sdk";
 import { yativoClient } from "../../lib/yativoClient.js";
+import { AppError } from "../../lib/errors.js";
 import logger from "../../lib/logger.js";
+
+/** Live replacement for the old hand-maintained currency list — every combined COIN_NETWORK token createWallet() will accept right now. */
+export async function listSupportedCryptoCurrencies(): Promise<string[]> {
+  const { allCurrencyOptions } = await yativoClient.crypto.wallets.getSupportedAssets();
+  return allCurrencyOptions;
+}
+
+async function requireSupportedCurrency(currency: string): Promise<void> {
+  const supported = await listSupportedCryptoCurrencies();
+  if (!supported.includes(currency)) {
+    throw new AppError(`"${currency}" isn't a supported crypto currency.`, 400, "UNSUPPORTED_CURRENCY");
+  }
+}
 
 export async function listCryptoWallets(page: number, pageSize: number) {
   const result = await yativoClient.crypto.wallets.listWallets({ page, pageSize });
   return { items: result.items, page: result.page, pageSize: result.pageSize, total: result.total };
 }
 
-export async function createCryptoWallet(currency: CryptoDepositCurrency, customerId?: string) {
+export async function createCryptoWallet(currency: string, customerId?: string) {
+  await requireSupportedCurrency(currency);
   return yativoClient.crypto.wallets.createWallet({ currency, customerId });
 }
 
@@ -44,7 +59,7 @@ export async function listCryptoDeposits(page: number, pageSize: number) {
 //
 // Yativo's `customer_id` on a wallet is a local label, not an isolation boundary — confirmed
 // live, every wallet for the same currency shares the exact same on-chain address regardless of
-// this value (see CRYPTO_DEPOSIT_CURRENCIES' doc comment and createWallet()'s). Labeling wallets
+// this value (see createWallet()'s doc comment). Labeling wallets
 // with our own local customer id here lets us show a customer "their" wallet and filter deposit
 // history to it, but it does NOT mean a deposit to that address is cryptographically provable as
 // theirs — anyone who requests a wallet for the same currency sees the same address. This is
@@ -54,11 +69,12 @@ export async function listMyCryptoWallets(localCustomerId: string) {
   return yativoClient.crypto.wallets.listCustomerWallets(localCustomerId);
 }
 
-export async function getOrCreateMyCryptoWallet(prisma: PrismaClient, localCustomerId: string, currency: CryptoDepositCurrency) {
+export async function getOrCreateMyCryptoWallet(prisma: PrismaClient, localCustomerId: string, currency: string) {
   // Reuse an existing wallet for this currency+customer label rather than creating a fresh one on
   // every call — Yativo's own create-wallet is idempotent per (currency, customer_id) too, but
   // checking first avoids a network round trip on every page load once a wallet already exists.
   const existing = (await listMyCryptoWallets(localCustomerId)).find((w) => w.currency === currency);
+  if (!existing) await requireSupportedCurrency(currency);
   const wallet = existing ?? (await yativoClient.crypto.wallets.createWallet({ currency, customerId: localCustomerId }));
 
   // Recorded locally so the crypto_deposit webhook can attribute an incoming deposit to this

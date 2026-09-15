@@ -2,7 +2,6 @@ import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import {
-  CRYPTO_DEPOSIT_CURRENCIES,
   cryptoWalletSchema,
   cryptoDepositSchema,
   createCryptoWalletSchema,
@@ -11,16 +10,15 @@ import {
 } from "@white-label/shared-types";
 import { requireStaffAuth, requirePermission } from "../../middleware/requireStaffAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
-import { listCryptoWallets, createCryptoWallet, deleteCryptoWallet, listCryptoDeposits } from "./cryptoWallets.service.js";
+import { listCryptoWallets, createCryptoWallet, deleteCryptoWallet, listCryptoDeposits, listSupportedCryptoCurrencies } from "./cryptoWallets.service.js";
 
 export async function adminCryptoWalletsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
-  // No lookup endpoint exists for this on Yativo's side — see CRYPTO_DEPOSIT_CURRENCIES' doc comment.
   server.get(
     "/admin/crypto/currencies",
     { preHandler: requireStaffAuth, schema: { response: { 200: z.array(z.string()) } } },
-    async (_request, reply) => reply.send([...CRYPTO_DEPOSIT_CURRENCIES]),
+    async (_request, reply) => reply.send(await listSupportedCryptoCurrencies()),
   );
 
   server.get(

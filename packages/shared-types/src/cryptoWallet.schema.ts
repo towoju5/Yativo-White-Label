@@ -1,16 +1,5 @@
 import { z } from "zod";
 
-/**
- * Combined COIN_NETWORK tokens, not bare tickers — Yativo's crypto wallet API has no lookup
- * endpoint for this list, so it's hand-maintained to match packages/yativo-sdk/src/crypto/wallets.ts.
- */
-export const CRYPTO_DEPOSIT_CURRENCIES = [
-  "USDC_SOL",
-  "EURC_SOL",
-] as const;
-export type CryptoDepositCurrency = (typeof CRYPTO_DEPOSIT_CURRENCIES)[number];
-export const cryptoDepositCurrencySchema = z.enum(CRYPTO_DEPOSIT_CURRENCIES);
-
 export const cryptoWalletSchema = z.object({
   id: z.string(),
   address: z.string(),
@@ -24,10 +13,28 @@ export const cryptoWalletSchema = z.object({
 export type CryptoWallet = z.infer<typeof cryptoWalletSchema>;
 
 export const createCryptoWalletSchema = z.object({
-  currency: cryptoDepositCurrencySchema,
+  /** Combined COIN_NETWORK token (e.g. "USDC_SOL") — validated against the live GET /portal|admin/crypto/currencies list server-side, not a fixed enum, since Yativo's supported-assets list changes independently of this app. */
+  currency: z.string().min(1),
   customerId: z.string().optional(),
 });
 export type CreateCryptoWalletInput = z.infer<typeof createCryptoWalletSchema>;
+
+export const cryptoNetworkSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  supportedCurrencies: z.array(z.string()),
+  currencyOptions: z.array(z.string()),
+  chainIdentifier: z.string(),
+  gasToken: z.string(),
+  confirmationBlocks: z.number(),
+});
+export type CryptoNetwork = z.infer<typeof cryptoNetworkSchema>;
+
+export const cryptoSupportedAssetsSchema = z.object({
+  networks: z.array(cryptoNetworkSchema),
+  allCurrencyOptions: z.array(z.string()),
+});
+export type CryptoSupportedAssets = z.infer<typeof cryptoSupportedAssetsSchema>;
 
 export const cryptoDepositSchema = z.object({
   id: z.string(),
