@@ -83,18 +83,18 @@ export default function PortalCardsPage() {
   const issueMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>("/portal/cards", { amountMinor: Math.round(Number(amount) * 100).toString() }),
     onSuccess: () => {
-      toast({ title: t("cards.toast.cardIssued", "Card issued") });
+      toast({ title: t("cards.toast.cardIssued", "Virtual card issued") });
       queryClient.invalidateQueries({ queryKey: ["portal", "cards"] });
       setIssueOpen(false);
     },
-    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.issueCardError", "Couldn't issue card"), description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.issueCardError", "Couldn't issue virtual card"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("cards.title", "Cards")}</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("cards.title", "Virtual Cards")}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{t("cards.subtitle", "Visa virtual cards linked to your USD wallet")}</p>
         </div>
       </div>
@@ -105,7 +105,7 @@ export default function PortalCardsPage() {
         <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="h-4 w-4" /> {t("cards.requestCard", "Request card")}
+              <Plus className="h-4 w-4" /> {t("cards.requestCard", "Request virtual card")}
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -119,7 +119,7 @@ export default function PortalCardsPage() {
             </div>
             <DialogFooter>
               <Button onClick={() => issueMutation.mutate()} disabled={issueMutation.isPending}>
-                {issueMutation.isPending ? t("cards.requesting", "Requesting…") : t("cards.requestCard", "Request card")}
+                {issueMutation.isPending ? t("cards.requesting", "Requesting…") : t("cards.requestCard", "Request virtual card")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -135,7 +135,7 @@ export default function PortalCardsPage() {
       ) : !data || data.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center">
           <CreditCard className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">{t("cards.emptyState", "No cards yet. Request one to start spending.")}</p>
+          <p className="text-sm text-muted-foreground">{t("cards.emptyState", "No virtual cards yet. Request one to start spending.")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -204,13 +204,13 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
   const revealMutation = useMutation({
     mutationFn: () => portalApi.post<CardReveal>(`/portal/cards/${card!.id}/reveal`),
     onSuccess: setRevealed,
-    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.revealCardError", "Couldn't reveal card"), description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.revealCardError", "Couldn't reveal virtual card"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const freezeMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>(`/portal/cards/${card!.id}/${card!.status === "FROZEN" ? "unfreeze" : "freeze"}`),
     onSuccess: (updated) => {
-      toast({ title: updated.status === "FROZEN" ? t("cards.toast.cardFrozen", "Card frozen") : t("cards.toast.cardUnfrozen", "Card unfrozen") });
+      toast({ title: updated.status === "FROZEN" ? t("cards.toast.cardFrozen", "Virtual card frozen") : t("cards.toast.cardUnfrozen", "Virtual card unfrozen") });
       invalidateCards();
     },
     onError: (e) => toast({ variant: "destructive", title: t("cards.toast.freezeError", "Couldn't update freeze state"), description: e instanceof ApiError ? e.message : undefined }),
@@ -219,7 +219,7 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
   const topupMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>(`/portal/cards/${card!.id}/topup`, { amountMinor: Math.round(Number(topupAmount) * 100).toString() }),
     onSuccess: () => {
-      toast({ title: t("cards.toast.cardToppedUp", "Card topped up") });
+      toast({ title: t("cards.toast.cardToppedUp", "Virtual card topped up") });
       invalidateCards();
       queryClient.invalidateQueries({ queryKey: ["portal", "wallets"] });
     },
@@ -248,11 +248,11 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
   const terminateMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>(`/portal/cards/${card!.id}/terminate`),
     onSuccess: () => {
-      toast({ title: t("cards.toast.cardTerminated", "Card terminated"), description: t("cards.toast.cardTerminatedDescription", "Any remaining balance is refunded to your wallet automatically.") });
+      toast({ title: t("cards.toast.cardTerminated", "Virtual card terminated"), description: t("cards.toast.cardTerminatedDescription", "Any remaining balance is refunded to your wallet automatically.") });
       invalidateCards();
       onClose();
     },
-    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.terminateError", "Couldn't terminate card"), description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("cards.toast.terminateError", "Couldn't terminate virtual card"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const copy = async (text: string, label: string) => {
@@ -400,11 +400,11 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : card.status === "FROZEN" ? (
                     <>
-                      <Sun className="h-4 w-4" /> {t("cards.unfreezeCard", "Unfreeze card")}
+                      <Sun className="h-4 w-4" /> {t("cards.unfreezeCard", "Unfreeze virtual card")}
                     </>
                   ) : (
                     <>
-                      <Snowflake className="h-4 w-4" /> {t("cards.freezeCard", "Freeze card")}
+                      <Snowflake className="h-4 w-4" /> {t("cards.freezeCard", "Freeze virtual card")}
                     </>
                   )}
                 </Button>
@@ -419,7 +419,7 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                     disabled={terminateMutation.isPending}
                   >
                     {terminateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-                    {terminateArmed ? t("cards.confirmTerminate", "Click again to confirm — this can't be undone") : t("cards.terminateCard", "Terminate card")}
+                    {terminateArmed ? t("cards.confirmTerminate", "Click again to confirm — this can't be undone") : t("cards.terminateCard", "Terminate virtual card")}
                   </Button>
                   {terminateArmed && (
                     <button className="text-xs text-muted-foreground hover:underline" onClick={() => setTerminateArmed(false)}>

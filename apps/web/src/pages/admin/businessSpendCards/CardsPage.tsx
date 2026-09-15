@@ -50,23 +50,23 @@ export default function AdminBusinessSpendCardsPage() {
   const issueMutation = useMutation({
     mutationFn: () => staffApi.post<BusinessSpendCardDto>("/admin/business-spend-cards", { customerId, cardType: "VIRTUAL" }),
     onSuccess: () => {
-      toast({ title: "Business Spend Card issued" });
+      toast({ title: "Business Card issued" });
       invalidate();
       setIssueOpen(false);
       setCustomerId("");
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't issue card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't issue Business Card", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const statusMutation = useMutation({
     mutationFn: ({ id, action }: { id: string; action: "activate" | "suspend" | "terminate" }) =>
       staffApi.post<BusinessSpendCardDto>(`/admin/business-spend-cards/${id}/status`, { action }),
     onSuccess: () => {
-      toast({ title: "Card updated" });
+      toast({ title: "Business Card updated" });
       invalidate();
       setTerminateArmedId(null);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't update card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't update Business Card", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const cards = data?.items ?? [];
@@ -75,19 +75,19 @@ export default function AdminBusinessSpendCardsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">Business Spend Cards</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">Platform-wide Business Spend Card issuance — business customers only</p>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Business Cards</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Platform-wide Business Card issuance — business customers only</p>
         </div>
         {canManage && (
         <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="h-4 w-4" /> Issue card
+              <Plus className="h-4 w-4" /> Issue Business Card
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Issue a Business Spend Card</DialogTitle>
+              <DialogTitle>Issue a Business Card</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-1.5">
@@ -98,7 +98,7 @@ export default function AdminBusinessSpendCardsPage() {
             </div>
             <DialogFooter>
               <Button disabled={!customerId || issueMutation.isPending} onClick={() => issueMutation.mutate()}>
-                {issueMutation.isPending ? "Issuing…" : "Issue card"}
+                {issueMutation.isPending ? "Issuing…" : "Issue Business Card"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -115,7 +115,7 @@ export default function AdminBusinessSpendCardsPage() {
       ) : cards.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center">
           <CreditCard className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No Business Spend Cards issued yet.</p>
+          <p className="text-sm text-muted-foreground">No Business Cards issued yet.</p>
         </div>
       ) : (
         <Table>
@@ -196,7 +196,7 @@ function ManageCardDialog({ card, onClose, onChanged }: { card: AdminBusinessSpe
         amountMinor: Math.round(Number(action === "fund" ? fundAmount : withdrawAmount) * 100).toString(),
       }),
     onSuccess: (result, action) => {
-      toast({ title: action === "fund" ? "Card funded" : "Withdrawal submitted", description: result.cardEmptied && !result.cardTerminated ? "Card emptied — automatic termination is still pending." : undefined });
+      toast({ title: action === "fund" ? "Business Card funded" : "Withdrawal submitted", description: result.cardEmptied && !result.cardTerminated ? "Business Card emptied — automatic termination is still pending." : undefined });
       onChanged();
     },
     onError: (e) => toast({ variant: "destructive", title: "Action failed", description: e instanceof ApiError ? e.message : undefined }),
@@ -226,7 +226,7 @@ function ManageCardDialog({ card, onClose, onChanged }: { card: AdminBusinessSpe
         {card && (
           <>
             <DialogHeader>
-              <DialogTitle>Manage {card.maskedPan ?? "card"}</DialogTitle>
+              <DialogTitle>Manage {card.maskedPan ?? "Business Card"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

@@ -52,18 +52,18 @@ export default function AdminCardsPage() {
   const issueMutation = useMutation({
     mutationFn: () => staffApi.post<CardDto>("/admin/cards/issue", { customerId, amountMinor: Math.round(Number(amount) * 100).toString() }),
     onSuccess: () => {
-      toast({ title: "Card issued" });
+      toast({ title: "Virtual card issued" });
       invalidate();
       setOpen(false);
       setCustomerId("");
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't issue card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't issue virtual card", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const freezeMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => staffApi.post<CardDto>(`/admin/cards/${id}/${status === "FROZEN" ? "unfreeze" : "freeze"}`),
     onSuccess: (updated) => {
-      toast({ title: updated.status === "FROZEN" ? "Card frozen" : "Card unfrozen" });
+      toast({ title: updated.status === "FROZEN" ? "Virtual card frozen" : "Virtual card unfrozen" });
       invalidate();
     },
     onError: (e) => toast({ variant: "destructive", title: "Couldn't update freeze state", description: e instanceof ApiError ? e.message : undefined }),
@@ -75,17 +75,17 @@ export default function AdminCardsPage() {
       setRevealedId(id);
       setRevealedCard(reveal);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't reveal card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't reveal virtual card", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const terminateMutation = useMutation({
     mutationFn: (id: string) => staffApi.post<CardDto>(`/admin/cards/${id}/terminate`),
     onSuccess: () => {
-      toast({ title: "Card terminated", description: "Any remaining balance is refunded to the wallet automatically." });
+      toast({ title: "Virtual card terminated", description: "Any remaining balance is refunded to the wallet automatically." });
       invalidate();
       setTerminateArmedId(null);
     },
-    onError: (e) => toast({ variant: "destructive", title: "Couldn't terminate card", description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't terminate virtual card", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const cards = data?.items ?? [];
@@ -99,19 +99,19 @@ export default function AdminCardsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">Cards</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">Virtual Cards</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Platform-wide Visa virtual card issuance — USD only</p>
         </div>
         {canManage && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="h-4 w-4" /> Issue card
+              <Plus className="h-4 w-4" /> Issue virtual card
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Issue a card</DialogTitle>
+              <DialogTitle>Issue a virtual card</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-1.5">
@@ -132,7 +132,7 @@ export default function AdminCardsPage() {
             </div>
             <DialogFooter>
               <Button disabled={!customerId || issueMutation.isPending} onClick={() => issueMutation.mutate()}>
-                {issueMutation.isPending ? "Issuing…" : "Issue card"}
+                {issueMutation.isPending ? "Issuing…" : "Issue virtual card"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -149,7 +149,7 @@ export default function AdminCardsPage() {
       ) : cards.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center">
           <CreditCard className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No cards issued yet.</p>
+          <p className="text-sm text-muted-foreground">No virtual cards issued yet.</p>
         </div>
       ) : (
         <Table>

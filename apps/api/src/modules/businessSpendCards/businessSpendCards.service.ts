@@ -46,7 +46,7 @@ export async function issueBusinessSpendCard(prisma: PrismaClient, customerId: s
   // "Full KYC must be submitted" is looser than (and distinct from) the endorsement check below —
   // it only requires KYC to be past NOT_STARTED, not fully APPROVED.
   if (customer.kycStatus === "NOT_STARTED") {
-    throw new AppError("Full KYC must be submitted for this customer before a Business Spend Card can be created.", 403, "KYC_NOT_SUBMITTED");
+    throw new AppError("Full KYC must be submitted for this customer before a Business Card can be created.", 403, "KYC_NOT_SUBMITTED");
   }
   // Respects the admin's PlatformSettings.kycRequiredServices toggle, same as every other
   // product — separate from (and in addition to) the guide's own two checks.
@@ -93,7 +93,7 @@ export async function issueBusinessSpendCard(prisma: PrismaClient, customerId: s
       status: "POSTED",
       idempotencyKey: `fee:bsc-create:${card.id}`,
       externalSource: "SYSTEM",
-      description: `Business Spend Card creation fee for ${card.id}`,
+      description: `Business Card creation fee for ${card.id}`,
       lines: [
         { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: BSC_CURRENCY },
         { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: BSC_CURRENCY },
@@ -107,7 +107,7 @@ export async function issueBusinessSpendCard(prisma: PrismaClient, customerId: s
 
 async function findOwnedBusinessSpendCard(prisma: PrismaClient, cardId: string, scopeCustomerId?: string): Promise<BusinessSpendCard> {
   const card = await prisma.businessSpendCard.findFirst({ where: { id: cardId, ...(scopeCustomerId ? { customerId: scopeCustomerId } : {}) } });
-  if (!card) throw new NotFoundError("Business Spend Card");
+  if (!card) throw new NotFoundError("Business Card");
   return card;
 }
 
@@ -144,7 +144,7 @@ async function chargeFee(
  */
 async function walletAction(prisma: PrismaClient, cardId: string, action: "fund" | "withdraw", amountMinor: bigint, scopeCustomerId?: string) {
   const card = await findOwnedBusinessSpendCard(prisma, cardId, scopeCustomerId);
-  if (card.status !== "ACTIVE") throw new AppError("Only an active Business Spend Card can be funded or withdrawn from.", 409, "CARD_NOT_ACTIVE");
+  if (card.status !== "ACTIVE") throw new AppError("Only an active Business Card can be funded or withdrawn from.", 409, "CARD_NOT_ACTIVE");
 
   const customer = await prisma.customer.findUniqueOrThrow({ where: { id: card.customerId } });
   const yativoCustomerId = await ensureYativoCustomer(prisma, customer);
@@ -175,7 +175,7 @@ async function walletAction(prisma: PrismaClient, cardId: string, action: "fund"
       status: "PENDING",
       idempotencyKey: `bsc-fund:${idempotencyKey}`,
       externalSource: "MANUAL",
-      description: `Fund Business Spend Card ${card.id}`,
+      description: `Fund Business Card ${card.id}`,
       lines: [
         { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: BSC_CURRENCY },
         { accountId: suspense.id, direction: "CREDIT", amountMinor, currencyCode: BSC_CURRENCY },
@@ -197,10 +197,10 @@ async function walletAction(prisma: PrismaClient, cardId: string, action: "fund"
         { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: BSC_CURRENCY },
         { accountId: settlement.id, direction: "CREDIT", amountMinor, currencyCode: BSC_CURRENCY },
       ],
-      { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Business Spend Card funding settled` },
+      { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Business Card funding settled` },
     );
 
-    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-fund:${idempotencyKey}`, `Business Spend Card funding fee for ${card.id}`);
+    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-fund:${idempotencyKey}`, `Business Card funding fee for ${card.id}`);
   } else {
     // Fee-only pre-check: the withdrawn amount is credited back, never debited, so only the fee
     // needs a balance guard here.
@@ -218,20 +218,20 @@ async function walletAction(prisma: PrismaClient, cardId: string, action: "fund"
       status: "POSTED",
       idempotencyKey: `bsc-withdraw:${idempotencyKey}`,
       externalSource: "SYSTEM",
-      description: `Withdraw Business Spend Card ${card.id}`,
+      description: `Withdraw Business Card ${card.id}`,
       lines: [
         { accountId: settlement.id, direction: "DEBIT", amountMinor: confirmedAmountMinor, currencyCode: BSC_CURRENCY },
         { accountId: walletAccount.id, direction: "CREDIT", amountMinor: confirmedAmountMinor, currencyCode: BSC_CURRENCY },
       ],
     });
 
-    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-withdraw:${idempotencyKey}`, `Business Spend Card withdrawal fee for ${card.id}`);
+    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-withdraw:${idempotencyKey}`, `Business Card withdrawal fee for ${card.id}`);
 
     if (cardEmptied && cardTerminated) {
       updatedCard = await prisma.businessSpendCard.update({ where: { id: card.id }, data: { status: "TERMINATED" } });
       await sendNotificationEmail(prisma, "BUSINESS_SPEND_CARD_TERMINATED", card.customerId, { maskedPan: card.maskedPan ?? "" });
     } else if (cardEmptied && terminationError) {
-      logger.warn({ cardId: card.id, terminationError }, "Business Spend Card emptied by withdrawal but automatic termination failed — retry via updateBusinessSpendCardStatus");
+      logger.warn({ cardId: card.id, terminationError }, "Business Card emptied by withdrawal but automatic termination failed — retry via updateBusinessSpendCardStatus");
     }
   }
 
@@ -274,7 +274,7 @@ export async function updateBusinessSpendCardStatus(
   if (feeMinor > 0n) {
     const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId: card.customerId, currencyCode: BSC_CURRENCY } });
     if (!walletAccount) throw new NotFoundError("Wallet");
-    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-${action}:${card.id}:${updated.updatedAt.getTime()}`, `Business Spend Card ${action} fee for ${card.id}`);
+    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-${action}:${card.id}:${updated.updatedAt.getTime()}`, `Business Card ${action} fee for ${card.id}`);
   }
 
   const notification = action === "activate" ? "BUSINESS_SPEND_CARD_ACTIVATED" : action === "suspend" ? "BUSINESS_SPEND_CARD_SUSPENDED" : "BUSINESS_SPEND_CARD_TERMINATED";
@@ -295,7 +295,7 @@ export async function setBusinessSpendCardPin(prisma: PrismaClient, cardId: stri
   if (feeMinor > 0n) {
     const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId: card.customerId, currencyCode: BSC_CURRENCY } });
     if (!walletAccount) throw new NotFoundError("Wallet");
-    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-pin:${card.id}:${randomUUID()}`, `Business Spend Card PIN update fee for ${card.id}`);
+    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-pin:${card.id}:${randomUUID()}`, `Business Card PIN update fee for ${card.id}`);
   }
 
   return businessSpendCardToDto(card);
@@ -312,7 +312,7 @@ export async function updateBusinessSpendCardLimits(prisma: PrismaClient, cardId
   if (feeMinor > 0n) {
     const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId: card.customerId, currencyCode: BSC_CURRENCY } });
     if (!walletAccount) throw new NotFoundError("Wallet");
-    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-limits:${card.id}:${randomUUID()}`, `Business Spend Card limits update fee for ${card.id}`);
+    await chargeFee(prisma, walletAccount.id, card.customerId, feeMinor, `fee:bsc-limits:${card.id}:${randomUUID()}`, `Business Card limits update fee for ${card.id}`);
   }
 
   return { card: businessSpendCardToDto(card), limits: result };

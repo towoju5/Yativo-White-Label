@@ -66,10 +66,10 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
 
   const currency = await prisma.currency.findUniqueOrThrow({ where: { code: CARD_CURRENCY } });
   const amount = Number(amountMinor) / 10 ** currency.decimals;
-  if (amount < 3) throw new AppError("Card minimum initial funding is $3.", 400, "CARD_MINIMUM_FUNDING");
+  if (amount < 3) throw new AppError("Virtual card minimum initial funding is $3.", 400, "CARD_MINIMUM_FUNDING");
 
   const activeCount = await prisma.card.count({ where: { customerId, status: { in: ["ACTIVE", "FROZEN"] } } });
-  if (activeCount >= 3) throw new AppError("You can have at most 3 active cards.", 409, "CARD_LIMIT_REACHED");
+  if (activeCount >= 3) throw new AppError("You can have at most 3 active virtual cards.", 409, "CARD_LIMIT_REACHED");
 
   const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId, currencyCode: CARD_CURRENCY } });
   if (!walletAccount) throw new NotFoundError("Wallet");
@@ -87,7 +87,7 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
     status: "PENDING",
     idempotencyKey: `card-fund:${cardId}`,
     externalSource: "MANUAL",
-    description: `Initial funding for new card`,
+    description: `Initial funding for new virtual card`,
     lines: [
       { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
       { accountId: suspense.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
@@ -111,7 +111,7 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
       { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
       { accountId: settlement.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
     ],
-    { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Card funding settled` },
+    { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Virtual card funding settled` },
   );
 
   if (feeMinor > 0n) {
@@ -121,7 +121,7 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
       status: "POSTED",
       idempotencyKey: `fee:card-create:${cardId}`,
       externalSource: "SYSTEM",
-      description: `Card creation fee for ${cardId}`,
+      description: `Virtual card creation fee for ${cardId}`,
       lines: [
         { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
         { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
@@ -163,8 +163,8 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
 
 async function findOwnedCard(prisma: PrismaClient, cardId: string, scopeCustomerId?: string): Promise<Card> {
   const card = await prisma.card.findFirst({ where: { id: cardId, ...(scopeCustomerId ? { customerId: scopeCustomerId } : {}) } });
-  if (!card) throw new NotFoundError("Card");
-  if (!card.yativoCardId) throw new AppError("This card was never fully set up.", 409, "CARD_NOT_LINKED");
+  if (!card) throw new NotFoundError("Virtual card");
+  if (!card.yativoCardId) throw new AppError("This virtual card was never fully set up.", 409, "CARD_NOT_LINKED");
   return card;
 }
 
@@ -218,7 +218,7 @@ export async function getCardDetail(prisma: PrismaClient, cardId: string, scopeC
  */
 export async function topupCard(prisma: PrismaClient, cardId: string, amountMinor: bigint, scopeCustomerId?: string) {
   const card = await findOwnedCard(prisma, cardId, scopeCustomerId);
-  if (card.status !== "ACTIVE") throw new AppError("Only an active card can be topped up.", 409, "CARD_NOT_ACTIVE");
+  if (card.status !== "ACTIVE") throw new AppError("Only an active virtual card can be topped up.", 409, "CARD_NOT_ACTIVE");
 
   const currency = await prisma.currency.findUniqueOrThrow({ where: { code: CARD_CURRENCY } });
   const amount = Number(amountMinor) / 10 ** currency.decimals;
@@ -239,7 +239,7 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
     status: "PENDING",
     idempotencyKey: `card-topup:${topupId}`,
     externalSource: "MANUAL",
-    description: `Top-up for card ${card.id}`,
+    description: `Top-up for virtual card ${card.id}`,
     lines: [
       { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
       { accountId: suspense.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
@@ -261,7 +261,7 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
       { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
       { accountId: settlement.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
     ],
-    { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Card top-up settled` },
+    { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Virtual card top-up settled` },
   );
 
   if (feeMinor > 0n) {
@@ -271,7 +271,7 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
       status: "POSTED",
       idempotencyKey: `fee:card-topup:${topupId}`,
       externalSource: "SYSTEM",
-      description: `Card top-up fee for ${card.id}`,
+      description: `Virtual card top-up fee for ${card.id}`,
       lines: [
         { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
         { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
@@ -291,7 +291,7 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
  */
 export async function withdrawFromCard(prisma: PrismaClient, cardId: string, amountMinor: bigint, scopeCustomerId?: string) {
   const card = await findOwnedCard(prisma, cardId, scopeCustomerId);
-  if (card.status !== "ACTIVE") throw new AppError("Only an active card can be withdrawn from.", 409, "CARD_NOT_ACTIVE");
+  if (card.status !== "ACTIVE") throw new AppError("Only an active virtual card can be withdrawn from.", 409, "CARD_NOT_ACTIVE");
 
   const currency = await prisma.currency.findUniqueOrThrow({ where: { code: CARD_CURRENCY } });
   const amount = Number(amountMinor) / 10 ** currency.decimals;
@@ -321,7 +321,7 @@ export async function withdrawFromCard(prisma: PrismaClient, cardId: string, amo
       status: "POSTED",
       idempotencyKey: `fee:card-withdraw:${withdrawalId}`,
       externalSource: "SYSTEM",
-      description: `Card withdrawal fee for ${card.id}`,
+      description: `Virtual card withdrawal fee for ${card.id}`,
       lines: [
         { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
         { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
@@ -347,7 +347,7 @@ async function setFrozen(prisma: PrismaClient, cardId: string, frozen: boolean, 
   const confirmed = issuerStatus ? (frozen ? issuerStatus.includes("froz") : !issuerStatus.includes("froz")) : undefined;
   if (confirmed === false) {
     throw new AppError(
-      `The card issuer didn't actually ${frozen ? "freeze" : "unfreeze"} this card (reported status: ${detail.status}). Try again in a moment.`,
+      `The card issuer didn't actually ${frozen ? "freeze" : "unfreeze"} this virtual card (reported status: ${detail.status}). Try again in a moment.`,
       502,
       "CARD_FREEZE_NOT_CONFIRMED",
     );
@@ -395,7 +395,7 @@ export async function terminateCard(prisma: PrismaClient, cardId: string, scopeC
       status: "POSTED",
       idempotencyKey: `fee:card-terminate:${card.id}`,
       externalSource: "SYSTEM",
-      description: `Card termination fee for ${card.id}`,
+      description: `Virtual card termination fee for ${card.id}`,
       lines: [
         { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
         { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },

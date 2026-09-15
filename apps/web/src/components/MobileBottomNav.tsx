@@ -13,7 +13,7 @@ export function MobileBottomNav() {
     { to: "/portal", label: t("nav.home", "Home"), icon: Home, end: true },
     { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
     { to: "/portal/send", label: t("nav.payout", "Payout"), icon: ArrowUpFromLine },
-    { to: "/portal/cards", label: t("nav.cards", "Cards"), icon: CreditCard },
+    { to: "/portal/cards", label: t("nav.cards", "Virtual Cards"), icon: CreditCard },
     { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
   ];
 

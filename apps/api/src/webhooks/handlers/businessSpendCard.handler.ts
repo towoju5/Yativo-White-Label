@@ -21,7 +21,7 @@ export async function handleBusinessSpendCardEvent(
 ): Promise<WebhookHandlerResult> {
   const card = await prisma.businessSpendCard.findFirst({ where: { yativoCardId: payload.yativoCardId } });
   if (!card) {
-    return { status: "IGNORED", errorMessage: `No local Business Spend Card found for yativoCardId ${payload.yativoCardId}` };
+    return { status: "IGNORED", errorMessage: `No local Business Card found for yativoCardId ${payload.yativoCardId}` };
   }
 
   switch (eventType) {

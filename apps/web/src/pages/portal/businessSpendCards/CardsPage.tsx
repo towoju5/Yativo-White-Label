@@ -47,18 +47,18 @@ export default function PortalBusinessSpendCardsPage() {
   const issueMutation = useMutation({
     mutationFn: () => portalApi.post<BusinessSpendCardDto>("/portal/business-spend-cards", { cardType: "VIRTUAL" }),
     onSuccess: () => {
-      toast({ title: t("businessSpendCards.toast.cardIssued", "Business Spend Card issued") });
+      toast({ title: t("businessSpendCards.toast.cardIssued", "Business Card issued") });
       queryClient.invalidateQueries({ queryKey: ["portal", "business-spend-cards"] });
       setIssueOpen(false);
     },
-    onError: (e) => toast({ variant: "destructive", title: t("businessSpendCards.toast.issueCardError", "Couldn't issue card"), description: e instanceof ApiError ? e.message : undefined }),
+    onError: (e) => toast({ variant: "destructive", title: t("businessSpendCards.toast.issueCardError", "Couldn't issue Business Card"), description: e instanceof ApiError ? e.message : undefined }),
   });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("businessSpendCards.title", "Business Spend Cards")}</h1>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("businessSpendCards.title", "Business Cards")}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{t("businessSpendCards.subtitle", "Cards for your business, funded from your USD wallet")}</p>
         </div>
       </div>
@@ -69,19 +69,19 @@ export default function PortalBusinessSpendCardsPage() {
         <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="h-4 w-4" /> {t("businessSpendCards.requestCard", "Request card")}
+              <Plus className="h-4 w-4" /> {t("businessSpendCards.requestCard", "Request Business Card")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("businessSpendCards.requestDialogTitle", "Request a Business Spend Card")}</DialogTitle>
+              <DialogTitle>{t("businessSpendCards.requestDialogTitle", "Request a Business Card")}</DialogTitle>
             </DialogHeader>
             <p className="text-sm text-muted-foreground">
               {t("businessSpendCards.requestDialogHelp", "Issued with a zero balance — fund it from your USD wallet once it's ready.")}
             </p>
             <DialogFooter>
               <Button onClick={() => issueMutation.mutate()} disabled={issueMutation.isPending}>
-                {issueMutation.isPending ? t("businessSpendCards.requesting", "Requesting…") : t("businessSpendCards.requestCard", "Request card")}
+                {issueMutation.isPending ? t("businessSpendCards.requesting", "Requesting…") : t("businessSpendCards.requestCard", "Request Business Card")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -97,7 +97,7 @@ export default function PortalBusinessSpendCardsPage() {
       ) : !data || data.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center">
           <CreditCard className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">{t("businessSpendCards.emptyState", "No Business Spend Cards yet. Request one to get started.")}</p>
+          <p className="text-sm text-muted-foreground">{t("businessSpendCards.emptyState", "No Business Cards yet. Request one to get started.")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -113,7 +113,7 @@ export default function PortalBusinessSpendCardsPage() {
               </div>
               <p className="mt-6 font-mono text-lg tracking-widest">{c.maskedPan ?? "•••• •••• •••• ----"}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{t("businessSpendCards.usd", "Business Spend Card · USD")}</span>
+                <span className="text-xs text-muted-foreground">{t("businessSpendCards.usd", "Business Card · USD")}</span>
                 <span className="text-xs font-medium text-primary">{t("businessSpendCards.manage", "Manage →")}</span>
               </div>
             </button>
@@ -157,8 +157,8 @@ function CardDetailSheet({ card, onClose }: { card: BusinessSpendCardDto | null;
       }),
     onSuccess: (result, action) => {
       toast({
-        title: action === "fund" ? t("businessSpendCards.toast.cardFunded", "Card funded") : t("businessSpendCards.toast.withdrawalSubmitted", "Withdrawal submitted"),
-        description: result.cardEmptied && !result.cardTerminated ? t("businessSpendCards.toast.terminationPending", "Card emptied — automatic termination is still pending, retry from here shortly.") : undefined,
+        title: action === "fund" ? t("businessSpendCards.toast.cardFunded", "Business Card funded") : t("businessSpendCards.toast.withdrawalSubmitted", "Withdrawal submitted"),
+        description: result.cardEmptied && !result.cardTerminated ? t("businessSpendCards.toast.terminationPending", "Business Card emptied — automatic termination is still pending, retry from here shortly.") : undefined,
       });
       invalidateCards();
       queryClient.invalidateQueries({ queryKey: ["portal", "wallets"] });
@@ -169,7 +169,7 @@ function CardDetailSheet({ card, onClose }: { card: BusinessSpendCardDto | null;
   const statusMutation = useMutation({
     mutationFn: (action: "activate" | "suspend" | "terminate") => portalApi.post<BusinessSpendCardDto>(`/portal/business-spend-cards/${card!.id}/status`, { action }),
     onSuccess: (updated, action) => {
-      toast({ title: t(`businessSpendCards.toast.status.${action}`, action === "activate" ? "Card activated" : action === "suspend" ? "Card suspended" : "Card terminated") });
+      toast({ title: t(`businessSpendCards.toast.status.${action}`, action === "activate" ? "Business Card activated" : action === "suspend" ? "Business Card suspended" : "Business Card terminated") });
       invalidateCards();
       if (updated.status === "TERMINATED") onClose();
     },
@@ -203,7 +203,7 @@ function CardDetailSheet({ card, onClose }: { card: BusinessSpendCardDto | null;
         {card && (
           <>
             <SheetHeader>
-              <SheetTitle>{t("businessSpendCards.cardTitle", "Business Spend Card")}</SheetTitle>
+              <SheetTitle>{t("businessSpendCards.cardTitle", "Business Card")}</SheetTitle>
               <SheetDescription>{t("businessSpendCards.subtitleUsd", "Visa · USD")}</SheetDescription>
             </SheetHeader>
 
@@ -280,11 +280,11 @@ function CardDetailSheet({ card, onClose }: { card: BusinessSpendCardDto | null;
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : card.status === "SUSPENDED" ? (
                     <>
-                      <Unlock className="h-4 w-4" /> {t("businessSpendCards.activateCard", "Activate card")}
+                      <Unlock className="h-4 w-4" /> {t("businessSpendCards.activateCard", "Activate Business Card")}
                     </>
                   ) : (
                     <>
-                      <Lock className="h-4 w-4" /> {t("businessSpendCards.suspendCard", "Suspend card")}
+                      <Lock className="h-4 w-4" /> {t("businessSpendCards.suspendCard", "Suspend Business Card")}
                     </>
                   )}
                 </Button>
@@ -297,7 +297,7 @@ function CardDetailSheet({ card, onClose }: { card: BusinessSpendCardDto | null;
                     disabled={statusMutation.isPending}
                   >
                     {statusMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-                    {terminateArmed ? t("businessSpendCards.confirmTerminate", "Click again to confirm — this can't be undone") : t("businessSpendCards.terminateCard", "Terminate card")}
+                    {terminateArmed ? t("businessSpendCards.confirmTerminate", "Click again to confirm — this can't be undone") : t("businessSpendCards.terminateCard", "Terminate Business Card")}
                   </Button>
                   {terminateArmed && (
                     <button className="text-xs text-muted-foreground hover:underline" onClick={() => setTerminateArmed(false)}>

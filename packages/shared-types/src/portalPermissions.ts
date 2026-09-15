@@ -31,7 +31,7 @@ export const PORTAL_PERMISSION_CATALOG: { key: PortalPermission; label: string; 
   { key: "beneficiaries.manage", label: "Manage beneficiaries", group: "Money", description: "Add, edit, or remove saved payout beneficiaries." },
   { key: "virtual_accounts.manage", label: "Manage virtual accounts", group: "Money", description: "Create and manage virtual account numbers." },
   { key: "crypto.manage", label: "Manage crypto wallets", group: "Money", description: "Create and manage crypto deposit wallets." },
-  { key: "cards.manage", label: "Manage cards", group: "Cards", description: "Issue, freeze, unfreeze, or view virtual cards." },
+  { key: "cards.manage", label: "Manage virtual cards", group: "Virtual Cards", description: "Issue, freeze, unfreeze, or view virtual cards." },
   { key: "statements.view", label: "View & export statements", group: "Reporting", description: "Generate, download, and email statements of account." },
   { key: "team.manage", label: "Manage team", group: "Team", description: "Invite, edit, deactivate, or remove other team members." },
 ];
