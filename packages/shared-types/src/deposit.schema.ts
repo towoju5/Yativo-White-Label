@@ -35,6 +35,14 @@ export const depositMethodSchema = z.object({
   minimumDeposit: z.string().optional(),
   maximumDeposit: z.string().optional(),
   formFields: z.array(depositFormFieldSchema),
+  /** null means this gateway needs no special approval and can be used immediately — see virtualAccount.schema.ts's identical pairing. */
+  endorsement: z.string().nullable(),
+  /** Whether the current customer can use this gateway right now. */
+  eligible: z.boolean(),
+  /** The customer's status for `endorsement` (e.g. "approved", "not_started") — null when `endorsement` is null. */
+  endorsementStatus: z.string().nullable(),
+  /** A hosted verification link to complete the required endorsement, when Yativo has issued one. */
+  hostedKycUrl: z.string().nullable(),
 });
 export type DepositMethod = z.infer<typeof depositMethodSchema>;
 
@@ -42,6 +50,8 @@ export type DepositMethod = z.infer<typeof depositMethodSchema>;
 
 export const depositQuoteRequestSchema = z.object({
   gatewayId: z.string(),
+  /** The country this gateway was picked under (step 1) — re-used server-side to re-resolve the gateway's current endorsement requirement, since Yativo's payin-method listing is scoped per country. */
+  country: z.string(),
   /** Wallet currency to credit — from the customer's own wallets (GET /portal/wallets). */
   walletCurrencyCode: currencyCodeSchema,
   /** The chosen method's LOCAL currency (DepositMethod.currency) — what the customer is actually paying with. */
@@ -76,6 +86,8 @@ export type DepositQuote = z.infer<typeof depositQuoteSchema>;
 
 export const createDepositSchema = z.object({
   gatewayId: z.string(),
+  /** The country this gateway was picked under (step 1) — see depositQuoteRequestSchema's identical field for why. */
+  country: z.string(),
   /** Wallet currency to credit — from the customer's own wallets (GET /portal/wallets). */
   walletCurrencyCode: currencyCodeSchema,
   /** Decimal amount (major units) in the chosen method's LOCAL currency (DepositMethod.currency), not the wallet currency. Optional when quoteId is given — Yativo derives it from the locked quote instead. */

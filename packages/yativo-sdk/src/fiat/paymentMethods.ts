@@ -44,6 +44,10 @@ const payoutMethodSchema = z
     fixed_charge: z.union([z.string(), z.number()]).optional(),
     float_charge: z.union([z.string(), z.number()]).optional(),
     estimated_delivery: z.string().optional(),
+    // Newly added by Yativo, same shape/meaning as virtualAccounts.ts's currency-endorsement
+    // pairing: null means this gateway needs no special approval, a string names the service the
+    // customer's endorsement checklist must show "approved" for before it can be used.
+    endorsement: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -61,6 +65,7 @@ export type FiatPayoutMethod = {
   fixedCharge?: string;
   floatCharge?: string;
   estimatedDelivery?: string;
+  endorsement: string | null;
 };
 
 function toPayoutMethod(data: z.infer<typeof payoutMethodSchema>): FiatPayoutMethod {
@@ -77,6 +82,7 @@ function toPayoutMethod(data: z.infer<typeof payoutMethodSchema>): FiatPayoutMet
     fixedCharge: data.fixed_charge !== undefined ? String(data.fixed_charge) : undefined,
     floatCharge: data.float_charge !== undefined ? String(data.float_charge) : undefined,
     estimatedDelivery: data.estimated_delivery,
+    endorsement: data.endorsement ?? null,
   };
 }
 
@@ -140,6 +146,9 @@ const payinMethodDetailSchema = z
     minimum_deposit: z.union([z.string(), z.number()]).nullable().optional(),
     maximum_deposit: z.union([z.string(), z.number()]).nullable().optional(),
     required_extra_data: z.object({ form_fields: z.array(payinFormFieldSchema).optional() }).passthrough().nullable().optional(),
+    // Same endorsement pairing Yativo added to payout methods and virtual-account currencies —
+    // null means no special approval is needed for this rail.
+    endorsement: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -152,6 +161,7 @@ export type FiatPayinMethodDetail = {
   minimumDeposit?: string;
   maximumDeposit?: string;
   formFields: FiatPayinFormField[];
+  endorsement: string | null;
 };
 
 function toPayinMethodDetail(data: z.infer<typeof payinMethodDetailSchema>): FiatPayinMethodDetail {
@@ -164,6 +174,7 @@ function toPayinMethodDetail(data: z.infer<typeof payinMethodDetailSchema>): Fia
     minimumDeposit: data.minimum_deposit != null ? String(data.minimum_deposit) : undefined,
     maximumDeposit: data.maximum_deposit != null ? String(data.maximum_deposit) : undefined,
     formFields: (data.required_extra_data?.form_fields ?? []).map(toFormField),
+    endorsement: data.endorsement ?? null,
   };
 }
 

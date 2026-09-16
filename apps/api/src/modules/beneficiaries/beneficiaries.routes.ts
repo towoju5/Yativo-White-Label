@@ -46,7 +46,8 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const methods = await listPayoutMethods(app.prisma, request.query.country, request.query.currency);
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
+      const methods = await listPayoutMethods(app.prisma, customer, request.query.country, request.query.currency);
       return reply.send(methods);
     },
   );

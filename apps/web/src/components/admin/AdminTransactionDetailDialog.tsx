@@ -13,7 +13,18 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "se
   REVERSED: "destructive",
 };
 
-function Row({ label, value }: { label: string; value: string }) {
+/** `wrap` breaks a long opaque value (idempotency keys can run 100-300+ characters) onto as many
+ * lines as it needs, stacked under the label, instead of forcing the row (and the dialog) to
+ * scroll sideways to show it. */
+function Row({ label, value, wrap }: { label: string; value: string; wrap?: boolean }) {
+  if (wrap) {
+    return (
+      <div className="px-3 py-2.5">
+        <dt className="text-muted-foreground">{label}</dt>
+        <dd className="mt-1 break-all font-mono text-xs">{value}</dd>
+      </div>
+    );
+  }
   return (
     <div className="flex items-center justify-between gap-3 px-3 py-2.5">
       <dt className="shrink-0 text-muted-foreground">{label}</dt>
@@ -55,8 +66,8 @@ export function AdminTransactionDetailDialog({ transactionId, onClose }: { trans
 
             <dl className="divide-y divide-border rounded-lg border border-border text-sm">
               <Row label="Type" value={data.type} />
-              <Row label="Idempotency key" value={data.idempotencyKey} />
-              {data.externalRef && <Row label="External reference" value={data.externalRef} />}
+              <Row label="Idempotency key" value={data.idempotencyKey} wrap />
+              {data.externalRef && <Row label="External reference" value={data.externalRef} wrap />}
               <Row label="Source" value={data.externalSource} />
               <Row label="Date" value={new Date(data.createdAt).toLocaleString()} />
               {data.postedAt && <Row label="Posted" value={new Date(data.postedAt).toLocaleString()} />}

@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
-import type { Beneficiary, Prisma, PrismaClient } from "@prisma/client";
+import type { Beneficiary, Customer, Prisma, PrismaClient } from "@prisma/client";
 import type { CreateBeneficiaryInput, UpdateBeneficiaryInput } from "@white-label/shared-types";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
+import { loadEndorsementEligibilityResolver } from "../../lib/endorsementEligibility.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { logCustomerAction } from "../security/auditLog.service.js";
 import logger from "../../lib/logger.js";
@@ -123,10 +124,21 @@ export async function listPayoutCountries() {
   return yativoClient.fiat.paymentMethods.listPayoutCountries();
 }
 
-/** Active payout rails for a country/currency corridor — step 2. `gatewayId` feeds getBeneficiaryForm and beneficiary creation. */
-export async function listPayoutMethods(prisma: PrismaClient, country?: string, currency?: string) {
+/**
+ * Active payout rails for a country/currency corridor — step 2. `gatewayId` feeds
+ * getBeneficiaryForm and beneficiary creation. Enriched with the same endorsement-eligibility
+ * fields as deposit methods and virtual-account currencies (see endorsementEligibility.ts) — if
+ * the customer isn't Yativo-registered yet (pre-KYC), gated gateways are reported not-yet-eligible
+ * rather than erroring the whole list, matching deposits.routes.ts's identical fallback.
+ */
+export async function listPayoutMethods(prisma: PrismaClient, customer: Customer, country?: string, currency?: string) {
   const methods = await yativoClient.fiat.paymentMethods.listActivePayoutMethods({ country, currency });
-  return filterEnabledGateways(prisma, "PAYOUT", methods);
+  const enabled = await filterEnabledGateways(prisma, "PAYOUT", methods);
+
+  const resolveEligibility = customer.yativoCustomerId
+    ? await loadEndorsementEligibilityResolver(prisma, customer)
+    : (endorsement: string | null) => (endorsement ? { eligible: false, endorsementStatus: null, hostedKycUrl: null } : { eligible: true, endorsementStatus: null, hostedKycUrl: null });
+  return enabled.map((m) => ({ ...m, ...resolveEligibility(m.endorsement) }));
 }
 
 /** Field schema for a chosen payout method — step 3, drives the dynamic payment_data form. */

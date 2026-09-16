@@ -52,6 +52,14 @@ export const payoutMethodSchema = z.object({
   fixedCharge: z.string().optional(),
   floatCharge: z.string().optional(),
   estimatedDelivery: z.string().optional(),
+  /** null means this gateway needs no special approval and can be used immediately — see virtualAccount.schema.ts's identical pairing. */
+  endorsement: z.string().nullable(),
+  /** Whether the current customer can use this gateway right now. */
+  eligible: z.boolean(),
+  /** The customer's status for `endorsement` (e.g. "approved", "not_started") — null when `endorsement` is null. */
+  endorsementStatus: z.string().nullable(),
+  /** A hosted verification link to complete the required endorsement, when Yativo has issued one. */
+  hostedKycUrl: z.string().nullable(),
 });
 export type PayoutMethod = z.infer<typeof payoutMethodSchema>;
 

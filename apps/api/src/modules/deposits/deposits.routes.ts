@@ -18,6 +18,8 @@ import { majorToMinor } from "../../lib/money.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
+import { loadEndorsementEligibilityResolver, requireEndorsementApproved } from "../../lib/endorsementEligibility.js";
+import { AppError } from "../../lib/errors.js";
 
 // Native gateway pay-ins only (country → method → wallet + amount → initiate) — for
 // long-lived bank-transfer receiving accounts, see modules/virtualAccounts instead.
@@ -40,9 +42,19 @@ export async function depositsRoutes(app: FastifyInstance) {
       schema: { querystring: z.object({ country: z.string() }), response: { 200: z.array(depositMethodSchema) } },
     },
     async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       const methods = await yativoClient.fiat.paymentMethods.listPayinMethodsByCountry({ country: request.query.country });
       const active = methods.filter((m) => m.active);
-      return reply.send(await filterEnabledGateways(app.prisma, "PAYIN", active));
+      const enabled = await filterEnabledGateways(app.prisma, "PAYIN", active);
+
+      // Browsing methods is allowed before KYC/Yativo registration (only the actual quote/initiate
+      // steps require it) — if the customer isn't registered with Yativo yet, there's no
+      // endorsement checklist to check against, so every gated method is reported not-yet-eligible
+      // (status unknown) rather than erroring the whole list out.
+      const resolveEligibility = customer.yativoCustomerId
+        ? await loadEndorsementEligibilityResolver(app.prisma, customer)
+        : (endorsement: string | null) => (endorsement ? { eligible: false, endorsementStatus: null, hostedKycUrl: null } : { eligible: true, endorsementStatus: null, hostedKycUrl: null });
+      return reply.send(enabled.map((m) => ({ ...m, ...resolveEligibility(m.endorsement) })));
     },
   );
 
@@ -55,6 +67,17 @@ export async function depositsRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       await requireKycApprovedForService(app.prisma, "DEPOSIT", customer);
+
+      // Re-resolved fresh from Yativo rather than trusted from the client — same rationale as
+      // virtualAccounts.routes.ts's POST gate. `country` is only needed to re-look-up this
+      // gateway's current endorsement requirement; nothing else here depends on it.
+      const chosenMethod = (await yativoClient.fiat.paymentMethods.listPayinMethodsByCountry({ country: request.body.country })).find(
+        (m) => m.gatewayId === request.body.gatewayId,
+      );
+      if (!chosenMethod) {
+        throw new AppError("This deposit gateway is no longer available.", 404, "UNSUPPORTED_GATEWAY");
+      }
+      await requireEndorsementApproved(app.prisma, customer, chosenMethod.endorsement, "This deposit gateway");
 
       const yativoQuote = await yativoClient.fiat.quotes.createPayin({
         fromCurrency: request.body.localCurrency,
@@ -128,6 +151,16 @@ export async function depositsRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
       await requireKycApprovedForService(app.prisma, "DEPOSIT", customer);
+
+      // Authoritative gate — run before any Yativo call, same as issueCard's endorsement check
+      // (see cards.service.ts), so a rejected endorsement never needs a compensating reversal.
+      const chosenMethod = (await yativoClient.fiat.paymentMethods.listPayinMethodsByCountry({ country: request.body.country })).find(
+        (m) => m.gatewayId === request.body.gatewayId,
+      );
+      if (!chosenMethod) {
+        throw new AppError("This deposit gateway is no longer available.", 404, "UNSUPPORTED_GATEWAY");
+      }
+      await requireEndorsementApproved(app.prisma, customer, chosenMethod.endorsement, "This deposit gateway");
 
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
 

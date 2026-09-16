@@ -16,6 +16,7 @@ import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.servic
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
 import { checkPayoutLimit } from "../security/limits.service.js";
+import { requireEndorsementApproved } from "../../lib/endorsementEligibility.js";
 
 type PayoutWithTransaction = Payout & { transaction: { status: "PENDING" | "POSTED" | "REVERSED" } };
 
@@ -131,10 +132,20 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   // used below is always derived from *this* beneficiary — the same way /portal/quotes derives
   // its method_id — so as long as the client quotes and pays out against the same beneficiaryId,
   // Yativo's "payout method must match quote_id's method" requirement is satisfied by construction.
-  getBeneficiaryGatewayInfo(beneficiary);
+  const { gatewayId } = getBeneficiaryGatewayInfo(beneficiary);
 
   const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
   await requireKycApprovedForService(prisma, "PAYOUT", customer);
+
+  // Re-resolved fresh from Yativo (never trusted from the stored beneficiary) — a gateway's
+  // endorsement requirement or the customer's approval status can both change after the
+  // beneficiary was created, so this is checked again here, right before any funds are put on
+  // hold, same rationale as issueCard's endorsement check in cards.service.ts.
+  const gatewayEndorsement = (await yativoClient.fiat.paymentMethods.listActivePayoutMethods({ currency: input.currencyCode })).find(
+    (m) => m.gatewayId === String(gatewayId),
+  )?.endorsement ?? null;
+  await requireEndorsementApproved(prisma, customer, gatewayEndorsement, "This payout gateway");
+
   const currency = await prisma.currency.findUniqueOrThrow({ where: { code: input.currencyCode } });
 
   const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId, currencyCode: input.currencyCode } });

@@ -2,12 +2,15 @@ import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { LucideIcon } from "lucide-react";
-import { LogOut } from "lucide-react";
+import { LogOut, Sun, Moon } from "lucide-react";
 import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { useTemplate } from "@/templates/useTemplate";
+import { getStoredColorScheme, setStoredColorScheme } from "@/templates/TemplateProvider";
+import { useState } from "react";
 
 export interface NavItem {
   to: string;
@@ -35,12 +38,30 @@ interface SidebarProps {
 export function MeridianSidebar({ sections, userLabel, userSubLabel, onLogout, showNotifications }: SidebarProps) {
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { t } = useTranslation();
+  const template = useTemplate();
+  const [isDark, setIsDark] = useState(() => (getStoredColorScheme(template.id) ?? (template.id === "nova" ? "dark" : "light")) === "dark");
+
+  function toggleTheme() {
+    const next = !isDark;
+    setStoredColorScheme(template.id, next ? "dark" : "light");
+    setIsDark(next);
+  }
 
   return (
     <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col gap-4 bg-muted/40 p-4 lg:flex">
       <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-border bg-card px-4 py-3.5 shadow-soft">
         <BrandLogo branding={branding} className="h-8" badgeClassName="rounded-lg bg-none bg-primary text-sm" textClassName="text-sm" />
-        {showNotifications && <NotificationBell />}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={toggleTheme}
+            aria-label={isDark ? t("topbar.switchToLightMode", "Switch to light mode") : t("topbar.switchToDarkMode", "Switch to dark mode")}
+            title={isDark ? t("topbar.switchToLightMode", "Switch to light mode") : t("topbar.switchToDarkMode", "Switch to dark mode")}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          {showNotifications && <NotificationBell />}
+        </div>
       </div>
 
       <nav className="scrollbar-thin flex-1 space-y-4 overflow-y-auto">

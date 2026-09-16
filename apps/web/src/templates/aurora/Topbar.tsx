@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, Menu, LogOut } from "lucide-react";
+import { ChevronRight, Menu, LogOut, Sun, Moon } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { findCurrentPageLabel } from "@/lib/currentPageLabel";
+import { useTemplate } from "@/templates/useTemplate";
+import { getStoredColorScheme, setStoredColorScheme } from "@/templates/TemplateProvider";
 import type { NavSection } from "./Sidebar";
 
 interface TopbarProps {
@@ -22,11 +24,27 @@ export function AuroraTopbar({ sections, productName, userLabel, onLogout, profi
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const pageLabel = findCurrentPageLabel(sections.flatMap((s) => s.items), pathname, productName);
+  const template = useTemplate();
+  const [isDark, setIsDark] = useState(() => (getStoredColorScheme(template.id) ?? (template.id === "nova" ? "dark" : "light")) === "dark");
+
+  function toggleTheme() {
+    const next = !isDark;
+    setStoredColorScheme(template.id, next ? "dark" : "light");
+    setIsDark(next);
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
       <span className="truncate font-heading text-sm font-semibold">{pageLabel}</span>
       <div className="flex items-center gap-2">
+        <button
+          onClick={toggleTheme}
+          aria-label={isDark ? t("topbar.switchToLightMode", "Switch to light mode") : t("topbar.switchToDarkMode", "Switch to dark mode")}
+          title={isDark ? t("topbar.switchToLightMode", "Switch to light mode") : t("topbar.switchToDarkMode", "Switch to dark mode")}
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
         {profileTo && (
           <NavLink
             to={profileTo}

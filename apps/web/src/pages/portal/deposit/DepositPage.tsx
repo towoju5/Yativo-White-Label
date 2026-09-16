@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { DepositCountry, DepositMethod, DepositFormField, DepositResult, DepositQuote, WalletBalance, CustomerTransactionListItem } from "@white-label/shared-types";
-import { ArrowLeft, ArrowRight, Banknote, Check, Clock, Coins, Copy, ExternalLink, Landmark, Loader2, RefreshCw, Wallet as WalletIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, Clock, Coins, Copy, ExternalLink, Landmark, Loader2, RefreshCw, Wallet as WalletIcon } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
 import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
+
+function formatEndorsement(endorsement: string) {
+  return endorsement.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default function DepositPage() {
   const { t } = useTranslation();
@@ -185,6 +189,7 @@ function NativeDepositCard() {
     mutationFn: () =>
       portalApi.post<DepositQuote>("/portal/deposit/quote", {
         gatewayId,
+        country: countryIso3,
         walletCurrencyCode,
         localCurrency: selectedMethod!.currency,
         amount,
@@ -202,6 +207,7 @@ function NativeDepositCard() {
     mutationFn: () =>
       portalApi.post<DepositResult>("/portal/deposit/initiate", {
         gatewayId,
+        country: countryIso3,
         walletCurrencyCode,
         quoteId: quote!.quoteId,
         extraData: Object.keys(extraData).length > 0 ? extraData : undefined,
@@ -455,13 +461,18 @@ function NativeDepositCard() {
                               <button
                                 key={m.gatewayId}
                                 type="button"
+                                disabled={!m.eligible}
                                 onClick={() => {
                                   setGatewayId(m.gatewayId);
                                   setExtraData({});
                                 }}
                                 className={cn(
                                   "relative flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors",
-                                  selected ? "border-primary bg-primary/5 shadow-soft" : "border-border hover:bg-muted/50",
+                                  !m.eligible
+                                    ? "cursor-not-allowed border-border opacity-60"
+                                    : selected
+                                      ? "border-primary bg-primary/5 shadow-soft"
+                                      : "border-border hover:bg-muted/50",
                                 )}
                               >
                                 {selected && (
@@ -473,9 +484,21 @@ function NativeDepositCard() {
                                   <Banknote className="h-4 w-4 shrink-0 text-muted-foreground" />
                                   <span className="pr-6 text-sm font-semibold leading-tight">{m.methodName}</span>
                                 </div>
-                                <Badge variant="outline" className="w-fit">
-                                  {m.currency}
-                                </Badge>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <Badge variant="outline" className="w-fit">
+                                    {m.currency}
+                                  </Badge>
+                                  {m.endorsement &&
+                                    (m.eligible ? (
+                                      <Badge variant="success" className="gap-1 text-[10px]">
+                                        <CheckCircle2 className="h-3 w-3" /> {t("deposit.step1.verified", "Verified")}
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="gap-1 text-[10px]">
+                                        <Clock className="h-3 w-3" /> {formatEndorsement(m.endorsement)}
+                                      </Badge>
+                                    ))}
+                                </div>
                                 {(m.minimumDeposit || m.maximumDeposit) && (
                                   <p className="text-xs text-muted-foreground">
                                     {t("deposit.step1.methodRange", "{{min}}–{{max}} {{currency}} per deposit", {
@@ -485,6 +508,24 @@ function NativeDepositCard() {
                                     })}
                                   </p>
                                 )}
+                                {!m.eligible &&
+                                  (m.hostedKycUrl ? (
+                                    <a
+                                      href={m.hostedKycUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="inline-flex w-fit items-center gap-1 text-xs font-medium text-primary hover:underline"
+                                    >
+                                      {t("deposit.step1.startVerification", "Start verification")} <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground">
+                                      {t("deposit.step1.requiresVerification", "Requires {{endorsement}} verification — contact support to get started.", {
+                                        endorsement: formatEndorsement(m.endorsement!),
+                                      })}
+                                    </p>
+                                  ))}
                               </button>
                             );
                           })}

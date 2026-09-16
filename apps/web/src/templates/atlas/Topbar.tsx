@@ -3,13 +3,15 @@ import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { LucideIcon } from "lucide-react";
-import { Menu, LogOut, ChevronDown } from "lucide-react";
+import { Menu, LogOut, ChevronDown, Sun, Moon } from "lucide-react";
 import { fetchBranding } from "@/theme/branding";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { useTemplate } from "@/templates/useTemplate";
+import { getStoredColorScheme, setStoredColorScheme } from "@/templates/TemplateProvider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +43,14 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout, showNoti
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const template = useTemplate();
+  const [isDark, setIsDark] = useState(() => (getStoredColorScheme(template.id) ?? (template.id === "nova" ? "dark" : "light")) === "dark");
+
+  function toggleTheme() {
+    const next = !isDark;
+    setStoredColorScheme(template.id, next ? "dark" : "light");
+    setIsDark(next);
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-lg">
@@ -73,6 +83,15 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout, showNoti
           <div className="hidden md:block">
             <LanguageSwitcher />
           </div>
+
+          <button
+            onClick={toggleTheme}
+            aria-label={isDark ? t("topbar.switchToLightMode", "Switch to light mode") : t("topbar.switchToDarkMode", "Switch to dark mode")}
+            title={isDark ? t("topbar.switchToLightMode", "Switch to light mode") : t("topbar.switchToDarkMode", "Switch to dark mode")}
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
 
           {showNotifications && <NotificationBell />}
 

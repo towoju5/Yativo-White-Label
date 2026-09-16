@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Beneficiary, BeneficiaryFormField, CreateBeneficiaryInput, PayoutCountry, PayoutMethod } from "@white-label/shared-types";
-import { ArrowLeft, ArrowRight, Banknote, Check, Landmark, Loader2, Pencil, Plus, Trash2, User, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, Clock, ExternalLink, Landmark, Loader2, Pencil, Plus, Trash2, User, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
 import { humanize } from "@/pages/portal/kyc/kycUtils";
 import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
+
+function formatEndorsement(endorsement: string) {
+  return endorsement.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default function BeneficiariesPage() {
   const { t } = useTranslation();
@@ -270,13 +274,18 @@ export default function BeneficiariesPage() {
                           <button
                             key={m.gatewayId}
                             type="button"
+                            disabled={!m.eligible}
                             onClick={() => {
                               setGatewayId(m.gatewayId);
                               setPaymentData({});
                             }}
                             className={cn(
                               "relative flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors",
-                              selected ? "border-primary bg-primary/5 shadow-soft" : "border-border hover:bg-muted/50",
+                              !m.eligible
+                                ? "cursor-not-allowed border-border opacity-60"
+                                : selected
+                                  ? "border-primary bg-primary/5 shadow-soft"
+                                  : "border-border hover:bg-muted/50",
                             )}
                           >
                             {selected && (
@@ -291,6 +300,16 @@ export default function BeneficiariesPage() {
                             <div className="flex flex-wrap items-center gap-1.5">
                               <Badge variant="outline">{m.currency}</Badge>
                               {m.estimatedDelivery && <span className="text-xs text-muted-foreground">{m.estimatedDelivery}</span>}
+                              {m.endorsement &&
+                                (m.eligible ? (
+                                  <Badge variant="success" className="gap-1 text-[10px]">
+                                    <CheckCircle2 className="h-3 w-3" /> {t("beneficiaries.verified", "Verified")}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="gap-1 text-[10px]">
+                                    <Clock className="h-3 w-3" /> {formatEndorsement(m.endorsement)}
+                                  </Badge>
+                                ))}
                             </div>
                             {(m.minimumWithdrawal || m.maximumWithdrawal) && (
                               <p className="text-xs text-muted-foreground">
@@ -301,6 +320,24 @@ export default function BeneficiariesPage() {
                                 })}
                               </p>
                             )}
+                            {!m.eligible &&
+                              (m.hostedKycUrl ? (
+                                <a
+                                  href={m.hostedKycUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex w-fit items-center gap-1 text-xs font-medium text-primary hover:underline"
+                                >
+                                  {t("beneficiaries.startVerification", "Start verification")} <ExternalLink className="h-3 w-3" />
+                                </a>
+                              ) : (
+                                <p className="text-xs text-muted-foreground">
+                                  {t("beneficiaries.requiresVerification", "Requires {{endorsement}} verification — contact support to get started.", {
+                                    endorsement: formatEndorsement(m.endorsement!),
+                                  })}
+                                </p>
+                              ))}
                           </button>
                         );
                       })}
