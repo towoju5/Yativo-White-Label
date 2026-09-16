@@ -1,28 +1,18 @@
 import type { PrismaClient, PaymentGatewayKind } from "@prisma/client";
 
-// Rails this platform doesn't offer regardless of admin overrides — matched against Yativo's
-// free-form methodName since gateways have no stable name enum (see paymentMethods.ts's SDK
-// schema). Case-insensitive substring match against whatever the live method name is.
-const HIDDEN_GATEWAY_NAME_PATTERNS = [/sepa/i];
-
-function isHiddenGatewayName(methodName: string): boolean {
-  return HIDDEN_GATEWAY_NAME_PATTERNS.some((pattern) => pattern.test(methodName));
-}
-
-/** Drops any gateway an admin has explicitly disabled (see PaymentGatewayOverride's doc comment), plus any rail this platform hides outright (e.g. SEPA) — independent of whatever Yativo itself reports as active. */
-export async function filterEnabledGateways<T extends { gatewayId: string; methodName: string }>(
+/** Drops any gateway an admin has explicitly disabled (see PaymentGatewayOverride's doc comment) — independent of whatever Yativo itself reports as active. Rails this platform hides outright regardless of admin config (e.g. SEPA, Base) are filtered separately by their `endorsement` field — see endorsementEligibility.ts's isHiddenEndorsement. */
+export async function filterEnabledGateways<T extends { gatewayId: string }>(
   prisma: PrismaClient,
   kind: PaymentGatewayKind,
   items: T[],
 ): Promise<T[]> {
-  const named = items.filter((i) => !isHiddenGatewayName(i.methodName));
-  if (named.length === 0) return named;
+  if (items.length === 0) return items;
   const overrides = await prisma.paymentGatewayOverride.findMany({
-    where: { kind, gatewayId: { in: named.map((i) => i.gatewayId) } },
+    where: { kind, gatewayId: { in: items.map((i) => i.gatewayId) } },
     select: { gatewayId: true },
   });
   const disabled = new Set(overrides.map((o) => o.gatewayId));
-  return named.filter((i) => !disabled.has(i.gatewayId));
+  return items.filter((i) => !disabled.has(i.gatewayId));
 }
 
 export async function setGatewayEnabled(prisma: PrismaClient, kind: PaymentGatewayKind, gatewayId: string, enabled: boolean): Promise<void> {

@@ -43,6 +43,10 @@ export const createCustomerSchema = z.object({
 });
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 
+// Free-form — seen live as a plain string ("Missing BVN"), an object
+// ({"all_of": ["government_id_document"]}), an empty array, or null. Callers format defensively.
+const flexibleEndorsementFieldSchema = z.union([z.string(), z.array(z.unknown()), z.record(z.unknown())]).nullable();
+
 export const customerEndorsementSchema = z.object({
   /** snake_case service slug — e.g. "faster_payments", "virtual_card", "brazil". */
   service: z.string(),
@@ -54,6 +58,12 @@ export const customerEndorsementSchema = z.object({
   description: z.string().nullable(),
   /** False only when an admin has explicitly hidden this service from the customer-facing checklist — doesn't affect whether it gates any action. */
   isVisible: z.boolean(),
+  /** Why a non-approved status is what it is, e.g. "Missing BVN". */
+  errors: flexibleEndorsementFieldSchema,
+  /** What's still needed to move this forward, e.g. {"all_of": ["government_id_document"]}. */
+  requirementsDue: flexibleEndorsementFieldSchema,
+  futureRequirementsDue: flexibleEndorsementFieldSchema,
+  metadata: flexibleEndorsementFieldSchema,
 });
 export type CustomerEndorsement = z.infer<typeof customerEndorsementSchema>;
 

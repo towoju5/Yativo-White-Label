@@ -17,6 +17,14 @@ export function isEndorsementRestrictedForCustomer(endorsement: string | null, c
   return !!endorsement && BUSINESS_ONLY_ENDORSEMENTS.has(endorsement) && customer.type !== "BUSINESS";
 }
 
+/** Endorsement-gated rails this platform doesn't offer to anyone, regardless of customer type — Yativo exposes them, this product doesn't. */
+const HIDDEN_ENDORSEMENTS = new Set(["sepa", "base"]);
+
+/** True when `endorsement` names a rail this platform hides outright — callers drop the gateway/currency/method entirely, same treatment as isEndorsementRestrictedForCustomer. */
+export function isHiddenEndorsement(endorsement: string | null): boolean {
+  return !!endorsement && HIDDEN_ENDORSEMENTS.has(endorsement);
+}
+
 /**
  * Yativo now pairs an optional `endorsement` service slug with every virtual-account currency,
  * deposit gateway, and payout gateway — null means the rail needs no special approval, a string
@@ -39,6 +47,9 @@ export async function loadEndorsementEligibilityResolver(prisma: PrismaClient, c
 /** Authoritative gate right before money actually moves — throws 409 ENDORSEMENT_REQUIRED unless `endorsement` is null or already approved for this customer. `resource` names what's being gated (e.g. "This deposit gateway", "This payout gateway") for the error message. */
 export async function requireEndorsementApproved(prisma: PrismaClient, customer: Customer, endorsement: string | null, resource: string): Promise<void> {
   if (!endorsement) return;
+  if (isHiddenEndorsement(endorsement)) {
+    throw new AppError(`${resource} isn't available.`, 404, "UNSUPPORTED_GATEWAY");
+  }
   if (isEndorsementRestrictedForCustomer(endorsement, customer)) {
     throw new AppError(`${resource} is only available to business customers.`, 403, "BUSINESS_CUSTOMER_REQUIRED");
   }

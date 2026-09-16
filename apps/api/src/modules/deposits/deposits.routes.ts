@@ -17,7 +17,7 @@ import { majorToMinor } from "../../lib/money.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
-import { loadEndorsementEligibilityResolver, requireEndorsementApproved, isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
+import { loadEndorsementEligibilityResolver, requireEndorsementApproved, isEndorsementRestrictedForCustomer, isHiddenEndorsement } from "../../lib/endorsementEligibility.js";
 import { AppError } from "../../lib/errors.js";
 
 // Native gateway pay-ins only (country → method → wallet + amount → initiate) — for
@@ -55,7 +55,7 @@ export async function depositsRoutes(app: FastifyInstance) {
         : (endorsement: string | null) => (endorsement ? { eligible: false, endorsementStatus: null, hostedKycUrl: null } : { eligible: true, endorsementStatus: null, hostedKycUrl: null });
       return reply.send(
         enabled
-          .filter((m) => !isEndorsementRestrictedForCustomer(m.endorsement, customer))
+          .filter((m) => !isHiddenEndorsement(m.endorsement) && !isEndorsementRestrictedForCustomer(m.endorsement, customer))
           .map((m) => ({ ...m, ...resolveEligibility(m.endorsement) })),
       );
     },

@@ -4,7 +4,7 @@ import type { CreateBeneficiaryInput, UpdateBeneficiaryInput } from "@white-labe
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
-import { loadEndorsementEligibilityResolver, isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
+import { loadEndorsementEligibilityResolver, isEndorsementRestrictedForCustomer, isHiddenEndorsement } from "../../lib/endorsementEligibility.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { logCustomerAction } from "../security/auditLog.service.js";
 import logger from "../../lib/logger.js";
@@ -135,7 +135,7 @@ export async function listPayoutMethods(prisma: PrismaClient, customer: Customer
     ? await loadEndorsementEligibilityResolver(prisma, customer)
     : (endorsement: string | null) => (endorsement ? { eligible: false, endorsementStatus: null, hostedKycUrl: null } : { eligible: true, endorsementStatus: null, hostedKycUrl: null });
   return enabled
-    .filter((m) => !isEndorsementRestrictedForCustomer(m.endorsement, customer))
+    .filter((m) => !isHiddenEndorsement(m.endorsement) && !isEndorsementRestrictedForCustomer(m.endorsement, customer))
     .map((m) => ({ ...m, ...resolveEligibility(m.endorsement) }));
 }
 

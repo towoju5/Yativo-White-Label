@@ -128,6 +128,10 @@ const regenerateEntrySchema = z
     service: z.string(),
     status: z.string(),
     hosted_kyc_url: z.union([z.array(z.string()), z.string(), z.null()]).optional(),
+    errors: flexibleEndorsementFieldSchema,
+    requirements_due: flexibleEndorsementFieldSchema,
+    future_requirements_due: flexibleEndorsementFieldSchema,
+    metadata: flexibleEndorsementFieldSchema,
   })
   .passthrough();
 
@@ -302,11 +306,11 @@ export function createCustomersResource(ctx: YativoContext) {
     },
 
     /**
-     * Generates a fresh hosted verification link for one endorsement service — needed because
-     * the passive get() call above never actually carries a usable hosted_kyc_url (confirmed
-     * live: it's always null/empty there, even for a "pending" service). Returns every
-     * endorsement Yativo reports back (see regenerateResponseSchema's doc comment for why),
-     * normalized the same way get()'s `endorsements` are.
+     * Generates a fresh hosted verification link for one endorsement service — the passive get()
+     * call above does carry a usable hosted_kyc_url for some pending services, but a customer can
+     * still want a new one (e.g. an expired session), and not every pending service has one set
+     * yet. Returns every endorsement Yativo reports back (see regenerateResponseSchema's doc
+     * comment for why), normalized the same way get()'s `endorsements` are.
      */
     async regenerateEndorsementLink(yativoCustomerId: string, service: string): Promise<FiatCustomerEndorsement[]> {
       const res = await ctx.request({
@@ -325,6 +329,10 @@ export function createCustomersResource(ctx: YativoContext) {
         status: e.status,
         hostedKycUrl: extractHostedUrl(e.hosted_kyc_url),
         updated: null,
+        errors: e.errors ?? null,
+        requirementsDue: e.requirements_due ?? null,
+        futureRequirementsDue: e.future_requirements_due ?? null,
+        metadata: e.metadata ?? null,
       }));
     },
   };

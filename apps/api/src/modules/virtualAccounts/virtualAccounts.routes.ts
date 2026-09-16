@@ -15,7 +15,7 @@ import { requirePortalPermission } from "../../middleware/requirePortalPermissio
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
-import { isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
+import { isEndorsementRestrictedForCustomer, isHiddenEndorsement } from "../../lib/endorsementEligibility.js";
 import { AppError } from "../../lib/errors.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 
@@ -24,15 +24,6 @@ import { errorResponseSchema } from "../../lib/httpSchemas.js";
  * deposit flow in modules/deposits (one-off pay-ins via CODI/SPEI/etc.). A virtual account is
  * long-lived: provisioned once per currency, then reused for every incoming transfer.
  */
-// Virtual-account currencies list has no separate rail/network field — the rail is encoded
-// directly in the currency token itself (e.g. "USDCOBO", "EURBASE" — see
-// FiatVirtualAccountCurrency's doc comment), so hiding a rail means matching it there.
-const HIDDEN_VIRTUAL_ACCOUNT_RAIL_PATTERNS = [/sepa/i, /base/i];
-
-function isHiddenVirtualAccountCurrency(currency: string): boolean {
-  return HIDDEN_VIRTUAL_ACCOUNT_RAIL_PATTERNS.some((pattern) => pattern.test(currency));
-}
-
 export async function virtualAccountsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
@@ -49,7 +40,7 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
       ]);
 
       const result = currencies
-        .filter((c) => !isHiddenVirtualAccountCurrency(c.currency) && !isEndorsementRestrictedForCustomer(c.endorsement, customer))
+        .filter((c) => !isHiddenEndorsement(c.endorsement) && !isEndorsementRestrictedForCustomer(c.endorsement, customer))
         .map((c) => {
           if (!c.endorsement) {
             return { currency: c.currency, endorsement: null, eligible: true, endorsementStatus: null, hostedKycUrl: null };
@@ -101,7 +92,7 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
         yativoClient.fiat.customers.get(yativoCustomerId),
       ]);
       const chosen = currencies.find((c) => c.currency === request.body.currency);
-      if (!chosen || isHiddenVirtualAccountCurrency(chosen.currency)) {
+      if (!chosen || isHiddenEndorsement(chosen.endorsement)) {
         throw new AppError(`${request.body.currency} isn't a supported virtual account currency.`, 404, "UNSUPPORTED_CURRENCY");
       }
       if (isEndorsementRestrictedForCustomer(chosen.endorsement, customer)) {

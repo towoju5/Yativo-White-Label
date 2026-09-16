@@ -19,6 +19,21 @@ function formatServiceName(service: string) {
   return service.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** errors/requirementsDue/futureRequirementsDue/metadata come back as a string, an array, an object, or null depending on the service — flatten whichever shape shows up into one readable line, or null if there's nothing worth showing. */
+function formatFlexibleField(value: string | unknown[] | Record<string, unknown> | null): string | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string") return value.trim() || null;
+  if (Array.isArray(value)) {
+    const parts = value.map((v) => (typeof v === "string" ? v : JSON.stringify(v))).filter(Boolean);
+    return parts.length ? parts.join(", ") : null;
+  }
+  const parts = Object.values(value)
+    .flatMap((v) => (Array.isArray(v) ? v : [v]))
+    .map((v) => (typeof v === "string" ? v.replace(/_/g, " ") : JSON.stringify(v)))
+    .filter(Boolean);
+  return parts.length ? parts.join(", ") : null;
+}
+
 export function EndorsementsTable({
   endorsements,
   isLoading,
@@ -92,17 +107,23 @@ export function EndorsementsTable({
 
   const labelFor = (e: CustomerEndorsement) => e.displayName || formatServiceName(e.service);
 
-  const renderName = (e: CustomerEndorsement) => (
-    <>
-      <span>{labelFor(e)}</span>
-      {showHiddenBadge && !e.isVisible && (
-        <Badge variant="secondary" className="ml-2 align-middle text-[10px]">
-          Hidden from customers
-        </Badge>
-      )}
-      {e.description && <p className="mt-0.5 text-xs font-normal text-muted-foreground">{e.description}</p>}
-    </>
-  );
+  const renderName = (e: CustomerEndorsement) => {
+    const errorText = e.status !== "approved" ? formatFlexibleField(e.errors) : null;
+    const requirementsText = e.status !== "approved" ? formatFlexibleField(e.requirementsDue) : null;
+    return (
+      <>
+        <span>{labelFor(e)}</span>
+        {showHiddenBadge && !e.isVisible && (
+          <Badge variant="secondary" className="ml-2 align-middle text-[10px]">
+            Hidden from customers
+          </Badge>
+        )}
+        {e.description && <p className="mt-0.5 text-xs font-normal text-muted-foreground">{e.description}</p>}
+        {errorText && <p className="mt-0.5 text-xs font-normal text-destructive">{errorText}</p>}
+        {requirementsText && <p className="mt-0.5 text-xs font-normal text-muted-foreground">Needs: {requirementsText}</p>}
+      </>
+    );
+  };
 
   const renderAction = (e: CustomerEndorsement) =>
     e.status === "approved" || !e.hostedKycUrl ? (

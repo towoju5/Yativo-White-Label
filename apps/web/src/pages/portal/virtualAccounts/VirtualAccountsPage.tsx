@@ -74,7 +74,7 @@ export default function VirtualAccountsPage() {
   const availableCurrencies = (currenciesQuery.data ?? []).filter((c) => !provisionedCurrencies.has(c.currency));
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("virtualAccounts.title", "Virtual accounts")}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">{t("virtualAccounts.subtitle", "Dedicated bank details you can reuse for every incoming transfer, once per currency.")}</p>
