@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { VirtualAccount, VirtualAccountCurrency, CustomerTransactionListItem } from "@white-label/shared-types";
-import { CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, Landmark, ShieldCheck } from "lucide-react";
+import { CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, History, Landmark, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
@@ -83,11 +83,20 @@ export default function VirtualAccountsPage() {
       <div className="flex flex-col gap-4">
           <Card>
               <CardHeader>
-                  <div className="flex items-center gap-2">
-                      <Landmark className="h-4 w-4 text-primary" />
-                      <CardTitle className="text-base">{t("virtualAccounts.yourAccounts", "Your accounts")}</CardTitle>
+                  <div className="flex items-start justify-between gap-3">
+                      <div>
+                          <div className="flex items-center gap-2">
+                              <Landmark className="h-4 w-4 text-primary" />
+                              <CardTitle className="text-base">{t("virtualAccounts.yourAccounts", "Your accounts")}</CardTitle>
+                          </div>
+                          <CardDescription>{t("virtualAccounts.shareDetails", "Share these details with whoever is sending you funds.")}</CardDescription>
+                      </div>
+                      <Button variant="outline" size="sm" className="shrink-0" asChild>
+                          <Link to="/portal/virtual-accounts/deposits">
+                              <History className="h-3.5 w-3.5" /> {t("virtualAccounts.viewDepositHistory", "Deposit history")}
+                          </Link>
+                      </Button>
                   </div>
-                  <CardDescription>{t("virtualAccounts.shareDetails", "Share these details with whoever is sending you funds.")}</CardDescription>
               </CardHeader>
               <CardContent>
                   {accountsQuery.isLoading ? (
