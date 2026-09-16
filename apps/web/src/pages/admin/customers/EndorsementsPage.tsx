@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import type { Customer, CustomerEndorsement } from "@white-label/shared-types";
 import { Search, User } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
@@ -12,12 +12,17 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EndorsementsTable } from "@/components/endorsements/EndorsementsTable";
 
-const KYC_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  APPROVED: "success",
-  PENDING: "warning",
-  REJECTED: "destructive",
-  NOT_STARTED: "secondary",
-};
+/** approved/total across every endorsement service Yativo reports for a customer — null once the fetch fails (e.g. not yet registered with Yativo), rendered as "—". */
+function useEndorsementSummaries(customerIds: string[]) {
+  return useQueries({
+    queries: customerIds.map((id) => ({
+      queryKey: ["admin", "customers", id, "endorsements"],
+      queryFn: () => staffApi.get<CustomerEndorsement[]>(`/admin/customers/${id}/endorsements`),
+      staleTime: 60_000,
+      retry: false,
+    })),
+  });
+}
 
 export default function EndorsementsPage() {
   const canManage = useStaffPermission("endorsements.manage");
@@ -38,6 +43,7 @@ export default function EndorsementsPage() {
 
   const customers = customersQuery.data?.items ?? [];
   const selected = customers.find((c) => c.id === selectedId);
+  const endorsementSummaries = useEndorsementSummaries(customers.map((c) => c.id));
 
   return (
     <div className="space-y-6">
@@ -72,7 +78,11 @@ export default function EndorsementsPage() {
               <p className="py-6 text-center text-sm text-muted-foreground">No customers match this search.</p>
             ) : (
               <div className="max-h-[28rem] space-y-1 overflow-y-auto">
-                {customers.map((c) => (
+                {customers.map((c, i) => {
+                  const summary = endorsementSummaries[i];
+                  const approved = summary?.data?.filter((e) => e.status === "approved").length;
+                  const total = summary?.data?.length;
+                  return (
                   <button
                     key={c.id}
                     type="button"
@@ -86,11 +96,20 @@ export default function EndorsementsPage() {
                       <p className="truncate text-sm font-medium">{c.fullName ?? c.businessName ?? c.email}</p>
                       <p className="truncate text-xs text-muted-foreground">{c.email}</p>
                     </div>
-                    <Badge variant={KYC_VARIANT[c.kycStatus] ?? "secondary"} className="ml-2 shrink-0 text-[10px]">
-                      {c.kycStatus.replace("_", " ")}
-                    </Badge>
+                    {summary?.isLoading ? (
+                      <Skeleton className="ml-2 h-4 w-8 shrink-0" />
+                    ) : total === undefined ? (
+                      <Badge variant="secondary" className="ml-2 shrink-0 text-[10px]">
+                        —
+                      </Badge>
+                    ) : (
+                      <Badge variant={total > 0 && approved === total ? "success" : "secondary"} className="ml-2 shrink-0 text-[10px]">
+                        {approved}/{total}
+                      </Badge>
+                    )}
                   </button>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

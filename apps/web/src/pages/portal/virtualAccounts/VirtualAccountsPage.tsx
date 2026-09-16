@@ -101,7 +101,7 @@ export default function VirtualAccountsPage() {
                       {t("virtualAccounts.noAccountsYet", "No virtual accounts yet — provision one for a currency below.")}
                   </p>
                   ) : (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                       {accounts.map((a) => {
                       const isExpanded = expandedAccountId === a.accountId;
                       return (
