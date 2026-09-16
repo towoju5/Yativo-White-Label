@@ -2,19 +2,29 @@ import { z } from "zod";
 import type { YativoContext } from "../client.js";
 import { yativoEnvelope, yativoPaginatedEnvelope } from "../client.js";
 
+// `errors`/`requirements_due`/`future_requirements_due`/`metadata` are all free-form and
+// inconsistently shaped live — seen as a plain string ("Missing BVN"), an object
+// ({"all_of": ["government_id_document"]}), an empty array ([]), or null, depending on the
+// service and provider behind it. Accept anything rather than picking one shape and breaking on
+// the others; callers format defensively (see formatFlexibleField in EndorsementsTable.tsx).
+const flexibleEndorsementFieldSchema = z.union([z.string(), z.array(z.unknown()), z.record(z.unknown())]).nullable().optional();
+
 // Confirmed against the live API: GET /customer/{id} includes a per-service endorsement
 // checklist — `service` is a human-readable, Title Case name ("Faster payments", "Cobo pobo")
 // that we normalize to snake_case so it lines up with fiat/virtualAccounts.ts's
 // `endorsement` values ("faster_payments", "cobo_pobo") from
 // GET /business/virtual-account/currencies-and-endorsements. `status` is a free-form string
-// from Yativo (seen live: "not_started", "approved" — treat anything else as not-yet-approved
-// rather than enumerating every possible value).
+// from Yativo (seen live: "not_started", "pending", "approved", "declined").
 const endorsementSchema = z
   .object({
     service: z.string(),
     status: z.string(),
     hosted_kyc_url: z.string().nullable().optional(),
     updated: z.string().optional(),
+    errors: flexibleEndorsementFieldSchema,
+    requirements_due: flexibleEndorsementFieldSchema,
+    future_requirements_due: flexibleEndorsementFieldSchema,
+    metadata: flexibleEndorsementFieldSchema,
   })
   .passthrough();
 
@@ -31,6 +41,9 @@ const customerDataSchema = z
   })
   .passthrough();
 
+/** Free-form — a string, an array, or an object, depending on the service/provider; see flexibleEndorsementFieldSchema's doc comment. */
+export type FlexibleEndorsementField = string | unknown[] | Record<string, unknown> | null;
+
 export type FiatCustomerEndorsement = {
   /** snake_case, matching FiatVirtualAccountCurrency.endorsement — e.g. "faster_payments", "virtual_card". */
   service: string;
@@ -38,6 +51,12 @@ export type FiatCustomerEndorsement = {
   hostedKycUrl: string | null;
   /** Yativo's own free-form display string (e.g. "Aug 21, 2026 16:52") — not parsed, shown as-is. */
   updated: string | null;
+  /** Why a non-approved status is what it is, e.g. "Missing BVN" — null when nothing was given. */
+  errors: FlexibleEndorsementField;
+  /** What's still needed to move this forward, e.g. {"all_of": ["government_id_document"]}. */
+  requirementsDue: FlexibleEndorsementField;
+  futureRequirementsDue: FlexibleEndorsementField;
+  metadata: FlexibleEndorsementField;
 };
 
 export const fiatCustomerSchema = z.object({
@@ -51,12 +70,27 @@ function normalizeServiceName(service: string): string {
   return service.trim().toLowerCase().replace(/\s+/g, "_");
 }
 
-// Confirmed live: once a service is approved (no verification link needed any more), Yativo
-// sometimes returns the literal string "[]" for hosted_kyc_url instead of null — an
-// empty-array-serialized-as-string artifact, not a URL. Only pass through values that actually
-// look like a link.
+const URL_RE = /^https?:\/\//;
+
+// Confirmed live: `hosted_kyc_url` on GET /customer/{id}'s endorsement entries is wildly
+// inconsistent — a bare URL string, a JSON-encoded array containing one URL (the provider bridge
+// link comes back this way, e.g. '["https://bridge.withpersona.com/verify?..."]'), or the literal
+// string "[]" once no link is pending / the service is approved. Only the bare-string and
+// JSON-array-of-one-URL shapes carry a real link; everything else normalizes to null.
 function normalizeHostedKycUrl(url: string | null | undefined): string | null {
-  return url && /^https?:\/\//.test(url) ? url : null;
+  if (!url) return null;
+  if (URL_RE.test(url)) return url;
+  try {
+    const parsed: unknown = JSON.parse(url);
+    if (typeof parsed === "string" && URL_RE.test(parsed)) return parsed;
+    if (Array.isArray(parsed)) {
+      const first = parsed.find((v): v is string => typeof v === "string" && URL_RE.test(v));
+      if (first) return first;
+    }
+  } catch {
+    // Not JSON (e.g. a malformed non-URL string) — falls through to null below.
+  }
+  return null;
 }
 
 function toFiatCustomer(data: z.infer<typeof customerDataSchema>): FiatCustomer {
@@ -71,6 +105,10 @@ function toFiatCustomer(data: z.infer<typeof customerDataSchema>): FiatCustomer 
       status: e.status,
       hostedKycUrl: normalizeHostedKycUrl(e.hosted_kyc_url),
       updated: e.updated ?? null,
+      errors: e.errors ?? null,
+      requirementsDue: e.requirements_due ?? null,
+      futureRequirementsDue: e.future_requirements_due ?? null,
+      metadata: e.metadata ?? null,
     })),
   };
 }
