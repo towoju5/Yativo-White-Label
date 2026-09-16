@@ -53,6 +53,7 @@ import ProfitPage from "@/pages/admin/profit/ProfitPage";
 import SupportTicketsPage from "@/pages/admin/support/SupportTicketsPage";
 import ReconciliationPage from "@/pages/admin/reconciliation/ReconciliationPage";
 import CryptoWalletsPage from "@/pages/admin/crypto/CryptoWalletsPage";
+import AdminVirtualAccountsPage from "@/pages/admin/virtualAccounts/VirtualAccountsPage";
 import PagesPage from "@/pages/admin/pages/PagesPage";
 import PageEditorPage from "@/pages/admin/pages/PageEditorPage";
 import BrandingSettingsPage from "@/pages/admin/settings/BrandingSettingsPage";
@@ -171,6 +172,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "support", element: <SupportTicketsPage /> },
               { path: "reconciliation", element: <ReconciliationPage /> },
               { path: "crypto", element: <CryptoWalletsPage /> },
+              { path: "virtual-accounts", element: <AdminVirtualAccountsPage /> },
               { path: "pages", element: <PagesPage /> },
               { path: "pages/:id", element: <PageEditorPage /> },
               { path: "settings/branding", element: <BrandingSettingsPage /> },

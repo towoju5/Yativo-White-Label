@@ -1,13 +1,22 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { virtualAccountSchema, virtualAccountCurrencySchema, createVirtualAccountSchema } from "@white-label/shared-types";
+import {
+  virtualAccountSchema,
+  virtualAccountCurrencySchema,
+  createVirtualAccountSchema,
+  adminVirtualAccountSchema,
+  paginationQuerySchema,
+  paginatedResponseSchema,
+} from "@white-label/shared-types";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
+import { requireStaffAuth } from "../../middleware/requireStaffAuth.js";
 import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
+import { isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
 import { AppError } from "../../lib/errors.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 
@@ -16,6 +25,15 @@ import { errorResponseSchema } from "../../lib/httpSchemas.js";
  * deposit flow in modules/deposits (one-off pay-ins via CODI/SPEI/etc.). A virtual account is
  * long-lived: provisioned once per currency, then reused for every incoming transfer.
  */
+// Virtual-account currencies list has no separate rail/network field — the rail is encoded
+// directly in the currency token itself (e.g. "USDCOBO", "EURBASE" — see
+// FiatVirtualAccountCurrency's doc comment), so hiding a rail means matching it there.
+const HIDDEN_VIRTUAL_ACCOUNT_RAIL_PATTERNS = [/sepa/i, /base/i];
+
+function isHiddenVirtualAccountCurrency(currency: string): boolean {
+  return HIDDEN_VIRTUAL_ACCOUNT_RAIL_PATTERNS.some((pattern) => pattern.test(currency));
+}
+
 export async function virtualAccountsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
@@ -32,19 +50,21 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
         yativoClient.fiat.customers.get(yativoCustomerId),
       ]);
 
-      const result = currencies.map((c) => {
-        if (!c.endorsement) {
-          return { currency: c.currency, endorsement: null, eligible: true, endorsementStatus: null, hostedKycUrl: null };
-        }
-        const match = endorsements.find((e) => e.service === c.endorsement);
-        return {
-          currency: c.currency,
-          endorsement: c.endorsement,
-          eligible: match?.status === "approved",
-          endorsementStatus: match?.status ?? null,
-          hostedKycUrl: match?.hostedKycUrl ?? null,
-        };
-      });
+      const result = currencies
+        .filter((c) => !isHiddenVirtualAccountCurrency(c.currency) && !isEndorsementRestrictedForCustomer(c.endorsement, customer))
+        .map((c) => {
+          if (!c.endorsement) {
+            return { currency: c.currency, endorsement: null, eligible: true, endorsementStatus: null, hostedKycUrl: null };
+          }
+          const match = endorsements.find((e) => e.service === c.endorsement);
+          return {
+            currency: c.currency,
+            endorsement: c.endorsement,
+            eligible: match?.status === "approved",
+            endorsementStatus: match?.status ?? null,
+            hostedKycUrl: match?.hostedKycUrl ?? null,
+          };
+        });
       return reply.send(result);
     },
   );
@@ -85,8 +105,11 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
         yativoClient.fiat.customers.get(yativoCustomerId),
       ]);
       const chosen = currencies.find((c) => c.currency === request.body.currency);
-      if (!chosen) {
+      if (!chosen || isHiddenVirtualAccountCurrency(chosen.currency)) {
         throw new AppError(`${request.body.currency} isn't a supported virtual account currency.`, 404, "UNSUPPORTED_CURRENCY");
+      }
+      if (isEndorsementRestrictedForCustomer(chosen.endorsement, customer)) {
+        throw new AppError("This currency is only available to business customers.", 403, "BUSINESS_CUSTOMER_REQUIRED");
       }
       if (chosen.endorsement) {
         const match = endorsements.find((e) => e.service === chosen.endorsement);
@@ -114,6 +137,46 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
       }
 
       return reply.send(account);
+    },
+  );
+
+  server.get(
+    "/admin/virtual-accounts",
+    {
+      preHandler: requireStaffAuth,
+      schema: {
+        querystring: paginationQuerySchema.extend({ customerId: z.string().optional() }),
+        response: { 200: paginatedResponseSchema(adminVirtualAccountSchema) },
+      },
+    },
+    async (request, reply) => {
+      const { page, pageSize, customerId } = request.query;
+      const where = customerId ? { customerId } : {};
+      const [total, accounts] = await Promise.all([
+        app.prisma.virtualAccount.count({ where }),
+        app.prisma.virtualAccount.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          include: { customer: { select: { id: true, email: true, fullName: true, businessName: true } } },
+        }),
+      ]);
+      return reply.send({
+        items: accounts.map((a) => ({
+          id: a.id,
+          customerId: a.customerId,
+          customerName: a.customer.fullName ?? a.customer.businessName,
+          customerEmail: a.customer.email,
+          currencyCode: a.currencyCode,
+          yativoAccountId: a.yativoAccountId,
+          identifiers: a.identifiers as Record<string, unknown>,
+          createdAt: a.createdAt.toISOString(),
+        })),
+        page,
+        pageSize,
+        total,
+      });
     },
   );
 }

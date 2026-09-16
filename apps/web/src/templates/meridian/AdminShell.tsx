@@ -49,6 +49,7 @@ const sections: NavSection[] = [
       { to: "/admin/cards", label: "Virtual Cards", icon: CreditCard },
       { to: "/admin/business-spend-cards", label: "Business Cards", icon: CreditCard },
       { to: "/admin/crypto", label: "Crypto wallets", icon: Coins },
+      { to: "/admin/virtual-accounts", label: "Virtual accounts", icon: Landmark },
     ],
   },
   {

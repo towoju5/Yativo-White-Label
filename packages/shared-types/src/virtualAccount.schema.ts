@@ -22,3 +22,16 @@ export const createVirtualAccountSchema = z.object({
   currency: z.string(),
 });
 export type CreateVirtualAccountInput = z.infer<typeof createVirtualAccountSchema>;
+
+/** Admin-facing: one customer's virtual account plus enough of the owning customer's identity to show who it belongs to. */
+export const adminVirtualAccountSchema = z.object({
+  id: z.string(),
+  customerId: z.string(),
+  customerName: z.string().nullable(),
+  customerEmail: z.string().nullable(),
+  currencyCode: z.string(),
+  yativoAccountId: z.string(),
+  identifiers: z.record(z.unknown()),
+  createdAt: z.string(),
+});
+export type AdminVirtualAccount = z.infer<typeof adminVirtualAccountSchema>;

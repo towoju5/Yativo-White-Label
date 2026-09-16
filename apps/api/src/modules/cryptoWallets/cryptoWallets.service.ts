@@ -4,10 +4,19 @@ import { yativoClient } from "../../lib/yativoClient.js";
 import { AppError } from "../../lib/errors.js";
 import logger from "../../lib/logger.js";
 
+// Networks this platform doesn't offer even though Yativo supports them — currency options are
+// COIN_NETWORK tokens (e.g. "USDC_BASE"), so a "_<NETWORK>" suffix match hides every asset on
+// that network at once. Single choke point: both the portal and admin currency pickers, and
+// createWallet's own support check, all go through listSupportedCryptoCurrencies().
+const HIDDEN_CRYPTO_NETWORKS = new Set(["BASE"]);
+
 /** Live replacement for the old hand-maintained currency list — every combined COIN_NETWORK token createWallet() will accept right now. */
 export async function listSupportedCryptoCurrencies(): Promise<string[]> {
   const { allCurrencyOptions } = await yativoClient.crypto.wallets.getSupportedAssets();
-  return allCurrencyOptions;
+  return allCurrencyOptions.filter((option) => {
+    const network = option.split("_").pop() ?? "";
+    return !HIDDEN_CRYPTO_NETWORKS.has(network.toUpperCase());
+  });
 }
 
 async function requireSupportedCurrency(currency: string): Promise<void> {

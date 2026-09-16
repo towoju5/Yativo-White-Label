@@ -21,6 +21,7 @@ import { AppError } from "../../lib/errors.js";
 import { parseMultipartKycRequest, injectFiles } from "../../lib/parseMultipartKyc.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { getCustomerEndorsements, regenerateCustomerEndorsementLink } from "../customers/customers.service.js";
+import { isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
 import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import { sendOpsAlert } from "../notifications/channels/opsAlert.js";
 import logger from "../../lib/logger.js";
@@ -64,10 +65,12 @@ export async function kycRoutes(app: FastifyInstance) {
     "/portal/kyc/endorsements",
     { preHandler: requireCustomerAuth, schema: { response: { 200: z.array(customerEndorsementSchema), 409: errorResponseSchema } } },
     async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
       const endorsements = await getCustomerEndorsements(app.prisma, request.customer!.sub);
-      // Customer-facing only — an admin-hidden service is excluded from what the customer sees,
-      // but never from the live status checks that gate card/account/wallet creation elsewhere.
-      return reply.send(endorsements.filter((e) => e.isVisible));
+      // Customer-facing only — an admin-hidden service, and any service restricted to business
+      // customers (e.g. cobo_pobo) that this customer isn't, are excluded from what the customer
+      // sees, but never from the live status checks that gate card/account/wallet creation elsewhere.
+      return reply.send(endorsements.filter((e) => e.isVisible && !isEndorsementRestrictedForCustomer(e.service, customer)));
     },
   );
 
@@ -81,8 +84,9 @@ export async function kycRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
       const endorsements = await regenerateCustomerEndorsementLink(app.prisma, request.customer!.sub, request.params.service);
-      return reply.send(endorsements.filter((e) => e.isVisible));
+      return reply.send(endorsements.filter((e) => e.isVisible && !isEndorsementRestrictedForCustomer(e.service, customer)));
     },
   );
 

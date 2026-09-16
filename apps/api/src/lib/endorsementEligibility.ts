@@ -9,6 +9,14 @@ export type EndorsementEligibility = {
   hostedKycUrl: string | null;
 };
 
+/** Endorsement services Yativo only extends to business customers — not an approval status, so no amount of KYC ever unlocks these for an individual. */
+const BUSINESS_ONLY_ENDORSEMENTS = new Set(["cobo_pobo"]);
+
+/** True when `endorsement` is business-only and `customer` isn't a business — callers use this to drop the gateway/currency/method from lists entirely rather than showing it as a locked, "get verified" option. */
+export function isEndorsementRestrictedForCustomer(endorsement: string | null, customer: Pick<Customer, "type">): boolean {
+  return !!endorsement && BUSINESS_ONLY_ENDORSEMENTS.has(endorsement) && customer.type !== "BUSINESS";
+}
+
 /**
  * Yativo now pairs an optional `endorsement` service slug with every virtual-account currency,
  * deposit gateway, and payout gateway — null means the rail needs no special approval, a string
@@ -31,6 +39,9 @@ export async function loadEndorsementEligibilityResolver(prisma: PrismaClient, c
 /** Authoritative gate right before money actually moves — throws 409 ENDORSEMENT_REQUIRED unless `endorsement` is null or already approved for this customer. `resource` names what's being gated (e.g. "This deposit gateway", "This payout gateway") for the error message. */
 export async function requireEndorsementApproved(prisma: PrismaClient, customer: Customer, endorsement: string | null, resource: string): Promise<void> {
   if (!endorsement) return;
+  if (isEndorsementRestrictedForCustomer(endorsement, customer)) {
+    throw new AppError(`${resource} is only available to business customers.`, 403, "BUSINESS_CUSTOMER_REQUIRED");
+  }
   const resolve = await loadEndorsementEligibilityResolver(prisma, customer);
   if (!resolve(endorsement).eligible) {
     throw new AppError(`${resource} requires ${endorsement.replace(/_/g, " ")} verification before it can be used.`, 409, "ENDORSEMENT_REQUIRED");

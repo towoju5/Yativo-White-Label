@@ -5,7 +5,7 @@ import { AppError, NotFoundError } from "../../lib/errors.js";
 import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
-import { loadEndorsementEligibilityResolver } from "../../lib/endorsementEligibility.js";
+import { loadEndorsementEligibilityResolver, isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { logCustomerAction } from "../security/auditLog.service.js";
 import logger from "../../lib/logger.js";
@@ -138,7 +138,9 @@ export async function listPayoutMethods(prisma: PrismaClient, customer: Customer
   const resolveEligibility = customer.yativoCustomerId
     ? await loadEndorsementEligibilityResolver(prisma, customer)
     : (endorsement: string | null) => (endorsement ? { eligible: false, endorsementStatus: null, hostedKycUrl: null } : { eligible: true, endorsementStatus: null, hostedKycUrl: null });
-  return enabled.map((m) => ({ ...m, ...resolveEligibility(m.endorsement) }));
+  return enabled
+    .filter((m) => !isEndorsementRestrictedForCustomer(m.endorsement, customer))
+    .map((m) => ({ ...m, ...resolveEligibility(m.endorsement) }));
 }
 
 /** Field schema for a chosen payout method — step 3, drives the dynamic payment_data form. */

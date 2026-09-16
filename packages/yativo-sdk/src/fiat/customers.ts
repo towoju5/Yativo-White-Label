@@ -23,8 +23,6 @@ const customerDataSchema = z
     id: z.union([z.string(), z.number()]).optional(),
     customer_id: z.string().optional(),
     customer_status: z.string().optional(),
-    customer_kyc_status: z.string().nullable().optional(),
-    kyc_verified_date: z.string().nullable().optional(),
     endorsement: z.array(endorsementSchema).optional(),
     // Confirmed against the Business Spend Card guide — gates card creation independently of the
     // virtual_card endorsement above; not used by the older virtual-card product, so this was
@@ -45,8 +43,6 @@ export type FiatCustomerEndorsement = {
 export const fiatCustomerSchema = z.object({
   yativoCustomerId: z.string(),
   status: z.string(),
-  kycStatus: z.string().nullable(),
-  kycVerifiedAt: z.string().nullable(),
   canCreateVc: z.boolean().optional(),
 });
 export type FiatCustomer = z.infer<typeof fiatCustomerSchema> & { endorsements: FiatCustomerEndorsement[] };
@@ -69,8 +65,6 @@ function toFiatCustomer(data: z.infer<typeof customerDataSchema>): FiatCustomer 
   return {
     yativoCustomerId: String(id),
     status: data.customer_status ?? "active",
-    kycStatus: data.customer_kyc_status ?? null,
-    kycVerifiedAt: data.kyc_verified_date ?? null,
     canCreateVc: data.can_create_vc,
     endorsements: (data.endorsement ?? []).map((e) => ({
       service: normalizeServiceName(e.service),
@@ -213,7 +207,7 @@ export function createCustomersResource(ctx: YativoContext) {
           status: "success",
           status_code: 200,
           message: "mock",
-          data: { customer_id: "yativo-cust-mock-001", customer_status: "active", customer_kyc_status: "pending" },
+          data: { customer_id: "yativo-cust-mock-001", customer_status: "active" },
         },
       });
       return toFiatCustomer(res.data);
