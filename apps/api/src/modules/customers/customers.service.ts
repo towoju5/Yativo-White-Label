@@ -168,6 +168,32 @@ export async function regenerateCustomerEndorsementLink(prisma: PrismaClient, cu
   }
 }
 
+/**
+ * Re-runs KYC verification for a single endorsement — individual customers only (Yativo itself
+ * rejects a business customer with a 422, but that message is generic ("This endpoint only
+ * supports individual customers") so it's checked here first for a clearer error).
+ */
+export async function resubmitCustomerEndorsement(prisma: PrismaClient, customerId: string, service: string) {
+  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+  if (!customer) throw new NotFoundError("Customer");
+  if (customer.type !== "INDIVIDUAL") {
+    throw new AppError("KYC resubmission by endorsement is only supported for individual customers.", 422, "INDIVIDUAL_CUSTOMER_REQUIRED");
+  }
+  if (!customer.yativoCustomerId) {
+    throw new AppError("This customer isn't registered on Yativo yet — no endorsement data is available.", 409, "NOT_REGISTERED");
+  }
+  let yativoCustomerId = customer.yativoCustomerId;
+  try {
+    await yativoClient.fiat.customers.resubmitKyc(yativoCustomerId, service);
+  } catch (err) {
+    if (!isYativoCustomerNotFound(err)) throw err;
+    yativoCustomerId = await resubmitAfterCustomerNotFound(prisma, customer);
+    await yativoClient.fiat.customers.resubmitKyc(yativoCustomerId, service);
+  }
+  const { endorsements } = await yativoClient.fiat.customers.get(yativoCustomerId);
+  return enrichEndorsements(prisma, endorsements);
+}
+
 export async function approveKyc(prisma: PrismaClient, actorId: string, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");

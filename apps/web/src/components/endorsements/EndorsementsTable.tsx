@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { CustomerEndorsement } from "@white-label/shared-types";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, RotateCw } from "lucide-react";
 import { ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,7 @@ export function EndorsementsTable({
   isLoading,
   errorMessage,
   onGenerateLink,
+  onResubmit,
   showHiddenBadge,
 }: {
   endorsements: CustomerEndorsement[] | undefined;
@@ -54,12 +55,20 @@ export function EndorsementsTable({
    * used where the caller hasn't wired a mutation.
    */
   onGenerateLink?: (service: string) => Promise<CustomerEndorsement[]>;
+  /**
+   * Re-runs KYC verification for one endorsement (e.g. after the customer updated their ID/
+   * selfie) and returns the customer's full, updated endorsement list. Only supported for
+   * individual customers upstream — the caller decides whether to pass this at all based on the
+   * selected customer's type, same as onGenerateLink's own gating by caller.
+   */
+  onResubmit?: (service: string) => Promise<CustomerEndorsement[]>;
   /** Admin-only: flags a service an admin has hidden from the customer-facing checklist. The portal never renders those rows at all (they're already filtered out server-side), so this only makes sense here. */
   showHiddenBadge?: boolean;
 }) {
   const { toast } = useToast();
   const [overrides, setOverrides] = useState<Record<string, CustomerEndorsement>>({});
   const [generatingService, setGeneratingService] = useState<string | null>(null);
+  const [resubmittingService, setResubmittingService] = useState<string | null>(null);
   const [viewing, setViewing] = useState<{ url: string; service: string } | null>(null);
 
   if (isLoading) {
@@ -82,16 +91,20 @@ export function EndorsementsTable({
 
   const merged = endorsements.map((e) => overrides[e.service] ?? e);
 
+  const applyOverrides = (updated: CustomerEndorsement[]) => {
+    setOverrides((prev) => {
+      const next = { ...prev };
+      for (const e of updated) next[e.service] = e;
+      return next;
+    });
+  };
+
   const handleGenerate = async (service: string) => {
     if (!onGenerateLink) return;
     setGeneratingService(service);
     try {
       const updated = await onGenerateLink(service);
-      setOverrides((prev) => {
-        const next = { ...prev };
-        for (const e of updated) next[e.service] = e;
-        return next;
-      });
+      applyOverrides(updated);
       const fresh = updated.find((e) => e.service === service);
       if (fresh?.hostedKycUrl) {
         setViewing({ url: fresh.hostedKycUrl, service });
@@ -102,6 +115,20 @@ export function EndorsementsTable({
       toast({ variant: "destructive", title: "Couldn't generate link", description: e instanceof ApiError ? e.message : undefined });
     } finally {
       setGeneratingService(null);
+    }
+  };
+
+  const handleResubmit = async (service: string) => {
+    if (!onResubmit) return;
+    setResubmittingService(service);
+    try {
+      const updated = await onResubmit(service);
+      applyOverrides(updated);
+      toast({ title: `Resubmitted ${formatServiceName(service)} for verification` });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Couldn't resubmit", description: e instanceof ApiError ? e.message : undefined });
+    } finally {
+      setResubmittingService(null);
     }
   };
 
@@ -125,7 +152,7 @@ export function EndorsementsTable({
     );
   };
 
-  const renderAction = (e: CustomerEndorsement) =>
+  const renderLinkAction = (e: CustomerEndorsement) =>
     e.status === "approved" || !e.hostedKycUrl ? (
       <span className="text-muted-foreground">—</span>
     ) : onGenerateLink ? (
@@ -138,6 +165,23 @@ export function EndorsementsTable({
       </Button>
     );
 
+  const renderAction = (e: CustomerEndorsement) => (
+    <div className="flex items-center justify-end gap-1">
+      {onResubmit && (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={resubmittingService === e.service}
+          onClick={() => handleResubmit(e.service)}
+          title={`Resubmit ${labelFor(e)} for verification`}
+        >
+          {resubmittingService === e.service ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCw className="h-3.5 w-3.5" />}
+        </Button>
+      )}
+      {renderLinkAction(e)}
+    </div>
+  );
+
   return (
     <>
       <div className="hidden sm:block">
@@ -147,7 +191,7 @@ export function EndorsementsTable({
               <TableHead>Service</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last updated</TableHead>
-              <TableHead className="text-right">Verification link</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

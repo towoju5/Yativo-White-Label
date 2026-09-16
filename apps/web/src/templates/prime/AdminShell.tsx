@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -85,7 +86,7 @@ const sections: NavSection[] = [
   },
 ];
 
-export function PrimeAdminShell({ children }: { children: ReactNode }) {
+export function PrimeAdminShell({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) {
   const { user, logout } = useStaffAuth();
 
   return (
@@ -94,7 +95,7 @@ export function PrimeAdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <PrimeTopbar sections={sections} productName="Admin" userLabel={user?.email ?? "Staff"} userSubLabel={user?.role ?? ""} onLogout={logout} />
         <main className="flex-1 overflow-x-hidden p-6">
-          <div className="mx-auto max-w-6xl">{children}</div>
+          <div className={cn("mx-auto", fullWidth ? "max-w-none" : "max-w-6xl")}>{children}</div>
         </main>
       </div>
     </div>

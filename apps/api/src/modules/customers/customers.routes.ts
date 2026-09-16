@@ -23,6 +23,7 @@ import {
   getCustomerDetail,
   getCustomerEndorsements,
   regenerateCustomerEndorsementLink,
+  resubmitCustomerEndorsement,
   approveKyc,
   rejectKyc,
   freezeCustomer,
@@ -139,6 +140,21 @@ export async function customersRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const endorsements = await regenerateCustomerEndorsementLink(app.prisma, request.params.id, request.params.service);
+      return reply.send(endorsements);
+    },
+  );
+
+  server.post(
+    "/admin/customers/:id/endorsements/:service/resubmit",
+    {
+      preHandler: [requireStaffAuth, requirePermission("endorsements.manage")],
+      schema: {
+        params: z.object({ id: z.string(), service: z.string() }),
+        response: { 200: z.array(customerEndorsementSchema), 404: errorResponseSchema, 409: errorResponseSchema, 422: errorResponseSchema },
+      },
+    },
+    async (request, reply) => {
+      const endorsements = await resubmitCustomerEndorsement(app.prisma, request.params.id, request.params.service);
       return reply.send(endorsements);
     },
   );

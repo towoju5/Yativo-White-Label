@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -85,7 +86,7 @@ const sections: NavSection[] = [
   },
 ];
 
-export function MeridianAdminShell({ children }: { children: ReactNode }) {
+export function MeridianAdminShell({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) {
   const { user, logout } = useStaffAuth();
 
   return (
@@ -93,7 +94,7 @@ export function MeridianAdminShell({ children }: { children: ReactNode }) {
       <MeridianSidebar sections={sections} userLabel={user?.email ?? "Staff"} userSubLabel={user?.role ?? ""} onLogout={logout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MeridianTopbar sections={sections} productName="Admin" onLogout={logout} />
-        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 overflow-x-hidden p-6">{children}</main>
+        <main className={cn("mx-auto flex w-full flex-1 flex-col gap-6 overflow-x-hidden p-6", fullWidth ? "max-w-none" : "max-w-6xl")}>{children}</main>
       </div>
     </div>
   );

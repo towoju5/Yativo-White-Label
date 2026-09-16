@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -66,13 +67,13 @@ const items: NavItem[] = [
   { to: "/admin/settings/endorsements", label: "Endorsements display", icon: BadgeCheck },
 ];
 
-export function AtlasAdminShell({ children }: { children: ReactNode }) {
+export function AtlasAdminShell({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) {
   const { user, logout } = useStaffAuth();
 
   return (
     <div className="min-h-screen bg-background">
       <AtlasTopbar items={items} userLabel={user?.email ?? "Staff"} userSubLabel={user?.role ?? ""} onLogout={logout} />
-      <main className="mx-auto max-w-7xl overflow-x-hidden px-4 py-8 sm:px-6 lg:py-10">{children}</main>
+      <main className={cn("mx-auto overflow-x-hidden px-4 py-8 sm:px-6 lg:py-10", fullWidth ? "max-w-none" : "max-w-7xl")}>{children}</main>
     </div>
   );
 }

@@ -75,7 +75,7 @@ export interface TemplateComponents {
   name: string;
   description: string;
   PortalShell: FC<{ children: ReactNode }>;
-  AdminShell: FC<{ children: ReactNode }>;
+  AdminShell: FC<{ children: ReactNode; fullWidth?: boolean }>;
   DashboardLayout: FC<DashboardLayoutProps>;
   WalletBalanceCard: FC<WalletBalanceCardProps>;
   StatCard: FC<StatCardProps>;

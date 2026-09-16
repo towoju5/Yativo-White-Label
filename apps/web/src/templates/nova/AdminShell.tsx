@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -85,7 +86,7 @@ const sections: NavSection[] = [
   },
 ];
 
-export function NovaAdminShell({ children }: { children: ReactNode }) {
+export function NovaAdminShell({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) {
   const { user, logout } = useStaffAuth();
 
   return (
@@ -94,7 +95,7 @@ export function NovaAdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <NovaTopbar sections={sections} productName="Admin" />
         <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
+          <div className={cn("mx-auto", fullWidth ? "max-w-none" : "max-w-7xl")}>{children}</div>
         </main>
       </div>
     </div>

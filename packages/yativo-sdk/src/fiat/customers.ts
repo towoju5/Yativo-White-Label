@@ -335,5 +335,23 @@ export function createCustomersResource(ctx: YativoContext) {
         metadata: e.metadata ?? null,
       }));
     },
+
+    /**
+     * Re-runs KYC verification for one endorsement on an individual customer (e.g. after they've
+     * updated their ID/selfie) without touching any other endorsement on the profile. Individual
+     * customers only — Yativo 422s for a business customer, which surfaces as a YativoApiError the
+     * caller decides how to handle. A 200 here only means the resubmission was queued, not that
+     * verification completed — callers re-fetch get() to see the endorsement's current status.
+     */
+    async resubmitKyc(yativoCustomerId: string, endorsement: string): Promise<string> {
+      const res = await ctx.request({
+        baseUrl: ctx.config.fiatBaseUrl,
+        path: `/customer/kyc/resubmit/${yativoCustomerId}/${endorsement}`,
+        method: "POST",
+        schema: yativoEnvelope(z.object({ message: z.string() })),
+        mockData: { status: "success", status_code: 200, message: "mock", data: { message: `KYC resubmission for "${endorsement}" queued.` } },
+      });
+      return res.data.message;
+    },
   };
 }

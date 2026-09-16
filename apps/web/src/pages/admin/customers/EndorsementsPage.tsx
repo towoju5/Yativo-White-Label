@@ -132,6 +132,8 @@ export default function EndorsementsPage() {
                 isLoading={endorsementsQuery.isLoading}
                 errorMessage={endorsementsQuery.isError ? (endorsementsQuery.error instanceof ApiError ? endorsementsQuery.error.message : "Couldn't load endorsements.") : null}
                 onGenerateLink={canManage ? (service) => staffApi.post<CustomerEndorsement[]>(`/admin/customers/${selectedId}/endorsements/${service}/link`) : undefined}
+                // Resubmission is only supported upstream for individual customers — Yativo 422s for a business customer.
+                onResubmit={canManage && selected?.type === "INDIVIDUAL" ? (service) => staffApi.post<CustomerEndorsement[]>(`/admin/customers/${selectedId}/endorsements/${service}/resubmit`) : undefined}
                 showHiddenBadge
               />
             )}

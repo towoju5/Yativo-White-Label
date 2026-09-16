@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -85,7 +86,7 @@ const sections: NavSection[] = [
   },
 ];
 
-export function AuroraAdminShell({ children }: { children: ReactNode }) {
+export function AuroraAdminShell({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) {
   const { user, logout } = useStaffAuth();
 
   return (
@@ -93,7 +94,7 @@ export function AuroraAdminShell({ children }: { children: ReactNode }) {
       <AuroraSidebar sections={sections} userLabel={user?.email ?? "Staff"} userSubLabel={user?.role ?? ""} onLogout={logout} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AuroraTopbar sections={sections} productName="Admin" userLabel={user?.email ?? "Staff"} onLogout={logout} />
-        <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 overflow-x-hidden p-6">{children}</main>
+        <main className={cn("mx-auto flex w-full flex-col gap-6 overflow-x-hidden p-6", fullWidth ? "max-w-none" : "max-w-7xl")}>{children}</main>
       </div>
     </div>
   );
