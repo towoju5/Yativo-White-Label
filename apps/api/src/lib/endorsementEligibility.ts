@@ -9,12 +9,28 @@ export type EndorsementEligibility = {
   hostedKycUrl: string | null;
 };
 
+/**
+ * Yativo isn't consistent about the casing/spacing of an `endorsement` slug across endpoints —
+ * the customer checklist (`fiat/customers.ts`'s `get()`) normalizes its own `service` field to
+ * lowercase snake_case, but a gateway/currency's own `endorsement` field (deposit methods, payout
+ * methods, virtual-account currencies) is passed through exactly as Yativo sent it, with no
+ * guarantee it matches that same casing (e.g. "Sepa"/"SEPA" instead of "sepa"). Every comparison
+ * against a known endorsement name goes through this first so a hide/restrict rule can't silently
+ * miss a differently-cased match.
+ */
+function normalizeEndorsement(endorsement: string | null): string | null {
+  if (!endorsement) return null;
+  const normalized = endorsement.trim().toLowerCase().replace(/\s+/g, "_");
+  return normalized || null;
+}
+
 /** Endorsement services Yativo only extends to business customers — not an approval status, so no amount of KYC ever unlocks these for an individual. */
 const BUSINESS_ONLY_ENDORSEMENTS = new Set(["cobo_pobo"]);
 
 /** True when `endorsement` is business-only and `customer` isn't a business — callers use this to drop the gateway/currency/method from lists entirely rather than showing it as a locked, "get verified" option. */
 export function isEndorsementRestrictedForCustomer(endorsement: string | null, customer: Pick<Customer, "type">): boolean {
-  return !!endorsement && BUSINESS_ONLY_ENDORSEMENTS.has(endorsement) && customer.type !== "BUSINESS";
+  const normalized = normalizeEndorsement(endorsement);
+  return !!normalized && BUSINESS_ONLY_ENDORSEMENTS.has(normalized) && customer.type !== "BUSINESS";
 }
 
 /** Endorsement-gated rails this platform doesn't offer to anyone, regardless of customer type — Yativo exposes them, this product doesn't. */
@@ -22,7 +38,8 @@ const HIDDEN_ENDORSEMENTS = new Set(["sepa", "base"]);
 
 /** True when `endorsement` names a rail this platform hides outright — callers drop the gateway/currency/method entirely, same treatment as isEndorsementRestrictedForCustomer. */
 export function isHiddenEndorsement(endorsement: string | null): boolean {
-  return !!endorsement && HIDDEN_ENDORSEMENTS.has(endorsement);
+  const normalized = normalizeEndorsement(endorsement);
+  return !!normalized && HIDDEN_ENDORSEMENTS.has(normalized);
 }
 
 /**
@@ -38,8 +55,12 @@ export async function loadEndorsementEligibilityResolver(prisma: PrismaClient, c
   const { endorsements } = await yativoClient.fiat.customers.get(yativoCustomerId);
 
   return (endorsement: string | null): EndorsementEligibility => {
-    if (!endorsement) return { eligible: true, endorsementStatus: null, hostedKycUrl: null };
-    const match = endorsements.find((e) => e.service === endorsement);
+    const normalized = normalizeEndorsement(endorsement);
+    if (!normalized) return { eligible: true, endorsementStatus: null, hostedKycUrl: null };
+    // `e.service` is already normalized by fiat/customers.ts's own normalizeServiceName — compare
+    // against `normalized` (not the raw `endorsement`) so a differently-cased gateway/currency
+    // endorsement field still finds its match on the checklist.
+    const match = endorsements.find((e) => e.service === normalized);
     return { eligible: match?.status === "approved", endorsementStatus: match?.status ?? null, hostedKycUrl: match?.hostedKycUrl ?? null };
   };
 }
