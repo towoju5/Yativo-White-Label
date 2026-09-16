@@ -31,7 +31,6 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
   ACTIVE: "success",
@@ -99,7 +98,6 @@ export default function PortalCardsPage() {
         </div>
       </div>
 
-      <KycRequiredNotice service="CARD" />
 
       <div className="flex items-center justify-end">
         <Dialog open={issueOpen} onOpenChange={setIssueOpen}>

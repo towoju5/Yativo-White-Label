@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { Card, PrismaClient } from "@prisma/client";
 import { AppError, NotFoundError, InsufficientFundsError } from "../../lib/errors.js";
-import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { postTransaction } from "../ledger/postTransaction.js";
@@ -48,7 +47,6 @@ async function ensureCardsActivated(prisma: PrismaClient, customerId: string, ya
 export async function issueCard(prisma: PrismaClient, customerId: string, amountMinor: bigint) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
-  await requireKycApprovedForService(prisma, "CARD", customer);
 
   // Resolved up front (not just before the Yativo create() call below) so the "virtual_card"
   // endorsement check can run before any funds are put on hold — a rejected endorsement

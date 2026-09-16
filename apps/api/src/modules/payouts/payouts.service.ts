@@ -6,7 +6,6 @@ import { yativoClient } from "../../lib/yativoClient.js";
 import { enqueuePayoutStatusPoll } from "../../jobs/payoutPollQueue.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { NotFoundError, InsufficientFundsError, AppError } from "../../lib/errors.js";
-import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js";
 import { getAvailableBalance } from "../ledger/balances.js";
@@ -135,7 +134,6 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   const { gatewayId } = getBeneficiaryGatewayInfo(beneficiary);
 
   const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
-  await requireKycApprovedForService(prisma, "PAYOUT", customer);
 
   // Re-resolved fresh from Yativo (never trusted from the stored beneficiary) — a gateway's
   // endorsement requirement or the customer's approval status can both change after the

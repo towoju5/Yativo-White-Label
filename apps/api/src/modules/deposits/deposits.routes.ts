@@ -11,7 +11,6 @@ import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { ensureCustomerWalletAccount, ensurePlatformAccount } from "../ledger/accounts.js";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { env } from "../../config/env.js";
-import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
 import { majorToMinor } from "../../lib/money.js";
@@ -70,7 +69,6 @@ export async function depositsRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
-      await requireKycApprovedForService(app.prisma, "DEPOSIT", customer);
 
       // Re-resolved fresh from Yativo rather than trusted from the client — same rationale as
       // virtualAccounts.routes.ts's POST gate. `country` is only needed to re-look-up this
@@ -154,7 +152,6 @@ export async function depositsRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
-      await requireKycApprovedForService(app.prisma, "DEPOSIT", customer);
 
       // Authoritative gate — run before any Yativo call, same as issueCard's endorsement check
       // (see cards.service.ts), so a rejected endorsement never needs a compensating reversal.

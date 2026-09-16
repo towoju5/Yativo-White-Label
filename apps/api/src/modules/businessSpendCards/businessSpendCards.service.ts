@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import type { BusinessSpendCard, PrismaClient } from "@prisma/client";
 import type { BusinessSpendCardLimit } from "@white-label/shared-types";
 import { AppError, NotFoundError, InsufficientFundsError } from "../../lib/errors.js";
-import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { requireBusinessCustomer } from "../../lib/requireBusinessCustomer.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
@@ -35,22 +34,14 @@ export function businessSpendCardToDto(card: BusinessSpendCard) {
 
 /**
  * Every prerequisite from the integration guide, checked independently (any one failing blocks
- * creation) — business-type + full KYC submitted are cheap local checks; the virtual_card
- * endorsement and can_create_vc flag both require a live fetch of the Yativo customer record.
+ * creation) — business-type is a cheap local check; the virtual_card endorsement and
+ * can_create_vc flag both require a live fetch of the Yativo customer record.
  */
 export async function issueBusinessSpendCard(prisma: PrismaClient, customerId: string, cardType: "VIRTUAL" | "PHYSICAL" = "VIRTUAL") {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) throw new NotFoundError("Customer");
 
   requireBusinessCustomer(customer);
-  // "Full KYC must be submitted" is looser than (and distinct from) the endorsement check below —
-  // it only requires KYC to be past NOT_STARTED, not fully APPROVED.
-  if (customer.kycStatus === "NOT_STARTED") {
-    throw new AppError("Full KYC must be submitted for this customer before a Business Card can be created.", 403, "KYC_NOT_SUBMITTED");
-  }
-  // Respects the admin's PlatformSettings.kycRequiredServices toggle, same as every other
-  // product — separate from (and in addition to) the guide's own two checks.
-  await requireKycApprovedForService(prisma, "BUSINESS_SPEND_CARD", customer);
 
   const yativoCustomerId = await ensureYativoCustomer(prisma, customer);
   const fiatCustomer = await yativoClient.fiat.customers.get(yativoCustomerId);

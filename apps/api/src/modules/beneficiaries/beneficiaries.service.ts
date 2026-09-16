@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import type { Beneficiary, Customer, Prisma, PrismaClient } from "@prisma/client";
 import type { CreateBeneficiaryInput, UpdateBeneficiaryInput } from "@white-label/shared-types";
 import { AppError, NotFoundError } from "../../lib/errors.js";
-import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
 import { loadEndorsementEligibilityResolver, isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
@@ -58,9 +57,6 @@ export async function listBeneficiaries(prisma: PrismaClient, customerId: string
 }
 
 export async function createBeneficiary(prisma: PrismaClient, customerId: string, input: CreateBeneficiaryInput) {
-  const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
-  await requireKycApprovedForService(prisma, "BENEFICIARY", customer);
-
   const { gatewayId, currency, paymentData } = parseYativoDetails(input.details);
 
   // Generated up front so it can double as the Yativo idempotency key — a retry of this same

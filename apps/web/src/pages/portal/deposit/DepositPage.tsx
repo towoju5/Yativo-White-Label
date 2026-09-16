@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
-import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
 
 function formatEndorsement(endorsement: string) {
@@ -35,7 +34,6 @@ export default function DepositPage() {
         </p>
       </div>
 
-      <KycRequiredNotice service="DEPOSIT" />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
         <NativeDepositCard />

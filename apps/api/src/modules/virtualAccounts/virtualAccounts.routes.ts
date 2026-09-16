@@ -15,7 +15,6 @@ import { requirePortalPermission } from "../../middleware/requirePortalPermissio
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
-import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { isEndorsementRestrictedForCustomer } from "../../lib/endorsementEligibility.js";
 import { AppError } from "../../lib/errors.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
@@ -42,7 +41,6 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
     { preHandler: [requireCustomerAuth, requirePortalPermission("virtual_accounts.manage")], schema: { response: { 200: z.array(virtualAccountCurrencySchema) } } },
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
-      await requireKycApprovedForService(app.prisma, "VIRTUAL_ACCOUNT", customer);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
 
       const [currencies, { endorsements }] = await Promise.all([
@@ -74,7 +72,6 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
     { preHandler: [requireCustomerAuth, requirePortalPermission("virtual_accounts.manage")], schema: { response: { 200: z.array(virtualAccountSchema) } } },
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
-      await requireKycApprovedForService(app.prisma, "VIRTUAL_ACCOUNT", customer);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
       const accounts = await yativoClient.fiat.virtualAccounts.listForCustomer(yativoCustomerId);
 
@@ -97,7 +94,6 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
-      await requireKycApprovedForService(app.prisma, "VIRTUAL_ACCOUNT", customer);
       const yativoCustomerId = await ensureYativoCustomer(app.prisma, customer);
 
       const [currencies, { endorsements }] = await Promise.all([

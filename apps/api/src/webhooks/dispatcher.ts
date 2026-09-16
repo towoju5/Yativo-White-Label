@@ -76,13 +76,13 @@ export async function dispatchWebhookEvent(
     // "unrecognized" event, but intentionally a no-op.
     case "endorsement.updated":
       return { status: "IGNORED", errorMessage: "Endorsement status is always read live from Yativo — nothing to update locally" };
-    // Same reasoning as endorsement.updated: KYC status is always read live from Yativo (see
-    // requireKycApproved.ts / customers.service.ts), never cached locally, so there's nothing for
-    // these to update. Recognized (per docs.yativo.com's event table) so they log as expected
-    // rather than "unrecognized".
+    // Yativo's own general customer_kyc_status isn't consumed anywhere in this app any more —
+    // endorsements (see endorsement.updated above) are the only per-service approval signal this
+    // platform gates on now. Recognized (per docs.yativo.com's event table) so they log as
+    // expected rather than "unrecognized", but intentionally a no-op.
     case "customer.kyc.approved":
     case "customer.kyc.rejected":
-      return { status: "IGNORED", errorMessage: "KYC status is always read live from Yativo — nothing to update locally" };
+      return { status: "IGNORED", errorMessage: "Yativo's general KYC status isn't used by this platform — endorsements are the only status it acts on" };
     // Documented as a distinct event from virtual_account.deposit, but docs.yativo.com gives no
     // payload example for it — unlike virtual_account.deposit's confirmed nested customer/source
     // shape. Recognized so it's visible in the admin webhook log instead of looking unrecognized,

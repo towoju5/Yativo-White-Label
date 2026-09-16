@@ -5,7 +5,6 @@ import { cryptoWalletSchema, cryptoDepositSchema, createCryptoWalletSchema } fro
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { requirePortalPermission } from "../../middleware/requirePortalPermission.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
-import { requireKycApprovedForService } from "../../lib/requireKycApproved.js";
 import { listMyCryptoWallets, getOrCreateMyCryptoWallet, listMyCryptoDeposits, listSupportedCryptoCurrencies } from "./cryptoWallets.service.js";
 
 export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
@@ -33,9 +32,8 @@ export async function portalCryptoWalletsRoutes(app: FastifyInstance) {
       schema: { body: createCryptoWalletSchema.pick({ currency: true }), response: { 200: cryptoWalletSchema } },
     },
     async (request, reply) => {
-      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: resolveEffectiveCustomerId(request.customer!) } });
-      await requireKycApprovedForService(app.prisma, "CRYPTO_WALLET", customer);
-      const wallet = await getOrCreateMyCryptoWallet(app.prisma, customer.id, request.body.currency);
+      const customerId = resolveEffectiveCustomerId(request.customer!);
+      const wallet = await getOrCreateMyCryptoWallet(app.prisma, customerId, request.body.currency);
       return reply.send(wallet);
     },
   );

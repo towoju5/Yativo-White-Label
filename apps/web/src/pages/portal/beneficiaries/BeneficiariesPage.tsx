@@ -17,7 +17,6 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
 import { humanize } from "@/pages/portal/kyc/kycUtils";
-import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 
 function formatEndorsement(endorsement: string) {
   return endorsement.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -191,7 +190,6 @@ export default function BeneficiariesPage() {
         </div>
       </div>
 
-      <KycRequiredNotice service="BENEFICIARY" />
 
       <div className="flex items-center justify-end">
         <Dialog

@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
 
 const FIELD_LABELS: Record<string, string> = {
@@ -81,7 +80,6 @@ export default function VirtualAccountsPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">{t("virtualAccounts.subtitle", "Dedicated bank details you can reuse for every incoming transfer, once per currency.")}</p>
       </div>
 
-      <KycRequiredNotice service="VIRTUAL_ACCOUNT" />
       <div className="flex flex-col gap-4">
           <Card>
               <CardHeader>

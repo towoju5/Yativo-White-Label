@@ -27,7 +27,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect, Stepper } from "@/pages/portal/kyc/kycShared";
-import { KycRequiredNotice } from "@/components/kyc/KycRequiredNotice";
 
 const QUOTE_LIFETIME_MS = 5 * 60_000;
 
@@ -306,7 +305,7 @@ export default function SendMoneyPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("send.title", "Send money")}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
@@ -314,7 +313,6 @@ export default function SendMoneyPage() {
         </p>
       </div>
 
-      <KycRequiredNotice service="PAYOUT" />
 
       {step === 0 && (
         <div className="flex gap-2 rounded-lg border border-border bg-muted/30 p-1">

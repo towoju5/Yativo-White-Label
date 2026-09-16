@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { publicApi, ApiError } from "@/lib/api-client";
 
-/** Unlike KycStatusBanner, this is never dismissable — an unverified email can eventually block
- * login entirely (see PlatformSettings.requireEmailVerification), so it stays until resolved. */
+/** Never dismissable — an unverified email can eventually block login entirely (see
+ * PlatformSettings.requireEmailVerification), so it stays until resolved. */
 export function EmailVerificationBanner() {
   const { user } = useCustomerAuth();
   const { t } = useTranslation();
