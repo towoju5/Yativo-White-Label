@@ -61,7 +61,22 @@ function toCustomerListItem(tx: TxWithEntries, customerId: string) {
 export async function listTransactionsForCustomer(
   prisma: PrismaClient,
   customerId: string,
-  filters: { type?: LedgerTransactionType; status?: LedgerTransactionStatus; currencyCode?: string; dateFrom?: Date; dateTo?: Date; search?: string },
+  filters: {
+    type?: LedgerTransactionType;
+    status?: LedgerTransactionStatus;
+    currencyCode?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    search?: string;
+    /**
+     * Scopes to deposits that landed via a virtual account (see modules/virtualAccounts) rather
+     * than the one-off gateway pay-in flow (modules/deposits). Both post a `DEPOSIT`-type ledger
+     * transaction in the same currencies, but only the gateway flow creates a linked `Deposit`
+     * row — virtual account deposits post directly (see webhooks/handlers/virtualAccountDeposit.handler.ts)
+     * — so `deposit: null` is what actually distinguishes the two rails, not currency or type alone.
+     */
+    rail?: "VIRTUAL_ACCOUNT";
+  },
   page: number,
   pageSize: number,
 ) {
@@ -83,6 +98,7 @@ export async function listTransactionsForCustomer(
       ? { createdAt: { ...(filters.dateFrom ? { gte: filters.dateFrom } : {}), ...(filters.dateTo ? { lte: filters.dateTo } : {}) } }
       : {}),
     ...(searchOr ? { OR: searchOr } : {}),
+    ...(filters.rail === "VIRTUAL_ACCOUNT" ? { type: "DEPOSIT", deposit: null } : {}),
   };
 
   const [total, transactions] = await Promise.all([

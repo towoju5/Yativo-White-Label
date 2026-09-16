@@ -28,6 +28,7 @@ import SendMoneyPage from "@/pages/portal/send/SendMoneyPage";
 import DepositPage from "@/pages/portal/deposit/DepositPage";
 import PortalCryptoWalletsPage from "@/pages/portal/crypto/CryptoWalletsPage";
 import VirtualAccountsPage from "@/pages/portal/virtualAccounts/VirtualAccountsPage";
+import VirtualAccountDepositsPage from "@/pages/portal/virtualAccounts/VirtualAccountDepositsPage";
 import BeneficiariesPage from "@/pages/portal/beneficiaries/BeneficiariesPage";
 import PortalCardsPage from "@/pages/portal/cards/CardsPage";
 import PortalBusinessSpendCardsPage from "@/pages/portal/businessSpendCards/CardsPage";
@@ -131,6 +132,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "deposit", element: <DepositPage /> },
               { path: "crypto", element: <PortalCryptoWalletsPage /> },
               { path: "virtual-accounts", element: <VirtualAccountsPage /> },
+              { path: "virtual-accounts/deposits", element: <VirtualAccountDepositsPage /> },
               { path: "beneficiaries", element: <BeneficiariesPage /> },
               { path: "cards", element: <PortalCardsPage /> },
               { path: "business-spend-cards", element: <PortalBusinessSpendCardsPage /> },

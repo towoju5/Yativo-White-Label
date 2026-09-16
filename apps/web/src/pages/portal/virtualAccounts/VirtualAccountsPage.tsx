@@ -215,12 +215,12 @@ export default function VirtualAccountsPage() {
 
 function AccountActivity({ currencyCode }: { currencyCode: string }) {
   const { t } = useTranslation();
-  // Virtual accounts are provisioned one-per-currency (get-or-create — see virtualAccounts.routes.ts),
-  // and incoming transfers land as DEPOSIT ledger entries in that same currency, so this filter
-  // reliably scopes to just this account without needing a dedicated per-account history endpoint.
+  // Virtual accounts are provisioned one-per-currency (get-or-create — see virtualAccounts.routes.ts).
+  // `rail: VIRTUAL_ACCOUNT` (not just type+currency) is what actually excludes gateway pay-in
+  // deposits landing in the same currency — see listTransactionsForCustomer's doc comment.
   const activityQuery = useQuery({
     queryKey: ["portal", "transactions", "virtual-account", currencyCode],
-    queryFn: () => portalApi.get<Paginated<CustomerTransactionListItem>>("/portal/transactions", { type: "DEPOSIT", currencyCode, page: 1, pageSize: 5 }),
+    queryFn: () => portalApi.get<Paginated<CustomerTransactionListItem>>("/portal/transactions", { rail: "VIRTUAL_ACCOUNT", currencyCode, page: 1, pageSize: 5 }),
   });
   const items = activityQuery.data?.items ?? [];
 
@@ -249,8 +249,11 @@ function AccountActivity({ currencyCode }: { currencyCode: string }) {
               />
             ))}
           </div>
-          <Link to="/portal/transactions" className="block border-t border-border p-2 text-center text-xs font-medium text-primary hover:underline">
-            {t("virtualAccounts.viewAllActivity", "View all in Transactions")}
+          <Link
+            to={`/portal/virtual-accounts/deposits?currencyCode=${currencyCode}`}
+            className="block border-t border-border p-2 text-center text-xs font-medium text-primary hover:underline"
+          >
+            {t("virtualAccounts.viewAllActivity", "View all transfer deposits")}
           </Link>
         </>
       )}
