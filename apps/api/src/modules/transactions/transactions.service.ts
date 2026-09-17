@@ -103,6 +103,14 @@ export async function listTransactionsForCustomer(
 
   const where: Prisma.LedgerTransactionWhereInput = {
     entries: { some: { account: { customerId }, ...(filters.currencyCode ? { currencyCode: filters.currencyCode } : {}) } },
+    // A settlement (`settle:<originalId>`) is a second LedgerTransaction row that re-posts the
+    // same customer-facing effect as the PENDING hold it settles (see settlePendingTransaction) —
+    // an internal ledger-mechanics artifact, not a second real-world event. Both rows touch the
+    // same wallet account, so without this exclusion a settled deposit/payout/card-funding shows
+    // up TWICE with two different transaction ids and (as of the friendly-status work) the same
+    // "Success" badge on both. The original hold's own row already reflects the correct final
+    // status via deriveFriendlyStatuses, so it's the one row that should ever show here.
+    NOT: { idempotencyKey: { startsWith: "settle:" } },
     ...(filters.type ? { type: filters.type } : {}),
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.dateFrom || filters.dateTo
@@ -138,6 +146,9 @@ export async function listLedgerTransactions(
   pageSize: number,
 ) {
   const where: Prisma.LedgerTransactionWhereInput = {
+    // See the identical exclusion in listTransactionsForCustomer above — a settlement row is an
+    // internal artifact of the original hold it settles, not a second transaction to list.
+    NOT: { idempotencyKey: { startsWith: "settle:" } },
     ...(filters.type ? { type: filters.type } : {}),
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.currencyCode ? { entries: { some: { currencyCode: filters.currencyCode } } } : {}),

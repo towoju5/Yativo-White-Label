@@ -7,7 +7,25 @@ import { enqueueEmail } from "../../jobs/emailQueue.js";
 import { sendWebPush } from "./channels/webPush.js";
 import { sendSms } from "./channels/sms.js";
 import { sendWhatsApp } from "./channels/whatsapp/index.js";
+import { sendOpsAlert } from "./channels/opsAlert.js";
 import logger from "../../lib/logger.js";
+
+/**
+ * Real money movement only (matches the "Money movement" group in EMAIL_NOTIFICATION_CATALOG,
+ * minus BENEFICIARY_ADDED — adding a beneficiary moves no money) plus CARD_TRANSACTION, which
+ * carries an amount too but lives in a different catalog group. Lifecycle/security notifications
+ * (card frozen, 2FA, passkeys, KYC, welcome) are deliberately excluded — they'd just be noise on
+ * an ops channel meant for "did money move" visibility.
+ */
+const TRANSACTION_SUMMARY_TYPES: EmailNotificationType[] = [
+  "DEPOSIT_CREATED",
+  "DEPOSIT_RECEIVED",
+  "PAYOUT_CREATED",
+  "PAYOUT_COMPLETED",
+  "PAYOUT_FAILED",
+  "SWAP_COMPLETED",
+  "CARD_TRANSACTION",
+];
 
 // Same allowlist StaticPage uses for admin-authored HTML (see pages.service.ts), plus `style` —
 // inline styles are how plain HTML emails get any layout at all, since most mail clients strip
@@ -509,6 +527,13 @@ export async function sendNotificationEmail(
     // USD") — reused as the in-app/push/SMS title so this doesn't need its own separate copy.
     const title = renderTemplate(template.subject, allVars);
     const body = EMAIL_NOTIFICATION_CATALOG.find((c) => c.type === type)?.description ?? title;
+
+    // Ops visibility into real money movement — fire-and-forget, same as every other channel here;
+    // see TRANSACTION_SUMMARY_TYPES' doc comment for why only these types qualify.
+    if (TRANSACTION_SUMMARY_TYPES.includes(type)) {
+      const who = customer.fullName ?? customer.businessName ?? customer.email;
+      void sendOpsAlert(`💳 ${title} — ${who}`);
+    }
 
     await Promise.all([
       enqueueEmail({ to: customer.email, subject: title, html: renderTemplate(template.bodyHtml, allVars) }),

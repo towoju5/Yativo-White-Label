@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import type { CustomerTransactionListItem, StatementLine, WalletBalance } from "@white-label/shared-types";
 import { formatCurrencyAmount } from "@white-label/shared-types";
 import { Wallet, Clock, ArrowLeftRight, TrendingUp } from "lucide-react";
@@ -11,6 +12,7 @@ import type { ActivityItem, DashboardChartPoint } from "@/templates/types";
 export default function PortalDashboardPage() {
   const T = useTemplate();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const walletsQuery = useQuery({
     queryKey: ["portal", "wallets"],
@@ -68,6 +70,7 @@ export default function PortalDashboardPage() {
     availableMinor: w.availableMinor,
     pendingMinor: w.pendingMinor,
     label: t("dashboard.walletLabel", "Wallet"),
+    onClick: () => navigate(`/portal/wallets/${w.walletId}`),
   }));
 
   const totalPending = (walletsQuery.data ?? []).reduce((sum, w) => sum + BigInt(w.pendingMinor || "0"), 0n);

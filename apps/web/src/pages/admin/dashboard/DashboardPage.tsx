@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
   const activity: ActivityItem[] = (txQuery.data?.items ?? []).map((tx) => ({
     id: tx.id,
     title: tx.description ?? tx.type,
-    subtitle: tx.customerEmail ?? tx.externalSource,
+    subtitle: tx.customerName ?? tx.externalSource,
     amountMinor: tx.amountMinor ?? "0",
     decimals: primary?.decimals ?? 2,
     currencyCode: tx.currencyCode ?? primary?.currencyCode ?? "USD",

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertCircle, Check, ChevronsUpDown, Loader2, Upload, X } from "lucide-react";
+import { AlertCircle, Camera, Check, ChevronsUpDown, Loader2, Upload, X } from "lucide-react";
 import { FILE_ACCEPT, type KycCountry } from "@white-label/shared-types";
 import { ApiError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { humanize, validateFile, type AnyForm } from "./kycUtils";
+import { humanize, validateFile, validateCapturedPhoto, type AnyForm } from "./kycUtils";
 import { useKycSubdivisions, useKycPostalCodeRule, useKycIdentificationTypes } from "./kycHooks";
 
 function getAtPath(obj: unknown, path: string[]): unknown {
@@ -277,70 +277,88 @@ export function FileField({
   const [error, setError] = useState<string | null>(null);
   const value = form.watch(name) as string | undefined;
 
+  const clear = () => {
+    setState(null);
+    files?.delete(name);
+    form.setValue(name, "", { shouldValidate: true });
+  };
+
+  const accept = async (file: File, err: string | null) => {
+    if (err) {
+      setError(err);
+      clear();
+      return;
+    }
+    setError(null);
+    setState({ name: file.name, size: file.size });
+    if (encoding === "binary") {
+      files?.set(name, file);
+      // The real File lives in the registry (see FileRegistryProvider) — this field only
+      // needs a non-empty placeholder so the existing required-string validation still
+      // gates step navigation correctly.
+      form.setValue(name, file.name, { shouldValidate: true });
+    } else {
+      files?.delete(name);
+      form.setValue(name, await fileToBase64(file), { shouldValidate: true });
+    }
+    onValidated?.(file);
+  };
+
   return (
     <div className="space-y-1.5">
       <Label>{label}</Label>
-      <label
-        className={cn(
-          "flex cursor-pointer items-center gap-3 rounded-lg border border-dashed p-3 text-sm transition-colors hover:bg-muted/50",
-          error ? "border-destructive/50" : value ? "border-success/50 bg-success/5" : "border-border",
-        )}
-      >
-        <input
-          type="file"
-          accept={FILE_ACCEPT}
-          className="hidden"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const err = validateFile(file);
-            if (err) {
-              setError(err);
-              setState(null);
-              files?.delete(name);
-              form.setValue(name, "", { shouldValidate: true });
-              return;
-            }
-            setError(null);
-            setState({ name: file.name, size: file.size });
-            if (encoding === "binary") {
-              files?.set(name, file);
-              // The real File lives in the registry (see FileRegistryProvider) — this field only
-              // needs a non-empty placeholder so the existing required-string validation still
-              // gates step navigation correctly.
-              form.setValue(name, file.name, { shouldValidate: true });
-            } else {
-              files?.delete(name);
-              form.setValue(name, await fileToBase64(file), { shouldValidate: true });
-            }
-            onValidated?.(file);
-          }}
-        />
-        {value ? <Check className="h-4 w-4 shrink-0 text-success" /> : <Upload className="h-4 w-4 shrink-0 text-muted-foreground" />}
-        <span className="min-w-0 flex-1 truncate text-muted-foreground">
-          {state ? (
-            <>
-              <span className="text-foreground">{state.name}</span> · {formatBytes(state.size)}
-            </>
-          ) : (
-            t("kycShared.clickToUpload", "Click to upload")
+      {value ? (
+        <div
+          className={cn(
+            "flex items-center gap-3 rounded-lg border border-dashed p-3 text-sm transition-colors",
+            error ? "border-destructive/50" : "border-success/50 bg-success/5",
           )}
-        </span>
-        {value && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              setState(null);
-              files?.delete(name);
-              form.setValue(name, "", { shouldValidate: true });
-            }}
-            className="shrink-0 text-muted-foreground hover:text-destructive"
-          >
+        >
+          <Check className="h-4 w-4 shrink-0 text-success" />
+          <span className="min-w-0 flex-1 truncate text-muted-foreground">
+            {state && (
+              <>
+                <span className="text-foreground">{state.name}</span> · {formatBytes(state.size)}
+              </>
+            )}
+          </span>
+          <button type="button" onClick={clear} className="shrink-0 text-muted-foreground hover:text-destructive">
             <X className="h-4 w-4" />
           </button>
-        )}
-      </label>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <label className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-border p-3 text-center text-xs text-muted-foreground transition-colors hover:bg-muted/50">
+            <input
+              type="file"
+              accept="image/jpeg"
+              capture="environment"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) await accept(file, validateCapturedPhoto(file));
+              }}
+            />
+            <Camera className="h-4 w-4" />
+            {t("kycShared.takePhoto", "Take photo")}
+          </label>
+          <label className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-border p-3 text-center text-xs text-muted-foreground transition-colors hover:bg-muted/50">
+            <input
+              type="file"
+              accept={FILE_ACCEPT}
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) await accept(file, validateFile(file));
+              }}
+            />
+            <Upload className="h-4 w-4" />
+            {t("kycShared.chooseFile", "Choose file")}
+          </label>
+        </div>
+      )}
       {error && <p className="text-xs text-destructive">{error}</p>}
       {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>

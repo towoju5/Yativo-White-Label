@@ -140,10 +140,10 @@ export default function TransactionsPage() {
                 <TableRow key={tx.id}>
                   <TableCell className="whitespace-nowrap text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</TableCell>
                   <TableCell className="text-xs uppercase text-muted-foreground">{tx.type}</TableCell>
-                  <TableCell className="max-w-[260px] truncate" title={tx.id ?? undefined}>
-                    {tx.id ?? "—"}
+                  <TableCell className="max-w-[260px] truncate" title={tx.description ?? tx.id}>
+                    {tx.description ?? tx.id}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{tx.customerEmail ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{tx.customerName ?? "—"}</TableCell>
                   <TableCell>
                     <Badge variant={TRANSACTION_STATUS_VARIANT[tx.status]}>{TRANSACTION_STATUS_LABEL[tx.status]}</Badge>
                   </TableCell>
@@ -153,7 +153,7 @@ export default function TransactionsPage() {
                       tx.direction === "CREDIT" ? "text-success" : tx.direction === "DEBIT" ? "text-foreground" : "text-muted-foreground",
                     )}
                   >
-                    {tx.amountMinor !== undefined ? (
+                    {tx.amountMinor != null ? (
                       <>
                         {tx.direction === "CREDIT" ? "+" : tx.direction === "DEBIT" ? "-" : ""}
                         {formatMinorAmount(tx.amountMinor, 2)} {tx.currencyCode ?? ""}

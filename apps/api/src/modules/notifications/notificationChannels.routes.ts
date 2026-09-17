@@ -1,8 +1,11 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { notificationChannelSettingsSchema, updateNotificationChannelSettingsSchema } from "@white-label/shared-types";
+import { notificationChannelSettingsSchema, updateNotificationChannelSettingsSchema, testNotificationChannelSchema, testNotificationChannelResultSchema } from "@white-label/shared-types";
 import { requireStaffAuth, requirePermission } from "../../middleware/requireStaffAuth.js";
 import { notificationChannelConfig, applyNotificationChannelSettings, saveNotificationChannelSettings, type NotificationChannelSettings } from "../../lib/notificationChannelConfig.js";
+import { postSlackMessage } from "./channels/slack.js";
+import { postTelegramMessage } from "./channels/telegram.js";
+import { AppError } from "../../lib/errors.js";
 
 function toSafeDto(s: NotificationChannelSettings) {
   return {
@@ -75,6 +78,30 @@ export async function notificationChannelsRoutes(app: FastifyInstance) {
       await db.adminAuditLog.create({ data: { actorId: request.staffUser!.sub, action: "notification_channels.updated", target: "notification-channels" } });
       applyNotificationChannelSettings(next);
       return reply.send(toSafeDto(next));
+    },
+  );
+
+  server.post(
+    "/admin/settings/notification-channels/test",
+    {
+      preHandler: [requireStaffAuth, requirePermission("api_keys.manage")],
+      schema: { body: testNotificationChannelSchema, response: { 200: testNotificationChannelResultSchema } },
+    },
+    async (request, reply) => {
+      const testMessage = "✅ Test alert from White Label admin — notification channels are wired up correctly.";
+
+      if (request.body.channel === "slack") {
+        const webhookUrl = request.body.webhookUrl || notificationChannelConfig.slack.webhookUrl;
+        if (!webhookUrl) throw new AppError("No webhook URL to test — enter one first.", 400, "MISSING_CHANNEL_CONFIG");
+        const result = await postSlackMessage(webhookUrl, testMessage);
+        return reply.send(result.ok ? { success: true, message: "Test message sent — check Slack." } : { success: false, message: result.error });
+      }
+
+      const botToken = request.body.botToken || notificationChannelConfig.telegram.botToken;
+      const chatId = request.body.chatId || notificationChannelConfig.telegram.chatId;
+      if (!botToken || !chatId) throw new AppError("Both a bot token and chat ID are needed to test — enter them first.", 400, "MISSING_CHANNEL_CONFIG");
+      const result = await postTelegramMessage(botToken, chatId, testMessage);
+      return reply.send(result.ok ? { success: true, message: "Test message sent — check Telegram." } : { success: false, message: result.error });
     },
   );
 }

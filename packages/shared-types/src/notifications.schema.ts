@@ -180,3 +180,21 @@ export const updateNotificationChannelSettingsSchema = z.object({
   }),
 });
 export type UpdateNotificationChannelSettingsInput = z.infer<typeof updateNotificationChannelSettingsSchema>;
+
+/**
+ * Lets an admin verify a channel actually delivers before saving — `webhookUrl`/`botToken` are
+ * optional so testing a channel whose secret is already saved (masked in the form) reuses the
+ * persisted value server-side, the same "blank means keep existing" convention as the update
+ * schema above. `chatId` is never masked, so it's always sent from the current form value.
+ */
+export const testNotificationChannelSchema = z.discriminatedUnion("channel", [
+  z.object({ channel: z.literal("slack"), webhookUrl: z.string().optional() }),
+  z.object({ channel: z.literal("telegram"), botToken: z.string().optional(), chatId: z.string().optional() }),
+]);
+export type TestNotificationChannelInput = z.infer<typeof testNotificationChannelSchema>;
+
+export const testNotificationChannelResultSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+export type TestNotificationChannelResult = z.infer<typeof testNotificationChannelResultSchema>;

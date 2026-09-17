@@ -28,7 +28,7 @@ export default function DepositPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("deposit.title", "Payin")}</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("deposit.title", "Deposit")}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {t("deposit.subtitle", "Fund your wallet with a one-time payment via a local rail, or crypto.")}
         </p>
@@ -299,12 +299,12 @@ function NativeDepositCard() {
           }}
         >
           <Button size="sm" onClick={() => setOpen(true)}>
-            <WalletIcon className="h-4 w-4" /> {t("deposit.localCard.depositButton", "Payin")}
+            <WalletIcon className="h-4 w-4" /> {t("deposit.localCard.depositButton", "Deposit")}
           </Button>
 
           <DialogContent className="max-w-lg overflow-hidden p-0 sm:max-w-2xl">
             <DialogHeader className="border-b border-border px-6 py-5">
-              <DialogTitle className="font-heading text-xl">{t("deposit.dialog.title", "Payin funds")}</DialogTitle>
+              <DialogTitle className="font-heading text-xl">{t("deposit.dialog.title", "Deposit funds")}</DialogTitle>
               {!result && !quote && (
                 <div className="pt-2">
                   <Stepper steps={DEPOSIT_STEPS} current={step} />
@@ -317,10 +317,10 @@ function NativeDepositCard() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-success">
                     <Check className="h-4 w-4" />
-                    {t("deposit.dialog.initiated", "Payin initiated")}
+                    {t("deposit.dialog.initiated", "Deposit initiated")}
                   </div>
                   <dl className="divide-y divide-border rounded-lg border border-border">
-                    {result.depositId && <Row label={t("deposit.dialog.depositId", "Payin ID")} value={result.depositId} />}
+                    {result.depositId && <Row label={t("deposit.dialog.depositId", "Deposit ID")} value={result.depositId} />}
                     {result.localAmount && result.localCurrency && (
                       <Row label={t("deposit.dialog.amountToPay", "Amount to pay")} value={`${result.localAmount} ${result.localCurrency}`} />
                     )}

@@ -124,7 +124,6 @@
   },
   "crypto": {
     "addressCopied": "Address copied",
-    "copyAddress": "Copy address",
     "copyAddressError": "Couldn't copy address",
     "depositAddressReady": "Deposit address ready",
     "generateAddress": "Generate address",
@@ -133,9 +132,7 @@
     "generating": "Generating…",
     "noDepositsYet": "No crypto deposits yet",
     "noWalletsYet": "No crypto wallets yet — generate an address below to get started.",
-    "qrCodeHint": "Scan this code in your wallet app to send {{currency}} to this address.",
     "selectAssetPlaceholder": "Select an asset",
-    "showQrCode": "Show QR code",
     "subtitle": "Deposit addresses and on-chain deposit history for supported assets.",
     "title": "Crypto wallets",
     "transactionsDescription": "Every on-chain deposit matched to your account.",
@@ -204,7 +201,7 @@
     "buttons": {
       "back": "Back",
       "continue": "Continue",
-      "startDeposit": "Start payin"
+      "startDeposit": "Start deposit"
     },
     "cryptoCard": {
       "description": "Deposit addresses and on-chain deposit history now live on their own page.",
@@ -217,9 +214,9 @@
       "estimatedDelivery": "Estimated delivery",
       "exchangeRate": "Exchange rate",
       "fee": "Fee",
-      "initiated": "Payin initiated",
+      "initiated": "Deposit initiated",
       "openLinkAriaLabel": "Open link",
-      "title": "Payin funds",
+      "title": "Deposit funds",
       "youllReceive": "You'll receive"
     },
     "errors": {
@@ -228,7 +225,7 @@
       "pickWallet": "Pick which wallet to credit"
     },
     "localCard": {
-      "depositButton": "Payin",
+      "depositButton": "Deposit",
       "description": "Pick your country and pay via the local rail — bank transfer, CODI, DEBIN and more.",
       "title": "Or deposit with a local payment method"
     },
@@ -258,7 +255,7 @@
       "method": "Method"
     },
     "subtitle": "Fund your wallet with a one-time payment via a local rail, or crypto.",
-    "title": "Payin",
+    "title": "Deposit",
     "toast": {
       "copied": "Copied to clipboard",
       "copyFailed": "Couldn't copy",
@@ -325,7 +322,7 @@
         "phone": "Phone",
         "registrationNumber": "Registration number",
         "requiredFieldsHint": "Fill in the required fields above.",
-        "taxId": "Tax ID (optional)",
+        "taxId": "Tax ID/NIN/SSN/EIN",
         "title": "Business info",
         "tradeName": "Trade name",
         "website": "Website (optional)",
@@ -511,7 +508,7 @@
     "postalCodeFormatErrorWithExample": "Doesn't match the expected format (e.g. {{example}}).",
     "postalCodeLabel": "Postal code",
     "proofOfAddressHint": "Utility bill, bank statement, or lease.",
-    "proofOfAddressLabel": "Proof of address",
+    "proofOfAddressLabel": "Proof of address (within last 3months)",
     "searchPlaceholder": "Search…",
     "selectCountryPlaceholder": "Select a country",
     "selectOption": "Select",

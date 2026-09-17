@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { NotificationChannelSettingsDto, UpdateNotificationChannelSettingsInput, WhatsAppProviderKind } from "@white-label/shared-types";
+import type { NotificationChannelSettingsDto, TestNotificationChannelResult, UpdateNotificationChannelSettingsInput, WhatsAppProviderKind } from "@white-label/shared-types";
+import { Loader2, Send } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,23 @@ export default function NotificationChannelsSettingsPage() {
       toast({ title: "Notification channel settings saved" });
     },
     onError: (e) => toast({ variant: "destructive", title: "Couldn't save settings", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const testSlackMutation = useMutation({
+    mutationFn: () => staffApi.post<TestNotificationChannelResult>("/admin/settings/notification-channels/test", { channel: "slack", webhookUrl: form.slackWebhookUrlInput || undefined }),
+    onSuccess: (result) => toast({ variant: result.success ? undefined : "destructive", title: result.success ? "Slack test sent" : "Slack test failed", description: result.message }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't test Slack", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const testTelegramMutation = useMutation({
+    mutationFn: () =>
+      staffApi.post<TestNotificationChannelResult>("/admin/settings/notification-channels/test", {
+        channel: "telegram",
+        botToken: form.telegramBotTokenInput || undefined,
+        chatId: form.telegram.chatId || undefined,
+      }),
+    onSuccess: (result) => toast({ variant: result.success ? undefined : "destructive", title: result.success ? "Telegram test sent" : "Telegram test failed", description: result.message }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't test Telegram", description: e instanceof ApiError ? e.message : undefined }),
   });
 
   const copyPublicKey = () => {
@@ -284,6 +302,15 @@ export default function NotificationChannelsSettingsPage() {
               placeholder={secretHint(form.slack.webhookUrlConfigured)}
             />
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => testSlackMutation.mutate()}
+            disabled={testSlackMutation.isPending || (!form.slackWebhookUrlInput && !form.slack.webhookUrlConfigured)}
+          >
+            {testSlackMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Send test message
+          </Button>
         </CardContent>
       </Card>
 
@@ -310,6 +337,15 @@ export default function NotificationChannelsSettingsPage() {
             <Label htmlFor="telegramChatId">Chat ID</Label>
             <Input id="telegramChatId" value={form.telegram.chatId} onChange={(e) => setForm((f) => ({ ...f, telegram: { ...f.telegram, chatId: e.target.value } }))} />
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => testTelegramMutation.mutate()}
+            disabled={testTelegramMutation.isPending || !form.telegram.chatId || (!form.telegramBotTokenInput && !form.telegram.botTokenConfigured)}
+          >
+            {testTelegramMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Send test message
+          </Button>
         </CardContent>
       </Card>
 

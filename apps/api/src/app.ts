@@ -7,6 +7,7 @@ import multipart from "@fastify/multipart";
 import websocket from "@fastify/websocket";
 import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 import { YativoApiError, parseYativoErrorMessage, parseYativoErrorDetails } from "@white-label/yativo-sdk";
+import { sendOpsAlert } from "./modules/notifications/channels/opsAlert.js";
 import { env } from "./config/env.js";
 import logger from "./lib/logger.js";
 import { AppError } from "./lib/errors.js";
@@ -127,9 +128,9 @@ export async function buildApp() {
           .code(503)
           .send({ message: "This feature isn't available yet — please contact support.", code: "PROVIDER_AUTH_ERROR" });
       }
-      // Every other 4xx is (usually) something the customer can fix — bad payment_data, insufficient
-      // balance, a stale/mismatched quote, a gateway that needs a customer_id, etc. Surface Yativo's
-      // own `data.error`/`message` rather than a generic message; only fall back when the body isn't
+      // Every other 4xx is (usually) something the customer can fix — bad payment_data, a
+      // stale/mismatched quote, a gateway that needs a customer_id, etc. Surface Yativo's own
+      // `data.error`/`message` rather than a generic message; only fall back when the body isn't
       // parseable (a true 5xx or an unexpected shape).
       if (error.upstreamStatus >= 400 && error.upstreamStatus < 500) {
         const upstreamMessage = parseYativoErrorMessage(error.upstreamBody);
@@ -137,6 +138,23 @@ export async function buildApp() {
         // screens that want it (currently the KYC/KYB wizards) show every rejected field instead
         // of the single flattened line in `message`.
         const details = parseYativoErrorDetails(error.upstreamBody);
+
+        // "Insufficient balance" from Yativo means THIS PLATFORM's own float/settlement balance
+        // held with Yativo is too low — never the customer's own wallet, which is already checked
+        // locally (getAvailableBalance) before any Yativo call is made. Showing that raw message
+        // to a customer would read as "you don't have enough money" when the opposite is true, and
+        // it leaks an operational problem to an end user — so this is surfaced as maintenance mode
+        // instead, with an urgent ops alert so the team can top up the float.
+        if (/insufficient/i.test(upstreamMessage ?? error.upstreamBody)) {
+          void sendOpsAlert(
+            `🚨 Yativo rejected a request for insufficient platform balance — ${error.method} ${error.path}. Top up the platform's Yativo balance to restore service. Upstream: ${upstreamMessage ?? error.upstreamBody}`,
+          );
+          return reply.code(503).send({
+            message: "This service is currently under maintenance. Please try again shortly or contact support.",
+            code: "PROVIDER_MAINTENANCE",
+          });
+        }
+
         return reply.code(error.upstreamStatus).send({
           message: upstreamMessage ?? "The payment provider rejected this request. Please check your details and try again.",
           code: "PROVIDER_ERROR",

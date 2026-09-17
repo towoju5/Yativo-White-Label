@@ -21,10 +21,10 @@ export interface AdminTransactionRow {
   externalSource: string;
   externalRef: string | null;
   createdAt: string;
-  amountMinor?: string;
-  currencyCode?: string;
-  direction?: "DEBIT" | "CREDIT";
-  customerId?: string;
-  customerEmail?: string;
+  amountMinor: string | null;
+  currencyCode: string | null;
+  direction: "DEBIT" | "CREDIT" | null;
+  customerId: string | null;
+  customerName: string | null;
 }
 

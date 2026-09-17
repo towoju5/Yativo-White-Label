@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import type { CryptoWallet, CryptoDeposit } from "@white-label/shared-types";
-import { Coins, Copy, ExternalLink, QrCode } from "lucide-react";
+import { Coins, Copy, ExternalLink } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 import { portalApi, ApiError } from "@/lib/api-client";
@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 function truncateAddress(address: string) {
   return address.length > 14 ? `${address.slice(0, 8)}…${address.slice(-6)}` : address;
@@ -51,7 +50,6 @@ export default function CryptoWalletsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currency, setCurrency] = useState("");
-  const [qrWallet, setQrWallet] = useState<CryptoWallet | null>(null);
 
   const currenciesQuery = useQuery({
     queryKey: ["portal", "crypto", "currencies"],
@@ -118,29 +116,23 @@ export default function CryptoWalletsPage() {
               {t("crypto.noWalletsYet", "No crypto wallets yet — generate an address below to get started.")}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {wallets.map((w) => (
-                <div key={w.id} className="flex flex-col gap-2 rounded-lg border border-border p-3 text-sm">
+                <div key={w.id} className="flex flex-col items-center gap-3 rounded-lg border border-border p-4 text-sm">
                   <div className="flex items-center gap-1.5 font-medium">
                     {w.currency} <Badge variant="outline">{w.network}</Badge>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => copy(w.address)}
-                      className="flex items-center gap-1.5 self-start font-mono text-xs text-muted-foreground hover:text-primary"
-                      title={w.address}
-                    >
-                      {truncateAddress(w.address)}
-                      <Copy className="h-3 w-3" />
-                    </button>
-                    <button
-                      onClick={() => setQrWallet(w)}
-                      className="text-muted-foreground hover:text-primary"
-                      title={t("crypto.showQrCode", "Show QR code")}
-                    >
-                      <QrCode className="h-3.5 w-3.5" />
-                    </button>
+                  <div className="rounded-lg border border-border bg-white p-3">
+                    <QRCodeSVG value={w.address} size={200} />
                   </div>
+                  <button
+                    onClick={() => copy(w.address)}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-md bg-muted px-3 py-1.5 font-mono text-xs text-muted-foreground hover:text-primary"
+                    title={w.address}
+                  >
+                    {truncateAddress(w.address)}
+                    <Copy className="h-3 w-3 shrink-0" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -230,34 +222,6 @@ export default function CryptoWalletsPage() {
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={!!qrWallet} onOpenChange={(open) => !open && setQrWallet(null)}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-1.5">
-              {qrWallet?.currency} <Badge variant="outline">{qrWallet?.network}</Badge>
-            </DialogTitle>
-          </DialogHeader>
-          {qrWallet && (
-            <div className="flex flex-col items-center gap-4 py-2">
-              <div className="rounded-lg border border-border bg-white p-4">
-                <QRCodeSVG value={qrWallet.address} size={200} />
-              </div>
-              <button
-                onClick={() => copy(qrWallet.address)}
-                className="flex max-w-full items-center gap-1.5 break-all rounded-md bg-muted px-3 py-2 font-mono text-xs text-muted-foreground hover:text-primary"
-                title={t("crypto.copyAddress", "Copy address")}
-              >
-                <span className="break-all text-center">{qrWallet.address}</span>
-                <Copy className="h-3.5 w-3.5 shrink-0" />
-              </button>
-              <p className="text-center text-xs text-muted-foreground">
-                {t("crypto.qrCodeHint", "Scan this code in your wallet app to send {{currency}} to this address.", { currency: qrWallet.currency })}
-              </p>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

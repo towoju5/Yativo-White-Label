@@ -25,6 +25,22 @@ export function validateFile(file: File): string | null {
   return null;
 }
 
+const CAPTURED_PHOTO_MAX_BYTES = 3 * 1024 * 1024;
+
+/**
+ * Stricter rules for a photo just snapped with the device camera (the `capture` file input) as
+ * opposed to one picked from existing files: JPEG only and capped at 3MB, regardless of the
+ * broader FILE_ACCEPT/FILE_MAX_BYTES rules above. Most camera apps already produce a JPEG under
+ * this size, so this mainly catches an unusual capture (e.g. HEIC on some iOS/Safari versions).
+ */
+export function validateCapturedPhoto(file: File): string | null {
+  const isJpeg = file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name);
+  if (!isJpeg) return "That photo isn't a JPEG — try again, or use \"Choose file\" instead.";
+  if (file.size > CAPTURED_PHOTO_MAX_BYTES) return "That photo is over 3MB — try again, or use \"Choose file\" instead.";
+  if (file.size < FILE_MIN_BYTES) return `That photo looks too small to be valid (min ${Math.round(FILE_MIN_BYTES / 1024)}KB).`;
+  return null;
+}
+
 // react-hook-form's UseFormReturn is invariant in its validate callback, so a plain
 // `UseFormReturn<any>` alias isn't assignable from a concretely-typed form — these
 // reusable field-group components are view glue shared across two different schemas,
