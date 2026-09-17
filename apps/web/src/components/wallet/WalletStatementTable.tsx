@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { TRANSACTION_STATUS_LABEL, TRANSACTION_STATUS_VARIANT } from "@/lib/transactionStatus";
 import { TransactionDetailDialog } from "./TransactionDetailDialog";
 import { TransactionCardRow } from "./TransactionCardRow";
 
@@ -13,12 +14,6 @@ interface WalletStatementTableProps {
   decimals: number;
   isLoading?: boolean;
 }
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  POSTED: "success",
-  PENDING: "warning",
-  REVERSED: "destructive",
-};
 
 export function WalletStatementTable({ lines, decimals, isLoading }: WalletStatementTableProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
@@ -58,7 +53,7 @@ export function WalletStatementTable({ lines, decimals, isLoading }: WalletState
               <TableCell className="max-w-[220px] truncate">{line.description ?? line.transactionType}</TableCell>
               <TableCell className="text-xs uppercase text-muted-foreground">{line.transactionType}</TableCell>
               <TableCell>
-                <Badge variant={STATUS_VARIANT[line.status] ?? "secondary"}>{line.status}</Badge>
+                <Badge variant={TRANSACTION_STATUS_VARIANT[line.status]}>{TRANSACTION_STATUS_LABEL[line.status]}</Badge>
               </TableCell>
               <TableCell className={cn("text-right font-mono", line.direction === "CREDIT" ? "text-success" : "text-foreground")}>
                 {line.direction === "CREDIT" ? "+" : "-"}

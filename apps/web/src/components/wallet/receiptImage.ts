@@ -1,5 +1,6 @@
 import type { TransactionDetail } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
+import { TRANSACTION_STATUS_LABEL } from "@/lib/transactionStatus";
 
 export function humanizeType(type: string): string {
   return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -34,7 +35,7 @@ export function feeDetailRows(data: TransactionDetail): ReceiptRow[] {
 export function buildReceiptRows(data: TransactionDetail): ReceiptRow[] {
   return [
     ["Type", humanizeType(data.type)],
-    ["Status", data.status],
+    ["Status", TRANSACTION_STATUS_LABEL[data.status]],
     ...(data.description ? ([["Description", data.description]] as ReceiptRow[]) : []),
     ...(data.payout ? ([["Recipient", data.payout.beneficiaryName]] as ReceiptRow[]) : []),
     ...feeDetailRows(data),

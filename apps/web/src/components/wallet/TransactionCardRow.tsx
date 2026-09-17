@@ -1,12 +1,7 @@
 import { formatMinorAmount } from "@white-label/shared-types";
-import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
+import { TRANSACTION_STATUS_LABEL, TRANSACTION_STATUS_VARIANT } from "@/lib/transactionStatus";
 import { cn } from "@/lib/utils";
-
-const STATUS_VARIANT: Record<string, BadgeProps["variant"]> = {
-  POSTED: "success",
-  PENDING: "warning",
-  REVERSED: "destructive",
-};
 
 const MOBILE_DESCRIPTION_LIMIT = 20;
 
@@ -45,8 +40,8 @@ export function TransactionCardRow({ date, description, type, status, direction,
         {(status || type) && (
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {status && (
-              <Badge variant={STATUS_VARIANT[status] ?? "secondary"} className="text-[10px]">
-                {status}
+              <Badge variant={TRANSACTION_STATUS_VARIANT[status as keyof typeof TRANSACTION_STATUS_VARIANT] ?? "secondary"} className="text-[10px]">
+                {TRANSACTION_STATUS_LABEL[status as keyof typeof TRANSACTION_STATUS_LABEL] ?? status}
               </Badge>
             )}
             {type && <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{type}</span>}

@@ -10,10 +10,12 @@ import { PrimeStatCard } from "./StatCard";
 import { PrimeWalletBalanceCard } from "./WalletBalanceCard";
 
 const STATUS_VARIANT: Record<string, BadgeProps["variant"]> = {
+  SUCCESS: "success",
   POSTED: "success",
   APPROVED: "success",
   SUCCEEDED: "success",
   PENDING: "warning",
+  PROCESSING: "secondary",
   UNDER_REVIEW: "warning",
   REVERSED: "destructive",
   FAILED: "destructive",

@@ -25,6 +25,21 @@ export type LedgerTransactionType = (typeof LEDGER_TRANSACTION_TYPES)[number];
 export const LEDGER_TRANSACTION_STATUSES = ["PENDING", "POSTED", "REVERSED"] as const;
 export type LedgerTransactionStatus = (typeof LEDGER_TRANSACTION_STATUSES)[number];
 
+/**
+ * The customer/admin-facing status vocabulary for any transaction (deposit, payout, card funding,
+ * swap, ...), derived server-side from the raw 3-value LEDGER_TRANSACTION_STATUSES plus whether an
+ * external submission/settlement actually happened — see deriveFriendlyStatus in the API's
+ * ledger module. Every list/detail DTO shown to a person uses this instead of the raw enum:
+ * - PENDING: a hold exists but hasn't been sent to the external system yet.
+ * - PROCESSING: sent to the external system (Yativo, a card processor, ...), awaiting confirmation.
+ * - FAILED: a hold was released without ever succeeding.
+ * - REVERSED: this transaction DID succeed at some point, and that success was later undone
+ *   (a refund, chargeback, or manual admin reversal) — never used for something that just failed.
+ * - SUCCESS: posted and final.
+ */
+export const FRIENDLY_TRANSACTION_STATUSES = ["PENDING", "PROCESSING", "FAILED", "REVERSED", "SUCCESS"] as const;
+export type FriendlyTransactionStatus = (typeof FRIENDLY_TRANSACTION_STATUSES)[number];
+
 export const LEDGER_EXTERNAL_SOURCES = ["YATIVO_WEBHOOK", "MANUAL", "SYSTEM"] as const;
 export type LedgerExternalSource = (typeof LEDGER_EXTERNAL_SOURCES)[number];
 

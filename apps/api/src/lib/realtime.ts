@@ -1,6 +1,7 @@
 import { EventEmitter } from "node:events";
 import { Redis } from "ioredis";
 import type { PrismaClient } from "@prisma/client";
+import type { FriendlyTransactionStatus } from "@white-label/shared-types";
 import { env } from "../config/env.js";
 import logger from "./logger.js";
 
@@ -36,6 +37,20 @@ export type SupportTicketRealtimeMessage = {
 function ticketChannel(ticketId: string): string {
   return `support-ticket:${ticketId}`;
 }
+
+export type PayoutUpdateMessage = {
+  type: "payout.updated";
+  payoutId: string;
+  customerId: string;
+  status: FriendlyTransactionStatus;
+  updatedAt: string;
+};
+
+// Every staff connection auto-watches this one channel (see realtime.routes.ts) — unlike wallet
+// updates, the admin payouts list spans every customer at once, so a per-customer channel isn't a
+// fit; broadcasting to all staff sockets is simpler than making that page watch every customerId
+// on its current page of results.
+const STAFF_BROADCAST_CHANNEL = "staff-broadcast";
 
 /** Which "side" of a ticket a WS connection represents — a ticket has exactly one customer but potentially several staff, so presence is tracked per side, not per individual user. */
 export type TicketSide = "customer" | "staff";
@@ -139,6 +154,38 @@ export async function publishSupportTicketMessage(message: SupportTicketRealtime
   } catch (err) {
     logger.error({ err, ticketId: message.ticketId }, "Failed to publish support ticket message");
   }
+}
+
+/** Publishes a payout status change to every staff connection. Never throws — same rationale as publishWalletUpdatesForAccounts. */
+export async function publishPayoutUpdate(message: PayoutUpdateMessage): Promise<void> {
+  try {
+    await getPublisher().publish(STAFF_BROADCAST_CHANNEL, JSON.stringify(message));
+  } catch (err) {
+    logger.error({ err, payoutId: message.payoutId }, "Failed to publish payout update");
+  }
+}
+
+/** Every staff WS connection calls this once, unconditionally, on connect — see realtime.routes.ts. Same reference-counted watch pattern as watchWalletChannel. */
+export function watchStaffBroadcastChannel(onMessage: (msg: PayoutUpdateMessage) => void): () => void {
+  const channel = STAFF_BROADCAST_CHANNEL;
+  const sub = getSubscriber();
+  const listener = (raw: string) => {
+    try {
+      onMessage(JSON.parse(raw) as PayoutUpdateMessage);
+    } catch (err) {
+      logger.warn({ err }, "Dropped malformed realtime message");
+    }
+  };
+  emitter.on(channel, listener);
+  if (emitter.listenerCount(channel) === 1) {
+    sub.subscribe(channel).catch((err) => logger.error({ err, channel }, "Redis SUBSCRIBE failed"));
+  }
+  return () => {
+    emitter.off(channel, listener);
+    if (emitter.listenerCount(channel) === 0) {
+      sub.unsubscribe(channel).catch((err) => logger.error({ err, channel }, "Redis UNSUBSCRIBE failed"));
+    }
+  };
 }
 
 /** Same reference-counted watch pattern as watchWalletChannel — see its doc comment. */

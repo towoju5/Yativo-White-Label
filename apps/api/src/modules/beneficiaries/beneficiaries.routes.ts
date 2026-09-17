@@ -22,6 +22,7 @@ import {
   listPayoutCountries,
   listPayoutMethods,
   getBeneficiaryForm,
+  getBeneficiaryPayoutBaseCurrencies,
 } from "./beneficiaries.service.js";
 
 export async function beneficiariesRoutes(app: FastifyInstance) {
@@ -91,6 +92,22 @@ export async function beneficiariesRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const beneficiary = await getBeneficiary(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
       return reply.send(beneficiary);
+    },
+  );
+
+  server.get(
+    "/portal/beneficiaries/:id/payout-method",
+    {
+      preHandler: [requireCustomerAuth, requirePortalPermission("beneficiaries.manage")],
+      schema: {
+        params: z.object({ id: z.string() }),
+        response: { 200: z.object({ baseCurrencies: z.array(z.string()) }), 404: errorResponseSchema },
+      },
+    },
+    async (request, reply) => {
+      const beneficiary = await getBeneficiary(app.prisma, request.params.id, resolveEffectiveCustomerId(request.customer!));
+      const baseCurrencies = await getBeneficiaryPayoutBaseCurrencies(beneficiary);
+      return reply.send({ baseCurrencies });
     },
   );
 

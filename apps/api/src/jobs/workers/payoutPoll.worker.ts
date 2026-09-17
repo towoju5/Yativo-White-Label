@@ -3,7 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { createBullConnection } from "../connection.js";
 import { PAYOUT_POLL_QUEUE_NAME, MAX_POLL_ATTEMPTS, enqueuePayoutStatusPoll, type PayoutPollJobData } from "../payoutPollQueue.js";
 import { yativoClient } from "../../lib/yativoClient.js";
-import { settlePayoutCompleted } from "../../modules/payouts/payouts.service.js";
+import { settlePayoutCompleted, publishPayoutStatusUpdate } from "../../modules/payouts/payouts.service.js";
 import { reverseTransaction } from "../../modules/ledger/reverseTransaction.js";
 import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
 import { sendOpsAlert } from "../../modules/notifications/channels/opsAlert.js";
@@ -77,6 +77,10 @@ export function startPayoutPollWorker(prisma: PrismaClient): Worker<PayoutPollJo
           reason: `Yativo poll reported status "${status}"`,
         });
         await sendOpsAlert(`⚠️ Payout failed (detected via status poll, status "${status}"): ${displayAmount} ${payout.currencyCode} (payout ${payout.id}, customer ${payout.customerId})`);
+        // Reaching this branch already required `payout.transaction.status === "PENDING"` (checked
+        // at the top of this job) — the hold was never settled, so this is always a failure, never
+        // a later reversal of a success.
+        await publishPayoutStatusUpdate(payout, "FAILED");
         logger.info({ payoutId, attempt, status }, "payout reversed via status poll");
         return;
       }

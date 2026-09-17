@@ -2,6 +2,22 @@ import { z } from "zod";
 import type { YativoContext } from "../client.js";
 import { yativoEnvelope } from "../client.js";
 
+/**
+ * A payin/payout method's `base_currency` is a comma-separated string (e.g. "USD,GBP", "COP,USD")
+ * naming which wallet currencies this specific gateway can actually debit from (payout) or credit
+ * into (payin) — confirmed against live sample payloads. Distinct from the method's own `currency`
+ * field, which is the LOCAL rail currency (e.g. Mexico's SPEI pays out in MXN but only accepts
+ * USD/EUR wallets as the funding source). Never trust a wallet-currency picker without filtering
+ * against this list — an unsupported pair fails at the exchange-rate/quote step instead.
+ */
+function parseBaseCurrencies(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((c) => c.trim())
+    .filter((c) => c.length > 0);
+}
+
 const payinMethodSchema = z
   .object({
     id: z.union([z.string(), z.number()]),
@@ -48,6 +64,7 @@ const payoutMethodSchema = z
     // pairing: null means this gateway needs no special approval, a string names the service the
     // customer's endorsement checklist must show "approved" for before it can be used.
     endorsement: z.string().nullable().optional(),
+    base_currency: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -66,6 +83,8 @@ export type FiatPayoutMethod = {
   floatCharge?: string;
   estimatedDelivery?: string;
   endorsement: string | null;
+  /** Wallet currencies this gateway can actually debit from — see parseBaseCurrencies above. Empty means Yativo didn't report a restriction for this method. */
+  baseCurrencies: string[];
 };
 
 function toPayoutMethod(data: z.infer<typeof payoutMethodSchema>): FiatPayoutMethod {
@@ -83,6 +102,7 @@ function toPayoutMethod(data: z.infer<typeof payoutMethodSchema>): FiatPayoutMet
     floatCharge: data.float_charge !== undefined ? String(data.float_charge) : undefined,
     estimatedDelivery: data.estimated_delivery,
     endorsement: data.endorsement ?? null,
+    baseCurrencies: parseBaseCurrencies(data.base_currency),
   };
 }
 
@@ -149,6 +169,7 @@ const payinMethodDetailSchema = z
     // Same endorsement pairing Yativo added to payout methods and virtual-account currencies —
     // null means no special approval is needed for this rail.
     endorsement: z.string().nullable().optional(),
+    base_currency: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -162,6 +183,8 @@ export type FiatPayinMethodDetail = {
   maximumDeposit?: string;
   formFields: FiatPayinFormField[];
   endorsement: string | null;
+  /** Wallet currencies this gateway can actually credit into — see parseBaseCurrencies above. Empty means Yativo didn't report a restriction for this method. */
+  baseCurrencies: string[];
 };
 
 function toPayinMethodDetail(data: z.infer<typeof payinMethodDetailSchema>): FiatPayinMethodDetail {
@@ -175,6 +198,7 @@ function toPayinMethodDetail(data: z.infer<typeof payinMethodDetailSchema>): Fia
     maximumDeposit: data.maximum_deposit != null ? String(data.maximum_deposit) : undefined,
     formFields: (data.required_extra_data?.form_fields ?? []).map(toFormField),
     endorsement: data.endorsement ?? null,
+    baseCurrencies: parseBaseCurrencies(data.base_currency),
   };
 }
 
@@ -231,6 +255,7 @@ export function createPaymentMethodsResource(ctx: YativoContext) {
               fixed_charge: "1.5",
               float_charge: "0.01",
               estimated_delivery: "1-2 business days",
+              base_currency: "USD,MXN",
             },
           ],
         },
@@ -302,6 +327,7 @@ export function createPaymentMethodsResource(ctx: YativoContext) {
               minimum_deposit: "100",
               maximum_deposit: "1000000",
               required_extra_data: null,
+              base_currency: "USD,MXN",
             },
           ],
         },

@@ -124,6 +124,7 @@
   },
   "crypto": {
     "addressCopied": "Address copied",
+    "copyAddress": "Copy address",
     "copyAddressError": "Couldn't copy address",
     "depositAddressReady": "Deposit address ready",
     "generateAddress": "Generate address",
@@ -132,7 +133,9 @@
     "generating": "Generating…",
     "noDepositsYet": "No crypto deposits yet",
     "noWalletsYet": "No crypto wallets yet — generate an address below to get started.",
+    "qrCodeHint": "Scan this code in your wallet app to send {{currency}} to this address.",
     "selectAssetPlaceholder": "Select an asset",
+    "showQrCode": "Show QR code",
     "subtitle": "Deposit addresses and on-chain deposit history for supported assets.",
     "title": "Crypto wallets",
     "transactionsDescription": "Every on-chain deposit matched to your account.",
@@ -201,7 +204,7 @@
     "buttons": {
       "back": "Back",
       "continue": "Continue",
-      "startDeposit": "Start deposit"
+      "startDeposit": "Start payin"
     },
     "cryptoCard": {
       "description": "Deposit addresses and on-chain deposit history now live on their own page.",
@@ -214,9 +217,9 @@
       "estimatedDelivery": "Estimated delivery",
       "exchangeRate": "Exchange rate",
       "fee": "Fee",
-      "initiated": "Deposit initiated",
+      "initiated": "Payin initiated",
       "openLinkAriaLabel": "Open link",
-      "title": "Deposit funds",
+      "title": "Payin funds",
       "youllReceive": "You'll receive"
     },
     "errors": {
@@ -225,7 +228,7 @@
       "pickWallet": "Pick which wallet to credit"
     },
     "localCard": {
-      "depositButton": "Deposit",
+      "depositButton": "Payin",
       "description": "Pick your country and pay via the local rail — bank transfer, CODI, DEBIN and more.",
       "title": "Or deposit with a local payment method"
     },
@@ -242,6 +245,7 @@
     },
     "step2": {
       "amountLabel": "Amount ({{currency}})",
+      "noEligibleWallet": "None of your wallets are in a currency this method supports ({{currencies}}).",
       "prompt": "{{method}} — amount & details",
       "selectFieldPlaceholder": "Select {{field}}",
       "walletLabel": "Wallet to credit",
@@ -254,7 +258,7 @@
       "method": "Method"
     },
     "subtitle": "Fund your wallet with a one-time payment via a local rail, or crypto.",
-    "title": "Deposit",
+    "title": "Payin",
     "toast": {
       "copied": "Copied to clipboard",
       "copyFailed": "Couldn't copy",
@@ -721,7 +725,7 @@
       "account": "Account",
       "manage": "Manage"
     },
-    "sendMoney": "Send money",
+    "sendMoney": "Withdraw",
     "settings": "Settings",
     "team": "Team",
     "virtualAccounts": "Virtual accounts",
@@ -750,6 +754,7 @@
       "amountLabel": "Amount to send ({{currency}})",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "Debit from wallet",
+      "noEligibleWallet": "None of your wallets are in a currency this recipient's payout method supports ({{currencies}}).",
       "prompt": "Amount to send",
       "promptTo": "Amount to send to {{name}}",
       "recipientFallback": "the recipient",

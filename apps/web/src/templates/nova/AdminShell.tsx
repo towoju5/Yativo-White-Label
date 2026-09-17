@@ -29,6 +29,7 @@ import {
   HardDrive,
   History,
   TrendingUp,
+  Type,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { NovaSidebar, type NavSection } from "./Sidebar";
@@ -82,6 +83,7 @@ const sections: NavSection[] = [
       { to: "/admin/settings/integrations", label: "Integrations", icon: Plug },
       { to: "/admin/settings/storage", label: "Storage", icon: HardDrive },
       { to: "/admin/settings/endorsements", label: "Endorsements display", icon: BadgeCheck },
+      { to: "/admin/settings/nav-labels", label: "Customer menu", icon: Type },
     ],
   },
 ];

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { StatementLine, WalletBalance } from "@white-label/shared-types";
+import type { CustomerTransactionListItem, StatementLine, WalletBalance } from "@white-label/shared-types";
 import { formatCurrencyAmount } from "@white-label/shared-types";
 import { Wallet, Clock, ArrowLeftRight, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -26,20 +26,32 @@ export default function PortalDashboardPage() {
     enabled: !!primary,
   });
 
-  const isLoading = walletsQuery.isLoading || (!!primary && statementQuery.isLoading);
-  const lines = statementQuery.data?.items ?? [];
+  // Recent activity is customer-wide (every currency wallet, same source TransactionsPage.tsx
+  // uses) — NOT scoped to `primary`, which is just whichever wallet's currency happens to sort
+  // first alphabetically and can easily be an empty/unused one while the customer's real activity
+  // sits in a different currency.
+  const transactionsQuery = useQuery({
+    queryKey: ["portal", "transactions", "recent"],
+    queryFn: () => portalApi.get<Paginated<CustomerTransactionListItem>>("/portal/transactions", { page: 1, pageSize: 12 }),
+  });
 
-  const activity: ActivityItem[] = lines.map((l) => ({
-    id: l.entryId,
-    title: l.description ?? l.transactionType,
-    subtitle: new Date(l.createdAt).toLocaleDateString(),
-    amountMinor: l.amountMinor,
-    decimals: primary?.decimals ?? 2,
-    currencyCode: l.currencyCode,
-    direction: l.direction,
-    status: l.status,
-    date: l.createdAt,
-  }));
+  const isLoading = walletsQuery.isLoading || (!!primary && statementQuery.isLoading) || transactionsQuery.isLoading;
+  const lines = statementQuery.data?.items ?? [];
+  const decimalsByCurrency = new Map((walletsQuery.data ?? []).map((w) => [w.currencyCode, w.decimals]));
+
+  const activity: ActivityItem[] = (transactionsQuery.data?.items ?? [])
+    .filter((tx) => tx.amountMinor !== null && tx.currencyCode !== null && tx.direction !== null)
+    .map((tx) => ({
+      id: tx.id,
+      title: tx.description ?? tx.type,
+      subtitle: new Date(tx.createdAt).toLocaleDateString(),
+      amountMinor: tx.amountMinor!,
+      decimals: decimalsByCurrency.get(tx.currencyCode!) ?? 2,
+      currencyCode: tx.currencyCode!,
+      direction: tx.direction!,
+      status: tx.status,
+      date: tx.createdAt,
+    }));
 
   const chartData: DashboardChartPoint[] = [...lines]
     .reverse()

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   ENTRY_DIRECTIONS,
+  FRIENDLY_TRANSACTION_STATUSES,
   LEDGER_EXTERNAL_SOURCES,
   LEDGER_TRANSACTION_STATUSES,
   LEDGER_TRANSACTION_TYPES,
@@ -47,7 +48,7 @@ export const statementLineSchema = z.object({
   entryId: z.string(),
   transactionId: z.string(),
   transactionType: z.enum(LEDGER_TRANSACTION_TYPES),
-  status: z.enum(LEDGER_TRANSACTION_STATUSES),
+  status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
   direction: z.enum(ENTRY_DIRECTIONS),
   amountMinor: minorAmountSchema,
   currencyCode: currencyCodeSchema,
@@ -62,6 +63,7 @@ export const customerTransactionListItemSchema = ledgerTransactionSchema.extend(
   amountMinor: minorAmountSchema.nullable(),
   currencyCode: currencyCodeSchema.nullable(),
   direction: z.enum(ENTRY_DIRECTIONS).nullable(),
+  status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
 });
 export type CustomerTransactionListItem = z.infer<typeof customerTransactionListItemSchema>;
 
@@ -70,7 +72,7 @@ export const statementDocumentLineSchema = z.object({
   date: z.string(),
   description: z.string(),
   type: z.enum(LEDGER_TRANSACTION_TYPES),
-  status: z.enum(LEDGER_TRANSACTION_STATUSES),
+  status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
   direction: z.enum(ENTRY_DIRECTIONS),
   amountMinor: minorAmountSchema,
   balanceAfterMinor: minorAmountSchema,
@@ -146,7 +148,7 @@ export type TransactionDetailDeposit = z.infer<typeof transactionDetailDepositSc
 export const transactionDetailSchema = z.object({
   id: z.string(),
   type: z.enum(LEDGER_TRANSACTION_TYPES),
-  status: z.enum(LEDGER_TRANSACTION_STATUSES),
+  status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
   description: z.string().nullable(),
   createdAt: z.string(),
   postedAt: z.string().nullable(),
@@ -200,7 +202,7 @@ export type AdminTransactionDetailPayout = z.infer<typeof adminTransactionDetail
 export const adminTransactionDetailSchema = z.object({
   id: z.string(),
   type: z.enum(LEDGER_TRANSACTION_TYPES),
-  status: z.enum(LEDGER_TRANSACTION_STATUSES),
+  status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
   description: z.string().nullable(),
   externalRef: z.string().nullable(),
   externalSource: z.enum(LEDGER_EXTERNAL_SOURCES),

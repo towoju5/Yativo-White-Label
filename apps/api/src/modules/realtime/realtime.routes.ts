@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { verifyStaffAccessToken, verifyPortalAccessToken } from "../../lib/jwt.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
-import { watchWalletChannel, watchSupportTicketChannel, markTicketPresence } from "../../lib/realtime.js";
+import { watchWalletChannel, watchSupportTicketChannel, watchStaffBroadcastChannel, markTicketPresence } from "../../lib/realtime.js";
 import logger from "../../lib/logger.js";
 
 type ClientMessage =
@@ -18,9 +18,12 @@ type ClientMessage =
  *
  * A portal connection auto-watches its own customer's wallet channel and can't watch any other
  * (enforced server-side, not just left to the client to behave). A staff connection starts
- * watching nothing and sends explicit watch/unwatch messages as the admin navigates between
- * customer detail pages — any authenticated staff member may watch any customerId, matching the
- * existing admin API's own access model (no per-customer permission gate on viewing a customer).
+ * watching no per-customer wallet channel and sends explicit watch/unwatch messages as the admin
+ * navigates between customer detail pages — any authenticated staff member may watch any
+ * customerId, matching the existing admin API's own access model (no per-customer permission gate
+ * on viewing a customer). Every staff connection additionally auto-watches the shared staff
+ * broadcast channel (payout status changes, etc.) for as long as it's open — see
+ * watchStaffBroadcastChannel in lib/realtime.ts.
  */
 export async function realtimeRoutes(app: FastifyInstance) {
   app.get("/ws", { websocket: true }, (socket, request) => {
@@ -104,11 +107,14 @@ export async function realtimeRoutes(app: FastifyInstance) {
       else if (parsed.type === "unwatch-ticket" && typeof parsed.ticketId === "string") unwatchTicket(parsed.ticketId);
     });
 
+    const unsubStaffBroadcast = isStaff ? watchStaffBroadcastChannel((msg) => send(msg)) : null;
+
     socket.on("close", () => {
       for (const unsub of unsubscribers.values()) unsub();
       unsubscribers.clear();
       for (const unsub of ticketUnsubscribers.values()) unsub();
       ticketUnsubscribers.clear();
+      unsubStaffBroadcast?.();
     });
 
     socket.on("error", (err: Error) => logger.warn({ err }, "Realtime WS connection error"));

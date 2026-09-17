@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FRIENDLY_TRANSACTION_STATUSES } from "./enums.js";
 import { currencyCodeSchema, minorAmountSchema } from "./money.js";
 
 export const beneficiarySchema = z.object({
@@ -60,6 +61,8 @@ export const payoutMethodSchema = z.object({
   endorsementStatus: z.string().nullable(),
   /** A hosted verification link to complete the required endorsement, when Yativo has issued one. */
   hostedKycUrl: z.string().nullable(),
+  /** Wallet currencies this gateway can actually debit from — filter the "debit from wallet" picker to these; empty means Yativo didn't report a restriction for this method. */
+  baseCurrencies: z.array(z.string()),
 });
 export type PayoutMethod = z.infer<typeof payoutMethodSchema>;
 
@@ -149,7 +152,7 @@ export const payoutSchema = z.object({
   amountMinor: minorAmountSchema,
   /** The platform's own fee, locked in at payout creation time — debited from the wallet alongside amountMinor, never forwarded to Yativo. */
   platformFeeMinor: minorAmountSchema,
-  status: z.enum(["PENDING", "POSTED", "REVERSED"]),
+  status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
   transactionId: z.string(),
   yativoPayoutId: z.string().nullable(),
   createdAt: z.string(),

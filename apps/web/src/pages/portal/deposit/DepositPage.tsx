@@ -28,7 +28,7 @@ export default function DepositPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("deposit.title", "Deposit")}</h1>
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">{t("deposit.title", "Payin")}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
           {t("deposit.subtitle", "Fund your wallet with a one-time payment via a local rail, or crypto.")}
         </p>
@@ -158,6 +158,13 @@ function NativeDepositCard() {
   const selectedMethod = methodsQuery.data?.find((m) => m.gatewayId === gatewayId);
   const formFields = selectedMethod?.formFields ?? [];
   const wallets = walletsQuery.data ?? [];
+  // Only offer wallets this gateway can actually credit into — an unsupported currency would
+  // otherwise fail at the quote step instead of being caught here. Falls back to every wallet if
+  // Yativo didn't report a restriction for this method.
+  const eligibleWallets =
+    selectedMethod && selectedMethod.baseCurrencies.length > 0
+      ? wallets.filter((w) => selectedMethod.baseCurrencies.includes(w.currencyCode))
+      : wallets;
 
   const isFieldRequired = (f: DepositFormField) => f.required;
 
@@ -292,12 +299,12 @@ function NativeDepositCard() {
           }}
         >
           <Button size="sm" onClick={() => setOpen(true)}>
-            <WalletIcon className="h-4 w-4" /> {t("deposit.localCard.depositButton", "Deposit")}
+            <WalletIcon className="h-4 w-4" /> {t("deposit.localCard.depositButton", "Payin")}
           </Button>
 
           <DialogContent className="max-w-lg overflow-hidden p-0 sm:max-w-2xl">
             <DialogHeader className="border-b border-border px-6 py-5">
-              <DialogTitle className="font-heading text-xl">{t("deposit.dialog.title", "Deposit funds")}</DialogTitle>
+              <DialogTitle className="font-heading text-xl">{t("deposit.dialog.title", "Payin funds")}</DialogTitle>
               {!result && !quote && (
                 <div className="pt-2">
                   <Stepper steps={DEPOSIT_STEPS} current={step} />
@@ -310,10 +317,10 @@ function NativeDepositCard() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-success">
                     <Check className="h-4 w-4" />
-                    {t("deposit.dialog.initiated", "Deposit initiated")}
+                    {t("deposit.dialog.initiated", "Payin initiated")}
                   </div>
                   <dl className="divide-y divide-border rounded-lg border border-border">
-                    {result.depositId && <Row label={t("deposit.dialog.depositId", "Deposit ID")} value={result.depositId} />}
+                    {result.depositId && <Row label={t("deposit.dialog.depositId", "Payin ID")} value={result.depositId} />}
                     {result.localAmount && result.localCurrency && (
                       <Row label={t("deposit.dialog.amountToPay", "Amount to pay")} value={`${result.localAmount} ${result.localCurrency}`} />
                     )}
@@ -463,6 +470,12 @@ function NativeDepositCard() {
                                 onClick={() => {
                                   setGatewayId(m.gatewayId);
                                   setExtraData({});
+                                  // Re-checked below rather than reset unconditionally, so picking
+                                  // the same currency's method twice in a row (e.g. going Back and
+                                  // forth) doesn't needlessly clear an already-valid choice.
+                                  if (walletCurrencyCode && !m.baseCurrencies.includes(walletCurrencyCode) && m.baseCurrencies.length > 0) {
+                                    setWalletCurrencyCode("");
+                                  }
                                 }}
                                 className={cn(
                                   "relative flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors",
@@ -553,7 +566,7 @@ function NativeDepositCard() {
                               />
                             </SelectTrigger>
                             <SelectContent>
-                              {wallets.map((w) => (
+                              {eligibleWallets.map((w) => (
                                 <SelectItem key={w.walletId} value={w.currencyCode}>
                                   {w.currencyCode}
                                 </SelectItem>
@@ -561,6 +574,13 @@ function NativeDepositCard() {
                             </SelectContent>
                           </Select>
                           {fieldErrors._wallet && <p className="text-xs text-destructive">{fieldErrors._wallet}</p>}
+                          {eligibleWallets.length === 0 && wallets.length > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              {t("deposit.step2.noEligibleWallet", "None of your wallets are in a currency this method supports ({{currencies}}).", {
+                                currencies: selectedMethod?.baseCurrencies.join(", "),
+                              })}
+                            </p>
+                          )}
                         </div>
                         <div className="space-y-1.5">
                           <Label htmlFor="depositAmount">

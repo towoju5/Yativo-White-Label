@@ -12,13 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ReportTransactionIssueDialog } from "@/components/support/ReportTransactionIssueDialog";
+import { TRANSACTION_STATUS_LABEL, TRANSACTION_STATUS_VARIANT } from "@/lib/transactionStatus";
 import { humanizeType, feeDetailRows, buildReceiptRows, renderReceiptPng, receiptFileName } from "./receiptImage";
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  POSTED: "success",
-  PENDING: "warning",
-  REVERSED: "destructive",
-};
 
 function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -160,7 +155,7 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
                 <p className={`font-heading text-2xl font-semibold ${primaryEntry?.direction === "CREDIT" ? "text-success" : ""}`}>{amountLabel}</p>
                 <p className="text-sm text-muted-foreground">{data.description ?? humanizeType(data.type)}</p>
               </div>
-              <Badge variant={STATUS_VARIANT[data.status] ?? "secondary"}>{data.status}</Badge>
+              <Badge variant={TRANSACTION_STATUS_VARIANT[data.status]}>{TRANSACTION_STATUS_LABEL[data.status]}</Badge>
             </div>
             <dl className="divide-y divide-border rounded-lg border border-border text-sm">
               <Row label="Type" value={humanizeType(data.type)} />

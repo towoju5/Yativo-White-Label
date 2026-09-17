@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { Payout, PrismaClient, LedgerExternalSource } from "@prisma/client";
-import type { CreatePayoutInput } from "@white-label/shared-types";
+import type { CreatePayoutInput, FriendlyTransactionStatus } from "@white-label/shared-types";
 import { env } from "../../config/env.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { enqueuePayoutStatusPoll } from "../../jobs/payoutPollQueue.js";
@@ -8,6 +8,7 @@ import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { NotFoundError, InsufficientFundsError, AppError } from "../../lib/errors.js";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js";
+import { deriveFriendlyStatuses } from "../ledger/friendlyStatus.js";
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
@@ -16,47 +17,41 @@ import { sendNotificationEmail } from "../notifications/notifications.service.js
 import { formatMinorAmount } from "../../lib/formatMoney.js";
 import { checkPayoutLimit } from "../security/limits.service.js";
 import { requireEndorsementApproved } from "../../lib/endorsementEligibility.js";
+import { publishPayoutUpdate } from "../../lib/realtime.js";
 
-type PayoutWithTransaction = Payout & { transaction: { status: "PENDING" | "POSTED" | "REVERSED" } };
+type PayoutWithTransaction = Payout & { transaction: { status: "PENDING" | "POSTED" | "REVERSED"; postedAt: Date | null } };
 
-/**
- * A Payout's `transactionId` always points at the original PENDING hold
- * transaction. Once settled, `settlePendingTransaction` flips that original
- * to REVERSED (releasing the hold — see reverseTransaction.ts) and posts a
- * *separate* POSTED settlement transaction keyed deterministically as
- * `settle:${transactionId}`. So the payout's business-facing status can't be
- * read directly off the original transaction — it's derived: still PENDING
- * while held, POSTED once a settlement transaction exists for it, or
- * REVERSED if the hold was released with no settlement (a failed payout).
- */
-async function derivePayoutStatuses(
-  prisma: PrismaClient,
-  payouts: PayoutWithTransaction[],
-): Promise<Map<string, "PENDING" | "POSTED" | "REVERSED">> {
-  const reversedIds = payouts.filter((p) => p.transaction.status === "REVERSED").map((p) => p.transactionId);
-  const settlements =
-    reversedIds.length === 0
-      ? []
-      : await prisma.ledgerTransaction.findMany({
-          where: { idempotencyKey: { in: reversedIds.map((id) => `settle:${id}`) } },
-          select: { idempotencyKey: true, status: true },
-        });
-  const settledTransactionIds = new Set(
-    settlements.filter((s) => s.status === "POSTED").map((s) => s.idempotencyKey.replace(/^settle:/, "")),
-  );
-
-  const result = new Map<string, "PENDING" | "POSTED" | "REVERSED">();
-  for (const p of payouts) {
-    if (p.transaction.status !== "REVERSED") {
-      result.set(p.id, p.transaction.status);
-    } else {
-      result.set(p.id, settledTransactionIds.has(p.transactionId) ? "POSTED" : "REVERSED");
-    }
-  }
-  return result;
+/** Broadcasts a payout's new business-facing status to every staff connection — see PayoutUpdateMessage in lib/realtime.ts. Never throws (publishPayoutUpdate itself is best-effort). */
+export async function publishPayoutStatusUpdate(payout: { id: string; customerId: string }, status: FriendlyTransactionStatus) {
+  await publishPayoutUpdate({
+    type: "payout.updated",
+    payoutId: payout.id,
+    customerId: payout.customerId,
+    status,
+    updatedAt: new Date().toISOString(),
+  });
 }
 
-function payoutToDto(payout: PayoutWithTransaction, status: "PENDING" | "POSTED" | "REVERSED") {
+/**
+ * A Payout's `transactionId` always points at the original PENDING hold transaction — see
+ * deriveFriendlyStatuses' doc comment for how PENDING/POSTED/REVERSED on that hold maps to the
+ * 5-value friendly status. PROCESSING (vs plain PENDING) is decided by `yativoPayoutId`: it's set
+ * the moment the payout is actually submitted to Yativo (see createPortalPayout below), so a hold
+ * still PENDING with that id already set means "sent, awaiting confirmation" rather than "not sent
+ * yet" — the latter is never actually observable today since submission happens synchronously
+ * right after the hold is created, but the distinction is kept for whenever that changes.
+ */
+async function derivePayoutStatuses(prisma: PrismaClient, payouts: PayoutWithTransaction[]): Promise<Map<string, FriendlyTransactionStatus>> {
+  const submittedIds = new Set(payouts.filter((p) => p.yativoPayoutId).map((p) => p.transactionId));
+  const statusByTransactionId = await deriveFriendlyStatuses(
+    prisma,
+    payouts.map((p) => ({ id: p.transactionId, status: p.transaction.status, postedAt: p.transaction.postedAt })),
+    submittedIds,
+  );
+  return new Map(payouts.map((p) => [p.id, statusByTransactionId.get(p.transactionId)!]));
+}
+
+function payoutToDto(payout: PayoutWithTransaction, status: FriendlyTransactionStatus) {
   return {
     id: payout.id,
     customerId: payout.customerId,
@@ -86,12 +81,22 @@ async function toSinglePayoutDto(prisma: PrismaClient, payout: PayoutWithTransac
  * needs a second, unchecked debit against the wallet the way computing it fresh at settlement
  * time used to. Shared by the `payout.completed` webhook handler and the mock-mode synchronous
  * escape hatch in createPortalPayout below.
+ *
+ * Called from three independent paths that can all race for the same payout — the webhook, the
+ * fallback status poll, and (mock mode only) createPortalPayout itself. settlePendingTransaction's
+ * own idempotency means a race can never double-post the ledger settlement, but without the check
+ * below it WOULD double-send the "your payout is complete" notification: e.g. Yativo's ordinary
+ * webhook-retry behavior alone is enough to call this twice for one payout. Checking for an
+ * already-posted settlement BEFORE calling settlePendingTransaction means only the caller that
+ * actually performs the settlement ever notifies the customer.
  */
 export async function settlePayoutCompleted(
   prisma: PrismaClient,
   payout: { id: string; customerId: string; currencyCode: string; amountMinor: bigint; platformFeeMinor: bigint; transactionId: string },
   opts: { externalSource: LedgerExternalSource },
 ) {
+  const alreadySettled = await prisma.ledgerTransaction.findUnique({ where: { idempotencyKey: `settle:${payout.transactionId}` } });
+
   const walletAccount = await prisma.account.findFirstOrThrow({
     where: { type: "CUSTOMER_WALLET", customerId: payout.customerId, currencyCode: payout.currencyCode },
   });
@@ -113,10 +118,14 @@ export async function settlePayoutCompleted(
     description: `Payout ${payout.id} settled`,
   });
 
-  await sendNotificationEmail(prisma, "PAYOUT_COMPLETED", payout.customerId, {
-    amount: await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor),
-    currency: payout.currencyCode,
-  });
+  if (!alreadySettled) {
+    await sendNotificationEmail(prisma, "PAYOUT_COMPLETED", payout.customerId, {
+      amount: await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor),
+      currency: payout.currencyCode,
+    });
+
+    await publishPayoutStatusUpdate(payout, "SUCCESS");
+  }
 
   return tx;
 }

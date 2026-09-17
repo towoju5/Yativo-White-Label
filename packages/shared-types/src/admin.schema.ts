@@ -2,7 +2,7 @@ import { z } from "zod";
 import { customerSchema } from "./customer.schema.js";
 import { walletBalanceSchema } from "./wallet.schema.js";
 import { minorAmountSchema, currencyCodeSchema } from "./money.js";
-import { ENTRY_DIRECTIONS } from "./enums.js";
+import { ENTRY_DIRECTIONS, FRIENDLY_TRANSACTION_STATUSES } from "./enums.js";
 import { payoutSchema } from "./payout.schema.js";
 import { ledgerTransactionSchema } from "./transaction.schema.js";
 import { cardSchema } from "./card.schema.js";
@@ -36,6 +36,7 @@ export const adminTransactionListItemSchema = ledgerTransactionSchema.extend({
   amountMinor: minorAmountSchema.nullable(),
   currencyCode: currencyCodeSchema.nullable(),
   direction: z.enum(ENTRY_DIRECTIONS).nullable(),
+  status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
 });
 export type AdminTransactionListItem = z.infer<typeof adminTransactionListItemSchema>;
 

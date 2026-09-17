@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Beneficiary, Customer, Prisma, PrismaClient } from "@prisma/client";
+import type { Customer, Prisma, PrismaClient } from "@prisma/client";
 import type { CreateBeneficiaryInput, UpdateBeneficiaryInput } from "@white-label/shared-types";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { yativoClient } from "../../lib/yativoClient.js";
@@ -150,7 +150,7 @@ export async function getBeneficiaryForm(gatewayId: number) {
  * this beneficiary predates details capturing this shape (e.g. was never actually linked to a
  * real Yativo gateway).
  */
-export function getBeneficiaryGatewayInfo(beneficiary: Pick<Beneficiary, "details">) {
+export function getBeneficiaryGatewayInfo(beneficiary: { details: unknown }) {
   const details = (beneficiary.details as Record<string, unknown>) ?? {};
   const gatewayId = Number(details.gatewayId);
   const currency = typeof details.currency === "string" ? details.currency : undefined;
@@ -158,4 +158,26 @@ export function getBeneficiaryGatewayInfo(beneficiary: Pick<Beneficiary, "detail
     throw new AppError("This beneficiary is missing its payout gateway details — remove it and add it again.", 409, "BENEFICIARY_NOT_LINKED");
   }
   return { gatewayId, currency };
+}
+
+/**
+ * Which wallet currencies this beneficiary's payout gateway can actually debit from — for the
+ * "debit from wallet" picker on the Send Money page when reusing a saved beneficiary (the "new
+ * recipient" flow already has this from the payout-methods list it fetched to create one). Needs
+ * a fresh lookup since a beneficiary's own `details` only ever stored the gateway id/currency, not
+ * its base_currency restriction.
+ *
+ * `details.country` is only present on beneficiaries created after this was added — an older one
+ * without it can't be re-scoped to a country, so this returns an empty list (meaning "no known
+ * restriction", same convention as PayoutMethod.baseCurrencies) rather than failing the whole page.
+ */
+export async function getBeneficiaryPayoutBaseCurrencies(beneficiary: { details: unknown }): Promise<string[]> {
+  const details = (beneficiary.details as Record<string, unknown>) ?? {};
+  const { gatewayId } = getBeneficiaryGatewayInfo(beneficiary);
+  const country = typeof details.country === "string" ? details.country : undefined;
+  if (!country) return [];
+
+  const methods = await yativoClient.fiat.paymentMethods.listActivePayoutMethods({ country });
+  const method = methods.find((m) => m.gatewayId === String(gatewayId));
+  return method?.baseCurrencies ?? [];
 }

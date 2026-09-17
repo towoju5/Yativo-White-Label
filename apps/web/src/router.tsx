@@ -71,6 +71,7 @@ import NotificationChannelsSettingsPage from "@/pages/admin/settings/Notificatio
 import EmailTemplatesSettingsPage from "@/pages/admin/settings/EmailTemplatesSettingsPage";
 import StorageSettingsPage from "@/pages/admin/settings/StorageSettingsPage";
 import EndorsementSettingsPage from "@/pages/admin/settings/EndorsementSettingsPage";
+import NavLabelsSettingsPage from "@/pages/admin/settings/NavLabelsSettingsPage";
 
 export function createRouter(adminLoginPath: string) {
   return createBrowserRouter([
@@ -191,6 +192,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "settings/email-templates", element: <EmailTemplatesSettingsPage /> },
               { path: "settings/storage", element: <StorageSettingsPage /> },
               { path: "settings/endorsements", element: <EndorsementSettingsPage /> },
+              { path: "settings/nav-labels", element: <NavLabelsSettingsPage /> },
             ],
           },
         ],

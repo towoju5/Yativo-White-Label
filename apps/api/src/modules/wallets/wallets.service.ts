@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../ledger/accounts.js";
 import { getAvailableBalance, getPendingHold, getPostedBalance } from "../ledger/balances.js";
+import { deriveFriendlyStatus, deriveFriendlyStatuses, isSubmittedToExternalSystem } from "../ledger/friendlyStatus.js";
 import { getPlatformSettings } from "../platformSettings/platformSettings.service.js";
 import { NotFoundError, AppError } from "../../lib/errors.js";
 import logger from "../../lib/logger.js";
@@ -93,14 +94,17 @@ export async function getWalletStatement(
     orderBy: { createdAt: "desc" },
     skip: (page - 1) * pageSize,
     take: pageSize,
-    include: { transaction: true },
+    include: { transaction: { include: { payout: { select: { yativoPayoutId: true } }, deposit: { select: { id: true } } } } },
   });
+
+  const submittedIds = new Set(entries.filter((e) => isSubmittedToExternalSystem(e.transaction)).map((e) => e.transactionId));
+  const statuses = await deriveFriendlyStatuses(prisma, entries.map((e) => e.transaction), submittedIds);
 
   const items = entries.map((entry) => ({
     entryId: entry.id,
     transactionId: entry.transactionId,
     transactionType: entry.transaction.type,
-    status: entry.transaction.status,
+    status: statuses.get(entry.transactionId)!,
     direction: entry.direction,
     amountMinor: entry.amountMinor.toString(),
     currencyCode: entry.currencyCode,
@@ -136,16 +140,19 @@ export async function getWalletStatementForRange(prisma: PrismaClient, accountId
     prisma.ledgerEntry.findMany({
       where: { accountId, createdAt: { gte: dateFrom, lte: dateTo } },
       orderBy: { createdAt: "asc" },
-      include: { transaction: true },
+      include: { transaction: { include: { payout: { select: { yativoPayoutId: true } }, deposit: { select: { id: true } } } } },
     }),
     getPostedBalance(prisma, accountId, accountType),
   ]);
+
+  const submittedIds = new Set(entries.filter((e) => isSubmittedToExternalSystem(e.transaction)).map((e) => e.transactionId));
+  const statuses = await deriveFriendlyStatuses(prisma, entries.map((e) => e.transaction), submittedIds);
 
   const lines = entries.map((entry) => ({
     date: entry.createdAt.toISOString(),
     description: entry.transaction.description ?? entry.transaction.type,
     type: entry.transaction.type,
-    status: entry.transaction.status,
+    status: statuses.get(entry.transactionId)!,
     direction: entry.direction,
     amountMinor: entry.amountMinor.toString(),
     balanceAfterMinor: entry.balanceAfterMinor.toString(),
@@ -172,10 +179,12 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
   });
   if (!tx) throw new NotFoundError("Transaction");
 
+  const status = await deriveFriendlyStatus(prisma, tx, isSubmittedToExternalSystem(tx));
+
   return {
     id: tx.id,
     type: tx.type,
-    status: tx.status,
+    status,
     description: tx.description,
     // No externalRef/externalSource here — those are the provider's own tracking id/name
     // (can literally read "YATIVO_WEBHOOK"), and this is a customer-facing response. Kept on the

@@ -229,19 +229,33 @@ export type SwapCompletedPayload = z.infer<typeof swapCompletedPayloadSchema>;
 const rawBusinessSpendCardEventSchema = z
   .object({
     card_id: z.string(),
-    customer_id: z.string(),
+    // Present on .created/.funded/.withdrawn/.terminated, but NOT on the per-swipe
+    // .transaction.*/.status_changed events (confirmed against their documented payloads — those
+    // only carry card_id) — optional here so parsing those doesn't throw.
+    customer_id: z.string().nullable().optional(),
     amount: z.union([z.string(), z.number()]).nullable().optional(),
     reason: z.string().nullable().optional(),
     limits: z.array(z.record(z.unknown())).nullable().optional(),
+    // .transaction.* fields.
+    transaction_id: z.string().nullable().optional(),
+    currency: z.string().nullable().optional(),
+    status: z.string().nullable().optional(),
+    // .status_changed's own event-name echo (e.g. "card.suspended") — distinct from the outer
+    // eventType, which is always the literal "business_spend_card.status_changed" for this one.
+    event_type: z.string().nullable().optional(),
   })
   .passthrough();
 
 export const businessSpendCardEventPayloadSchema = rawBusinessSpendCardEventSchema.transform((d) => ({
   yativoCardId: d.card_id,
-  yativoCustomerId: d.customer_id,
+  yativoCustomerId: d.customer_id ?? null,
   amount: d.amount !== undefined && d.amount !== null ? String(d.amount) : undefined,
   reason: d.reason ?? undefined,
   limits: d.limits ?? undefined,
+  transactionId: d.transaction_id ?? undefined,
+  currencyCode: d.currency ?? undefined,
+  status: d.status ?? undefined,
+  cardEventType: d.event_type ?? undefined,
 }));
 export type BusinessSpendCardEventPayload = z.infer<typeof businessSpendCardEventPayloadSchema>;
 
@@ -254,22 +268,41 @@ export const BUSINESS_SPEND_CARD_EVENT_TYPES = [
   "business_spend_card.withdrawn",
   "business_spend_card.pin_updated",
   "business_spend_card.limits_updated",
+  "business_spend_card.transaction.approved",
+  "business_spend_card.transaction.declined",
+  "business_spend_card.transaction.refunded",
+  "business_spend_card.transaction.reversed",
+  "business_spend_card.status_changed",
 ] as const;
 
 /** The standard-envelope event types this app recognizes (whether or not it has business logic wired up for all of them yet) — used only for documentation/reference, not for parsing. */
 export const YATIVO_WEBHOOK_EVENT_TYPES = [
   "deposit.created",
   "deposit.updated",
+  "deposit.completed",
   "payout.updated",
+  "payout.completed",
   "customer.created",
   "customer.updated",
+  "customer.kyc.approved",
+  "customer.kyc.rejected",
   "virtual_account.created",
   "virtual_account.updated",
   "virtual_account.deposit",
+  "virtual_account.funded",
   "metadata.created",
+  "metadata.updated",
   "tracking.created",
+  "endorsement.updated",
+  "user.updated",
+  "payin_method.enabled",
+  "payin_method.disabled",
+  "payout_method.enabled",
+  "payout_method.disabled",
   "crypto.wallet.created",
   "crypto_deposit",
+  "crypto.deposit.completed",
+  "wallet.deleted",
   "giftcard.status_changed",
   "webhook_updated",
   ...BUSINESS_SPEND_CARD_EVENT_TYPES,

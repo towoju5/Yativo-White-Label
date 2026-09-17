@@ -6,12 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  POSTED: "success",
-  PENDING: "warning",
-  REVERSED: "destructive",
-};
+import { TRANSACTION_STATUS_LABEL, TRANSACTION_STATUS_VARIANT } from "@/lib/transactionStatus";
 
 /** `wrap` breaks a long opaque value (idempotency keys can run 100-300+ characters) onto as many
  * lines as it needs, stacked under the label, instead of forcing the row (and the dialog) to
@@ -61,7 +56,7 @@ export function AdminTransactionDetailDialog({ transactionId, onClose }: { trans
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <p className="font-heading text-lg font-semibold">{data.description ?? data.type}</p>
-              <Badge variant={STATUS_VARIANT[data.status] ?? "secondary"}>{data.status}</Badge>
+              <Badge variant={TRANSACTION_STATUS_VARIANT[data.status]}>{TRANSACTION_STATUS_LABEL[data.status]}</Badge>
             </div>
 
             <dl className="divide-y divide-border rounded-lg border border-border text-sm">

@@ -32,3 +32,4 @@ export * from "./customerImport.schema.js";
 export * from "./pricing.schema.js";
 export * from "./security.schema.js";
 export * from "./profit.schema.js";
+export * from "./navLabels.schema.js";

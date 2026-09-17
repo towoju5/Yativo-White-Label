@@ -75,6 +75,20 @@ model EndorsementDisplaySetting {
   @@map("endorsement_display_settings")
 }
 
+/// Admin-customizable label override for one customer-portal nav item, keyed by the i18n key it
+/// already renders under (e.g. "nav.wallets") — one override applies across every visual template
+/// that shows that item, since they all share the same i18n keys. `translations` maps a locale
+/// code (matching apps/web/src/i18n/locales) to the label text for that locale; a locale missing
+/// from the map keeps falling back to the shipped default translation for that key. A missing row
+/// means "use the shipped default label in every locale."
+model NavLabelOverride {
+  key          String   @id
+  translations Json
+  updatedAt    DateTime @updatedAt
+
+  @@map("nav_label_overrides")
+}
+
 /// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
 model PlatformSettings {
   id                       Int                  @id @default(1)

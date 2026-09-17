@@ -20,7 +20,7 @@ export function AuroraPortalShell({ children }: { children: ReactNode }) {
       items: [
         { to: "/portal", label: t("nav.dashboard", "Dashboard"), icon: LayoutDashboard, end: true },
         { to: "/portal/wallets", label: t("nav.wallets", "Wallets"), icon: Wallet },
-        { to: "/portal/send", label: t("nav.sendMoney", "Send money"), icon: Send },
+        { to: "/portal/send", label: t("nav.sendMoney", "Withdraw"), icon: Send },
         { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
         { to: "/portal/crypto", label: t("nav.cryptoWallets", "Crypto wallets"), icon: Coins },
         { to: "/portal/virtual-accounts", label: t("nav.virtualAccounts", "Virtual accounts"), icon: Landmark },

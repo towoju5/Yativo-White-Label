@@ -1,15 +1,26 @@
 import type { Prisma, PrismaClient, LedgerTransactionType, LedgerTransactionStatus } from "@prisma/client";
+import type { FriendlyTransactionStatus } from "@white-label/shared-types";
 import { NotFoundError, AppError } from "../../lib/errors.js";
 import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js";
 import { reverseTransaction } from "../ledger/reverseTransaction.js";
+import { deriveFriendlyStatus, deriveFriendlyStatuses, isSubmittedToExternalSystem } from "../ledger/friendlyStatus.js";
 import type { EntryLine } from "../ledger/types.js";
 import { SYSTEM_ACTOR_ID } from "../../lib/adminAuditLog.js";
 
 type TxWithEntries = Prisma.LedgerTransactionGetPayload<{
-  include: { entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } } };
+  include: {
+    entries: { include: { account: { include: { customer: { select: { fullName: true; businessName: true } } } } } };
+    payout: { select: { yativoPayoutId: true } };
+    deposit: { select: { id: true } };
+  };
 }>;
 
-function toListItem(tx: TxWithEntries) {
+async function batchFriendlyStatuses(prisma: PrismaClient, transactions: TxWithEntries[]): Promise<Map<string, FriendlyTransactionStatus>> {
+  const submittedIds = new Set(transactions.filter(isSubmittedToExternalSystem).map((tx) => tx.id));
+  return deriveFriendlyStatuses(prisma, transactions, submittedIds);
+}
+
+function toListItem(tx: TxWithEntries, status: FriendlyTransactionStatus) {
   const customerEntry = tx.entries.find((e) => e.account.customerId) ?? null;
   const primary = customerEntry ?? tx.entries[0] ?? null;
   const customer = customerEntry?.account.customer ?? null;
@@ -17,7 +28,7 @@ function toListItem(tx: TxWithEntries) {
   return {
     id: tx.id,
     type: tx.type,
-    status: tx.status,
+    status,
     idempotencyKey: tx.idempotencyKey,
     externalSource: tx.externalSource,
     externalRef: tx.externalRef,
@@ -35,13 +46,13 @@ function toListItem(tx: TxWithEntries) {
   };
 }
 
-function toCustomerListItem(tx: TxWithEntries, customerId: string) {
+function toCustomerListItem(tx: TxWithEntries, customerId: string, status: FriendlyTransactionStatus) {
   const customerEntry = tx.entries.find((e) => e.account.customerId === customerId) ?? null;
 
   return {
     id: tx.id,
     type: tx.type,
-    status: tx.status,
+    status,
     idempotencyKey: tx.idempotencyKey,
     externalSource: tx.externalSource,
     externalRef: tx.externalRef,
@@ -108,11 +119,16 @@ export async function listTransactionsForCustomer(
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: { entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } } },
+      include: {
+        entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } },
+        payout: { select: { yativoPayoutId: true } },
+        deposit: { select: { id: true } },
+      },
     }),
   ]);
 
-  return { items: transactions.map((tx) => toCustomerListItem(tx, customerId)), total, page, pageSize };
+  const statuses = await batchFriendlyStatuses(prisma, transactions);
+  return { items: transactions.map((tx) => toCustomerListItem(tx, customerId, statuses.get(tx.id)!)), total, page, pageSize };
 }
 
 export async function listLedgerTransactions(
@@ -135,11 +151,16 @@ export async function listLedgerTransactions(
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      include: { entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } } },
+      include: {
+        entries: { include: { account: { include: { customer: { select: { fullName: true, businessName: true } } } } } },
+        payout: { select: { yativoPayoutId: true } },
+        deposit: { select: { id: true } },
+      },
     }),
   ]);
 
-  return { items: transactions.map(toListItem), total, page, pageSize };
+  const statuses = await batchFriendlyStatuses(prisma, transactions);
+  return { items: transactions.map((tx) => toListItem(tx, statuses.get(tx.id)!)), total, page, pageSize };
 }
 
 /**
@@ -209,6 +230,8 @@ export async function getTransactionDetailForAdmin(prisma: PrismaClient, transac
   });
   if (!tx) throw new NotFoundError("LedgerTransaction");
 
+  const status = await deriveFriendlyStatus(prisma, tx, isSubmittedToExternalSystem(tx));
+
   const lastAuditEntry = await prisma.adminAuditLog.findFirst({ where: { target: transactionId }, orderBy: { createdAt: "desc" } });
   let lastAction: { action: string; actorLabel: string | null; createdAt: string } | null = null;
   if (lastAuditEntry) {
@@ -222,7 +245,7 @@ export async function getTransactionDetailForAdmin(prisma: PrismaClient, transac
   return {
     id: tx.id,
     type: tx.type,
-    status: tx.status,
+    status,
     description: tx.description,
     externalRef: tx.externalRef,
     externalSource: tx.externalSource,

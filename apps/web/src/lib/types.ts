@@ -1,3 +1,5 @@
+import type { FriendlyTransactionStatus } from "@white-label/shared-types";
+
 export interface Paginated<T> {
   items: T[];
   total: number;
@@ -14,7 +16,7 @@ export interface Paginated<T> {
 export interface AdminTransactionRow {
   id: string;
   type: string;
-  status: string;
+  status: FriendlyTransactionStatus;
   description: string | null;
   externalSource: string;
   externalRef: string | null;

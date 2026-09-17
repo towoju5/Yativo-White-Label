@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, LEDGER_TRANSACTION_STATUSES } from "@white-label/shared-types";
+import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, FRIENDLY_TRANSACTION_STATUSES } from "@white-label/shared-types";
 import { CheckCircle2, ChevronLeft, ChevronRight, Eye, Undo2 } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { AdminTransactionRow, Paginated } from "@/lib/types";
@@ -16,14 +16,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { FRIENDLY_STATUS_FILTER_VALUE, TRANSACTION_STATUS_LABEL, TRANSACTION_STATUS_VARIANT } from "@/lib/transactionStatus";
 
 const PAGE_SIZE = 25;
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  POSTED: "success",
-  PENDING: "warning",
-  REVERSED: "destructive",
-};
 
 export default function TransactionsPage() {
   const { user } = useStaffAuth();
@@ -43,7 +38,7 @@ export default function TransactionsPage() {
     queryFn: () =>
       staffApi.get<Paginated<AdminTransactionRow>>("/admin/transactions", {
         type: type === "ALL" ? undefined : type,
-        status: status === "ALL" ? undefined : status,
+        status: status === "ALL" ? undefined : FRIENDLY_STATUS_FILTER_VALUE[status as keyof typeof FRIENDLY_STATUS_FILTER_VALUE],
         page,
         pageSize: PAGE_SIZE,
       }),
@@ -108,9 +103,9 @@ export default function TransactionsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">All statuses</SelectItem>
-            {LEDGER_TRANSACTION_STATUSES.map((s) => (
+            {FRIENDLY_TRANSACTION_STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
-                {s}
+                {TRANSACTION_STATUS_LABEL[s]}
               </SelectItem>
             ))}
           </SelectContent>
@@ -150,7 +145,7 @@ export default function TransactionsPage() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{tx.customerEmail ?? "—"}</TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[tx.status] ?? "secondary"}>{tx.status}</Badge>
+                    <Badge variant={TRANSACTION_STATUS_VARIANT[tx.status]}>{TRANSACTION_STATUS_LABEL[tx.status]}</Badge>
                   </TableCell>
                   <TableCell
                     className={cn(
@@ -174,9 +169,9 @@ export default function TransactionsPage() {
                   </TableCell>
                   {canAdjust && (
                     <TableCell className="text-right">
-                      {tx.status !== "REVERSED" && (
+                      {tx.status !== "REVERSED" && tx.status !== "FAILED" && (
                         <div className="flex justify-end gap-1">
-                          {tx.status === "PENDING" && (
+                          {(tx.status === "PENDING" || tx.status === "PROCESSING") && (
                             <Button variant="ghost" size="icon" title="Mark as posted" onClick={() => setAdjusting({ tx, action: "settle" })}>
                               <CheckCircle2 className="h-4 w-4 text-success" />
                             </Button>
@@ -215,7 +210,7 @@ export default function TransactionsPage() {
             <p className="text-sm text-muted-foreground">
               {adjusting?.action === "settle"
                 ? "Confirms this pending transaction actually happened, using its own original amount and accounts — for a hold stuck because a webhook never arrived."
-                : adjusting?.tx.status === "PENDING"
+                : adjusting?.tx.status === "PENDING" || adjusting?.tx.status === "PROCESSING"
                   ? "Releases this hold — no posted funds move, since a pending transaction was never posted."
                   : "Posts an offsetting entry that reverses this transaction's real effect."}
             </p>

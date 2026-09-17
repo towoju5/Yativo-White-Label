@@ -35,6 +35,8 @@ export const depositMethodSchema = z.object({
   minimumDeposit: z.string().optional(),
   maximumDeposit: z.string().optional(),
   formFields: z.array(depositFormFieldSchema),
+  /** Wallet currencies this gateway can actually credit into — filter the "wallet to credit" picker to these; empty means Yativo didn't report a restriction for this method. */
+  baseCurrencies: z.array(z.string()),
   /** null means this gateway needs no special approval and can be used immediately — see virtualAccount.schema.ts's identical pairing. */
   endorsement: z.string().nullable(),
   /** Whether the current customer can use this gateway right now. */

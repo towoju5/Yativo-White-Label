@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { CustomerTransactionListItem, WalletBalance } from "@white-label/shared-types";
-import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, LEDGER_TRANSACTION_STATUSES } from "@white-label/shared-types";
+import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, FRIENDLY_TRANSACTION_STATUSES } from "@white-label/shared-types";
 
 // SWAP and ADJUSTMENT are internal/platform-side ledger mechanics, not something a customer
 // filters their own activity by — hidden from this picker even though the admin transactions
@@ -20,15 +20,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TransactionDetailDialog } from "@/components/wallet/TransactionDetailDialog";
 import { TransactionCardRow } from "@/components/wallet/TransactionCardRow";
+import { FRIENDLY_STATUS_FILTER_VALUE, TRANSACTION_STATUS_LABEL, TRANSACTION_STATUS_VARIANT } from "@/lib/transactionStatus";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  POSTED: "success",
-  PENDING: "warning",
-  REVERSED: "destructive",
-};
 
 function humanizeType(type: string): string {
   return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -66,7 +61,7 @@ export default function PortalTransactionsPage() {
     queryFn: () =>
       portalApi.get<Paginated<CustomerTransactionListItem>>("/portal/transactions", {
         type: type === "ALL" ? undefined : type,
-        status: status === "ALL" ? undefined : status,
+        status: status === "ALL" ? undefined : FRIENDLY_STATUS_FILTER_VALUE[status as keyof typeof FRIENDLY_STATUS_FILTER_VALUE],
         currencyCode: currencyCode === "ALL" ? undefined : currencyCode,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
@@ -154,9 +149,9 @@ export default function PortalTransactionsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">{t("transactions.allStatuses", "All statuses")}</SelectItem>
-                {LEDGER_TRANSACTION_STATUSES.map((v) => (
+                {FRIENDLY_TRANSACTION_STATUSES.map((v) => (
                   <SelectItem key={v} value={v}>
-                    {v}
+                    {TRANSACTION_STATUS_LABEL[v]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -232,7 +227,7 @@ export default function PortalTransactionsPage() {
                     </TableCell>
                     <TableCell className="text-xs uppercase text-muted-foreground">{tx.type}</TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[tx.status] ?? "secondary"}>{tx.status}</Badge>
+                      <Badge variant={TRANSACTION_STATUS_VARIANT[tx.status]}>{TRANSACTION_STATUS_LABEL[tx.status]}</Badge>
                     </TableCell>
                     <TableCell
                       className={cn("text-right font-mono", tx.direction === "CREDIT" ? "text-success" : tx.direction === "DEBIT" ? "text-foreground" : "text-muted-foreground")}

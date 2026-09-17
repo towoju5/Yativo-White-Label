@@ -1,3 +1,4 @@
+import type { FriendlyTransactionStatus } from "@white-label/shared-types";
 import { staffTokenStore, portalTokenStore } from "./api-client";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
@@ -21,7 +22,15 @@ export type SupportTicketRealtimeMessage = {
   status: string;
 };
 
-type RealtimeMessage = WalletUpdateMessage | SupportTicketRealtimeMessage;
+export type PayoutUpdateMessage = {
+  type: "payout.updated";
+  payoutId: string;
+  customerId: string;
+  status: FriendlyTransactionStatus;
+  updatedAt: string;
+};
+
+type RealtimeMessage = WalletUpdateMessage | SupportTicketRealtimeMessage | PayoutUpdateMessage;
 type Listener = (msg: RealtimeMessage) => void;
 type TokenStore = typeof staffTokenStore;
 

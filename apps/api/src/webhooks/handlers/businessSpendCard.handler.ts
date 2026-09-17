@@ -13,6 +13,13 @@ import type { WebhookHandlerResult } from "./result.js";
  * after a `withdraw` empties a card (flagged by `reason: "balance_withdrawn_in_full"`), so this
  * catches the case where that synchronous update (see businessSpendCards.service.ts's
  * walletAction) was missed for any reason.
+ *
+ * `.transaction.approved`/`.declined`/`.refunded`/`.reversed` (a per-swipe authorization report)
+ * and `.status_changed` (Yativo's own free-form status label) are recognized but not acted on: the
+ * funds movement for an approved purchase already happened against the balance this platform
+ * funded via `.funded`, so there's nothing further to post to the ledger, and this app already
+ * tracks card status from the `.activated`/`.suspended`/`.terminated` events above rather than
+ * this one's label.
  */
 export async function handleBusinessSpendCardEvent(
   prisma: PrismaClient,
@@ -42,6 +49,13 @@ export async function handleBusinessSpendCardEvent(
       // Already handled synchronously by the API call that triggered it — recorded for the admin
       // webhook log only, never re-applied here.
       return { status: "IGNORED", errorMessage: `${eventType} is applied synchronously; webhook recorded for audit only` };
+    case "business_spend_card.transaction.approved":
+    case "business_spend_card.transaction.declined":
+    case "business_spend_card.transaction.refunded":
+    case "business_spend_card.transaction.reversed":
+    case "business_spend_card.status_changed":
+      // Informational only — see this function's doc comment for why nothing further is posted.
+      return { status: "IGNORED", errorMessage: `${eventType} is informational; no local ledger action needed` };
     default:
       return { status: "IGNORED", errorMessage: `Unrecognized business_spend_card event: ${eventType}` };
   }

@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "@/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
+export const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   en: "English",
   es: "Español",
   fr: "Français",

@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import type { PayoutEventPayload } from "@white-label/yativo-sdk";
-import { settlePayoutCompleted } from "../../modules/payouts/payouts.service.js";
+import { settlePayoutCompleted, publishPayoutStatusUpdate } from "../../modules/payouts/payouts.service.js";
 import { reverseTransaction } from "../../modules/ledger/reverseTransaction.js";
 import { sendNotificationEmail } from "../../modules/notifications/notifications.service.js";
 import { sendOpsAlert } from "../../modules/notifications/channels/opsAlert.js";
@@ -33,7 +33,8 @@ export async function handlePayoutEvent(prisma: PrismaClient, payload: PayoutEve
       // `settle:${transactionId}` (see settlePayoutCompleted) — reverse that one instead when a
       // "refunded" status arrives for an already-completed payout.
       const settlement = await prisma.ledgerTransaction.findUnique({ where: { idempotencyKey: `settle:${payout.transactionId}` } });
-      const toReverse = settlement?.status === "POSTED" ? settlement.id : payout.transactionId;
+      const wasAlreadySettled = settlement?.status === "POSTED";
+      const toReverse = wasAlreadySettled ? settlement.id : payout.transactionId;
       await reverseTransaction(prisma, toReverse, `Payout ${payload.status} (webhook ${externalEventId})`);
       const displayAmount = await formatMinorAmount(prisma, payout.currencyCode, payout.amountMinor);
       await sendNotificationEmail(prisma, "PAYOUT_FAILED", payout.customerId, {
@@ -42,6 +43,9 @@ export async function handlePayoutEvent(prisma: PrismaClient, payload: PayoutEve
         reason: `Payout ${payload.status}`,
       });
       await sendOpsAlert(`⚠️ Payout ${payload.status}: ${displayAmount} ${payout.currencyCode} (payout ${payout.id}, customer ${payout.customerId})`);
+      // Only "REVERSED" (not "FAILED") when this payout had already completed — undoing a real
+      // success is a different customer-facing story than a payout that never went through.
+      await publishPayoutStatusUpdate(payout, wasAlreadySettled ? "REVERSED" : "FAILED");
       return { status: "PROCESSED" };
     }
 

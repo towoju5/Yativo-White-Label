@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PayoutListItem } from "@white-label/shared-types";
 import { formatMinorAmount } from "@white-label/shared-types";
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { staffApi } from "@/lib/api-client";
+import { staffRealtime } from "@/lib/realtime";
 import type { Paginated } from "@/lib/types";
+import { TRANSACTION_STATUS_LABEL, TRANSACTION_STATUS_VARIANT } from "@/lib/transactionStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,20 +15,28 @@ import { AdminTransactionDetailDialog } from "@/components/admin/AdminTransactio
 
 const PAGE_SIZE = 25;
 
-const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
-  POSTED: "success",
-  PENDING: "warning",
-  REVERSED: "destructive",
-};
-
 export default function AdminPayoutsPage() {
   const [page, setPage] = useState(1);
   const [viewingTransactionId, setViewingTransactionId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "payouts", page],
     queryFn: () => staffApi.get<Paginated<PayoutListItem>>("/admin/payouts", { page, pageSize: PAGE_SIZE }),
   });
+
+  // Live status pushes: staffRealtime is already connected app-wide (see useRealtimeWalletBridge),
+  // this just patches whichever cached page currently holds the payout so a completion/failure
+  // shows up immediately instead of waiting for the next page-change/window-focus refetch.
+  useEffect(() => {
+    return staffRealtime.subscribe((msg) => {
+      if (msg.type !== "payout.updated") return;
+      queryClient.setQueriesData<Paginated<PayoutListItem>>({ queryKey: ["admin", "payouts"] }, (prev) => {
+        if (!prev || !prev.items.some((p) => p.id === msg.payoutId)) return prev;
+        return { ...prev, items: prev.items.map((item) => (item.id === msg.payoutId ? { ...item, status: msg.status } : item)) };
+      });
+    });
+  }, [queryClient]);
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
 
@@ -65,7 +75,7 @@ export default function AdminPayoutsPage() {
                   <TableCell>{p.customerName ?? <span className="font-mono text-xs text-muted-foreground">{p.customerId}</span>}</TableCell>
                   <TableCell>{p.beneficiaryName ?? <span className="font-mono text-xs text-muted-foreground">{p.beneficiaryId}</span>}</TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[p.status] ?? "secondary"}>{p.status}</Badge>
+                    <Badge variant={TRANSACTION_STATUS_VARIANT[p.status]}>{TRANSACTION_STATUS_LABEL[p.status]}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-mono">
                     {formatMinorAmount(p.amountMinor, 2)} {p.currencyCode}

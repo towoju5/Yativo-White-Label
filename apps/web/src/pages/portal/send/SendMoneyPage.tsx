@@ -162,6 +162,34 @@ export default function SendMoneyPage() {
     refetchInterval: (q) => (q.state.data?.status === "pending" ? 5000 : false),
   });
 
+  // A saved beneficiary's gateway isn't in scope on this page the way a brand-new one's is (that
+  // one's already sitting in `selectedMethod` from the country/method steps just walked through)
+  // — this re-resolves it so the "debit from wallet" picker below can filter to the same
+  // gateway-supported currencies either way.
+  const beneficiaryPayoutMethodQuery = useQuery({
+    queryKey: ["portal", "beneficiaries", activeBeneficiary?.id, "payout-method"],
+    queryFn: () => portalApi.get<{ baseCurrencies: string[] }>(`/portal/beneficiaries/${activeBeneficiary!.id}/payout-method`),
+    enabled: useExisting && !!activeBeneficiary,
+  });
+
+  const gatewayBaseCurrencies = useExisting ? (beneficiaryPayoutMethodQuery.data?.baseCurrencies ?? []) : (selectedMethod?.baseCurrencies ?? []);
+  const wallets = walletsQuery.data ?? [];
+  // Only offer wallets this gateway can actually debit from — an unsupported currency would
+  // otherwise fail at the quote step instead of being caught here. Falls back to every wallet if
+  // Yativo didn't report a restriction for this gateway (or, for a saved beneficiary created
+  // before this was tracked, if its country isn't known).
+  const eligibleWallets = gatewayBaseCurrencies.length > 0 ? wallets.filter((w) => gatewayBaseCurrencies.includes(w.currencyCode)) : wallets;
+
+  // Safety net for the saved-beneficiary path, where the gateway's supported currencies only
+  // become known asynchronously (after activeBeneficiary is already set) — the explicit reset in
+  // the "new recipient" method picker's onClick above covers that flow synchronously instead.
+  useEffect(() => {
+    if (debitCurrency && gatewayBaseCurrencies.length > 0 && !gatewayBaseCurrencies.includes(debitCurrency)) {
+      setDebitCurrency("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gatewayBaseCurrencies.join(",")]);
+
   const steps = useExisting ? SAVED_STEPS : NEW_STEPS;
   const amountStepIndex = steps.length - 2;
   const reviewStepIndex = steps.length - 1;
@@ -205,7 +233,10 @@ export default function SendMoneyPage() {
     createBeneficiaryMutation.mutate({
       name,
       type: "BANK_ACCOUNT",
-      details: { gatewayId: Number(gatewayId), currency: selectedMethod.currency, paymentData: submittedPaymentData },
+      // `country` is stored purely so a later visit can re-resolve this gateway's supported debit
+      // currencies (see /portal/beneficiaries/:id/payout-method) without asking the customer to
+      // pick a country again — it's otherwise unused by Yativo's own beneficiary-create call.
+      details: { gatewayId: Number(gatewayId), currency: selectedMethod.currency, paymentData: submittedPaymentData, country: countryIso3 },
     });
   };
 
@@ -413,6 +444,9 @@ export default function SendMoneyPage() {
                         onClick={() => {
                           setGatewayId(m.gatewayId);
                           setPaymentData({});
+                          if (debitCurrency && !m.baseCurrencies.includes(debitCurrency) && m.baseCurrencies.length > 0) {
+                            setDebitCurrency("");
+                          }
                         }}
                         className={cn(
                           "relative flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors",
@@ -552,13 +586,20 @@ export default function SendMoneyPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(walletsQuery.data ?? [{ currencyCode: "USD" }]).map((w) => (
+                    {(eligibleWallets.length > 0 ? eligibleWallets : wallets.length === 0 ? [{ currencyCode: "USD" }] : []).map((w) => (
                       <SelectItem key={w.currencyCode} value={w.currencyCode}>
                         {w.currencyCode}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {eligibleWallets.length === 0 && wallets.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("send.amountStep.noEligibleWallet", "None of your wallets are in a currency this recipient's payout method supports ({{currencies}}).", {
+                      currencies: gatewayBaseCurrencies.join(", "),
+                    })}
+                  </p>
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="sendAmount">
