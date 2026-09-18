@@ -23,6 +23,8 @@ function settingsToDto(s: PlatformSettings) {
     kycRequiredServices: s.kycRequiredServices,
     requireEmailVerification: s.requireEmailVerification,
     customerLoginMethod: s.customerLoginMethod,
+    currencySyncFrequency: s.currencySyncFrequency,
+    lastCurrencySyncAt: s.lastCurrencySyncAt ? s.lastCurrencySyncAt.toISOString() : null,
     updatedAt: s.updatedAt.toISOString(),
   };
 }
@@ -39,7 +41,13 @@ export async function getWalletCurrencySettings(prisma: PrismaClient) {
   return { settings: settingsToDto(settings), currencies: currencies.map(currencyToDto) };
 }
 
-/** Pulls the authoritative currency list from Yativo and upserts into the local table — new currencies default to disabled-for-customers, existing rows keep their current enabled flag untouched. */
+/**
+ * Pulls the authoritative currency list from Yativo and upserts into the local table — new
+ * currencies default to disabled-for-customers, existing rows keep their current enabled flag
+ * untouched. Called both by the admin's on-demand "Sync from Yativo" button and by the scheduled
+ * background job (see jobs/currencySyncScheduler.ts), which is why it stamps lastCurrencySyncAt
+ * itself rather than leaving that to the caller.
+ */
 export async function syncCurrenciesFromYativo(prisma: PrismaClient) {
   const currencies = await yativoClient.fiat.currencies.listAll();
   for (const c of currencies) {
@@ -49,6 +57,7 @@ export async function syncCurrenciesFromYativo(prisma: PrismaClient) {
       create: { code: c.code, name: c.name, decimals: c.decimals, isFiat: c.isFiat, symbol: c.symbol, logoUrl: c.logoUrl, countryCode: c.countryCode, isActive: c.isActive },
     });
   }
+  await prisma.platformSettings.update({ where: { id: 1 }, data: { lastCurrencySyncAt: new Date() } });
   return getWalletCurrencySettings(prisma);
 }
 

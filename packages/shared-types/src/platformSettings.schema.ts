@@ -24,12 +24,21 @@ export const CUSTOMER_LOGIN_METHODS = ["PASSWORD", "MAGIC_LINK"] as const;
 export const customerLoginMethodSchema = z.enum(CUSTOMER_LOGIN_METHODS);
 export type CustomerLoginMethod = z.infer<typeof customerLoginMethodSchema>;
 
+// How often the background job pulls the currency list from Yativo's GET /currencies/all and
+// upserts it into the local Currency table — separate from the admin's on-demand "Sync from
+// Yativo" button, which always runs immediately regardless of this setting.
+export const CURRENCY_SYNC_FREQUENCIES = ["DAILY", "TWICE_DAILY"] as const;
+export const currencySyncFrequencySchema = z.enum(CURRENCY_SYNC_FREQUENCIES);
+export type CurrencySyncFrequency = z.infer<typeof currencySyncFrequencySchema>;
+
 export const platformSettingsSchema = z.object({
   walletCurrencyMode: walletCurrencyModeSchema,
   defaultCurrencyCode: z.string(),
   kycRequiredServices: z.array(kycRequiredServiceSchema),
   requireEmailVerification: z.boolean(),
   customerLoginMethod: customerLoginMethodSchema,
+  currencySyncFrequency: currencySyncFrequencySchema,
+  lastCurrencySyncAt: z.string().nullable(),
   updatedAt: z.string(),
 });
 export type PlatformSettings = z.infer<typeof platformSettingsSchema>;
@@ -64,6 +73,7 @@ export type WalletCurrencySettings = z.infer<typeof walletCurrencySettingsSchema
 export const updatePlatformSettingsSchema = z.object({
   walletCurrencyMode: walletCurrencyModeSchema.optional(),
   defaultCurrencyCode: z.string().length(3).optional(),
+  currencySyncFrequency: currencySyncFrequencySchema.optional(),
 });
 export type UpdatePlatformSettingsInput = z.infer<typeof updatePlatformSettingsSchema>;
 

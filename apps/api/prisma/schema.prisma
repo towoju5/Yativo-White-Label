@@ -47,6 +47,14 @@ enum CustomerLoginMethod {
   MAGIC_LINK
 }
 
+// How often the scheduled job pulls the currency list from Yativo's GET /currencies/all and
+// upserts it into the local Currency table (in addition to the admin's on-demand "Sync from
+// Yativo" button, which always runs immediately regardless of this setting).
+enum CurrencySyncFrequency {
+  DAILY
+  TWICE_DAILY
+}
+
 // Each value gates one customer-facing action behind requireKycApproved — admin can turn any
 // of these off if that action shouldn't require identity verification on this platform.
 enum KycRequiredService {
@@ -91,22 +99,27 @@ model NavLabelOverride {
 
 /// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
 model PlatformSettings {
-  id                       Int                  @id @default(1)
-  walletCurrencyMode       WalletCurrencyMode   @default(DEFAULT_ONLY)
-  defaultCurrencyCode      String               @db.Char(3)
-  defaultCurrency          Currency             @relation(fields: [defaultCurrencyCode], references: [code])
+  id                       Int                   @id @default(1)
+  walletCurrencyMode       WalletCurrencyMode    @default(DEFAULT_ONLY)
+  defaultCurrencyCode      String                @db.Char(3)
+  defaultCurrency          Currency              @relation(fields: [defaultCurrencyCode], references: [code])
   // Defaults to every service requiring KYC — matches this app's original hardcoded behavior,
   // so a migration never silently relaxes a security check nobody asked to relax.
-  kycRequiredServices      KycRequiredService[] @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET, BUSINESS_SPEND_CARD])
+  kycRequiredServices      KycRequiredService[]  @default([DEPOSIT, VIRTUAL_ACCOUNT, PAYOUT, CARD, BENEFICIARY, CRYPTO_WALLET, BUSINESS_SPEND_CARD])
   // Off by default so this never surprises an existing deployment — a signup always sends a
   // verification email regardless (see signupCustomer), this only decides whether login/session
   // issuance actually enforce it.
-  requireEmailVerification Boolean              @default(false)
+  requireEmailVerification Boolean               @default(false)
   /// Which login form the portal shows by default — PASSWORD is the default so this never changes
   /// behavior for an existing deployment. MAGIC_LINK doesn't remove password login server-side
   /// (loginCustomer still works), it only changes which flow the login page presents.
-  customerLoginMethod      CustomerLoginMethod  @default(PASSWORD)
-  updatedAt                DateTime             @updatedAt
+  customerLoginMethod      CustomerLoginMethod   @default(PASSWORD)
+  // Cadence for the automatic background currency sync — the manual "Sync from Yativo" admin
+  // button is unaffected and always runs on demand regardless of this value.
+  currencySyncFrequency    CurrencySyncFrequency @default(DAILY)
+  // Null until the first sync (manual or scheduled) actually runs.
+  lastCurrencySyncAt       DateTime?
+  updatedAt                DateTime              @updatedAt
 
   @@map("platform_settings")
 }

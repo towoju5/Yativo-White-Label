@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { WalletCurrencySettings, WalletCurrencyMode, AdminCurrency } from "@white-label/shared-types";
+import type { WalletCurrencySettings, WalletCurrencyMode, CurrencySyncFrequency, AdminCurrency } from "@white-label/shared-types";
 import { RefreshCw, Coins } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,11 @@ const MODE_LABELS: Record<WalletCurrencyMode, string> = {
   DEFAULT_ONLY: "Default only — customers hold a single wallet currency",
   SELF_SERVICE: "Self-service — customers can add other enabled currencies themselves",
   ALL_AUTOMATIC: "All automatic — every enabled currency is provisioned at signup",
+};
+
+const SYNC_FREQUENCY_LABELS: Record<CurrencySyncFrequency, string> = {
+  DAILY: "Daily — once a day, at 4:00 AM UTC",
+  TWICE_DAILY: "Twice daily — 4:00 AM and 4:00 PM UTC",
 };
 
 export default function WalletCurrenciesSettingsPage() {
@@ -40,7 +45,7 @@ export default function WalletCurrenciesSettingsPage() {
   });
 
   const updateSettingsMutation = useMutation({
-    mutationFn: (body: { walletCurrencyMode?: WalletCurrencyMode; defaultCurrencyCode?: string }) =>
+    mutationFn: (body: { walletCurrencyMode?: WalletCurrencyMode; defaultCurrencyCode?: string; currencySyncFrequency?: CurrencySyncFrequency }) =>
       staffApi.patch("/admin/settings/wallet-currencies", body),
     onSuccess: () => {
       invalidate();
@@ -69,9 +74,14 @@ export default function WalletCurrenciesSettingsPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">Wallet currencies</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Control which currencies customers can hold, and how they get them.</p>
         </div>
-        <Button size="sm" variant="outline" onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}>
-          <RefreshCw className={syncMutation.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"} /> Sync from Yativo
-        </Button>
+        <div className="flex flex-col items-end gap-1">
+          <Button size="sm" variant="outline" onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}>
+            <RefreshCw className={syncMutation.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"} /> Sync from Yativo
+          </Button>
+          {settings?.lastCurrencySyncAt && (
+            <p className="text-xs text-muted-foreground">Last synced {new Date(settings.lastCurrencySyncAt).toLocaleString()}</p>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -123,6 +133,28 @@ export default function WalletCurrenciesSettingsPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">Every customer gets a wallet in this currency automatically at signup.</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Automatic sync frequency</label>
+                <Select
+                  value={settings.currencySyncFrequency}
+                  onValueChange={(v) => updateSettingsMutation.mutate({ currencySyncFrequency: v as CurrencySyncFrequency })}
+                >
+                  <SelectTrigger className="w-80">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(SYNC_FREQUENCY_LABELS) as CurrencySyncFrequency[]).map((freq) => (
+                      <SelectItem key={freq} value={freq}>
+                        {SYNC_FREQUENCY_LABELS[freq]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  How often the platform automatically pulls the currency list from Yativo in the background. The "Sync from Yativo" button above always
+                  runs immediately regardless of this setting.
+                </p>
               </div>
             </>
           )}

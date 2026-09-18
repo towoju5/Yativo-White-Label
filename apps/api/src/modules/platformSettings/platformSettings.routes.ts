@@ -13,6 +13,7 @@ import {
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
+import { rescheduleCurrencySync } from "../../jobs/currencySyncScheduler.js";
 import {
   getWalletCurrencySettings,
   syncCurrenciesFromYativo,
@@ -53,6 +54,9 @@ export async function platformSettingsRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const settings = await updatePlatformSettings(app.prisma, request.body);
+      if (request.body.currencySyncFrequency) {
+        await rescheduleCurrencySync(request.body.currencySyncFrequency);
+      }
       return reply.send(settings);
     },
   );
