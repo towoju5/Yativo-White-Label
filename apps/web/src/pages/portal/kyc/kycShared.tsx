@@ -1,14 +1,19 @@
 import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertCircle, Camera, Check, ChevronsUpDown, Loader2, Upload, X } from "lucide-react";
-import { FILE_ACCEPT, type KycCountry } from "@white-label/shared-types";
-import { ApiError } from "@/lib/api-client";
+import { useMutation } from "@tanstack/react-query";
+import { AlertCircle, Camera, Check, ChevronsUpDown, Copy, Loader2, Smartphone, Upload, X } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { FILE_ACCEPT, type KycCountry, type KycContinueLinkResult } from "@white-label/shared-types";
+import { portalApi, ApiError } from "@/lib/api-client";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { humanize, validateFile, validateCapturedPhoto, type AnyForm } from "./kycUtils";
 import { useKycSubdivisions, useKycPostalCodeRule, useKycIdentificationTypes } from "./kycHooks";
 
@@ -115,7 +120,7 @@ export function ApiErrorSummary({ error }: { error: unknown }) {
  * field the instant the rest of the submission validates. Only used where FileField is given
  * `encoding="base64"` (the default — binary is opt-in, for the one field proven safe).
  */
-function fileToBase64(file: File): Promise<string> {
+export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -281,6 +286,9 @@ export function FileField({
     setState(null);
     files?.delete(name);
     form.setValue(name, "", { shouldValidate: true });
+    // Best-effort, fire-and-forget — a stale draft copy left behind on the server is harmless
+    // (overwritten by the next real selection, or cleaned up once the wizard is submitted).
+    void portalApi.del(`/portal/kyc/draft/files?fieldPath=${encodeURIComponent(name)}`).catch(() => {});
   };
 
   const accept = async (file: File, err: string | null) => {
@@ -302,6 +310,14 @@ export function FileField({
       form.setValue(name, await fileToBase64(file), { shouldValidate: true });
     }
     onValidated?.(file);
+
+    // Saved so "continue on another device" (see ContinueOnDeviceButton) resumes with this exact
+    // file already attached, instead of asking the customer to re-take/re-pick it on the new
+    // device. Best-effort, fire-and-forget — a failed save only means that one file would need
+    // re-selecting elsewhere, nothing else about the wizard is affected.
+    const draftFileBody = new FormData();
+    draftFileBody.append("file", file, file.name);
+    void portalApi.put(`/portal/kyc/draft/files?fieldPath=${encodeURIComponent(name)}`, draftFileBody).catch(() => {});
   };
 
   return (
@@ -564,6 +580,86 @@ export function Stepper({ steps, current }: { steps: string[]; current: number }
   );
 }
 
+/**
+ * Hands the customer a one-time link — shown as a QR code + copyable URL — to open this same KYC
+ * wizard, already signed in, on another device. Typical use: fill in the text-heavy fields on a
+ * laptop, then scan on a phone to use its camera for the document photo steps. Selected files are
+ * already saved the moment they're picked (see FileField), but the text fields only autosave on a
+ * debounce — `onBeforeGenerate` (wired to an immediate, non-debounced draft save) runs first so
+ * whatever was just typed is guaranteed to be there before the link is even generated.
+ */
+export function ContinueOnDeviceButton({ onBeforeGenerate }: { onBeforeGenerate?: () => Promise<void> | void }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+
+  const linkMutation = useMutation({
+    mutationFn: async () => {
+      await onBeforeGenerate?.();
+      return portalApi.post<KycContinueLinkResult>("/portal/kyc/continue-link");
+    },
+    onError: (e) => toast({ variant: "destructive", title: t("kycShared.continueLinkError", "Couldn't create link"), description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const copyLink = async () => {
+    if (!linkMutation.data) return;
+    try {
+      await navigator.clipboard.writeText(linkMutation.data.url);
+      toast({ title: t("kycShared.linkCopied", "Link copied") });
+    } catch {
+      toast({ variant: "destructive", title: t("kycShared.copyLinkError", "Couldn't copy link") });
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          setOpen(true);
+          linkMutation.mutate();
+        }}
+      >
+        <Smartphone className="h-3.5 w-3.5" /> {t("kycShared.continueOnDevice", "Continue on another device")}
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("kycShared.continueDialogTitle", "Continue on another device")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-2">
+            {linkMutation.isPending ? (
+              <Skeleton className="h-[180px] w-[180px]" />
+            ) : linkMutation.data ? (
+              <>
+                <div className="rounded-lg border border-border bg-white p-3">
+                  <QRCodeSVG value={linkMutation.data.url} size={180} />
+                </div>
+                <button
+                  onClick={copyLink}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-md bg-muted px-3 py-1.5 text-xs text-muted-foreground hover:text-primary"
+                >
+                  {t("kycShared.copyLink", "Copy link")} <Copy className="h-3 w-3 shrink-0" />
+                </button>
+                <p className="text-center text-xs text-muted-foreground">
+                  {t(
+                    "kycShared.continueDialogHint",
+                    "Scan this with your phone's camera, or copy the link — you'll be signed in and picked up right where you left off. Expires in 15 minutes.",
+                  )}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-destructive">{t("kycShared.continueLinkError", "Couldn't create link")}</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 export function WizardShell({
   title,
   subtitle,
@@ -575,6 +671,7 @@ export function WizardShell({
   nextLabel,
   isSubmitting,
   backDisabled,
+  onBeforeContinueOnDevice,
 }: {
   title: string;
   subtitle?: string;
@@ -586,14 +683,17 @@ export function WizardShell({
   nextLabel: string;
   isSubmitting?: boolean;
   backDisabled?: boolean;
+  /** Flushes the latest form values to the draft before a "continue on another device" link is generated — see ContinueOnDeviceButton. */
+  onBeforeContinueOnDevice?: () => Promise<void> | void;
 }) {
   const { t } = useTranslation();
   return (
     <div className="flex min-h-screen items-start justify-center bg-muted/30 px-4 py-10 sm:py-16">
       <div className="w-full max-w-2xl">
-        <div className="mb-6 text-center">
+        <div className="mb-6 flex flex-col items-center gap-3 text-center">
           <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>
           {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+          <ContinueOnDeviceButton onBeforeGenerate={onBeforeContinueOnDevice} />
         </div>
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-elevated">
           <div className="border-b border-border px-6 py-4 sm:px-8">

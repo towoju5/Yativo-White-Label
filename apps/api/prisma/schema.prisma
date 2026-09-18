@@ -373,6 +373,13 @@ model Customer {
   /// just confirming an address or gating a password change.
   magicLinkTokenHash         String?        @unique
   magicLinkExpiresAt         DateTime?
+  /// Set only while a "continue KYC on another device" link is active (see POST
+  /// /portal/kyc/continue-link) — short-lived (15 min) and single-use, same trust model as
+  /// magicLinkTokenHash, but issued to an ALREADY-authenticated session rather than emailed: the
+  /// customer generates it themselves (e.g. to scan a QR code with their phone and pick up the KYC
+  /// wizard where they left off, using the phone's camera for a document photo).
+  kycContinueTokenHash       String?        @unique
+  kycContinueExpiresAt       DateTime?
   lastLoginAt                DateTime?
   status                     CustomerStatus @default(ACTIVE)
   kycStatus                  KycStatus      @default(NOT_STARTED)
@@ -429,8 +436,33 @@ model Customer {
   supportTickets     SupportTicket[]
   auditLogs          CustomerAuditLog[]
   limits             CustomerLimits[]
+  kycDraftFiles      KycDraftFile[]
 
   @@map("customers")
+}
+
+/// A KYC document file selected mid-wizard, kept only long enough to survive a "continue on
+/// another device" handoff (see Customer.kycContinueTokenHash) — without this, switching devices
+/// mid-flow would mean re-taking/re-picking every photo already attached. Deliberately NOT put
+/// through the general storage provider used for public-ish assets like BrandingConfig.stampUrl:
+/// these are ID documents/selfies, so the bytes live here instead, readable only through
+/// GET /portal/kyc/draft/files/:fieldPath under the owning customer's own authenticated session —
+/// no public or signed URL is ever issued for one. Deleted once no longer needed: on successful
+/// KYC submission (see kyc.routes.ts), when the customer clears/replaces that field, or replaced
+/// outright when a newer file is selected at the same fieldPath (upsert on [customerId, fieldPath]).
+model KycDraftFile {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  /// Dot-path matching the wizard's own field name, e.g. "identifyingInformation.0.imageFront".
+  fieldPath  String
+  filename   String
+  mimetype   String
+  data       Bytes
+  createdAt  DateTime @default(now())
+
+  @@unique([customerId, fieldPath])
+  @@map("kyc_draft_files")
 }
 
 /// Customer-facing security activity log (login, password change, 2FA toggle, new beneficiary,

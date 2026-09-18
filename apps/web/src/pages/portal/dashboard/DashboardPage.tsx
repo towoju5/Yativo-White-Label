@@ -8,11 +8,14 @@ import { portalApi } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useTemplate } from "@/templates/useTemplate";
 import type { ActivityItem, DashboardChartPoint } from "@/templates/types";
+import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 
 export default function PortalDashboardPage() {
   const T = useTemplate();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useCustomerAuth();
+  const displayName = user?.fullName?.split(" ")[0] || user?.businessName || user?.email || null;
 
   const walletsQuery = useQuery({
     queryKey: ["portal", "wallets"],
@@ -77,7 +80,7 @@ export default function PortalDashboardPage() {
 
   return (
     <T.DashboardLayout
-      title={t("dashboard.title", "Welcome back")}
+      title={displayName ? t("dashboard.titleNamed", "Welcome back, {{name}}", { name: displayName }) : t("dashboard.title", "Welcome back")}
       subtitle={t("dashboard.subtitle", "Here's what's happening across your accounts")}
       heroLabel={t("dashboard.heroLabel", "Total balance")}
       heroAmountMinor={primary?.availableMinor}

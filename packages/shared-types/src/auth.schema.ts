@@ -145,6 +145,17 @@ export const verifyMagicLinkSchema = z.object({
 });
 export type VerifyMagicLinkInput = z.infer<typeof verifyMagicLinkSchema>;
 
+/** POST /portal/kyc/continue-link — authenticated; hands the current session a one-time link (shown as a QR code + copyable URL) to open the KYC wizard, already signed in, on another device. */
+export const kycContinueLinkSchema = z.object({
+  url: z.string(),
+});
+export type KycContinueLinkResult = z.infer<typeof kycContinueLinkSchema>;
+
+export const verifyKycContinueLinkSchema = z.object({
+  token: z.string().min(1),
+});
+export type VerifyKycContinueLinkInput = z.infer<typeof verifyKycContinueLinkSchema>;
+
 /** POST /portal/auth/setup-password — the one-time counterpart to changePasswordSchema for an
  * IMPORTED account with no existing password to confirm; only valid while requiresPasswordSetup is true. */
 export const setupPasswordSchema = z.object({

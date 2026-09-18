@@ -11,7 +11,7 @@ import {
   type KycCountry,
 } from "@white-label/shared-types";
 import { CheckCircle2 } from "lucide-react";
-import { portalApi } from "@/lib/api-client";
+import { portalApi, portalDownload } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,9 +28,10 @@ import {
   SearchableSelect,
   StepErrorSummary,
   ApiErrorSummary,
+  fileToBase64,
 } from "./kycShared";
 import { humanize, buildKycFormData, mergeKycDraft } from "./kycUtils";
-import { useFileRegistry, useKycOccupations, useKycLabelMap, useKycDraft } from "./kycHooks";
+import { useFileRegistry, useKycOccupations, useKycLabelMap, useKycDraft, useKycDraftAutosave, useKycDraftFiles } from "./kycHooks";
 
 const INDIVIDUAL_DEFAULT_VALUES = {
   callingCode: "+1",
@@ -78,12 +79,49 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
   // once, the first time the draft loads, so it never clobbers in-progress edits on a refetch.
   const draftQuery = useKycDraft();
   const draftApplied = useRef(false);
+  const [draftReady, setDraftReady] = useState(false);
   useEffect(() => {
     if (draftApplied.current || !draftQuery.data) return;
     draftApplied.current = true;
-    if (draftQuery.data.type !== "INDIVIDUAL" || !draftQuery.data.draft) return;
-    form.reset(mergeKycDraft(INDIVIDUAL_DEFAULT_VALUES, draftQuery.data.draft) as unknown as IndividualKycSubmissionInput);
+    if (draftQuery.data.type === "INDIVIDUAL" && draftQuery.data.draft) {
+      form.reset(mergeKycDraft(INDIVIDUAL_DEFAULT_VALUES, draftQuery.data.draft) as unknown as IndividualKycSubmissionInput);
+    }
+    setDraftReady(true);
   }, [draftQuery.data, form]);
+
+  // Autosaves the in-progress form as the customer edits it — see useKycDraftAutosave's doc
+  // comment. Gated on `draftReady` so this can never fire before the prefill above has actually
+  // applied, which would otherwise overwrite a real draft with the wizard's still-empty defaults.
+  useKycDraftAutosave(form.watch(), draftReady);
+
+  // Re-attaches any document/selfie photo already selected on another device (see
+  // ContinueOnDeviceButton + FileField's on-select save) — fetched once, after the text draft
+  // above has settled, so this can't race it. `selfieImage` is the one field using binary encoding
+  // (see its `encoding="binary"` below); everything else here defaults to base64.
+  const draftFilesQuery = useKycDraftFiles();
+  const draftFilesApplied = useRef(false);
+  useEffect(() => {
+    if (draftFilesApplied.current || !draftReady || !draftFilesQuery.data) return;
+    draftFilesApplied.current = true;
+    (async () => {
+      for (const meta of draftFilesQuery.data!) {
+        try {
+          const blob = await portalDownload("/portal/kyc/draft/files/content", { fieldPath: meta.fieldPath });
+          const file = new File([blob], meta.filename, { type: meta.mimetype });
+          if (meta.fieldPath === "selfieImage") {
+            files.set(meta.fieldPath, file);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            form.setValue(meta.fieldPath as any, meta.filename, { shouldValidate: true });
+          } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            form.setValue(meta.fieldPath as any, await fileToBase64(file), { shouldValidate: true });
+          }
+        } catch {
+          // Best-effort — one failed rehydration shouldn't block the rest of the wizard from loading.
+        }
+      }
+    })();
+  }, [draftReady, draftFilesQuery.data, form, files]);
 
   const submitMutation = useMutation({
     mutationFn: (input: IndividualKycSubmissionInput) => portalApi.post("/portal/kyc/individual", buildKycFormData(input, files)),
@@ -149,6 +187,7 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
       onNext={goNext}
       nextLabel={step === STEPS.length - 1 ? t("kycIndividual.actions.submit", "Submit for review") : t("kycIndividual.actions.continue", "Continue")}
       isSubmitting={submitMutation.isPending}
+      onBeforeContinueOnDevice={() => portalApi.put("/portal/kyc/draft", form.getValues())}
     >
       {step < STEPS.length - 1 && <StepErrorSummary errors={errors} fields={stepFields[step] ?? []} />}
       {step === 0 && (

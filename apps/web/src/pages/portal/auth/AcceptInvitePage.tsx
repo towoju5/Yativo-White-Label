@@ -7,7 +7,7 @@ import { publicApi, ApiError } from "@/lib/api-client";
 import { BrandLogo } from "@/components/BrandLogo";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -73,11 +73,11 @@ export default function AcceptInvitePage() {
               <form onSubmit={onSubmit} className="space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+                  <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="confirmPassword">Confirm password</Label>
-                  <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
+                  <PasswordInput id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={acceptMutation.isPending}>

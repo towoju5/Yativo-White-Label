@@ -11,13 +11,16 @@ import {
   kycOccupationSchema,
   kycLabelMapSchema,
   customerEndorsementSchema,
+  FILE_ACCEPT,
+  FILE_MIN_BYTES,
+  FILE_MAX_BYTES,
 } from "@white-label/shared-types";
 import { z } from "zod";
 import type { SubmitIndividualKycInput, SubmitBusinessKycInput } from "@white-label/yativo-sdk";
 import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
-import { AppError } from "../../lib/errors.js";
+import { AppError, NotFoundError } from "../../lib/errors.js";
 import { parseMultipartKycRequest, injectFiles } from "../../lib/parseMultipartKyc.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { getCustomerEndorsements, regenerateCustomerEndorsementLink } from "../customers/customers.service.js";
@@ -31,6 +34,28 @@ const kycDraftResponseSchema = z.object({
   type: z.enum(["INDIVIDUAL", "BUSINESS"]),
   draft: z.record(z.unknown()).nullable(),
 });
+
+const KYC_DRAFT_FILE_EXTENSIONS = new Set(FILE_ACCEPT.split(",").map((e) => e.replace(".", "").toLowerCase()));
+
+/** Same extension/size rules the final submission enforces (see parseMultipartKyc.ts) — a draft file that wouldn't be accepted at submission time shouldn't be accepted here either. */
+async function parseOneKycDraftFile(request: import("fastify").FastifyRequest): Promise<{ buffer: Buffer; filename: string; mimetype: string }> {
+  for await (const part of request.parts()) {
+    if (part.type !== "file") continue;
+    const ext = part.filename.split(".").pop()?.toLowerCase() ?? "";
+    if (!KYC_DRAFT_FILE_EXTENSIONS.has(ext)) {
+      throw new AppError(`"${part.filename}" isn't a supported file type — use ${FILE_ACCEPT}.`, 400, "INVALID_FILE_TYPE");
+    }
+    const buffer = await part.toBuffer();
+    if (buffer.length < FILE_MIN_BYTES) {
+      throw new AppError(`"${part.filename}" is too small (min ${Math.round(FILE_MIN_BYTES / 1024)}KB) — don't over-compress.`, 400, "FILE_TOO_SMALL");
+    }
+    if (buffer.length > FILE_MAX_BYTES) {
+      throw new AppError(`"${part.filename}" is too large (max ${Math.round(FILE_MAX_BYTES / 1024 / 1024)}MB).`, 400, "FILE_TOO_LARGE");
+    }
+    return { buffer, filename: part.filename, mimetype: part.mimetype };
+  }
+  throw new AppError("No file was uploaded.", 400, "MISSING_FILE");
+}
 
 async function resolveCountryIso3(iso2: string): Promise<string> {
   const countries = await yativoClient.fiat.kycReference.listCountries();
@@ -188,6 +213,84 @@ export async function kycRoutes(app: FastifyInstance) {
     },
   );
 
+  // Autosave for the in-progress wizard, called as the customer moves between steps — unlike the
+  // draft snapshot taken at actual submission time (see the /portal/kyc/individual and
+  // /portal/kyc/business handlers below), this never requires the payload to pass full-schema
+  // validation, since the form may still be incomplete. Same non-sensitive-fields-only stripping
+  // either way (buildIndividualKycDraft/buildBusinessKycDraft never see document images, ID
+  // numbers, or tax IDs) — this is what makes "continue on another device" (POST
+  // /portal/kyc/continue-link) actually resume with real progress instead of an empty form.
+  server.put(
+    "/portal/kyc/draft",
+    { preHandler: requireCustomerAuth, schema: { body: z.record(z.unknown()), response: { 204: z.void() } } },
+    async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      const draft = customer.type === "BUSINESS" ? buildBusinessKycDraft(request.body) : buildIndividualKycDraft(request.body);
+      await app.prisma.customer
+        .update({ where: { id: customer.id }, data: { kycDraft: draft } })
+        .catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to autosave KYC draft"));
+      return reply.code(204).send();
+    },
+  );
+
+  // Files a customer has already selected mid-wizard (document photos, proof of address, ...) —
+  // stored so "continue on another device" (POST /portal/kyc/continue-link) doesn't mean re-taking
+  // every photo on the new device. Deliberately its own small table rather than embedded in the
+  // kycDraft JSON blob above: see KycDraftFile's doc comment for why these bytes are never given a
+  // public/signed URL, only ever readable through the GET-by-fieldPath route below, gated by the
+  // owning customer's own session.
+  server.get(
+    "/portal/kyc/draft/files",
+    {
+      preHandler: requireCustomerAuth,
+      schema: { response: { 200: z.array(z.object({ fieldPath: z.string(), filename: z.string(), mimetype: z.string(), size: z.number() })) } },
+    },
+    async (request, reply) => {
+      const files = await app.prisma.kycDraftFile.findMany({
+        where: { customerId: request.customer!.sub },
+        select: { fieldPath: true, filename: true, mimetype: true, data: true },
+      });
+      return reply.send(files.map((f) => ({ fieldPath: f.fieldPath, filename: f.filename, mimetype: f.mimetype, size: f.data.length })));
+    },
+  );
+
+  server.get(
+    "/portal/kyc/draft/files/content",
+    { preHandler: requireCustomerAuth, schema: { querystring: z.object({ fieldPath: z.string() }) } },
+    async (request, reply) => {
+      const file = await app.prisma.kycDraftFile.findUnique({
+        where: { customerId_fieldPath: { customerId: request.customer!.sub, fieldPath: request.query.fieldPath } },
+      });
+      if (!file) throw new NotFoundError("Draft file");
+      reply.header("content-type", file.mimetype);
+      reply.header("content-disposition", `inline; filename="${encodeURIComponent(file.filename)}"`);
+      return reply.send(file.data);
+    },
+  );
+
+  server.put(
+    "/portal/kyc/draft/files",
+    { preHandler: requireCustomerAuth, schema: { querystring: z.object({ fieldPath: z.string() }), response: { 204: z.void() } } },
+    async (request, reply) => {
+      const { buffer, filename, mimetype } = await parseOneKycDraftFile(request);
+      await app.prisma.kycDraftFile.upsert({
+        where: { customerId_fieldPath: { customerId: request.customer!.sub, fieldPath: request.query.fieldPath } },
+        update: { filename, mimetype, data: buffer },
+        create: { customerId: request.customer!.sub, fieldPath: request.query.fieldPath, filename, mimetype, data: buffer },
+      });
+      return reply.code(204).send();
+    },
+  );
+
+  server.delete(
+    "/portal/kyc/draft/files",
+    { preHandler: requireCustomerAuth, schema: { querystring: z.object({ fieldPath: z.string() }), response: { 204: z.void() } } },
+    async (request, reply) => {
+      await app.prisma.kycDraftFile.deleteMany({ where: { customerId: request.customer!.sub, fieldPath: request.query.fieldPath } });
+      return reply.code(204).send();
+    },
+  );
+
   // --- Submission ---
 
   server.post(
@@ -229,6 +332,9 @@ export async function kycRoutes(app: FastifyInstance) {
           kycSubmittedAt: new Date(),
         },
       });
+      // No longer needed once actually submitted — the real submission just went to Yativo with
+      // its own file bytes (injectFiles above), so these draft-only copies are just dead weight.
+      await app.prisma.kycDraftFile.deleteMany({ where: { customerId: customer.id } }).catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to clean up KYC draft files"));
       await sendOpsAlert(`🪪 Individual KYC submitted for review — customer ${updated.id} (${updated.email}).`);
       const settings = await getPlatformSettings(app.prisma);
       return reply.send({
@@ -279,6 +385,9 @@ export async function kycRoutes(app: FastifyInstance) {
           kycSubmittedAt: new Date(),
         },
       });
+      // No longer needed once actually submitted — the real submission just went to Yativo with
+      // its own file bytes (injectFiles above), so these draft-only copies are just dead weight.
+      await app.prisma.kycDraftFile.deleteMany({ where: { customerId: customer.id } }).catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to clean up KYC draft files"));
       await sendOpsAlert(`🪪 Business KYB submitted for review — customer ${updated.id} (${updated.email}).`);
       const settings = await getPlatformSettings(app.prisma);
       return reply.send({

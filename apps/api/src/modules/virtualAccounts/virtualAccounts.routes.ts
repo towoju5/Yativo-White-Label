@@ -15,7 +15,7 @@ import { requirePortalPermission } from "../../middleware/requirePortalPermissio
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
-import { isEndorsementRestrictedForCustomer, isHiddenEndorsement } from "../../lib/endorsementEligibility.js";
+import { isEndorsementRestrictedForCustomer, isHiddenEndorsement, normalizeEndorsement } from "../../lib/endorsementEligibility.js";
 import { AppError } from "../../lib/errors.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 
@@ -42,13 +42,14 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
       const result = currencies
         .filter((c) => !isHiddenEndorsement(c.endorsement) && !isEndorsementRestrictedForCustomer(c.endorsement, customer))
         .map((c) => {
-          if (!c.endorsement) {
+          const endorsement = normalizeEndorsement(c.endorsement);
+          if (!endorsement) {
             return { currency: c.currency, endorsement: null, eligible: true, endorsementStatus: null, hostedKycUrl: null };
           }
-          const match = endorsements.find((e) => e.service === c.endorsement);
+          const match = endorsements.find((e) => e.service === endorsement);
           return {
             currency: c.currency,
-            endorsement: c.endorsement,
+            endorsement,
             eligible: match?.status === "approved",
             endorsementStatus: match?.status ?? null,
             hostedKycUrl: match?.hostedKycUrl ?? null,
@@ -98,11 +99,12 @@ export async function virtualAccountsRoutes(app: FastifyInstance) {
       if (isEndorsementRestrictedForCustomer(chosen.endorsement, customer)) {
         throw new AppError("This currency is only available to business customers.", 403, "BUSINESS_CUSTOMER_REQUIRED");
       }
-      if (chosen.endorsement) {
-        const match = endorsements.find((e) => e.service === chosen.endorsement);
+      const chosenEndorsement = normalizeEndorsement(chosen.endorsement);
+      if (chosenEndorsement) {
+        const match = endorsements.find((e) => e.service === chosenEndorsement);
         if (match?.status !== "approved") {
           throw new AppError(
-            `This currency requires ${chosen.endorsement.replace(/_/g, " ")} verification before you can generate an account.`,
+            `This currency requires ${chosenEndorsement.replace(/_/g, " ")} verification before you can generate an account.`,
             409,
             "ENDORSEMENT_REQUIRED",
           );

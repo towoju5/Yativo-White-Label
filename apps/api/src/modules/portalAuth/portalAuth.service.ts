@@ -238,6 +238,40 @@ export async function verifyMagicLink(prisma: PrismaClient, token: string, meta:
   return { customer, accessToken, refreshToken };
 }
 
+const KYC_CONTINUE_TTL_MS = 15 * 60 * 1000; // 15 minutes — plenty to switch devices and scan/open the link, short enough that a stale QR code left on screen isn't a standing risk.
+
+/**
+ * Issued to an ALREADY-authenticated session (unlike requestMagicLink, which emails an
+ * unauthenticated one) — POST /portal/kyc/continue-link. The customer is already proven; this just
+ * hands their current session a one-time link (shown as a QR code + copyable URL) so they can pick
+ * up the KYC wizard on another device, e.g. to use that device's camera for a document photo.
+ */
+export async function requestKycContinueLink(prisma: PrismaClient, customerId: string): Promise<string> {
+  const { token, tokenHash } = generateRefreshToken();
+  await prisma.customer.update({
+    where: { id: customerId },
+    data: { kycContinueTokenHash: tokenHash, kycContinueExpiresAt: new Date(Date.now() + KYC_CONTINUE_TTL_MS) },
+  });
+  return `${env.WEB_APP_URL}/portal/kyc/continue?token=${token}`;
+}
+
+/** Redeems a "continue KYC on another device" link into a real session on whatever device opens it — single-use, short-lived, same trust level as verifyMagicLink. */
+export async function verifyKycContinueLink(prisma: PrismaClient, token: string, meta: SessionMeta = {}) {
+  const tokenHash = hashRefreshToken(token);
+  const customer = await prisma.customer.findUnique({ where: { kycContinueTokenHash: tokenHash } });
+  if (!customer || !customer.kycContinueExpiresAt || customer.kycContinueExpiresAt < new Date()) {
+    throw new UnauthorizedError("This link is invalid or has expired — go back to the original device and generate a new one");
+  }
+  if (customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
+
+  await prisma.customer.update({ where: { id: customer.id }, data: { kycContinueTokenHash: null, kycContinueExpiresAt: null } });
+  await Promise.all([tryEnsureYativoCustomer(prisma, customer), tryProvisionDefaultWallets(prisma, customer.id)]);
+
+  const { accessToken, refreshToken } = await issueSession(prisma, customer.id, meta);
+  await logCustomerAction(prisma, customer.id, "Signed in (KYC continue-on-device link)", meta);
+  return { customer, accessToken, refreshToken };
+}
+
 export async function loginCustomer(prisma: PrismaClient, redis: Redis, email: string, password: string, meta: SessionMeta = {}) {
   const customer = await prisma.customer.findUnique({ where: { email } });
   if (!customer) {

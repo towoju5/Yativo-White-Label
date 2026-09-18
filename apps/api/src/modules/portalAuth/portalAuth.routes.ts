@@ -17,6 +17,8 @@ import {
   resetPasswordSchema,
   requestMagicLinkSchema,
   verifyMagicLinkSchema,
+  kycContinueLinkSchema,
+  verifyKycContinueLinkSchema,
   setupPasswordSchema,
   customerSchema,
   passkeyLoginOptionsResultSchema,
@@ -38,6 +40,8 @@ import {
   resetPassword,
   requestMagicLink,
   verifyMagicLink,
+  requestKycContinueLink,
+  verifyKycContinueLink,
   setupCustomerPassword,
 } from "./portalAuth.service.js";
 import { changePasswordSchema } from "@white-label/shared-types";
@@ -150,6 +154,31 @@ export async function portalAuthRoutes(app: FastifyInstance) {
     { config: { rateLimit: { max: 10, timeWindow: "1 minute" } }, schema: { body: verifyMagicLinkSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } } },
     async (request, reply) => {
       const { customer, accessToken, refreshToken } = await verifyMagicLink(app.prisma, request.body.token, requestMeta(request));
+      setRefreshCookie(reply, refreshToken);
+      return reply.send({ accessToken, requiresPasswordSetup: customer.requiresPasswordSetup });
+    },
+  );
+
+  // Generating the link requires an already-authenticated session (unlike the magic-link request
+  // above, which is reachable by anyone typing an email) — see requestKycContinueLink's doc
+  // comment for why that's the right trust boundary.
+  server.post(
+    "/portal/kyc/continue-link",
+    { preHandler: requireCustomerAuth, schema: { response: { 200: kycContinueLinkSchema } } },
+    async (request, reply) => {
+      const url = await requestKycContinueLink(app.prisma, resolveEffectiveCustomerId(request.customer!));
+      return reply.send({ url });
+    },
+  );
+
+  server.post(
+    "/portal/kyc/continue-verify",
+    {
+      config: { rateLimit: { max: 10, timeWindow: "1 minute" } },
+      schema: { body: verifyKycContinueLinkSchema, response: { 200: authTokensSchema, 401: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      const { customer, accessToken, refreshToken } = await verifyKycContinueLink(app.prisma, request.body.token, requestMeta(request));
       setRefreshCookie(reply, refreshToken);
       return reply.send({ accessToken, requiresPasswordSetup: customer.requiresPasswordSetup });
     },

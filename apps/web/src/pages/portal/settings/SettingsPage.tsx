@@ -8,6 +8,7 @@ import { Copy, ShieldAlert, ShieldCheck, KeyRound, Trash2, Laptop, Smartphone, H
 import { portalApi, ApiError } from "@/lib/api-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -60,15 +61,15 @@ function ChangePasswordCard() {
         <form className="space-y-4" onSubmit={onSubmit}>
           <div className="space-y-1.5">
             <Label htmlFor="current">{t("settings.changePassword.currentPasswordLabel", "Current password")}</Label>
-            <Input id="current" type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
+            <PasswordInput id="current" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="new">{t("settings.changePassword.newPasswordLabel", "New password")}</Label>
-            <Input id="new" type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} />
+            <PasswordInput id="new" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="confirm">{t("settings.changePassword.confirmPasswordLabel", "Confirm new password")}</Label>
-            <Input id="confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} />
+            <PasswordInput id="confirm" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} />
           </div>
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? t("settings.changePassword.updating", "Updating…") : t("settings.changePassword.submit", "Update password")}
@@ -537,9 +538,8 @@ export default function PortalSettingsPage() {
             <p className="text-sm text-muted-foreground">{t("settings.twoFactor.disable.description", "Confirm your password to turn off two-factor authentication.")}</p>
             <div className="space-y-1.5">
               <Label htmlFor="disablePassword">{t("settings.twoFactor.disable.passwordLabel", "Password")}</Label>
-              <Input
+              <PasswordInput
                 id="disablePassword"
-                type="password"
                 autoFocus
                 autoComplete="current-password"
                 value={disablePassword}

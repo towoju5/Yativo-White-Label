@@ -151,6 +151,7 @@
     },
     "subtitle": "Here's what's happening across your accounts",
     "title": "Welcome back",
+    "titleNamed": "Welcome back, {{name}}",
     "walletLabel": "Wallet"
   },
   "dashboardLayout": {

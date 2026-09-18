@@ -14,6 +14,8 @@ interface CustomerAuthState {
   verifyEmailStepUp: (challengeToken: string, code: string) => Promise<void>;
   /** Returns true when this login redeemed a magic link for an account that still needs to choose its own password — caller should route to /portal/setup-password instead of the normal post-login destination. */
   verifyMagicLink: (token: string) => Promise<boolean>;
+  /** Redeems a "continue KYC on another device" link (see POST /portal/kyc/continue-link) into a real session on this device. */
+  verifyKycContinueLink: (token: string) => Promise<void>;
   /** Returns the raw signup result — the caller checks `pendingVerification` and, if true, shows a "check your email" state instead of navigating in. */
   signup: (input: CreateCustomerInput) => Promise<SignupResult>;
   logout: () => Promise<void>;
@@ -83,6 +85,16 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     return requiresPasswordSetup ?? false;
   };
 
+  const verifyKycContinueLink: CustomerAuthState["verifyKycContinueLink"] = async (token) => {
+    const { accessToken } = await apiFetch<AuthTokens>("/portal/kyc/continue-verify", {
+      method: "POST",
+      body: { token },
+    });
+    portalTokenStore.set(accessToken);
+    const me = await portalApi.get<Customer>("/portal/auth/me");
+    setUser(me);
+  };
+
   const loginWithPasskey: CustomerAuthState["loginWithPasskey"] = async () => {
     const { flowId, options } = await apiFetch<PasskeyLoginOptionsResult>("/portal/auth/passkey/login/options", { method: "POST" });
     const response = await startAuthentication({ optionsJSON: options as unknown as Parameters<typeof startAuthentication>[0]["optionsJSON"] });
@@ -120,7 +132,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <CustomerAuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp, verifyMagicLink, signup, logout, refreshUser }}
+      value={{ user, isLoading, isAuthenticated: !!user, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp, verifyMagicLink, verifyKycContinueLink, signup, logout, refreshUser }}
     >
       {children}
     </CustomerAuthContext.Provider>

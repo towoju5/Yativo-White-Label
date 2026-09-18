@@ -15,7 +15,7 @@ import {
   type KycCountry,
 } from "@white-label/shared-types";
 import { CheckCircle2, Plus, Trash2 } from "lucide-react";
-import { portalApi } from "@/lib/api-client";
+import { portalApi, portalDownload } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,9 +34,10 @@ import {
   SearchableSelect,
   StepErrorSummary,
   ApiErrorSummary,
+  fileToBase64,
 } from "./kycShared";
 import { humanize, buildKycFormData, mergeKycDraft } from "./kycUtils";
-import { useFileRegistry, useKycBusinessIndustries, useKycLabelMap, useKycDraft } from "./kycHooks";
+import { useFileRegistry, useKycBusinessIndustries, useKycLabelMap, useKycDraft, useKycDraftAutosave, useKycDraftFiles } from "./kycHooks";
 
 function emptyAssociatedPerson(): KycAssociatedPerson {
   return {
@@ -126,12 +127,42 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
   // once, the first time the draft loads, so it never clobbers in-progress edits on a refetch.
   const draftQuery = useKycDraft();
   const draftApplied = useRef(false);
+  const [draftReady, setDraftReady] = useState(false);
   useEffect(() => {
     if (draftApplied.current || !draftQuery.data) return;
     draftApplied.current = true;
-    if (draftQuery.data.type !== "BUSINESS" || !draftQuery.data.draft) return;
-    form.reset(mergeKycDraft(BUSINESS_DEFAULT_VALUES, draftQuery.data.draft) as unknown as BusinessKycSubmissionInput);
+    if (draftQuery.data.type === "BUSINESS" && draftQuery.data.draft) {
+      form.reset(mergeKycDraft(BUSINESS_DEFAULT_VALUES, draftQuery.data.draft) as unknown as BusinessKycSubmissionInput);
+    }
+    setDraftReady(true);
   }, [draftQuery.data, form]);
+
+  // Autosaves the in-progress form as the customer edits it — see useKycDraftAutosave's doc
+  // comment. Gated on `draftReady` so this can never fire before the prefill above has actually
+  // applied, which would otherwise overwrite a real draft with the wizard's still-empty defaults.
+  useKycDraftAutosave(form.watch(), draftReady);
+
+  // Re-attaches any document already selected on another device (see ContinueOnDeviceButton +
+  // FileField's on-select save) — fetched once, after the text draft above has settled, so this
+  // can't race it. Every FileField in this wizard uses the default base64 encoding.
+  const draftFilesQuery = useKycDraftFiles();
+  const draftFilesApplied = useRef(false);
+  useEffect(() => {
+    if (draftFilesApplied.current || !draftReady || !draftFilesQuery.data) return;
+    draftFilesApplied.current = true;
+    (async () => {
+      for (const meta of draftFilesQuery.data!) {
+        try {
+          const blob = await portalDownload("/portal/kyc/draft/files/content", { fieldPath: meta.fieldPath });
+          const file = new File([blob], meta.filename, { type: meta.mimetype });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          form.setValue(meta.fieldPath as any, await fileToBase64(file), { shouldValidate: true });
+        } catch {
+          // Best-effort — one failed rehydration shouldn't block the rest of the wizard from loading.
+        }
+      }
+    })();
+  }, [draftReady, draftFilesQuery.data, form]);
 
   const { fields: personFields, append: appendPerson, remove: removePerson } = useFieldArray({
     control: form.control,
@@ -232,6 +263,7 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
       onNext={goNext}
       nextLabel={step === STEPS.length - 1 ? t("kycBusiness.actions.submit", "Submit for review") : t("kycBusiness.actions.continue", "Continue")}
       isSubmitting={submitMutation.isPending}
+      onBeforeContinueOnDevice={() => portalApi.put("/portal/kyc/draft", form.getValues())}
     >
       {step < STEPS.length - 1 && <StepErrorSummary errors={errors} fields={getStepFields(step)} />}
       {step === 0 && (

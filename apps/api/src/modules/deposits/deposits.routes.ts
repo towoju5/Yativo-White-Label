@@ -17,7 +17,13 @@ import { majorToMinor } from "../../lib/money.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
-import { loadEndorsementEligibilityResolver, requireEndorsementApproved, isEndorsementRestrictedForCustomer, isHiddenEndorsement } from "../../lib/endorsementEligibility.js";
+import {
+  loadEndorsementEligibilityResolver,
+  requireEndorsementApproved,
+  isEndorsementRestrictedForCustomer,
+  isHiddenEndorsement,
+  normalizeEndorsement,
+} from "../../lib/endorsementEligibility.js";
 import { AppError } from "../../lib/errors.js";
 
 // Native gateway pay-ins only (country → method → wallet + amount → initiate) — for
@@ -52,7 +58,10 @@ export async function depositsRoutes(app: FastifyInstance) {
       // (status unknown) rather than erroring the whole list out.
       const resolveEligibility = customer.yativoCustomerId
         ? await loadEndorsementEligibilityResolver(app.prisma, customer)
-        : (endorsement: string | null) => (endorsement ? { eligible: false, endorsementStatus: null, hostedKycUrl: null } : { eligible: true, endorsementStatus: null, hostedKycUrl: null });
+        : (endorsement: string | null) =>
+            normalizeEndorsement(endorsement)
+              ? { eligible: false, endorsementStatus: null, hostedKycUrl: null }
+              : { eligible: true, endorsementStatus: null, hostedKycUrl: null };
       return reply.send(
         enabled
           .filter((m) => !isHiddenEndorsement(m.endorsement) && !isEndorsementRestrictedForCustomer(m.endorsement, customer))

@@ -9,6 +9,9 @@ export type EndorsementEligibility = {
   hostedKycUrl: string | null;
 };
 
+/** Yativo's way of saying a gateway/currency/method needs no endorsement at all — functionally identical to a null `endorsement` field, just spelled out as a string instead. */
+const NO_ENDORSEMENT_REQUIRED = "no_endorsement_required";
+
 /**
  * Yativo isn't consistent about the casing/spacing of an `endorsement` slug across endpoints —
  * the customer checklist (`fiat/customers.ts`'s `get()`) normalizes its own `service` field to
@@ -16,12 +19,15 @@ export type EndorsementEligibility = {
  * methods, virtual-account currencies) is passed through exactly as Yativo sent it, with no
  * guarantee it matches that same casing (e.g. "Sepa"/"SEPA" instead of "sepa"). Every comparison
  * against a known endorsement name goes through this first so a hide/restrict rule can't silently
- * miss a differently-cased match.
+ * miss a differently-cased match. Also treats Yativo's literal `"no_endorsement_required"` value
+ * the same as a genuinely null endorsement — otherwise it fails to match anything on the
+ * customer's checklist and gets reported as an unmet requirement instead of "nothing to check".
  */
-function normalizeEndorsement(endorsement: string | null): string | null {
+export function normalizeEndorsement(endorsement: string | null): string | null {
   if (!endorsement) return null;
   const normalized = endorsement.trim().toLowerCase().replace(/\s+/g, "_");
-  return normalized || null;
+  if (!normalized || normalized === NO_ENDORSEMENT_REQUIRED) return null;
+  return normalized;
 }
 
 /** Endorsement services Yativo only extends to business customers — not an approval status, so no amount of KYC ever unlocks these for an individual. */

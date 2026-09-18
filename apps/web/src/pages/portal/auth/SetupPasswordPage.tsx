@@ -7,7 +7,7 @@ import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { BrandLogo } from "@/components/BrandLogo";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError, portalApi } from "@/lib/api-client";
@@ -68,11 +68,11 @@ export default function SetupPasswordPage() {
             <form className="space-y-4" onSubmit={onSubmit}>
               <div className="space-y-1.5">
                 <Label htmlFor="new">{t("setupPassword.newPasswordLabel", "New password")}</Label>
-                <Input id="new" type="password" autoComplete="new-password" required minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                <PasswordInput id="new" autoComplete="new-password" required minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="confirm">{t("setupPassword.confirmPasswordLabel", "Confirm password")}</Label>
-                <Input id="confirm" type="password" autoComplete="new-password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <PasswordInput id="confirm" autoComplete="new-password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full" disabled={submitting}>

@@ -11,6 +11,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -181,7 +182,7 @@ export default function PortalSignupPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="password">{t("signup.passwordLabel", "Password")}</Label>
-                <Input id="password" type="password" autoComplete="new-password" {...register("password")} />
+                <PasswordInput id="password" autoComplete="new-password" {...register("password")} />
                 {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}

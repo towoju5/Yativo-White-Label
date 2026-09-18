@@ -12,6 +12,7 @@ import PortalLoginPage from "@/pages/portal/auth/LoginPage";
 import ForgotPasswordPage from "@/pages/portal/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/portal/auth/ResetPasswordPage";
 import MagicLinkPage from "@/pages/portal/auth/MagicLinkPage";
+import KycContinuePage from "@/pages/portal/kyc/KycContinuePage";
 import SetupPasswordPage from "@/pages/portal/auth/SetupPasswordPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import PortalSignupPage from "@/pages/portal/auth/SignupPage";
@@ -89,6 +90,7 @@ export function createRouter(adminLoginPath: string) {
       { path: "/portal/forgot-password", element: <ForgotPasswordPage /> },
       { path: "/portal/reset-password", element: <ResetPasswordPage /> },
       { path: "/portal/magic-link", element: <MagicLinkPage /> },
+      { path: "/portal/kyc/continue", element: <KycContinuePage /> },
       { path: "/portal/accept-invite", element: <AcceptInvitePage /> },
       {
         path: "/portal/verify",
