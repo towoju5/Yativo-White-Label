@@ -41,22 +41,50 @@ export async function getWalletCurrencySettings(prisma: PrismaClient) {
   return { settings: settingsToDto(settings), currencies: currencies.map(currencyToDto) };
 }
 
+/** Never synced into the local Currency table or shown to customers — the Bluebanc Card Wallet entry Yativo's wallet/balance endpoint returns alongside real currencies (see wallets.ts's listBalances doc comment). Its "usdcc" slug is also 5 chars, longer than Currency.code's CHAR(3) column. */
+const HIDDEN_WALLET_SLUGS = new Set(["usdcc"]);
+
 /**
- * Pulls the authoritative currency list from Yativo and upserts into the local table — new
- * currencies default to disabled-for-customers, existing rows keep their current enabled flag
- * untouched. Called both by the admin's on-demand "Sync from Yativo" button and by the scheduled
- * background job (see jobs/currencySyncScheduler.ts), which is why it stamps lastCurrencySyncAt
- * itself rather than leaving that to the caller.
+ * Pulls the platform's own live Yativo wallet list and upserts into the local table — this is
+ * only the currencies this platform actually holds a funded Yativo wallet for (GET
+ * /wallet/balance), not Yativo's full platform-wide currency catalog, so a currency never shows
+ * up here (and therefore is never offered to customers) unless the admin has actually enabled a
+ * wallet for it on Yativo's side. New currencies default to disabled-for-customers, existing rows
+ * keep their current enabled flag untouched. Called both by the admin's on-demand "Sync from
+ * Yativo" button and by the scheduled background job (see jobs/currencySyncScheduler.ts), which is
+ * why it stamps lastCurrencySyncAt itself rather than leaving that to the caller.
  */
 export async function syncCurrenciesFromYativo(prisma: PrismaClient) {
-  const currencies = await yativoClient.fiat.currencies.listAll();
-  for (const c of currencies) {
+  const [balances, settings] = await Promise.all([yativoClient.fiat.wallets.listBalances(), getPlatformSettings(prisma)]);
+  const liveCodes = new Set<string>();
+
+  for (const entry of balances) {
+    if (HIDDEN_WALLET_SLUGS.has(entry.slug)) continue;
+    const code = entry.slug.toUpperCase();
+    liveCodes.add(code);
+    const name = entry.meta?.fullname ?? entry.name;
+    const symbol = entry.meta?.symbol ?? null;
+    const logoUrl = entry.meta?.logo ?? null;
+    const decimals = Number(entry.decimal_places);
+    const isActive = !entry.deleted_at;
     await prisma.currency.upsert({
-      where: { code: c.code },
-      update: { name: c.name, decimals: c.decimals, isFiat: c.isFiat, symbol: c.symbol, logoUrl: c.logoUrl, countryCode: c.countryCode, isActive: c.isActive },
-      create: { code: c.code, name: c.name, decimals: c.decimals, isFiat: c.isFiat, symbol: c.symbol, logoUrl: c.logoUrl, countryCode: c.countryCode, isActive: c.isActive },
+      where: { code },
+      update: { name, decimals, symbol, logoUrl, isActive },
+      create: { code, name, decimals, isFiat: true, symbol, logoUrl, isActive },
     });
   }
+
+  // A currency synced in previously (back when this pulled from Yativo's full platform-wide
+  // catalog, or a wallet that's since been closed on Yativo's side) but no longer present in the
+  // live wallet list is no longer something this platform actually holds — pull it back out of
+  // circulation so it stops being offered to customers. Never touches the current default
+  // currency even if it drops out, since updatePlatformSettings requires the default to stay
+  // enabled — an admin has to pick a new default first if that ever genuinely happens.
+  await prisma.currency.updateMany({
+    where: { code: { notIn: [...liveCodes, settings.defaultCurrencyCode] }, isEnabledForCustomers: true },
+    data: { isEnabledForCustomers: false, isActive: false },
+  });
+
   await prisma.platformSettings.update({ where: { id: 1 }, data: { lastCurrencySyncAt: new Date() } });
   return getWalletCurrencySettings(prisma);
 }

@@ -18,3 +18,15 @@ export const walletListItemSchema = walletBalanceSchema.extend({
   customerName: z.string().optional(),
 });
 export type WalletListItem = z.infer<typeof walletListItemSchema>;
+
+/** One entry from Yativo's live GET /wallet/balance — the platform's own Yativo-held wallets, admin-only (includes the internal "usdcc" card-funding wallet, which customer-facing screens never see). */
+export const yativoWalletBalanceSchema = z.object({
+  name: z.string(),
+  slug: z.string(),
+  currency: z.string(),
+  symbol: z.string().nullable(),
+  logoUrl: z.string().nullable(),
+  balance: z.string(),
+  decimalPlaces: z.number(),
+});
+export type YativoWalletBalance = z.infer<typeof yativoWalletBalanceSchema>;

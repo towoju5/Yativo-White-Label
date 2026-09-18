@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdminBusinessSpendCardListItem, BusinessSpendCardDto, BusinessSpendCardWalletActionResult, PaginatedResponse, Customer } from "@white-label/shared-types";
 import { CreditCard, Plus, Lock, Unlock, XCircle, Loader2, Settings2 } from "lucide-react";
@@ -38,9 +38,20 @@ export default function AdminBusinessSpendCardsPage() {
 
   const customersQuery = useQuery({
     queryKey: ["admin", "customers", "for-business-spend-card-issue"],
-    queryFn: () => staffApi.get<Paginated<Customer>>("/admin/customers", { page: 1, pageSize: 200 }),
+    // pageSize is capped at 100 server-side (paginationQuerySchema) — 200 here used to 400 on
+    // every request, silently leaving this dropdown empty with no error shown.
+    queryFn: () => staffApi.get<Paginated<Customer>>("/admin/customers", { page: 1, pageSize: 100 }),
     enabled: issueOpen,
   });
+  useEffect(() => {
+    if (customersQuery.isError) {
+      toast({
+        variant: "destructive",
+        title: "Couldn't load customers",
+        description: customersQuery.error instanceof ApiError ? customersQuery.error.message : undefined,
+      });
+    }
+  }, [customersQuery.isError]);
   const customerOptions = (customersQuery.data?.items ?? [])
     .filter((c) => c.type === "BUSINESS")
     .map((c) => ({ value: c.id, label: `${c.businessName ?? c.fullName ?? c.email} — ${c.email}` }));

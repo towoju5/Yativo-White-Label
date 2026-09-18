@@ -3,6 +3,7 @@ import type { Card, PrismaClient } from "@prisma/client";
 import { AppError, NotFoundError, InsufficientFundsError } from "../../lib/errors.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
+import { ensureCustomerWalletAccount } from "../ledger/accounts.js";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js";
 import { reverseTransaction } from "../ledger/reverseTransaction.js";
@@ -69,8 +70,11 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
   const activeCount = await prisma.card.count({ where: { customerId, status: { in: ["ACTIVE", "FROZEN"] } } });
   if (activeCount >= 3) throw new AppError("You can have at most 3 active virtual cards.", 409, "CARD_LIMIT_REACHED");
 
-  const walletAccount = await prisma.account.findFirst({ where: { type: "CUSTOMER_WALLET", customerId, currencyCode: CARD_CURRENCY } });
-  if (!walletAccount) throw new NotFoundError("Wallet");
+  // Cards are always funded from a USD wallet regardless of the platform's default currency or
+  // wallet-currency mode — a customer may never have self-added or been auto-provisioned one, so
+  // this creates it on demand rather than 404ing (confirmed live: this 404 was blocking every
+  // card issuance for any customer whose default/held wallets didn't happen to include USD).
+  const walletAccount = await ensureCustomerWalletAccount(prisma, customerId, CARD_CURRENCY);
 
   const feeMinor = await getEffectiveFee(prisma, "CARD_CREATE", customerId, amountMinor);
   const available = await getAvailableBalance(prisma, walletAccount.id, "CUSTOMER_WALLET");

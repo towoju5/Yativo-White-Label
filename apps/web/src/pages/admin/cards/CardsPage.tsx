@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CardDto, CardReveal, AdminCardListItem, PaginatedResponse, Customer } from "@white-label/shared-types";
 import { CreditCard, Eye, EyeOff, Plus, Snowflake, Sun, XCircle, Loader2 } from "lucide-react";
@@ -39,9 +39,20 @@ export default function AdminCardsPage() {
 
   const customersQuery = useQuery({
     queryKey: ["admin", "customers", "for-card-issue"],
-    queryFn: () => staffApi.get<Paginated<Customer>>("/admin/customers", { page: 1, pageSize: 200 }),
+    // pageSize is capped at 100 server-side (paginationQuerySchema) — 200 here used to 400 on
+    // every request, silently leaving this dropdown empty with no error shown.
+    queryFn: () => staffApi.get<Paginated<Customer>>("/admin/customers", { page: 1, pageSize: 100 }),
     enabled: open,
   });
+  useEffect(() => {
+    if (customersQuery.isError) {
+      toast({
+        variant: "destructive",
+        title: "Couldn't load customers",
+        description: customersQuery.error instanceof ApiError ? customersQuery.error.message : undefined,
+      });
+    }
+  }, [customersQuery.isError]);
   const customerOptions = (customersQuery.data?.items ?? []).map((c) => ({
     value: c.id,
     label: `${c.fullName ?? c.businessName ?? c.email} — ${c.email}`,

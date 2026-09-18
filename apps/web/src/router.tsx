@@ -54,6 +54,7 @@ import AuditLogPage from "@/pages/admin/auditLog/AuditLogPage";
 import ProfitPage from "@/pages/admin/profit/ProfitPage";
 import SupportTicketsPage from "@/pages/admin/support/SupportTicketsPage";
 import ReconciliationPage from "@/pages/admin/reconciliation/ReconciliationPage";
+import YativoBalancesPage from "@/pages/admin/wallets/YativoBalancesPage";
 import CryptoWalletsPage from "@/pages/admin/crypto/CryptoWalletsPage";
 import AdminVirtualAccountsPage from "@/pages/admin/virtualAccounts/VirtualAccountsPage";
 import PagesPage from "@/pages/admin/pages/PagesPage";
@@ -176,6 +177,7 @@ export function createRouter(adminLoginPath: string) {
               { path: "profit", element: <ProfitPage /> },
               { path: "support", element: <SupportTicketsPage /> },
               { path: "reconciliation", element: <ReconciliationPage /> },
+              { path: "wallets/yativo-balances", element: <YativoBalancesPage /> },
               { path: "crypto", element: <CryptoWalletsPage /> },
               { path: "virtual-accounts", element: <AdminVirtualAccountsPage /> },
               { path: "pages", element: <PagesPage /> },

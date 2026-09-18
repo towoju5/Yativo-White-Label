@@ -1,10 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { reconciliationReportSchema, paginationQuerySchema, paginatedResponseSchema } from "@white-label/shared-types";
+import { reconciliationReportSchema, paginationQuerySchema, paginatedResponseSchema, yativoWalletBalanceSchema } from "@white-label/shared-types";
 import { z } from "zod";
 import { requireStaffAuth, requirePermission } from "../../middleware/requireStaffAuth.js";
 import { yativoClient } from "../../lib/yativoClient.js";
-import { listReconciliationReports, runReconciliation, reconciliationReportToDto } from "./reconciliation.service.js";
+import { listReconciliationReports, runReconciliation, reconciliationReportToDto, getYativoWalletBalances } from "./reconciliation.service.js";
 
 export async function reconciliationRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -27,6 +27,16 @@ export async function reconciliationRoutes(app: FastifyInstance) {
     async (_request, reply) => {
       const reports = await runReconciliation(app.prisma, yativoClient);
       return reply.send(reports.map(reconciliationReportToDto));
+    },
+  );
+
+  /** Live from Yativo, not cached — the platform's own Yativo wallet balances, including the internal "usdcc" card-funding wallet. Admin-only (see getYativoWalletBalances doc comment). */
+  server.get(
+    "/admin/wallets/yativo-balances",
+    { preHandler: requireStaffAuth, schema: { response: { 200: z.array(yativoWalletBalanceSchema) } } },
+    async (_request, reply) => {
+      const balances = await getYativoWalletBalances(yativoClient);
+      return reply.send(balances);
     },
   );
 }

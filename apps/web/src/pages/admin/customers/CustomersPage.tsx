@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import type { Customer, CustomerImportRun } from "@white-label/shared-types";
@@ -76,7 +76,8 @@ export default function CustomersPage() {
   const [status, setStatus] = useState<string>("ALL");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { toast } = useToast();
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin", "customers", { search, kycStatus, status, page }],
     queryFn: () =>
       staffApi.get<Paginated<Customer>>("/admin/customers", {
@@ -87,6 +88,11 @@ export default function CustomersPage() {
         pageSize: PAGE_SIZE,
       }),
   });
+  useEffect(() => {
+    if (isError) {
+      toast({ variant: "destructive", title: "Couldn't load customers", description: error instanceof ApiError ? error.message : undefined });
+    }
+  }, [isError]);
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
 
@@ -154,6 +160,13 @@ export default function CustomersPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-12" />
           ))}
+        </div>
+      ) : isError ? (
+        <div className="rounded-lg border border-dashed border-destructive/50 p-10 text-center text-sm">
+          <p className="text-destructive">Couldn't load customers{error instanceof ApiError ? `: ${error.message}` : ""}</p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+            Retry
+          </Button>
         </div>
       ) : !data || data.items.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">No customers match these filters</div>
