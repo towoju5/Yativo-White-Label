@@ -66,8 +66,9 @@ export const PAYOUT_STATUSES = ["pending", "processing", "completed", "failed", 
  * `payout.updated` — the ONLY payout event Yativo sends; there's no separate created/completed/
  * failed split, so this replaces what were previously two handlers. No fee field exists on the
  * real payload. Confirmed live: `beneficiary_id` sometimes arrives as a JSON number rather than a
- * string, and `status` sometimes arrives as "success" (payin/crypto's spelling) rather than this
- * family's documented "completed" — both accepted and normalized here rather than failing.
+ * string, and `status` sometimes arrives as "success" (payin/crypto's spelling) or "complete" (no
+ * trailing -d) rather than this family's documented "completed" — all accepted and normalized
+ * here rather than failing.
  */
 const rawPayoutEventSchema = z
   .object({
@@ -77,7 +78,7 @@ const rawPayoutEventSchema = z
     beneficiary_id: z.union([z.string(), z.number()]).nullable().optional(),
     currency: z.string(),
     amount: z.union([z.string(), z.number()]),
-    status: z.union([z.enum(PAYOUT_STATUSES), z.literal("success")]),
+    status: z.union([z.enum(PAYOUT_STATUSES), z.literal("success"), z.literal("complete")]),
     created_at: z.string().nullable().optional(),
     updated_at: z.string().nullable().optional(),
   })
@@ -89,7 +90,7 @@ export const payoutEventPayloadSchema = rawPayoutEventSchema.transform((d) => ({
   currencyCode: d.currency,
   // Decimal major-unit string, same caveat as deposits above.
   amount: String(d.amount),
-  status: d.status === "success" ? ("completed" as const) : d.status,
+  status: d.status === "success" || d.status === "complete" ? ("completed" as const) : d.status,
   updatedAt: d.updated_at ?? undefined,
   createdAt: d.created_at ?? undefined,
 }));
