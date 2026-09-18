@@ -59,8 +59,8 @@ export async function deletePricingOverride(prisma: PrismaClient, customerId: st
   return { ...ruleToDto(fallback), source: "DEFAULT" as const };
 }
 
-function computeOwnFee(rule: Rule, amountMinor: bigint): bigint {
-  const percentagePortion = (amountMinor * BigInt(rule.percentageBps)) / 10000n;
+function computeOwnFee(rule: Rule, percentageBaseMinor: bigint): bigint {
+  const percentagePortion = (percentageBaseMinor * BigInt(rule.percentageBps)) / 10000n;
   switch (rule.feeType) {
     case "FIXED":
       return rule.fixedAmountMinor;
@@ -82,8 +82,13 @@ async function resolveEffectiveRule(prisma: PrismaClient, service: PricingServic
 /**
  * The fee to actually charge for one transaction. `upstreamFeeMinor` is whatever Yativo itself
  * reported as its own cost for this transaction (0 when it reports none — most services don't).
- * In MARKUP mode the platform fee is added on top of that; in STANDALONE mode (the default)
- * upstreamFeeMinor is ignored entirely and only the platform's own fee is charged.
+ *
+ * - STANDALONE (the default): the platform's own fee is charged, with any PERCENTAGE/COMBINED
+ *   portion computed against the total transaction amount (`amountMinor`). upstreamFeeMinor is
+ *   ignored entirely.
+ * - MARKUP: the platform's own fee is added on top of Yativo's fee, with any PERCENTAGE/COMBINED
+ *   portion computed against Yativo's fee itself (`upstreamFeeMinor`), not the total amount —
+ *   e.g. a 10% MARKUP fee on a $2 Yativo fee charges $0.20 on top, regardless of the deposit size.
  */
 export async function getEffectiveFee(
   prisma: PrismaClient,
@@ -93,6 +98,8 @@ export async function getEffectiveFee(
   upstreamFeeMinor: bigint = 0n,
 ): Promise<bigint> {
   const rule = await resolveEffectiveRule(prisma, service, customerId);
-  const ownFee = computeOwnFee(rule, amountMinor);
-  return rule.pricingMode === "MARKUP" ? upstreamFeeMinor + ownFee : ownFee;
+  if (rule.pricingMode === "MARKUP") {
+    return upstreamFeeMinor + computeOwnFee(rule, upstreamFeeMinor);
+  }
+  return computeOwnFee(rule, amountMinor);
 }

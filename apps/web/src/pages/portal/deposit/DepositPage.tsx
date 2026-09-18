@@ -302,8 +302,8 @@ function NativeDepositCard() {
             <WalletIcon className="h-4 w-4" /> {t("deposit.localCard.depositButton", "Deposit")}
           </Button>
 
-          <DialogContent className="max-w-lg overflow-hidden p-0 sm:max-w-2xl">
-            <DialogHeader className="border-b border-border px-6 py-5">
+          <DialogContent className="flex max-h-[85vh] max-w-lg flex-col overflow-hidden p-0 sm:max-w-2xl">
+            <DialogHeader className="shrink-0 border-b border-border px-6 py-5">
               <DialogTitle className="font-heading text-xl">{t("deposit.dialog.title", "Deposit funds")}</DialogTitle>
               {!result && !quote && (
                 <div className="pt-2">
@@ -312,7 +312,7 @@ function NativeDepositCard() {
               )}
             </DialogHeader>
 
-            <div className="max-h-[60vh] overflow-y-auto px-6 py-6">
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
               {result ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-success">
@@ -651,7 +651,7 @@ function NativeDepositCard() {
             </div>
 
             {!result && !quote && (
-              <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
+              <div className="flex shrink-0 items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
                 <Button type="button" variant="ghost" onClick={goBack} disabled={step === 0 || quoteMutation.isPending}>
                   <ArrowLeft className="h-4 w-4" /> {t("deposit.buttons.back", "Back")}
                 </Button>
@@ -670,7 +670,7 @@ function NativeDepositCard() {
             )}
 
             {quote && !result && (
-              <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
+              <div className="flex shrink-0 items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
                 <Button type="button" variant="ghost" onClick={resetWizard}>
                   {t("deposit.buttons.startOver", "Start over")}
                 </Button>

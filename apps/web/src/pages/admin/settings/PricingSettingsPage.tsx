@@ -10,7 +10,7 @@ import {
   type PricingMode,
   type UpdatePricingDefaultInput,
 } from "@white-label/shared-types";
-import { DollarSign, Pencil } from "lucide-react";
+import { DollarSign, Info, Pencil } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -54,8 +54,8 @@ export const FEE_TYPE_LABELS: Record<FeeType, string> = {
 };
 
 export const PRICING_MODE_LABELS: Record<PricingMode, string> = {
-  STANDALONE: "Standalone — ignore Yativo's fee",
-  MARKUP: "Add on top of Yativo's fee",
+  STANDALONE: "On total amount",
+  MARKUP: "On top of Yativo's fee",
 };
 
 export function formatFeeSummary(rule: { feeType: FeeType; fixedAmountMinor: string; percentageBps: number }): string {
@@ -93,6 +93,50 @@ export default function PricingSettingsPage() {
         <h1 className="font-heading text-2xl font-semibold tracking-tight">Pricing</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">Platform-wide default fees for each service — override per customer from their detail page.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">How fee options work</CardTitle>
+          </div>
+          <CardDescription>What each fee type and pricing mode actually charges.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          <div>
+            <p className="font-medium">Fee type — what shape the fee takes</p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+              <li>
+                <span className="font-medium text-foreground">Fixed</span> — a flat amount every time, e.g. $1.00 per transaction regardless of size.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Percentage</span> — a basis-points cut (100 bps = 1%) of the percentage base below. What that
+                base is depends on the pricing mode.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Fixed + percentage</span> — the fixed amount plus the percentage portion, added together.
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="font-medium">Pricing mode — what the percentage is calculated against</p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+              <li>
+                <span className="font-medium text-foreground">On total amount</span> (Standalone) — the fixed/percentage fee is computed against the full
+                transaction amount, e.g. a $1,000 deposit with a 1% fee charges $10. Yativo's own fee, if any, is ignored entirely — it isn't added on top and
+                isn't part of the calculation.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">On top of Yativo's fee</span> (Markup) — the platform charges Yativo's own fee for that
+                transaction, plus its own fixed/percentage fee computed against <em>that Yativo fee</em>, not the transaction total. E.g. if Yativo charges
+                $2 and the markup is a 10% percentage fee, the customer is charged $2 (Yativo's fee) + $0.20 (10% of $2) = $2.20 total — the size of the
+                deposit itself doesn't factor in. Only services where Yativo reports its own fee (currently Payin) are affected by this mode; for every
+                other service it behaves the same as "On total amount".
+              </li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -231,8 +275,10 @@ export function PricingRuleDialog({
               </Select>
               <p className="text-xs text-muted-foreground">
                 {hasUpstreamFee
-                  ? "Yativo reports a fee for this service, so markup is additive."
-                  : "Yativo doesn't report a fee for this service, so markup behaves the same as standalone."}
+                  ? pricingMode === "MARKUP"
+                    ? "Charged on top of Yativo's fee — any percentage is a cut of Yativo's fee, not the transaction total."
+                    : "Charged on the total transaction amount — Yativo's own fee is ignored."
+                  : "Yativo doesn't report a fee for this service, so both modes behave the same — charged on the total transaction amount."}
               </p>
             </div>
             <DialogFooter>
