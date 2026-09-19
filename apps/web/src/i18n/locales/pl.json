@@ -37,8 +37,10 @@
     "removeDialogTitle": "Usunąć {{name}}?",
     "removeError": "Nie udało się usunąć odbiorcy",
     "removed": "Odbiorca usunięty",
+    "requiresVerification": "Wymaga weryfikacji {{endorsement}} — skontaktuj się ze wsparciem, aby rozpocząć.",
     "selectCountryPlaceholder": "Wybierz kraj",
     "selectFieldPlaceholder": "Wybierz: {{field}}",
+    "startVerification": "Rozpocznij weryfikację",
     "steps": {
       "paymentDetails": "Dane płatności",
       "payoutMethod": "Metoda wypłaty",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} za przelew",
     "updateError": "Nie udało się zaktualizować odbiorcy",
     "updated": "Odbiorca zaktualizowany",
+    "verified": "Zweryfikowano",
     "whoAreYouSendingTo": "Do kogo wysyłasz pieniądze?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Aktywuj kartę firmową",
+    "addFunds": "Zasil środkami",
+    "cancel": "Anuluj",
+    "cardTitle": "Karta firmowa",
+    "confirmTerminate": "Kliknij ponownie, aby potwierdzić — tej operacji nie można cofnąć",
+    "emptyState": "Brak kart firmowych. Złóż wniosek, aby rozpocząć.",
+    "exp": "Ważna do {{date}}",
+    "fund": "Zasil",
+    "manage": "Zarządzaj →",
+    "monthlySpendingLimit": "Miesięczny limit wydatków (USD)",
+    "noTransactions": "Brak transakcji.",
+    "requestCard": "Złóż wniosek o kartę firmową",
+    "requestDialogHelp": "Wydawana z zerowym saldem — zasil ją ze swojego portfela USD, gdy będzie gotowa.",
+    "requestDialogTitle": "Wniosek o kartę firmową",
+    "requesting": "Wysyłanie wniosku…",
+    "retryTermination": "Ponów próbę zamknięcia",
+    "save": "Zapisz",
+    "setPin": "Ustaw PIN",
+    "subtitle": "Karty dla Twojej firmy, zasilane z Twojego portfela USD",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Zawieś kartę firmową",
+    "terminateCard": "Zamknij kartę firmową",
+    "title": "Karty firmowe",
+    "toast": {
+      "cardFunded": "Karta firmowa została zasilona",
+      "cardIssued": "Karta firmowa została wydana",
+      "issueCardError": "Nie udało się wydać karty firmowej",
+      "limitsError": "Nie udało się zaktualizować limitu",
+      "limitsUpdated": "Limit wydatków zaktualizowany",
+      "pinError": "Nie udało się zaktualizować kodu PIN",
+      "pinUpdated": "Kod PIN został zaktualizowany",
+      "statusError": "Nie udało się zaktualizować karty",
+      "terminationPending": "Środki z karty zostały wypłacone — automatyczne zamknięcie w toku, ponów za chwilę.",
+      "walletActionFailed": "Operacja nie powiodła się",
+      "withdrawalSubmitted": "Wypłata została zlecona"
+    },
+    "transactionFallback": "Transakcja",
+    "transactions": "Transakcje",
+    "usd": "Karta firmowa · USD",
+    "withdraw": "Wypłać",
+    "withdrawFeeNote": "Wypłata całego salda do zera automatycznie zamyka kartę. Wypłata może podlegać opłacie."
   },
   "cards": {
     "addFunds": "Doładuj środki",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "Przed zaksięgowaniem kwoty netto na Twoim portfelu z wypłat pobierana jest opłata."
   },
   "common": {
-    "language": "Język"
+    "app": "aplikacja",
+    "language": "Język",
+    "loading": "Ładowanie…"
   },
   "crypto": {
     "addressCopied": "Adres skopiowany",
@@ -151,6 +199,7 @@
     },
     "subtitle": "Oto co dzieje się na Twoich kontach",
     "title": "Witaj ponownie",
+    "titleNamed": "Witaj ponownie, {{name}}",
     "walletLabel": "Portfel"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Wstecz",
+      "confirmQuote": "Potwierdź i pobierz link do płatności",
       "continue": "Dalej",
-      "startDeposit": "Rozpocznij wpłatę"
+      "getQuote": "Pobierz ofertę",
+      "requote": "Przelicz ponownie",
+      "startDeposit": "Rozpocznij wpłatę",
+      "startOver": "Rozpocznij od nowa"
     },
     "cryptoCard": {
       "description": "Adresy depozytowe i historia wpłat on-chain znajdują się teraz na osobnej stronie.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "Kwota do zapłaty",
       "copyLinkAriaLabel": "Kopiuj link",
+      "depositId": "ID wpłaty",
       "estimatedDelivery": "Szacowany czas realizacji",
       "exchangeRate": "Kurs wymiany",
       "fee": "Opłata",
+      "goToCheckout": "Przejdź do kasy",
       "initiated": "Wpłata zainicjowana",
+      "negativeCredit": "Opłaty przewyższają kwotę wpłaty — otrzymana kwota byłaby ujemna. Spróbuj z wyższą kwotą.",
       "openLinkAriaLabel": "Otwórz link",
+      "quoteExpired": "Ta oferta wygasła — pobierz aktualny kurs, aby kontynuować.",
+      "quoteExpiresIn": "Kurs zablokowany na {{seconds}}s.",
+      "reviewQuote": "Sprawdź ofertę",
       "title": "Wpłać środki",
       "youllReceive": "Otrzymasz"
     },
@@ -229,6 +288,11 @@
       "description": "Wybierz swój kraj i zapłać lokalną metodą — przelewem bankowym, CODI, DEBIN i innymi.",
       "title": "Lub wpłać lokalną metodą płatności"
     },
+    "recent": {
+      "empty": "Brak wpłat.",
+      "title": "Ostatnie wpłaty",
+      "viewAll": "Zobacz wszystkie"
+    },
     "step0": {
       "countryLabel": "Kraj",
       "countryPlaceholder": "Wybierz kraj",
@@ -238,10 +302,14 @@
       "methodRange": "{{min}}–{{max}} {{currency}} za wpłatę",
       "noMethods": "Brak aktywnych metod wpłaty dla tego kraju.",
       "prompt": "Jak chcesz zapłacić z kraju {{country}}?",
-      "thisCountryFallback": "tego kraju"
+      "requiresVerification": "Wymaga weryfikacji {{endorsement}} — skontaktuj się ze wsparciem, aby rozpocząć.",
+      "startVerification": "Rozpocznij weryfikację",
+      "thisCountryFallback": "tego kraju",
+      "verified": "Zweryfikowano"
     },
     "step2": {
       "amountLabel": "Kwota ({{currency}})",
+      "noEligibleWallet": "Żaden z Twoich portfeli nie jest w walucie obsługiwanej przez tę metodę ({{currencies}}).",
       "prompt": "{{method}} — kwota i dane",
       "selectFieldPlaceholder": "Wybierz: {{field}}",
       "walletLabel": "Portfel do zasilenia",
@@ -260,8 +328,26 @@
       "copyFailed": "Nie udało się skopiować",
       "pickCountry": "Wybierz kraj, aby kontynuować",
       "pickMethod": "Wybierz metodę płatności, aby kontynuować",
+      "quoteFailed": "Nie udało się pobrać wyceny",
       "startFailed": "Nie udało się rozpocząć wpłaty"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "Wyślij e-mail ponownie",
+      "message": "Zweryfikuj swój adres e-mail ({{email}}), aby zachować pełny dostęp do konta.",
+      "resendFailed": "Nie udało się wysłać ponownie",
+      "sending": "Wysyłanie…",
+      "sent": "E-mail weryfikacyjny został wysłany — sprawdź swoją skrzynkę odbiorczą."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Wróć do logowania",
+    "description": "Podaj swój adres e-mail, a wyślemy Ci link do zresetowania hasła.",
+    "sending": "Wysyłanie…",
+    "sentDescription": "Jeśli konto powiązane z tym adresem e-mail istnieje, wysłaliśmy link do zresetowania hasła.",
+    "submit": "Wyślij link resetujący",
+    "title": "Zresetuj hasło"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Wróć do logowania",
+    "errorTitle": "Nie można kontynuować",
+    "genericError": "Nie udało się kontynuować weryfikacji za pomocą tego linku.",
+    "missingToken": "W tym linku brakuje tokenu.",
+    "verifyingTitle": "Wznawianie od miejsca, w którym przerwano…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Dalej",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "Wstecz",
     "chooseCountryFirstPlaceholder": "Najpierw wybierz kraj",
+    "chooseFile": "Wybierz plik",
     "cityLabel": "Miasto",
     "clickToUpload": "Kliknij, aby przesłać",
+    "continueDialogHint": "Zeskanuj aparatem telefonu lub skopiuj link — nastąpi zalogowanie i wznowienie dokładnie tam, gdzie przerwano. Link wygasa za 15 minut.",
+    "continueDialogTitle": "Kontynuuj na innym urządzeniu",
+    "continueLinkError": "Nie udało się wygenerować linku",
+    "continueOnDevice": "Kontynuuj na innym urządzeniu",
+    "copyLink": "Kopiuj link",
+    "copyLinkError": "Nie udało się skopiować linku",
     "countryLabel": "Kraj",
     "dateIssuedLabel": "Data wydania",
     "documentBackOptionalLabel": "Dokument — tył (opcjonalnie)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "Data ważności (opcjonalnie)",
     "fixBeforeContinuing": "Popraw poniższe błędy, aby kontynuować:",
     "issuingCountryLabel": "Kraj wydania",
+    "linkCopied": "Link skopiowany",
     "loadingEllipsis": "Ładowanie…",
     "noMatches": "Brak wyników.",
     "noPostalCodesText": "Ten kraj nie używa kodów pocztowych.",
@@ -517,7 +618,8 @@
     "stepOf": "Krok {{current}} z {{total}}",
     "streetAddress2Label": "Adres, ciąg dalszy (opcjonalnie)",
     "streetAddressLabel": "Adres",
-    "streetAddressPlaceholder": "ul. Główna 123"
+    "streetAddressPlaceholder": "ul. Główna 123",
+    "takePhoto": "Zrób zdjęcie"
   },
   "kycWizard": {
     "backToDashboard": "Powrót do panelu",
@@ -683,19 +785,40 @@
     "createAccount": "Utwórz konto",
     "defaultProductName": "White Label",
     "emailLabel": "E-mail",
+    "forgotPassword": "Nie pamiętasz hasła?",
     "genericError": "Nie można się zalogować. Sprawdź swoje dane logowania.",
     "invalidCodeError": "Nieprawidłowy kod. Spróbuj ponownie.",
+    "magicLinkDescription": "Wyślemy Ci link e-mail do logowania — bez konieczności podawania hasła.",
+    "magicLinkSend": "Wyślij link logowania",
+    "magicLinkSending": "Wysyłanie…",
+    "magicLinkSentBody": "Jeśli konto dla adresu {{email}} istnieje, link do logowania jest w drodze. Wygasa za 15 minut.",
+    "magicLinkSentDescription": "Sprawdź swoją pocztę e-mail, aby znaleźć link logowania.",
     "newHere": "Nowy tutaj?",
+    "or": "lub",
+    "passkeyError": "Nie udało się zalogować za pomocą tego klucza dostępu.",
+    "passkeyWaiting": "Oczekiwanie na klucz dostępu…",
     "passwordLabel": "Hasło",
+    "resendVerification": "Wyślij ponownie e-mail weryfikacyjny",
+    "resendingVerification": "Wysyłanie ponowne…",
     "signIn": "Zaloguj się",
     "signInDescription": "Zaloguj się do swojego konta",
+    "signInWithPasskey": "Zaloguj się za pomocą klucza dostępu",
     "signingIn": "Logowanie…",
+    "stepUpDescription": "Zauważyliśmy logowanie z nowej lokalizacji. Wpisz kod, który przed chwilą wysłaliśmy na Twój e-mail.",
     "verificationCodeLabel": "Kod weryfikacyjny",
+    "verificationResent": "E-mail weryfikacyjny został wysłany — sprawdź skrzynkę odbiorczą.",
     "verify": "Zweryfikuj",
     "verifyDescription": "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej lub kod zapasowy.",
     "verifyHeading": "Potwierdź, że to Ty",
     "verifying": "Weryfikowanie…",
     "welcomeBack": "Witaj ponownie"
+  },
+  "magicLink": {
+    "backToLogin": "Wróć do logowania",
+    "errorTitle": "Logowanie nie powiodło się",
+    "genericError": "Nie udało się zalogować za pomocą tego linku.",
+    "missingToken": "W tym linku logowania brakuje tokenu.",
+    "verifyingTitle": "Logowanie…"
   },
   "nav": {
     "account": "Konto",
@@ -706,11 +829,14 @@
       "send": "Wyślij"
     },
     "beneficiaries": "Odbiorcy",
+    "businessSpendCards": "Karty firmowe",
     "cards": "Karty",
     "cryptoWallets": "Portfele kryptowalut",
     "dashboard": "Panel",
     "deposit": "Wpłata",
+    "home": "Główna",
     "logout": "Wyloguj się",
+    "payout": "Wypłata",
     "portal": "Portal",
     "profileKyc": "Profil i weryfikacja KYC",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "Wyślij pieniądze",
     "settings": "Ustawienia",
+    "statements": "Wyciągi",
+    "support": "Wsparcie",
+    "team": "Zespół",
+    "transactions": "Transakcje",
     "virtualAccounts": "Konta wirtualne",
     "wallets": "Portfele",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Nic tu nie ma."
+  },
+  "notifications": {
+    "empty": "Wszystko przeczytane.",
+    "loading": "Ładowanie…",
+    "markAllRead": "Oznacz wszystkie jako przeczytane",
+    "title": "Powiadomienia"
   },
   "profile": {
     "accountTitle": "Konto",
@@ -740,11 +879,36 @@
     "subheading": "Zarządzaj danymi swojej tożsamości",
     "typeLabel": "Typ"
   },
+  "pwa": {
+    "banner": {
+      "cta": "Zainstaluj",
+      "dismiss": "Zamknij",
+      "message": "Zainstaluj aplikację {{name}} na tym urządzeniu, aby uzyskać szybki dostęp."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Wróć do logowania",
+    "confirmPasswordLabel": "Potwierdź nowe hasło",
+    "description": "Ten link jest jednorazowy i wygasa po 1 godzinie.",
+    "genericError": "Nie udało się zresetować hasła.",
+    "mismatch": "Hasła nie są identyczne",
+    "missingToken": "W tym linku resetującym brakuje tokenu.",
+    "missingTokenTitle": "Nieprawidłowy link",
+    "newPasswordLabel": "Nowe hasło",
+    "requestNewLink": "Poproś o nowy link",
+    "submit": "Zresetuj hasło",
+    "successDescription": "Twoje hasło zostało zresetowane — możesz się teraz zalogować.",
+    "successTitle": "Hasło zostało zaktualizowane",
+    "title": "Wybierz nowe hasło",
+    "tooShort": "Nowe hasło musi zawierać co najmniej 8 znaków",
+    "updating": "Aktualizowanie…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "Kwota do wysłania ({{currency}})",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "Obciąż portfel",
+      "noEligibleWallet": "Żaden z Twoich portfeli nie jest w walucie obsługiwanej przez metodę wypłaty odbiorcy ({{currencies}}).",
       "prompt": "Kwota do wysłania",
       "promptTo": "Kwota do wysłania dla {{name}}",
       "recipientFallback": "odbiorcę",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "Ta wycena wygasła — pobierz nową, aby kontynuować.",
       "expiresIn": "Wycena wygasa za {{seconds}} s.",
+      "feeLabel": "Opłata platformy",
+      "payoutAmountLabel": "Kwota wypłaty",
       "rateLabel": "Kurs",
       "recipientGetsLabel": "Odbiorca otrzymuje",
       "toLabel": "Do",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Ostatnie zdarzenia dotyczące bezpieczeństwa Twojego konta.",
+      "title": "Historia bezpieczeństwa"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Potwierdź nowe hasło",
       "currentPasswordLabel": "Obecne hasło",
       "description": "Wybierz silne hasło, którego nie używasz nigdzie indziej.",
+      "error": "Nie udało się zaktualizować hasła",
+      "mismatch": "Hasła nie są identyczne",
       "newPasswordLabel": "Nowe hasło",
       "submit": "Zaktualizuj hasło",
+      "success": "Hasło zaktualizowane — zaloguj się ponownie",
       "title": "Zmień hasło",
       "toastDescription": "Zmiana hasła nie jest jeszcze dostępna w tej wersji.",
-      "toastTitle": "Jeszcze niedostępne"
+      "toastTitle": "Jeszcze niedostępne",
+      "tooShort": "Nowe hasło musi zawierać co najmniej 8 znaków",
+      "updating": "Aktualizowanie…"
     },
     "copiedToClipboard": "Skopiowano do schowka",
     "copyError": "Nie udało się skopiować",
+    "passkeys": {
+      "add": "Dodaj klucz dostępu",
+      "addError": "Nie udało się zarejestrować tego klucza dostępu.",
+      "added": "Dodano {{date}}",
+      "continue": "Dalej",
+      "deleteError": "Nie udało się usunąć klucza dostępu",
+      "description": "Loguj się bez hasła za pomocą Face ID, Touch ID, Windows Hello lub klucza bezpieczeństwa.",
+      "empty": "Brak zarejestrowanych kluczy dostępu.",
+      "lastUsed": "ostatnio użyto {{date}}",
+      "nameLabel": "Nazwij to urządzenie",
+      "namePlaceholder": "np. iPhone Face ID",
+      "remove": "Usuń {{name}}",
+      "title": "Klucze dostępu",
+      "waiting": "Oczekiwanie na przeglądarkę…"
+    },
+    "push": {
+      "description": "Otrzymuj powiadomienia na tym urządzeniu o wpłatach, wypłatach i zdarzeniach bezpieczeństwa.",
+      "disabled": "Wyłączone",
+      "enabled": "Włączone na tym urządzeniu",
+      "genericError": "Nie udało się włączyć powiadomień — spróbuj ponownie.",
+      "iosInstallRequired": "Na urządzeniach iPhone/iPad Safari zezwala na powiadomienia push tylko dla zainstalowanych aplikacji — wybierz Udostępnij, a następnie \"Do ekranu początkowego\", po czym otwórz ją stamtąd.",
+      "notConfigured": "Powiadomienia push nie są jeszcze skonfigurowane na tej platformie.",
+      "permissionDenied": "Brak uprawnień do powiadomień — sprawdź ustawienia witryny w przeglądarce.",
+      "title": "Powiadomienia push",
+      "unsupported": "Ta przeglądarka nie obsługuje powiadomień push.",
+      "unsupportedBrowser": "Ta przeglądarka nie obsługuje powiadomień push."
+    },
+    "pwa": {
+      "description": "Dodaj {{name}} do ekranu głównego, aby uzyskać szybki dostęp jednym dotknięciem jak w natywnej aplikacji.",
+      "install": "Zainstaluj aplikację",
+      "installed": "Już zainstalowano na tym urządzeniu.",
+      "iosIntro": "Na urządzeniach iPhone/iPad dodaj z menu udostępniania w Safari:",
+      "iosStep1": "Stuknij ikonę Udostępnij",
+      "iosStep2": "Stuknij \"Do ekranu początkowego\"",
+      "title": "Zainstaluj aplikację",
+      "unavailable": "Przeglądarka nie zaoferowała jeszcze opcji instalacji — odśwież stronę lub sprawdź menu przeglądarki."
+    },
+    "sessions": {
+      "description": "Urządzenia aktualnie zalogowane na Twoim koncie.",
+      "empty": "Nie znaleziono aktywnych sesji.",
+      "revokeError": "Nie udało się wylogować tego urządzenia",
+      "signOut": "Wyloguj",
+      "thisDevice": "To urządzenie",
+      "title": "Aktywne sesje",
+      "unknownDevice": "Nieznane urządzenie",
+      "unknownIp": "Nieznana lokalizacja"
+    },
     "subtitle": "Zarządzaj bezpieczeństwem swojego konta",
     "title": "Ustawienia",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "Potwierdź hasło",
+    "description": "Zalogowano się za pomocą linku jednorazowego — ustaw hasło teraz, aby następnym razem móc zalogować się bezpośrednio.",
+    "genericError": "Nie udało się ustawić hasła.",
+    "mismatch": "Hasła nie są identyczne",
+    "newPasswordLabel": "Nowe hasło",
+    "submit": "Zapisz hasło",
+    "submitting": "Zapisywanie…",
+    "title": "Wybierz hasło",
+    "tooShort": "Hasło musi zawierać co najmniej 8 znaków"
+  },
   "signup": {
     "accountTypeLabel": "Rodzaj konta",
     "alreadyHaveAccount": "Masz już konto?",
+    "backToLogin": "Wróć do logowania",
     "business": "Firma",
     "businessNameLabel": "Nazwa firmy",
     "callingCodeAriaLabel": "Numer kierunkowy",
+    "checkEmailDescription": "Wysłaliśmy link weryfikacyjny na Twój adres e-mail. Potwierdź go, aby dokończyć konfigurację konta.",
+    "checkEmailTitle": "Sprawdź swoją skrzynkę e-mail",
     "countryLabel": "Kraj",
     "createAccount": "Utwórz konto",
     "createYourAccount": "Utwórz swoje konto",
@@ -902,6 +1138,58 @@
     "signIn": "Zaloguj się",
     "startSendingDescription": "Zacznij wysyłać, przechowywać i wydawać w kilka minut"
   },
+  "statements": {
+    "amount": "Kwota",
+    "balanceAfter": "Saldo po transakcji",
+    "credit": "Uznanie",
+    "date": "Data",
+    "debit": "Obciążenie",
+    "description": "Opis",
+    "direction": "Uznanie/Obciążenie",
+    "downloadError": "Nie udało się pobrać wyciągu",
+    "downloadExcel": "Pobierz Excel",
+    "downloadPdf": "Pobierz PDF",
+    "emailError": "Nie udało się wysłać wyciągu e-mailem",
+    "emailFormat": "Wyślij jako",
+    "emailMe": "Wyślij ten wyciąg na mój e-mail",
+    "emailed": "Wyciąg został wysłany na adres {{email}}",
+    "empty": "Brak transakcji w tym okresie",
+    "from": "Od",
+    "parameters": "Wybierz portfel i okres",
+    "preview": "Podgląd (100 najnowszych pozycji)",
+    "sending": "Wysyłanie…",
+    "subtitle": "Każde uznanie, obciążenie i saldo po każdej transakcji w wybranym okresie",
+    "title": "Wyciąg z konta",
+    "to": "Do",
+    "wallet": "Portfel"
+  },
+  "support": {
+    "chatHint": "Skorzystaj z dymku czatu w rogu ekranu, aby porozmawiać z nami na żywo",
+    "chatOnline": "Dostępny",
+    "chatUnavailable": "Czat na żywo jest obecnie niedostępny",
+    "contact": "Kontakt",
+    "deposit": "Wpłata",
+    "faq": "Często zadawane pytania",
+    "liveChat": "Czat na żywo",
+    "message": "Wiadomość",
+    "messagePlaceholder": "Opisz swój problem…",
+    "noEmail": "Skorzystaj z poniższego formularza, aby się z nami skontaktować",
+    "payout": "Wypłata",
+    "replyPlaceholder": "Napisz odpowiedź…",
+    "send": "Wyślij wiadomość",
+    "sendMessage": "Napisz do nas wiadomość",
+    "sendMessageDescription": "Odpowiemy na adres e-mail powiązany z Twoim kontem",
+    "sending": "Wysyłanie…",
+    "subject": "Temat",
+    "subjectPlaceholder": "W czym możemy Ci pomóc?",
+    "subtitle": "Uzyskaj pomoc, porozmawiaj z nami lub przejrzyj najczęstsze pytania",
+    "ticketError": "Nie udało się wysłać wiadomości",
+    "ticketSent": "Wiadomość wysłana — odpowiemy tutaj oraz mailowo",
+    "title": "Wsparcie",
+    "viewTransaction": "Zobacz transakcję",
+    "you": "Ty",
+    "yourTickets": "Twoje zgłoszenia"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "Zobacz profil"
@@ -910,21 +1198,57 @@
       "notifications": "Powiadomienia",
       "switchToDarkMode": "Przełącz na tryb ciemny",
       "switchToLightMode": "Przełącz na tryb jasny"
-    }
+    },
+    "switchToDarkMode": "Przełącz na tryb ciemny",
+    "switchToLightMode": "Przełącz na tryb jasny"
+  },
+  "transactions": {
+    "allCurrencies": "Wszystkie waluty",
+    "allStatuses": "Wszystkie statusy",
+    "allTypes": "Wszystkie typy",
+    "amount": "Kwota",
+    "clearFilters": "Wyczyść filtry",
+    "currency": "Waluta",
+    "date": "Data",
+    "description": "Opis",
+    "empty": "Brak transakcji spełniających te kryteria",
+    "from": "Od",
+    "pageOf": "Strona {{page}} z {{totalPages}}",
+    "search": "Szukaj",
+    "searchPlaceholder": "Opis, numer referencyjny lub ID",
+    "status": "Status",
+    "subtitle": "Wszystkie transakcje we wszystkich Twoich portfelach",
+    "title": "Historia transakcji",
+    "to": "Do",
+    "type": "Typ"
+  },
+  "verifyEmail": {
+    "backToLogin": "Wróć do logowania",
+    "errorTitle": "Weryfikacja nie powiodła się",
+    "genericError": "Nie udało się zweryfikować Twojego adresu e-mail.",
+    "missingToken": "W tym linku weryfikacyjnym brakuje tokenu.",
+    "successDescription": "Twój adres e-mail został zweryfikowany — możesz się teraz zalogować.",
+    "successTitle": "E-mail zweryfikowany",
+    "verifyingTitle": "Weryfikacja Twojego adresu e-mail…"
   },
   "virtualAccounts": {
     "accountReady": "Konto wirtualne gotowe",
     "addCurrency": "Dodaj walutę",
     "allCurrenciesAdded": "Masz już konto dla każdej dostępnej waluty.",
+    "backToAccounts": "Konta wirtualne",
     "copiedToClipboard": "Skopiowano do schowka",
     "copyError": "Nie udało się skopiować",
     "copyField": "Kopiuj: {{field}}",
     "createAccount": "Utwórz konto",
     "createAccountError": "Nie udało się utworzyć konta",
     "creating": "Tworzenie…",
+    "depositsSubtitle": "Każdy przelew przychodzący odebrany na Twoich kontach wirtualnych.",
+    "depositsTitle": "Wpłaty z przelewów",
     "noAccountsYet": "Brak kont wirtualnych — utwórz jedno dla wybranej waluty poniżej.",
+    "noActivity": "Brak przelewów przychodzących.",
     "noCurrenciesAvailable": "Żadne waluty dla kont wirtualnych nie są jeszcze dostępne.",
     "noVerificationNeeded": "Weryfikacja niewymagana",
+    "recentActivity": "Ostatnia aktywność",
     "requiresVerification": "Wymaga weryfikacji: {{endorsement}} — skontaktuj się z pomocą techniczną, aby zacząć.",
     "shareDetails": "Udostępnij te dane osobie, która wysyła Ci środki.",
     "startVerification": "Rozpocznij weryfikację",
@@ -932,6 +1256,8 @@
     "title": "Konta wirtualne",
     "verificationNote": "Niektóre szyny płatnicze wymagają jednorazowej weryfikacji przed wydaniem konta.",
     "verified": "Zweryfikowano",
+    "viewAllActivity": "Zobacz wszystkie wpłaty z przelewów",
+    "viewDepositHistory": "Historia wpłat",
     "yourAccounts": "Twoje konta"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "Nie udało się usunąć portfela",
     "removing": "Usuwanie…",
     "statement": "Wyciąg",
+    "viewFullStatement": "Zobacz pełny wyciąg / eksportuj",
     "walletRemoved": "Portfel usunięty",
     "walletTitle": "Portfel {{currencyCode}}"
   },

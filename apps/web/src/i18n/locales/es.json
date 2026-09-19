@@ -37,8 +37,10 @@
     "removeDialogTitle": "¿Eliminar a {{name}}?",
     "removeError": "No se pudo eliminar el beneficiario",
     "removed": "Beneficiario eliminado",
+    "requiresVerification": "Requiere verificación de {{endorsement}} — contacta a soporte para comenzar.",
     "selectCountryPlaceholder": "Selecciona un país",
     "selectFieldPlaceholder": "Selecciona {{field}}",
+    "startVerification": "Iniciar verificación",
     "steps": {
       "paymentDetails": "Datos de pago",
       "payoutMethod": "Método de pago",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} por transferencia",
     "updateError": "No se pudo actualizar el beneficiario",
     "updated": "Beneficiario actualizado",
+    "verified": "Verificado",
     "whoAreYouSendingTo": "¿A quién le estás enviando dinero?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Activar tarjeta de negocios",
+    "addFunds": "Agregar fondos",
+    "cancel": "Cancelar",
+    "cardTitle": "Tarjeta de negocios",
+    "confirmTerminate": "Haz clic de nuevo para confirmar — esto no se puede deshacer",
+    "emptyState": "Aún no hay tarjetas de negocios. Solicita una para comenzar.",
+    "exp": "Vence {{date}}",
+    "fund": "Fondear",
+    "manage": "Administrar →",
+    "monthlySpendingLimit": "Límite mensual de gasto (USD)",
+    "noTransactions": "Aún no hay transacciones.",
+    "requestCard": "Solicitar tarjeta de negocios",
+    "requestDialogHelp": "Emitida con saldo cero — fóndéala desde tu billetera USD cuando esté lista.",
+    "requestDialogTitle": "Solicitar una tarjeta de negocios",
+    "requesting": "Solicitando…",
+    "retryTermination": "Reintentar cancelación",
+    "save": "Guardar",
+    "setPin": "Establecer PIN",
+    "subtitle": "Tarjetas para tu negocio, fondeadas desde tu billetera USD",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Suspender tarjeta de negocios",
+    "terminateCard": "Cancelar tarjeta de negocios",
+    "title": "Tarjetas de negocios",
+    "toast": {
+      "cardFunded": "Tarjeta de negocios fondeada",
+      "cardIssued": "Tarjeta de negocios emitida",
+      "issueCardError": "No se pudo emitir la tarjeta de negocios",
+      "limitsError": "No se pudo actualizar el límite",
+      "limitsUpdated": "Límite de gasto actualizado",
+      "pinError": "No se pudo actualizar el PIN",
+      "pinUpdated": "PIN actualizado",
+      "statusError": "No se pudo actualizar la tarjeta",
+      "terminationPending": "Tarjeta de negocios vaciada — la cancelación automática sigue pendiente, reintenta desde aquí en breve.",
+      "walletActionFailed": "Error en la acción",
+      "withdrawalSubmitted": "Retiro enviado"
+    },
+    "transactionFallback": "Transacción",
+    "transactions": "Transacciones",
+    "usd": "Tarjeta de negocios · USD",
+    "withdraw": "Retirar",
+    "withdrawFeeNote": "Retirar a saldo cero cancela automáticamente la tarjeta. Puede aplicarse una tarifa a los retiros."
   },
   "cards": {
     "addFunds": "Añadir fondos",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "Se descuenta una comisión de los retiros antes de que el importe neto llegue a tu billetera."
   },
   "common": {
-    "language": "Idioma"
+    "app": "la aplicación",
+    "language": "Idioma",
+    "loading": "Cargando…"
   },
   "crypto": {
     "addressCopied": "Dirección copiada",
@@ -151,6 +199,7 @@
     },
     "subtitle": "Esto es lo que está pasando en tus cuentas",
     "title": "Bienvenido de nuevo",
+    "titleNamed": "Bienvenido de nuevo, {{name}}",
     "walletLabel": "Billetera"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Atrás",
+      "confirmQuote": "Confirmar y obtener enlace de pago",
       "continue": "Continuar",
-      "startDeposit": "Iniciar depósito"
+      "getQuote": "Obtener cotización",
+      "requote": "Recotizar",
+      "startDeposit": "Iniciar depósito",
+      "startOver": "Comenzar de nuevo"
     },
     "cryptoCard": {
       "description": "Las direcciones de depósito y el historial de depósitos on-chain ahora tienen su propia página.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "Importe a pagar",
       "copyLinkAriaLabel": "Copiar enlace",
+      "depositId": "ID de depósito",
       "estimatedDelivery": "Entrega estimada",
       "exchangeRate": "Tipo de cambio",
       "fee": "Comisión",
+      "goToCheckout": "Ir al pago",
       "initiated": "Depósito iniciado",
+      "negativeCredit": "Las tarifas superan este monto de depósito — recibirías menos que nada. Intenta con un monto mayor.",
       "openLinkAriaLabel": "Abrir enlace",
+      "quoteExpired": "Esta cotización ha expirado — obtén una nueva tasa para continuar.",
+      "quoteExpiresIn": "Tasa garantizada por {{seconds}}s.",
+      "reviewQuote": "Revisa tu cotización",
       "title": "Depositar fondos",
       "youllReceive": "Recibirás"
     },
@@ -229,6 +288,11 @@
       "description": "Elige tu país y paga mediante el método local — transferencia bancaria, CODI, DEBIN y más.",
       "title": "O deposita con un método de pago local"
     },
+    "recent": {
+      "empty": "Aún no hay depósitos.",
+      "title": "Depósitos recientes",
+      "viewAll": "Ver todos"
+    },
     "step0": {
       "countryLabel": "País",
       "countryPlaceholder": "Selecciona un país",
@@ -238,10 +302,14 @@
       "methodRange": "{{min}}–{{max}} {{currency}} por depósito",
       "noMethods": "Aún no hay métodos de depósito activos para este país.",
       "prompt": "¿Cómo quieres pagar desde {{country}}?",
-      "thisCountryFallback": "este país"
+      "requiresVerification": "Requiere verificación de {{endorsement}} — contacta a soporte para comenzar.",
+      "startVerification": "Iniciar verificación",
+      "thisCountryFallback": "este país",
+      "verified": "Verificado"
     },
     "step2": {
       "amountLabel": "Importe ({{currency}})",
+      "noEligibleWallet": "Ninguna de tus billeteras está en una moneda compatible con este método ({{currencies}}).",
       "prompt": "{{method}} — importe y detalles",
       "selectFieldPlaceholder": "Selecciona {{field}}",
       "walletLabel": "Billetera a acreditar",
@@ -260,8 +328,26 @@
       "copyFailed": "No se pudo copiar",
       "pickCountry": "Elige un país para continuar",
       "pickMethod": "Elige un método de pago para continuar",
+      "quoteFailed": "No se pudo obtener una cotización",
       "startFailed": "No se pudo iniciar el depósito"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "Reenviar correo",
+      "message": "Por favor verifica tu dirección de correo electrónico ({{email}}) para mantener acceso completo a tu cuenta.",
+      "resendFailed": "No se pudo reenviar",
+      "sending": "Enviando…",
+      "sent": "Correo de verificación enviado — revisa tu bandeja de entrada."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Volver a iniciar sesión",
+    "description": "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+    "sending": "Enviando…",
+    "sentDescription": "Si existe una cuenta para ese correo, hemos enviado un enlace para restablecer tu contraseña.",
+    "submit": "Enviar enlace de restablecimiento",
+    "title": "Restablecer tu contraseña"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Volver a iniciar sesión",
+    "errorTitle": "No se pudo continuar",
+    "genericError": "No se pudo continuar la verificación con este enlace.",
+    "missingToken": "Falta el token en este enlace.",
+    "verifyingTitle": "Retomando donde lo dejaste…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Continuar",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "Atrás",
     "chooseCountryFirstPlaceholder": "Elige primero un país",
+    "chooseFile": "Elegir archivo",
     "cityLabel": "Ciudad",
     "clickToUpload": "Haz clic para subir",
+    "continueDialogHint": "Escanea esto con la cámara de tu teléfono o copia el enlace; iniciarás sesión y retomarás exactamente donde lo dejaste. Expira en 15 minutos.",
+    "continueDialogTitle": "Continuar en otro dispositivo",
+    "continueLinkError": "No se pudo crear el enlace",
+    "continueOnDevice": "Continuar en otro dispositivo",
+    "copyLink": "Copiar enlace",
+    "copyLinkError": "No se pudo copiar el enlace",
     "countryLabel": "País",
     "dateIssuedLabel": "Fecha de emisión",
     "documentBackOptionalLabel": "Documento — dorso (opcional)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "Fecha de vencimiento (opcional)",
     "fixBeforeContinuing": "Corrige lo siguiente antes de continuar:",
     "issuingCountryLabel": "País emisor",
+    "linkCopied": "Enlace copiado",
     "loadingEllipsis": "Cargando…",
     "noMatches": "Sin coincidencias.",
     "noPostalCodesText": "Este país no usa códigos postales.",
@@ -517,7 +618,8 @@
     "stepOf": "Paso {{current}} de {{total}}",
     "streetAddress2Label": "Dirección línea 2 (opcional)",
     "streetAddressLabel": "Dirección",
-    "streetAddressPlaceholder": "Calle Principal 123"
+    "streetAddressPlaceholder": "Calle Principal 123",
+    "takePhoto": "Tomar foto"
   },
   "kycWizard": {
     "backToDashboard": "Volver al panel",
@@ -683,19 +785,40 @@
     "createAccount": "Crear una cuenta",
     "defaultProductName": "White Label",
     "emailLabel": "Correo electrónico",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
     "genericError": "No se pudo iniciar sesión. Verifica tus credenciales.",
     "invalidCodeError": "Código inválido. Inténtalo de nuevo.",
+    "magicLinkDescription": "Te enviaremos un enlace por correo para iniciar sesión, sin necesidad de contraseña.",
+    "magicLinkSend": "Enviar enlace de inicio de sesión",
+    "magicLinkSending": "Enviando…",
+    "magicLinkSentBody": "Si existe una cuenta para {{email}}, se ha enviado un enlace de inicio de sesión. Expira en 15 minutos.",
+    "magicLinkSentDescription": "Revisa tu correo para obtener el enlace de inicio de sesión.",
     "newHere": "¿Eres nuevo aquí?",
+    "or": "o",
+    "passkeyError": "No se pudo iniciar sesión con esa clave de acceso.",
+    "passkeyWaiting": "Esperando clave de acceso…",
     "passwordLabel": "Contraseña",
+    "resendVerification": "Reenviar correo de verificación",
+    "resendingVerification": "Reenviando…",
     "signIn": "Iniciar sesión",
     "signInDescription": "Inicia sesión en tu cuenta",
+    "signInWithPasskey": "Iniciar sesión con una clave de acceso",
     "signingIn": "Iniciando sesión…",
+    "stepUpDescription": "Notamos un inicio de sesión desde una nueva ubicación. Ingresa el código que te acabamos de enviar por correo.",
     "verificationCodeLabel": "Código de verificación",
+    "verificationResent": "Correo de verificación enviado — revisa tu bandeja de entrada.",
     "verify": "Verificar",
     "verifyDescription": "Introduce el código de 6 dígitos de tu app de autenticación, o un código de respaldo.",
     "verifyHeading": "Verifica que eres tú",
     "verifying": "Verificando…",
     "welcomeBack": "Bienvenido de nuevo"
+  },
+  "magicLink": {
+    "backToLogin": "Volver a iniciar sesión",
+    "errorTitle": "Error al iniciar sesión",
+    "genericError": "No se pudo iniciar sesión con este enlace.",
+    "missingToken": "Falta el token en este enlace de inicio de sesión.",
+    "verifyingTitle": "Iniciando sesión…"
   },
   "nav": {
     "account": "Cuenta",
@@ -706,11 +829,14 @@
       "send": "Enviar"
     },
     "beneficiaries": "Beneficiarios",
+    "businessSpendCards": "Tarjetas de negocios",
     "cards": "Tarjetas",
     "cryptoWallets": "Billeteras cripto",
     "dashboard": "Panel",
     "deposit": "Depósito",
+    "home": "Inicio",
     "logout": "Cerrar sesión",
+    "payout": "Retiro",
     "portal": "Portal",
     "profileKyc": "Perfil y KYC",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "Enviar dinero",
     "settings": "Configuración",
+    "statements": "Estados de cuenta",
+    "support": "Soporte",
+    "team": "Equipo",
+    "transactions": "Transacciones",
     "virtualAccounts": "Cuentas virtuales",
     "wallets": "Billeteras",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Nada que ver aquí."
+  },
+  "notifications": {
+    "empty": "Estás al día.",
+    "loading": "Cargando…",
+    "markAllRead": "Marcar todo como leído",
+    "title": "Notificaciones"
   },
   "profile": {
     "accountTitle": "Cuenta",
@@ -740,11 +879,36 @@
     "subheading": "Gestiona los datos de tu identidad",
     "typeLabel": "Tipo"
   },
+  "pwa": {
+    "banner": {
+      "cta": "Instalar",
+      "dismiss": "Descartar",
+      "message": "Instala {{name}} en este dispositivo para un acceso rápido."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Volver a iniciar sesión",
+    "confirmPasswordLabel": "Confirmar nueva contraseña",
+    "description": "Este enlace solo se puede usar una vez y expira en 1 hora.",
+    "genericError": "No se pudo restablecer tu contraseña.",
+    "mismatch": "Las contraseñas no coinciden",
+    "missingToken": "Falta el token en este enlace de restablecimiento.",
+    "missingTokenTitle": "Enlace inválido",
+    "newPasswordLabel": "Nueva contraseña",
+    "requestNewLink": "Solicitar un nuevo enlace",
+    "submit": "Restablecer contraseña",
+    "successDescription": "Tu contraseña ha sido restablecida — ya puedes iniciar sesión.",
+    "successTitle": "Contraseña actualizada",
+    "title": "Elige una nueva contraseña",
+    "tooShort": "La nueva contraseña debe tener al menos 8 caracteres",
+    "updating": "Actualizando…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "Importe a enviar ({{currency}})",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "Debitar de la billetera",
+      "noEligibleWallet": "Ninguna de tus billeteras está en una moneda compatible con el método de cobro del destinatario ({{currencies}}).",
       "prompt": "Importe a enviar",
       "promptTo": "Importe a enviar a {{name}}",
       "recipientFallback": "el destinatario",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "Esta cotización ha expirado — obtén una nueva para continuar.",
       "expiresIn": "La cotización expira en {{seconds}}s.",
+      "feeLabel": "Tarifa de la plataforma",
+      "payoutAmountLabel": "Monto de pago",
       "rateLabel": "Tasa",
       "recipientGetsLabel": "El destinatario recibe",
       "toLabel": "Para",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Eventos recientes relevantes para la seguridad de tu cuenta.",
+      "title": "Actividad de seguridad"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Confirmar nueva contraseña",
       "currentPasswordLabel": "Contraseña actual",
       "description": "Elige una contraseña segura que no uses en otro lugar.",
+      "error": "No se pudo actualizar la contraseña",
+      "mismatch": "Las contraseñas no coinciden",
       "newPasswordLabel": "Nueva contraseña",
       "submit": "Actualizar contraseña",
+      "success": "Contraseña actualizada — por favor inicia sesión de nuevo",
       "title": "Cambiar contraseña",
       "toastDescription": "Los cambios de contraseña no están habilitados en esta versión.",
-      "toastTitle": "Aún no disponible"
+      "toastTitle": "Aún no disponible",
+      "tooShort": "La nueva contraseña debe tener al menos 8 caracteres",
+      "updating": "Actualizando…"
     },
     "copiedToClipboard": "Copiado al portapapeles",
     "copyError": "No se pudo copiar",
+    "passkeys": {
+      "add": "Agregar una clave de acceso",
+      "addError": "No se pudo registrar esa clave de acceso.",
+      "added": "Agregada el {{date}}",
+      "continue": "Continuar",
+      "deleteError": "No se pudo eliminar la clave de acceso",
+      "description": "Inicia sesión sin contraseña usando Face ID, Touch ID, Windows Hello o una clave de seguridad.",
+      "empty": "Aún no hay claves de acceso registradas.",
+      "lastUsed": "usada por última vez el {{date}}",
+      "nameLabel": "Nombre para este dispositivo",
+      "namePlaceholder": "p. ej. iPhone Face ID",
+      "remove": "Eliminar {{name}}",
+      "title": "Claves de acceso",
+      "waiting": "Esperando al navegador…"
+    },
+    "push": {
+      "description": "Recibe alertas en este dispositivo para depósitos, pagos y eventos de seguridad.",
+      "disabled": "Desactivado",
+      "enabled": "Activado en este dispositivo",
+      "genericError": "No se pudieron activar las notificaciones — por favor intenta de nuevo.",
+      "iosInstallRequired": "En iPhone/iPad, Safari solo permite notificaciones push para apps instaladas — usa el botón Compartir y \"Agregar a pantalla de inicio\", luego ábrela desde allí para activarlo.",
+      "notConfigured": "Las notificaciones push aún no están configuradas en esta plataforma.",
+      "permissionDenied": "No se concedió permiso para notificaciones — revisa los permisos del sitio en tu navegador.",
+      "title": "Notificaciones push",
+      "unsupported": "Este navegador no admite notificaciones push.",
+      "unsupportedBrowser": "Este navegador no admite notificaciones push."
+    },
+    "pwa": {
+      "description": "Agrega {{name}} a tu pantalla de inicio para un acceso con un solo toque, como una app nativa.",
+      "install": "Instalar app",
+      "installed": "Ya instalada en este dispositivo.",
+      "iosIntro": "En iPhone/iPad, agrégala desde el menú compartir de Safari:",
+      "iosStep1": "Toca el icono Compartir",
+      "iosStep2": "Toca \"Agregar a pantalla de inicio\"",
+      "title": "Instalar app",
+      "unavailable": "Tu navegador aún no ofrece un aviso de instalación — intenta recargar la página o busca en el menú de tu navegador la opción \"Instalar app\"."
+    },
+    "sessions": {
+      "description": "Dispositivos con sesión iniciada actualmente en tu cuenta.",
+      "empty": "No se encontraron sesiones activas.",
+      "revokeError": "No se pudo cerrar la sesión de ese dispositivo",
+      "signOut": "Cerrar sesión",
+      "thisDevice": "Este dispositivo",
+      "title": "Sesiones activas",
+      "unknownDevice": "Dispositivo desconocido",
+      "unknownIp": "Ubicación desconocida"
+    },
     "subtitle": "Gestiona la seguridad de tu cuenta",
     "title": "Configuración",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "Confirmar contraseña",
+    "description": "Iniciaste sesión con un enlace de un solo uso — establece una contraseña ahora para poder iniciar sesión directamente la próxima vez.",
+    "genericError": "No se pudo establecer tu contraseña.",
+    "mismatch": "Las contraseñas no coinciden",
+    "newPasswordLabel": "Nueva contraseña",
+    "submit": "Guardar contraseña",
+    "submitting": "Guardando…",
+    "title": "Elige una contraseña",
+    "tooShort": "La contraseña debe tener al menos 8 caracteres"
+  },
   "signup": {
     "accountTypeLabel": "Tipo de cuenta",
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "backToLogin": "Volver a iniciar sesión",
     "business": "Empresa",
     "businessNameLabel": "Nombre de la empresa",
     "callingCodeAriaLabel": "Código de país",
+    "checkEmailDescription": "Hemos enviado un enlace de verificación a tu dirección de correo. Verifícalo para terminar de configurar tu cuenta.",
+    "checkEmailTitle": "Revisa tu correo electrónico",
     "countryLabel": "País",
     "createAccount": "Crear cuenta",
     "createYourAccount": "Crea tu cuenta",
@@ -902,6 +1138,58 @@
     "signIn": "Iniciar sesión",
     "startSendingDescription": "Empieza a enviar, guardar y gastar en minutos"
   },
+  "statements": {
+    "amount": "Monto",
+    "balanceAfter": "Saldo posterior",
+    "credit": "Crédito",
+    "date": "Fecha",
+    "debit": "Débito",
+    "description": "Descripción",
+    "direction": "Crédito/Débito",
+    "downloadError": "No se pudo descargar el estado de cuenta",
+    "downloadExcel": "Descargar Excel",
+    "downloadPdf": "Descargar PDF",
+    "emailError": "No se pudo enviar el estado de cuenta por correo",
+    "emailFormat": "Enviar como",
+    "emailMe": "Enviarme este estado de cuenta por correo",
+    "emailed": "Estado de cuenta enviado a {{email}}",
+    "empty": "No hay transacciones en este período",
+    "from": "Desde",
+    "parameters": "Elige una billetera y un período",
+    "preview": "Vista previa (100 filas más recientes)",
+    "sending": "Enviando…",
+    "subtitle": "Cada crédito, débito y saldo después de cada transacción, para el período que elijas",
+    "title": "Estado de cuenta",
+    "to": "Hasta",
+    "wallet": "Billetera"
+  },
+  "support": {
+    "chatHint": "Usa la burbuja de chat en la esquina para hablar con nosotros en vivo",
+    "chatOnline": "En línea",
+    "chatUnavailable": "El chat en vivo no está disponible en este momento",
+    "contact": "Contáctanos",
+    "deposit": "Depósito",
+    "faq": "Preguntas frecuentes",
+    "liveChat": "Chat en vivo",
+    "message": "Mensaje",
+    "messagePlaceholder": "Describe tu consulta…",
+    "noEmail": "Usa el siguiente formulario para comunicarte con nosotros",
+    "payout": "Pago",
+    "replyPlaceholder": "Escribe una respuesta…",
+    "send": "Enviar mensaje",
+    "sendMessage": "Envíanos un mensaje",
+    "sendMessageDescription": "Responderemos al correo registrado en tu cuenta",
+    "sending": "Enviando…",
+    "subject": "Asunto",
+    "subjectPlaceholder": "¿En qué podemos ayudarte?",
+    "subtitle": "Obtén ayuda, chatea con nosotros o explora las preguntas frecuentes",
+    "ticketError": "No se pudo enviar tu mensaje",
+    "ticketSent": "Mensaje enviado — te responderemos aquí y por correo",
+    "title": "Soporte",
+    "viewTransaction": "Ver transacción",
+    "you": "Tú",
+    "yourTickets": "Tus tickets"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "Ver perfil"
@@ -910,21 +1198,57 @@
       "notifications": "Notificaciones",
       "switchToDarkMode": "Cambiar a modo oscuro",
       "switchToLightMode": "Cambiar a modo claro"
-    }
+    },
+    "switchToDarkMode": "Cambiar a modo oscuro",
+    "switchToLightMode": "Cambiar a modo claro"
+  },
+  "transactions": {
+    "allCurrencies": "Todas las monedas",
+    "allStatuses": "Todos los estados",
+    "allTypes": "Todos los tipos",
+    "amount": "Monto",
+    "clearFilters": "Borrar filtros",
+    "currency": "Moneda",
+    "date": "Fecha",
+    "description": "Descripción",
+    "empty": "Ninguna transacción coincide con estos filtros",
+    "from": "Desde",
+    "pageOf": "Página {{page}} / {{totalPages}}",
+    "search": "Buscar",
+    "searchPlaceholder": "Descripción, referencia o ID",
+    "status": "Estado",
+    "subtitle": "Cada transacción en todas tus billeteras",
+    "title": "Historial de transacciones",
+    "to": "Hasta",
+    "type": "Tipo"
+  },
+  "verifyEmail": {
+    "backToLogin": "Volver a iniciar sesión",
+    "errorTitle": "Error de verificación",
+    "genericError": "No se pudo verificar tu correo.",
+    "missingToken": "Falta el token en este enlace de verificación.",
+    "successDescription": "Tu correo ha sido verificado — ya puedes iniciar sesión.",
+    "successTitle": "Correo verificado",
+    "verifyingTitle": "Verificando tu correo…"
   },
   "virtualAccounts": {
     "accountReady": "Cuenta virtual lista",
     "addCurrency": "Añadir una moneda",
     "allCurrenciesAdded": "Ya tienes una cuenta para cada moneda disponible.",
+    "backToAccounts": "Cuentas virtuales",
     "copiedToClipboard": "Copiado al portapapeles",
     "copyError": "No se pudo copiar",
     "copyField": "Copiar {{field}}",
     "createAccount": "Crear cuenta",
     "createAccountError": "No se pudo crear la cuenta",
     "creating": "Creando…",
+    "depositsSubtitle": "Cada transferencia entrante recibida en tus cuentas virtuales.",
+    "depositsTitle": "Depósitos por transferencia",
     "noAccountsYet": "Aún no hay cuentas virtuales — aprovisiona una para una moneda abajo.",
+    "noActivity": "Aún no hay transferencias entrantes.",
     "noCurrenciesAvailable": "Aún no hay monedas disponibles para cuentas virtuales.",
     "noVerificationNeeded": "No se necesita verificación",
+    "recentActivity": "Actividad reciente",
     "requiresVerification": "Requiere verificación de {{endorsement}} — contacta a soporte para empezar.",
     "shareDetails": "Comparte estos datos con quien te esté enviando fondos.",
     "startVerification": "Iniciar verificación",
@@ -932,6 +1256,8 @@
     "title": "Cuentas virtuales",
     "verificationNote": "Algunas redes necesitan una verificación única antes de poder emitir una cuenta.",
     "verified": "Verificado",
+    "viewAllActivity": "Ver todos los depósitos por transferencia",
+    "viewDepositHistory": "Historial de depósitos",
     "yourAccounts": "Tus cuentas"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "No se pudo eliminar la billetera",
     "removing": "Eliminando…",
     "statement": "Estado de cuenta",
+    "viewFullStatement": "Ver estado de cuenta completo / exportar",
     "walletRemoved": "Billetera eliminada",
     "walletTitle": "Billetera {{currencyCode}}"
   },

@@ -37,8 +37,10 @@
     "removeDialogTitle": "Rimuovere {{name}}?",
     "removeError": "Impossibile rimuovere il beneficiario",
     "removed": "Beneficiario rimosso",
+    "requiresVerification": "Richiede la verifica {{endorsement}} — contatta l'assistenza per iniziare.",
     "selectCountryPlaceholder": "Seleziona un paese",
     "selectFieldPlaceholder": "Seleziona {{field}}",
+    "startVerification": "Avvia verifica",
     "steps": {
       "paymentDetails": "Dati di pagamento",
       "payoutMethod": "Metodo di pagamento",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} per trasferimento",
     "updateError": "Impossibile aggiornare il beneficiario",
     "updated": "Beneficiario aggiornato",
+    "verified": "Verificato",
     "whoAreYouSendingTo": "A chi stai inviando denaro?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Attiva carta aziendale",
+    "addFunds": "Aggiungi fondi",
+    "cancel": "Annulla",
+    "cardTitle": "Carta aziendale",
+    "confirmTerminate": "Fai di nuovo clic per confermare — questa azione è irreversibile",
+    "emptyState": "Nessuna carta aziendale presente. Richiedine una per iniziare.",
+    "exp": "Scad. {{date}}",
+    "fund": "Ricarica",
+    "manage": "Gestisci →",
+    "monthlySpendingLimit": "Limite di spesa mensile (USD)",
+    "noTransactions": "Nessuna transazione per ora.",
+    "requestCard": "Richiedi carta aziendale",
+    "requestDialogHelp": "Emessa con saldo pari a zero — ricaricala dal tuo wallet USD non appena è pronta.",
+    "requestDialogTitle": "Richiedi una carta aziendale",
+    "requesting": "Richiesta in corso…",
+    "retryTermination": "Riprova chiusura carta",
+    "save": "Salva",
+    "setPin": "Imposta PIN",
+    "subtitle": "Carte per la tua azienda, ricaricate dal tuo wallet USD",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Sospendi carta aziendale",
+    "terminateCard": "Chiudi carta aziendale",
+    "title": "Carte aziendali",
+    "toast": {
+      "cardFunded": "Carta aziendale ricaricata",
+      "cardIssued": "Carta aziendale emessa",
+      "issueCardError": "Impossibile emettere la carta aziendale",
+      "limitsError": "Impossibile aggiornare il limite",
+      "limitsUpdated": "Limite di spesa aggiornato",
+      "pinError": "Impossibile aggiornare il PIN",
+      "pinUpdated": "PIN aggiornato",
+      "statusError": "Impossibile aggiornare lo stato della carta",
+      "terminationPending": "Carta aziendale svuotata — chiusura automatica in sospeso, riprova da qui a breve.",
+      "walletActionFailed": "Azione non riuscita",
+      "withdrawalSubmitted": "Prelievo inviato"
+    },
+    "transactionFallback": "Transazione",
+    "transactions": "Transazioni",
+    "usd": "Carta aziendale · USD",
+    "withdraw": "Preleva",
+    "withdrawFeeNote": "Prelevare l'intero saldo chiude automaticamente la carta. Ai prelievi potrebbe essere applicata una commissione."
   },
   "cards": {
     "addFunds": "Aggiungi fondi",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "Prima che l'importo netto raggiunga il tuo wallet viene dedotta una commissione dai prelievi."
   },
   "common": {
-    "language": "Lingua"
+    "app": "l'app",
+    "language": "Lingua",
+    "loading": "Caricamento…"
   },
   "crypto": {
     "addressCopied": "Indirizzo copiato",
@@ -151,6 +199,7 @@
     },
     "subtitle": "Ecco cosa succede nei tuoi conti",
     "title": "Bentornato",
+    "titleNamed": "Bentornato, {{name}}",
     "walletLabel": "Wallet"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Indietro",
+      "confirmQuote": "Conferma e ottieni il link di pagamento",
       "continue": "Continua",
-      "startDeposit": "Avvia deposito"
+      "getQuote": "Ottieni preventivo",
+      "requote": "Ricalcola preventivo",
+      "startDeposit": "Avvia deposito",
+      "startOver": "Ricomincia"
     },
     "cryptoCard": {
       "description": "Gli indirizzi di deposito e la cronologia dei depositi on-chain ora si trovano nella loro pagina dedicata.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "Importo da pagare",
       "copyLinkAriaLabel": "Copia link",
+      "depositId": "ID deposito",
       "estimatedDelivery": "Consegna stimata",
       "exchangeRate": "Tasso di cambio",
       "fee": "Commissione",
+      "goToCheckout": "Procedi al pagamento",
       "initiated": "Deposito avviato",
+      "negativeCredit": "Le commissioni superano questo importo — riceveresti meno di zero. Prova con un importo superiore.",
       "openLinkAriaLabel": "Apri link",
+      "quoteExpired": "Il preventivo è scaduto — richiedi una nuova quotazione per continuare.",
+      "quoteExpiresIn": "Tasso bloccato per {{seconds}}s.",
+      "reviewQuote": "Verifica il preventivo",
       "title": "Deposita fondi",
       "youllReceive": "Riceverai"
     },
@@ -229,6 +288,11 @@
       "description": "Scegli il tuo paese e paga tramite il circuito locale — bonifico bancario, CODI, DEBIN e altro.",
       "title": "Oppure deposita con un metodo di pagamento locale"
     },
+    "recent": {
+      "empty": "Nessun deposito recente.",
+      "title": "Depositi recenti",
+      "viewAll": "Visualizza tutti"
+    },
     "step0": {
       "countryLabel": "Paese",
       "countryPlaceholder": "Seleziona un paese",
@@ -238,10 +302,14 @@
       "methodRange": "{{min}}–{{max}} {{currency}} per deposito",
       "noMethods": "Nessun metodo di deposito attivo per questo paese al momento.",
       "prompt": "Come vuoi pagare da {{country}}?",
-      "thisCountryFallback": "questo paese"
+      "requiresVerification": "Richiede la verifica {{endorsement}} — contatta l'assistenza per iniziare.",
+      "startVerification": "Avvia verifica",
+      "thisCountryFallback": "questo paese",
+      "verified": "Verificato"
     },
     "step2": {
       "amountLabel": "Importo ({{currency}})",
+      "noEligibleWallet": "Nessuno dei tuoi wallet è in una valuta supportata da questo metodo ({{currencies}}).",
       "prompt": "{{method}} — importo e dettagli",
       "selectFieldPlaceholder": "Seleziona {{field}}",
       "walletLabel": "Wallet da accreditare",
@@ -260,8 +328,26 @@
       "copyFailed": "Impossibile copiare",
       "pickCountry": "Scegli un paese per continuare",
       "pickMethod": "Scegli un metodo di pagamento per continuare",
+      "quoteFailed": "Impossibile ottenere un preventivo",
       "startFailed": "Impossibile avviare il deposito"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "Reinvia email",
+      "message": "Verifica il tuo indirizzo email ({{email}}) per mantenere l'accesso completo al tuo account.",
+      "resendFailed": "Impossibile reinviare l'email",
+      "sending": "Invio in corso…",
+      "sent": "Email di verifica inviata — controlla la tua casella di posta."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Torna all'accesso",
+    "description": "Inserisci la tua email e ti invieremo un link per reimpostare la password.",
+    "sending": "Invio in corso…",
+    "sentDescription": "Se esiste un account associato a questa email, abbiamo inviato un link per reimpostare la password.",
+    "submit": "Invia link di reimpostazione",
+    "title": "Reimposta la password"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Torna all'accesso",
+    "errorTitle": "Impossibile continuare",
+    "genericError": "Impossibile continuare la verifica con questo link.",
+    "missingToken": "Questo link non contiene un token valido.",
+    "verifyingTitle": "Ripresa da dove avevi interrotto…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Continua",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "Indietro",
     "chooseCountryFirstPlaceholder": "Scegli prima un paese",
+    "chooseFile": "Scegli file",
     "cityLabel": "Città",
     "clickToUpload": "Fai clic per caricare",
+    "continueDialogHint": "Inquadra con la fotocamera dello smartphone o copia il link: accederai e riprenderai esattamente da dove avevi interrotto. Scade tra 15 minuti.",
+    "continueDialogTitle": "Continua su un altro dispositivo",
+    "continueLinkError": "Impossibile creare il link",
+    "continueOnDevice": "Continua su un altro dispositivo",
+    "copyLink": "Copia link",
+    "copyLinkError": "Impossibile copiare il link",
     "countryLabel": "Paese",
     "dateIssuedLabel": "Data di rilascio",
     "documentBackOptionalLabel": "Documento — retro (facoltativo)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "Data di scadenza (facoltativo)",
     "fixBeforeContinuing": "Correggi quanto segue prima di continuare:",
     "issuingCountryLabel": "Paese di rilascio",
+    "linkCopied": "Link copiato",
     "loadingEllipsis": "Caricamento…",
     "noMatches": "Nessun risultato.",
     "noPostalCodesText": "Questo paese non utilizza codici postali.",
@@ -517,7 +618,8 @@
     "stepOf": "Passaggio {{current}} di {{total}}",
     "streetAddress2Label": "Indirizzo riga 2 (facoltativo)",
     "streetAddressLabel": "Indirizzo",
-    "streetAddressPlaceholder": "123 Main St"
+    "streetAddressPlaceholder": "123 Main St",
+    "takePhoto": "Scatta foto"
   },
   "kycWizard": {
     "backToDashboard": "Torna alla dashboard",
@@ -683,19 +785,40 @@
     "createAccount": "Crea un account",
     "defaultProductName": "White Label",
     "emailLabel": "Email",
+    "forgotPassword": "Password dimenticata?",
     "genericError": "Impossibile accedere. Controlla le tue credenziali.",
     "invalidCodeError": "Codice non valido. Riprova.",
+    "magicLinkDescription": "Ti invieremo un link via email per accedere, senza bisogno di password.",
+    "magicLinkSend": "Invia link di accesso",
+    "magicLinkSending": "Invio in corso…",
+    "magicLinkSentBody": "Se esiste un account per {{email}}, il link di accesso è in arrivo. Scade tra 15 minuti.",
+    "magicLinkSentDescription": "Controlla la tua email per il link di accesso.",
     "newHere": "Sei nuovo qui?",
+    "or": "oppure",
+    "passkeyError": "Impossibile accedere con questa passkey.",
+    "passkeyWaiting": "In attesa della passkey…",
     "passwordLabel": "Password",
+    "resendVerification": "Reinvia email di verifica",
+    "resendingVerification": "Reinvio in corso…",
     "signIn": "Accedi",
     "signInDescription": "Accedi al tuo account",
+    "signInWithPasskey": "Accedi con una passkey",
     "signingIn": "Accesso in corso…",
+    "stepUpDescription": "Abbiamo rilevato un accesso da una nuova posizione. Inserisci il codice che ti abbiamo appena inviato via email.",
     "verificationCodeLabel": "Codice di verifica",
+    "verificationResent": "Email di verifica inviata — controlla la tua casella di posta.",
     "verify": "Verifica",
     "verifyDescription": "Inserisci il codice a 6 cifre dalla tua app di autenticazione, oppure un codice di backup.",
     "verifyHeading": "Verifica che sei tu",
     "verifying": "Verifica in corso…",
     "welcomeBack": "Bentornato"
+  },
+  "magicLink": {
+    "backToLogin": "Torna all'accesso",
+    "errorTitle": "Accesso non riuscito",
+    "genericError": "Impossibile accedere con questo link.",
+    "missingToken": "Questo link di accesso non contiene un token valido.",
+    "verifyingTitle": "Accesso in corso…"
   },
   "nav": {
     "account": "Account",
@@ -706,11 +829,14 @@
       "send": "Invia"
     },
     "beneficiaries": "Beneficiari",
+    "businessSpendCards": "Carte aziendali",
     "cards": "Carte",
     "cryptoWallets": "Wallet crypto",
     "dashboard": "Dashboard",
     "deposit": "Deposito",
+    "home": "Home",
     "logout": "Esci",
+    "payout": "Prelievo",
     "portal": "Portale",
     "profileKyc": "Profilo e KYC",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "Invia denaro",
     "settings": "Impostazioni",
+    "statements": "Estratti conto",
+    "support": "Assistenza",
+    "team": "Team",
+    "transactions": "Transazioni",
     "virtualAccounts": "Conti virtuali",
     "wallets": "Wallet",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Nessun contenuto disponibile qui."
+  },
+  "notifications": {
+    "empty": "Nessuna nuova notifica.",
+    "loading": "Caricamento…",
+    "markAllRead": "Segna tutte come lette",
+    "title": "Notifiche"
   },
   "profile": {
     "accountTitle": "Account",
@@ -740,11 +879,36 @@
     "subheading": "Gestisci i dati della tua identità",
     "typeLabel": "Tipo"
   },
+  "pwa": {
+    "banner": {
+      "cta": "Installa",
+      "dismiss": "Ignora",
+      "message": "Installa {{name}} su questo dispositivo per un accesso rapido."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Torna all'accesso",
+    "confirmPasswordLabel": "Conferma nuova password",
+    "description": "Questo link è utilizzabile una sola volta e scade tra 1 ora.",
+    "genericError": "Impossibile reimpostare la password.",
+    "mismatch": "Le password non coincidono",
+    "missingToken": "Questo link di reimpostazione non contiene un token valido.",
+    "missingTokenTitle": "Link non valido",
+    "newPasswordLabel": "Nuova password",
+    "requestNewLink": "Richiedi un nuovo link",
+    "submit": "Reimposta password",
+    "successDescription": "La tua password è stata reimpostata — ora puoi accedere.",
+    "successTitle": "Password aggiornata",
+    "title": "Scegli una nuova password",
+    "tooShort": "La nuova password deve contenere almeno 8 caratteri",
+    "updating": "Aggiornamento in corso…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "Importo da inviare ({{currency}})",
       "amountPlaceholder": "100,00",
       "debitWalletLabel": "Addebita dal wallet",
+      "noEligibleWallet": "Nessuno dei tuoi wallet è in una valuta supportata dal metodo di prelievo del destinatario ({{currencies}}).",
       "prompt": "Importo da inviare",
       "promptTo": "Importo da inviare a {{name}}",
       "recipientFallback": "il destinatario",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "Questa quotazione è scaduta — ottienine una nuova per continuare.",
       "expiresIn": "La quotazione scade tra {{seconds}}s.",
+      "feeLabel": "Commissione piattaforma",
+      "payoutAmountLabel": "Importo erogato",
       "rateLabel": "Tasso",
       "recipientGetsLabel": "Il destinatario riceve",
       "toLabel": "A",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Eventi recenti rilevanti per la sicurezza del tuo account.",
+      "title": "Attività di sicurezza"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Conferma nuova password",
       "currentPasswordLabel": "Password attuale",
       "description": "Scegli una password sicura che non usi altrove.",
+      "error": "Impossibile aggiornare la password",
+      "mismatch": "Le password non coincidono",
       "newPasswordLabel": "Nuova password",
       "submit": "Aggiorna password",
+      "success": "Password aggiornata — effettua nuovamente l'accesso",
       "title": "Cambia password",
       "toastDescription": "La modifica della password non è ancora attiva in questa versione.",
-      "toastTitle": "Non ancora disponibile"
+      "toastTitle": "Non ancora disponibile",
+      "tooShort": "La nuova password deve contenere almeno 8 caratteri",
+      "updating": "Aggiornamento in corso…"
     },
     "copiedToClipboard": "Copiato negli appunti",
     "copyError": "Impossibile copiare",
+    "passkeys": {
+      "add": "Aggiungi una passkey",
+      "addError": "Impossibile registrare questa passkey.",
+      "added": "Aggiunta il {{date}}",
+      "continue": "Continua",
+      "deleteError": "Impossibile rimuovere la passkey",
+      "description": "Accedi senza password utilizzando Face ID, Touch ID, Windows Hello o una chiave di sicurezza.",
+      "empty": "Nessuna passkey ancora registrata.",
+      "lastUsed": "ultimo utilizzo il {{date}}",
+      "nameLabel": "Assegna un nome a questo dispositivo",
+      "namePlaceholder": "es. iPhone Face ID",
+      "remove": "Rimuovi {{name}}",
+      "title": "Passkey",
+      "waiting": "In attesa del browser…"
+    },
+    "push": {
+      "description": "Ricevi avvisi su questo dispositivo per depositi, prelievi ed eventi di sicurezza.",
+      "disabled": "Disattivate",
+      "enabled": "Attivate su questo dispositivo",
+      "genericError": "Impossibile attivare le notifiche — riprova.",
+      "iosInstallRequired": "Su iPhone/iPad, Safari consente le notifiche push solo per le app installate — tocca Condividi e \"Aggiungi a schermata Home\", quindi aprila da lì per attivarle.",
+      "notConfigured": "Le notifiche push non sono ancora configurate su questa piattaforma.",
+      "permissionDenied": "Autorizzazione per le notifiche negata — controlla le impostazioni del sito nel browser.",
+      "title": "Notifiche push",
+      "unsupported": "Questo browser non supporta le notifiche push.",
+      "unsupportedBrowser": "Questo browser non supporta le notifiche push."
+    },
+    "pwa": {
+      "description": "Aggiungi {{name}} alla schermata iniziale per un accesso immediato, come un'app nativa.",
+      "install": "Installa app",
+      "installed": "Già installata su questo dispositivo.",
+      "iosIntro": "Su iPhone/iPad, aggiungila dal menu di condivisione di Safari:",
+      "iosStep1": "Tocca l'icona Condividi",
+      "iosStep2": "Tocca \"Aggiungi a schermata Home\"",
+      "title": "Installa app",
+      "unavailable": "Il browser non ha ancora proposto l'installazione — prova a ricaricare la pagina o cerca l'opzione \"Installa app\" nel menu del browser."
+    },
+    "sessions": {
+      "description": "Dispositivi attualmente connessi al tuo account.",
+      "empty": "Nessuna sessione attiva trovata.",
+      "revokeError": "Impossibile disconnettere questo dispositivo",
+      "signOut": "Disconnetti",
+      "thisDevice": "Questo dispositivo",
+      "title": "Sessioni attive",
+      "unknownDevice": "Dispositivo sconosciuto",
+      "unknownIp": "Posizione sconosciuta"
+    },
     "subtitle": "Gestisci la sicurezza del tuo account",
     "title": "Impostazioni",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "Conferma password",
+    "description": "Hai effettuato l'accesso con un link monouso — imposta una password ora per poter accedere direttamente le prossime volte.",
+    "genericError": "Impossibile impostare la password.",
+    "mismatch": "Le password non coincidono",
+    "newPasswordLabel": "Nuova password",
+    "submit": "Salva password",
+    "submitting": "Salvataggio in corso…",
+    "title": "Scegli una password",
+    "tooShort": "La password deve contenere almeno 8 caratteri"
+  },
   "signup": {
     "accountTypeLabel": "Tipo di account",
     "alreadyHaveAccount": "Hai già un account?",
+    "backToLogin": "Torna all'accesso",
     "business": "Azienda",
     "businessNameLabel": "Nome dell'azienda",
     "callingCodeAriaLabel": "Prefisso internazionale",
+    "checkEmailDescription": "Abbiamo inviato un link di verifica alla tua email. Verificala per completare la configurazione dell'account.",
+    "checkEmailTitle": "Controlla la tua email",
     "countryLabel": "Paese",
     "createAccount": "Crea account",
     "createYourAccount": "Crea il tuo account",
@@ -902,6 +1138,58 @@
     "signIn": "Accedi",
     "startSendingDescription": "Inizia a inviare, detenere e spendere in pochi minuti"
   },
+  "statements": {
+    "amount": "Importo",
+    "balanceAfter": "Saldo contabile",
+    "credit": "Accredito",
+    "date": "Data",
+    "debit": "Addebito",
+    "description": "Descrizione",
+    "direction": "Accredito/Addebito",
+    "downloadError": "Impossibile scaricare l'estratto conto",
+    "downloadExcel": "Scarica Excel",
+    "downloadPdf": "Scarica PDF",
+    "emailError": "Impossibile inviare l'estratto conto via email",
+    "emailFormat": "Invia come",
+    "emailMe": "Inviami questo estratto conto via email",
+    "emailed": "Estratto conto inviato a {{email}}",
+    "empty": "Nessuna transazione in questo periodo",
+    "from": "Da",
+    "parameters": "Scegli un wallet e un periodo",
+    "preview": "Anteprima (ultime 100 righe)",
+    "sending": "Invio in corso…",
+    "subtitle": "Ogni accredito, addebito e saldo dopo ogni transazione, per il periodo selezionato",
+    "title": "Estratto conto",
+    "to": "A",
+    "wallet": "Wallet"
+  },
+  "support": {
+    "chatHint": "Usa la chat nell'angolo in basso per parlare con noi in tempo reale",
+    "chatOnline": "Online",
+    "chatUnavailable": "La chat dal vivo non è al momento disponibile",
+    "contact": "Contattaci",
+    "deposit": "Deposito",
+    "faq": "Domande frequenti",
+    "liveChat": "Chat dal vivo",
+    "message": "Messaggio",
+    "messagePlaceholder": "Descrivi il problema…",
+    "noEmail": "Usa il modulo sottostante per contattarci",
+    "payout": "Prelievo",
+    "replyPlaceholder": "Scrivi una risposta…",
+    "send": "Invia messaggio",
+    "sendMessage": "Inviaci un messaggio",
+    "sendMessageDescription": "Risponderemo all'indirizzo email associato al tuo account",
+    "sending": "Invio in corso…",
+    "subject": "Oggetto",
+    "subjectPlaceholder": "Di cosa hai bisogno?",
+    "subtitle": "Ricevi supporto, chatta con noi o consulta le domande frequenti",
+    "ticketError": "Impossibile inviare il messaggio",
+    "ticketSent": "Messaggio inviato — ti risponderemo qui e via email",
+    "title": "Assistenza",
+    "viewTransaction": "Visualizza transazione",
+    "you": "Tu",
+    "yourTickets": "I tuoi ticket"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "Visualizza profilo"
@@ -910,21 +1198,57 @@
       "notifications": "Notifiche",
       "switchToDarkMode": "Passa alla modalità scura",
       "switchToLightMode": "Passa alla modalità chiara"
-    }
+    },
+    "switchToDarkMode": "Passa alla modalità scura",
+    "switchToLightMode": "Passa alla modalità chiara"
+  },
+  "transactions": {
+    "allCurrencies": "Tutte le valute",
+    "allStatuses": "Tutti gli stati",
+    "allTypes": "Tutti i tipi",
+    "amount": "Importo",
+    "clearFilters": "Reimposta filtri",
+    "currency": "Valuta",
+    "date": "Data",
+    "description": "Descrizione",
+    "empty": "Nessuna transazione corrisponde a questi filtri",
+    "from": "Da",
+    "pageOf": "Pagina {{page}} di {{totalPages}}",
+    "search": "Cerca",
+    "searchPlaceholder": "Descrizione, riferimento o ID",
+    "status": "Stato",
+    "subtitle": "Tutte le transazioni relative a tutti i tuoi wallet",
+    "title": "Cronologia transazioni",
+    "to": "A",
+    "type": "Tipo"
+  },
+  "verifyEmail": {
+    "backToLogin": "Torna all'accesso",
+    "errorTitle": "Verifica non riuscita",
+    "genericError": "Impossibile verificare la tua email.",
+    "missingToken": "Questo link di verifica non contiene un token valido.",
+    "successDescription": "La tua email è stata verificata — ora puoi accedere.",
+    "successTitle": "Email verificata",
+    "verifyingTitle": "Verifica della tua email in corso…"
   },
   "virtualAccounts": {
     "accountReady": "Conto virtuale pronto",
     "addCurrency": "Aggiungi una valuta",
     "allCurrenciesAdded": "Hai già un conto per ogni valuta disponibile.",
+    "backToAccounts": "Conti virtuali",
     "copiedToClipboard": "Copiato negli appunti",
     "copyError": "Impossibile copiare",
     "copyField": "Copia {{field}}",
     "createAccount": "Crea conto",
     "createAccountError": "Impossibile creare il conto",
     "creating": "Creazione in corso…",
+    "depositsSubtitle": "Tutti i bonifici in entrata ricevuti sui tuoi conti virtuali.",
+    "depositsTitle": "Depositi tramite bonifico",
     "noAccountsYet": "Ancora nessun conto virtuale — attivane uno per una valuta qui sotto.",
+    "noActivity": "Nessun bonifico in entrata al momento.",
     "noCurrenciesAvailable": "Nessuna valuta per conti virtuali è ancora disponibile.",
     "noVerificationNeeded": "Nessuna verifica richiesta",
+    "recentActivity": "Attività recente",
     "requiresVerification": "Richiede la verifica {{endorsement}} — contatta l'assistenza per iniziare.",
     "shareDetails": "Condividi questi dati con chiunque ti stia inviando fondi.",
     "startVerification": "Avvia la verifica",
@@ -932,6 +1256,8 @@
     "title": "Conti virtuali",
     "verificationNote": "Alcuni circuiti richiedono una verifica una tantum prima che un conto possa essere emesso.",
     "verified": "Verificato",
+    "viewAllActivity": "Visualizza tutti i depositi tramite bonifico",
+    "viewDepositHistory": "Cronologia depositi",
     "yourAccounts": "I tuoi conti"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "Impossibile rimuovere il wallet",
     "removing": "Rimozione in corso…",
     "statement": "Estratto conto",
+    "viewFullStatement": "Visualizza estratto conto completo / esporta",
     "walletRemoved": "Wallet rimosso",
     "walletTitle": "Wallet {{currencyCode}}"
   },

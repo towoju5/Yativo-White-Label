@@ -37,8 +37,10 @@
     "removeDialogTitle": "{{name}} entfernen?",
     "removeError": "Empfänger konnte nicht entfernt werden",
     "removed": "Empfänger entfernt",
+    "requiresVerification": "Erfordert Verifizierung für {{endorsement}} — kontaktieren Sie den Support, um zu beginnen.",
     "selectCountryPlaceholder": "Land auswählen",
     "selectFieldPlaceholder": "{{field}} auswählen",
+    "startVerification": "Verifizierung starten",
     "steps": {
       "paymentDetails": "Zahlungsdetails",
       "payoutMethod": "Auszahlungsmethode",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} pro Überweisung",
     "updateError": "Empfänger konnte nicht aktualisiert werden",
     "updated": "Empfänger aktualisiert",
+    "verified": "Verifiziert",
     "whoAreYouSendingTo": "An wen möchten Sie senden?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Geschäftskarte aktivieren",
+    "addFunds": "Guthaben aufladen",
+    "cancel": "Abbrechen",
+    "cardTitle": "Geschäftskarte",
+    "confirmTerminate": "Erneut klicken zur Bestätigung — dies kann nicht rückgängig gemacht werden",
+    "emptyState": "Noch keine Geschäftskarten vorhanden. Beantragen Sie eine, um zu beginnen.",
+    "exp": "Gültig bis {{date}}",
+    "fund": "Aufladen",
+    "manage": "Verwalten →",
+    "monthlySpendingLimit": "Monatliches Ausgabenlimit (USD)",
+    "noTransactions": "Noch keine Transaktionen.",
+    "requestCard": "Geschäftskarte beantragen",
+    "requestDialogHelp": "Wird mit Null-Guthaben ausgestellt — laden Sie sie aus Ihrem USD-Wallet auf, sobald sie bereit ist.",
+    "requestDialogTitle": "Geschäftskarte beantragen",
+    "requesting": "Wird beantragt…",
+    "retryTermination": "Kündigung wiederholen",
+    "save": "Speichern",
+    "setPin": "PIN festlegen",
+    "subtitle": "Karten für Ihr Unternehmen, aufgeladen aus Ihrem USD-Wallet",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Geschäftskarte sperren",
+    "terminateCard": "Geschäftskarte kündigen",
+    "title": "Geschäftskarten",
+    "toast": {
+      "cardFunded": "Geschäftskarte aufgeladen",
+      "cardIssued": "Geschäftskarte ausgestellt",
+      "issueCardError": "Geschäftskarte konnte nicht ausgestellt werden",
+      "limitsError": "Ausgabenlimit konnte nicht aktualisiert werden",
+      "limitsUpdated": "Ausgabenlimit aktualisiert",
+      "pinError": "PIN konnte nicht aktualisiert werden",
+      "pinUpdated": "PIN aktualisiert",
+      "statusError": "Kartenstatus konnte nicht aktualisiert werden",
+      "terminationPending": "Geschäftskarte entleert — automatische Kündigung steht noch aus, versuchen Sie es hier in Kürze erneut.",
+      "walletActionFailed": "Aktion fehlgeschlagen",
+      "withdrawalSubmitted": "Auszahlung übermittelt"
+    },
+    "transactionFallback": "Transaktion",
+    "transactions": "Transaktionen",
+    "usd": "Geschäftskarte · USD",
+    "withdraw": "Auszahlen",
+    "withdrawFeeNote": "Das Auszahlen des gesamten Guthabens auf Null kündigt die Karte automatisch. Für Auszahlungen kann eine Gebühr anfallen."
   },
   "cards": {
     "addFunds": "Guthaben hinzufügen",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "Vor Gutschrift des Nettobetrags auf Ihrem Wallet wird bei Abhebungen eine Gebühr abgezogen."
   },
   "common": {
-    "language": "Sprache"
+    "app": "die App",
+    "language": "Sprache",
+    "loading": "Wird geladen…"
   },
   "crypto": {
     "addressCopied": "Adresse kopiert",
@@ -151,6 +199,7 @@
     },
     "subtitle": "Das passiert gerade in Ihren Konten",
     "title": "Willkommen zurück",
+    "titleNamed": "Willkommen zurück, {{name}}",
     "walletLabel": "Wallet"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Zurück",
+      "confirmQuote": "Bestätigen & Zahlungslink anfordern",
       "continue": "Weiter",
-      "startDeposit": "Einzahlung starten"
+      "getQuote": "Angebot anfordern",
+      "requote": "Neu berechnen",
+      "startDeposit": "Einzahlung starten",
+      "startOver": "Neu beginnen"
     },
     "cryptoCard": {
       "description": "Einzahlungsadressen und On-Chain-Einzahlungsverlauf finden Sie jetzt auf einer eigenen Seite.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "Zu zahlender Betrag",
       "copyLinkAriaLabel": "Link kopieren",
+      "depositId": "Einzahlungs-ID",
       "estimatedDelivery": "Voraussichtliche Ankunft",
       "exchangeRate": "Wechselkurs",
       "fee": "Gebühr",
+      "goToCheckout": "Zur Kasse",
       "initiated": "Einzahlung eingeleitet",
+      "negativeCredit": "Die Gebühren übersteigen diesen Einzahlungsbetrag — Sie würden weniger als nichts erhalten. Versuchen Sie einen höheren Betrag.",
       "openLinkAriaLabel": "Link öffnen",
+      "quoteExpired": "Dieses Angebot ist abgelaufen — fordern Sie einen aktuellen Kurs an, um fortzufahren.",
+      "quoteExpiresIn": "Kurs garantiert für {{seconds}}s.",
+      "reviewQuote": "Angebot überprüfen",
       "title": "Geld einzahlen",
       "youllReceive": "Sie erhalten"
     },
@@ -229,6 +288,11 @@
       "description": "Wählen Sie Ihr Land und zahlen Sie über die lokale Zahlungsmethode — Banküberweisung, CODI, DEBIN und mehr.",
       "title": "Oder mit einer lokalen Zahlungsmethode einzahlen"
     },
+    "recent": {
+      "empty": "Noch keine Einzahlungen.",
+      "title": "Letzte Einzahlungen",
+      "viewAll": "Alle anzeigen"
+    },
     "step0": {
       "countryLabel": "Land",
       "countryPlaceholder": "Land auswählen",
@@ -238,10 +302,14 @@
       "methodRange": "{{min}}–{{max}} {{currency}} pro Einzahlung",
       "noMethods": "Für dieses Land sind derzeit keine aktiven Einzahlungsmethoden verfügbar.",
       "prompt": "Wie möchten Sie aus {{country}} bezahlen?",
-      "thisCountryFallback": "dieses Land"
+      "requiresVerification": "Erfordert Verifizierung für {{endorsement}} — kontaktieren Sie den Support, um zu beginnen.",
+      "startVerification": "Verifizierung starten",
+      "thisCountryFallback": "dieses Land",
+      "verified": "Verifiziert"
     },
     "step2": {
       "amountLabel": "Betrag ({{currency}})",
+      "noEligibleWallet": "Keines Ihrer Wallets wird in einer von dieser Methode unterstützten Währung geführt ({{currencies}}).",
       "prompt": "{{method}} — Betrag & Details",
       "selectFieldPlaceholder": "{{field}} auswählen",
       "walletLabel": "Gutzuschreibendes Wallet",
@@ -260,8 +328,26 @@
       "copyFailed": "Kopieren fehlgeschlagen",
       "pickCountry": "Wählen Sie ein Land, um fortzufahren",
       "pickMethod": "Wählen Sie eine Zahlungsmethode, um fortzufahren",
+      "quoteFailed": "Angebot konnte nicht abgerufen werden",
       "startFailed": "Einzahlung konnte nicht gestartet werden"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "E-Mail erneut senden",
+      "message": "Bitte bestätigen Sie Ihre E-Mail-Adresse ({{email}}), um vollen Zugriff auf Ihr Konto zu behalten.",
+      "resendFailed": "Konnte nicht erneut gesendet werden",
+      "sending": "Wird gesendet…",
+      "sent": "Bestätigungs-E-Mail gesendet — bitte prüfen Sie Ihren Posteingang."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Zurück zur Anmeldung",
+    "description": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
+    "sending": "Wird gesendet…",
+    "sentDescription": "Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link zum Zurücksetzen gesendet.",
+    "submit": "Zurücksetzungs-Link senden",
+    "title": "Passwort zurücksetzen"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Zurück zur Anmeldung",
+    "errorTitle": "Fortfahren nicht möglich",
+    "genericError": "Verifizierung konnte mit diesem Link nicht fortgesetzt werden.",
+    "missingToken": "Diesem Link fehlt das erforderliche Token.",
+    "verifyingTitle": "Fortsetzen, wo Sie aufgehört haben…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Weiter",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "Zurück",
     "chooseCountryFirstPlaceholder": "Zuerst ein Land wählen",
+    "chooseFile": "Datei auswählen",
     "cityLabel": "Stadt",
     "clickToUpload": "Zum Hochladen klicken",
+    "continueDialogHint": "Scannen Sie diesen Code mit Ihrer Handykamera oder kopieren Sie den Link — Sie werden angemeldet und setzen direkt dort fort, wo Sie aufgehört haben. Gültig für 15 Minuten.",
+    "continueDialogTitle": "Auf einem anderen Gerät fortsetzen",
+    "continueLinkError": "Link konnte nicht erstellt werden",
+    "continueOnDevice": "Auf einem anderen Gerät fortsetzen",
+    "copyLink": "Link kopieren",
+    "copyLinkError": "Link konnte nicht kopiert werden",
     "countryLabel": "Land",
     "dateIssuedLabel": "Ausstellungsdatum",
     "documentBackOptionalLabel": "Dokument — Rückseite (optional)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "Ablaufdatum (optional)",
     "fixBeforeContinuing": "Bitte beheben Sie Folgendes, bevor Sie fortfahren:",
     "issuingCountryLabel": "Ausstellungsland",
+    "linkCopied": "Link kopiert",
     "loadingEllipsis": "Wird geladen…",
     "noMatches": "Keine Treffer.",
     "noPostalCodesText": "Dieses Land verwendet keine Postleitzahlen.",
@@ -517,7 +618,8 @@
     "stepOf": "Schritt {{current}} von {{total}}",
     "streetAddress2Label": "Adresszusatz (optional)",
     "streetAddressLabel": "Straße und Hausnummer",
-    "streetAddressPlaceholder": "Musterstraße 123"
+    "streetAddressPlaceholder": "Musterstraße 123",
+    "takePhoto": "Foto aufnehmen"
   },
   "kycWizard": {
     "backToDashboard": "Zurück zum Dashboard",
@@ -683,19 +785,40 @@
     "createAccount": "Konto erstellen",
     "defaultProductName": "White Label",
     "emailLabel": "E-Mail",
+    "forgotPassword": "Passwort vergessen?",
     "genericError": "Anmeldung nicht möglich. Überprüfen Sie Ihre Zugangsdaten.",
     "invalidCodeError": "Ungültiger Code. Bitte versuchen Sie es erneut.",
+    "magicLinkDescription": "Wir senden Ihnen einen Link per E-Mail, mit dem Sie sich ohne Passwort anmelden können.",
+    "magicLinkSend": "Anmelde-Link senden",
+    "magicLinkSending": "Wird gesendet…",
+    "magicLinkSentBody": "Falls ein Konto für {{email}} existiert, ist ein Anmelde-Link unterwegs. Er läuft in 15 Minuten ab.",
+    "magicLinkSentDescription": "Prüfen Sie Ihre E-Mails für den Anmelde-Link.",
     "newHere": "Neu hier?",
+    "or": "oder",
+    "passkeyError": "Anmeldung mit diesem Passkey fehlgeschlagen.",
+    "passkeyWaiting": "Warten auf Passkey…",
     "passwordLabel": "Passwort",
+    "resendVerification": "Bestätigungs-E-Mail erneut senden",
+    "resendingVerification": "Wird erneut gesendet…",
     "signIn": "Anmelden",
     "signInDescription": "Melden Sie sich bei Ihrem Konto an",
+    "signInWithPasskey": "Mit einem Passkey anmelden",
     "signingIn": "Anmeldung läuft…",
+    "stepUpDescription": "Wir haben eine Anmeldung von einem neuen Standort festgestellt. Geben Sie den Code ein, den wir Ihnen per E-Mail gesendet haben.",
     "verificationCodeLabel": "Bestätigungscode",
+    "verificationResent": "Bestätigungs-E-Mail gesendet — bitte prüfen Sie Ihren Posteingang.",
     "verify": "Bestätigen",
     "verifyDescription": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein, oder einen Backup-Code.",
     "verifyHeading": "Bestätigen Sie, dass Sie es sind",
     "verifying": "Wird überprüft…",
     "welcomeBack": "Willkommen zurück"
+  },
+  "magicLink": {
+    "backToLogin": "Zurück zur Anmeldung",
+    "errorTitle": "Anmeldung fehlgeschlagen",
+    "genericError": "Sie konnten mit diesem Link nicht angemeldet werden.",
+    "missingToken": "Diesem Anmelde-Link fehlt das Token.",
+    "verifyingTitle": "Sie werden angemeldet…"
   },
   "nav": {
     "account": "Konto",
@@ -706,11 +829,14 @@
       "send": "Senden"
     },
     "beneficiaries": "Empfänger",
+    "businessSpendCards": "Geschäftskarten",
     "cards": "Karten",
     "cryptoWallets": "Krypto-Wallets",
     "dashboard": "Dashboard",
     "deposit": "Einzahlung",
+    "home": "Startseite",
     "logout": "Abmelden",
+    "payout": "Auszahlen",
     "portal": "Portal",
     "profileKyc": "Profil & KYC",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "Geld senden",
     "settings": "Einstellungen",
+    "statements": "Kontoauszüge",
+    "support": "Support",
+    "team": "Team",
+    "transactions": "Transaktionen",
     "virtualAccounts": "Virtuelle Konten",
     "wallets": "Wallets",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Hier gibt es nichts zu sehen."
+  },
+  "notifications": {
+    "empty": "Alles auf dem neuesten Stand.",
+    "loading": "Wird geladen…",
+    "markAllRead": "Alle als gelesen markieren",
+    "title": "Benachrichtigungen"
   },
   "profile": {
     "accountTitle": "Konto",
@@ -740,11 +879,36 @@
     "subheading": "Verwalten Sie Ihre Identitätsdaten",
     "typeLabel": "Typ"
   },
+  "pwa": {
+    "banner": {
+      "cta": "Installieren",
+      "dismiss": "Schließen",
+      "message": "Installieren Sie {{name}} auf diesem Gerät für schnellen One-Tap-Zugriff."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Zurück zur Anmeldung",
+    "confirmPasswordLabel": "Neues Passwort bestätigen",
+    "description": "Dieser Link kann nur einmal verwendet werden und läuft in 1 Stunde ab.",
+    "genericError": "Passwort konnte nicht zurückgesetzt werden.",
+    "mismatch": "Passwörter stimmen nicht überein",
+    "missingToken": "Diesem Link zum Zurücksetzen fehlt das Token.",
+    "missingTokenTitle": "Ungültiger Link",
+    "newPasswordLabel": "Neues Passwort",
+    "requestNewLink": "Neuen Link anfordern",
+    "submit": "Passwort zurücksetzen",
+    "successDescription": "Ihr Passwort wurde zurückgesetzt — Sie können sich jetzt anmelden.",
+    "successTitle": "Passwort aktualisiert",
+    "title": "Wählen Sie ein neues Passwort",
+    "tooShort": "Das neue Passwort muss mindestens 8 Zeichen lang sein",
+    "updating": "Wird aktualisiert…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "Zu sendender Betrag ({{currency}})",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "Von Wallet abbuchen",
+      "noEligibleWallet": "Keines Ihrer Wallets wird in einer von der Auszahlungsmethode des Empfängers unterstützten Währung geführt ({{currencies}}).",
       "prompt": "Zu sendender Betrag",
       "promptTo": "Zu sendender Betrag an {{name}}",
       "recipientFallback": "den Empfänger",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "Dieser Kurs ist abgelaufen — holen Sie sich einen neuen, um fortzufahren.",
       "expiresIn": "Kurs läuft in {{seconds}}s ab.",
+      "feeLabel": "Plattformgebühr",
+      "payoutAmountLabel": "Auszahlungsbetrag",
       "rateLabel": "Kurs",
       "recipientGetsLabel": "Empfänger erhält",
       "toLabel": "An",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Kürzliche sicherheitsrelevante Ereignisse in Ihrem Konto.",
+      "title": "Sicherheitsaktivität"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Neues Passwort bestätigen",
       "currentPasswordLabel": "Aktuelles Passwort",
       "description": "Wählen Sie ein starkes Passwort, das Sie nicht anderswo verwenden.",
+      "error": "Passwort konnte nicht aktualisiert werden",
+      "mismatch": "Passwörter stimmen nicht überein",
       "newPasswordLabel": "Neues Passwort",
       "submit": "Passwort aktualisieren",
+      "success": "Passwort aktualisiert — bitte melden Sie sich erneut an",
       "title": "Passwort ändern",
       "toastDescription": "Passwortänderungen sind in dieser Version noch nicht eingerichtet.",
-      "toastTitle": "Noch nicht verfügbar"
+      "toastTitle": "Noch nicht verfügbar",
+      "tooShort": "Das neue Passwort muss mindestens 8 Zeichen lang sein",
+      "updating": "Wird aktualisiert…"
     },
     "copiedToClipboard": "In die Zwischenablage kopiert",
     "copyError": "Kopieren fehlgeschlagen",
+    "passkeys": {
+      "add": "Passkey hinzufügen",
+      "addError": "Passkey konnte nicht registriert werden.",
+      "added": "Hinzugefügt am {{date}}",
+      "continue": "Weiter",
+      "deleteError": "Passkey konnte nicht entfernt werden",
+      "description": "Melden Sie sich ohne Passwort mit Face ID, Touch ID, Windows Hello oder einem Sicherheitsschlüssel an.",
+      "empty": "Bislang sind keine Passkeys registriert.",
+      "lastUsed": "zuletzt verwendet am {{date}}",
+      "nameLabel": "Dieses Gerät benennen",
+      "namePlaceholder": "z. B. iPhone Face ID",
+      "remove": "{{name}} entfernen",
+      "title": "Passkeys",
+      "waiting": "Warten auf Browser…"
+    },
+    "push": {
+      "description": "Erhalten Sie auf diesem Gerät Benachrichtigungen über Einzahlungen, Auszahlungen und Sicherheitsereignisse.",
+      "disabled": "Aus",
+      "enabled": "Auf diesem Gerät aktiviert",
+      "genericError": "Benachrichtigungen konnten nicht aktiviert werden — bitte versuchen Sie es erneut.",
+      "iosInstallRequired": "Unter iOS erlaubt Safari Push-Benachrichtigungen nur für installierte Apps — nutzen Sie \"Teilen\" und \"Zum Home-Bildschirm\", um es von dort zu aktivieren.",
+      "notConfigured": "Push-Benachrichtigungen sind auf dieser Plattform noch nicht eingerichtet.",
+      "permissionDenied": "Berechtigung für Benachrichtigungen wurde verweigert — prüfen Sie die Website-Einstellungen Ihres Browsers.",
+      "title": "Push-Benachrichtigungen",
+      "unsupported": "Dieser Browser unterstützt keine Push-Benachrichtigungen.",
+      "unsupportedBrowser": "Dieser Browser unterstützt keine Push-Benachrichtigungen."
+    },
+    "pwa": {
+      "description": "Fügen Sie {{name}} für den Schnellzugriff wie eine native App zu Ihrem Home-Bildschirm hinzu.",
+      "install": "App installieren",
+      "installed": "Bereits auf diesem Gerät installiert.",
+      "iosIntro": "Auf dem iPhone/iPad fügen Sie sie über das Teilen-Menü von Safari hinzu:",
+      "iosStep1": "Tippen Sie auf das Teilen-Symbol",
+      "iosStep2": "Tippen Sie auf \"Zum Home-Bildschirm\"",
+      "title": "App installieren",
+      "unavailable": "Ihr Browser hat noch keine Installationsaufforderung bereitgestellt — laden Sie die Seite neu oder prüfen Sie das Browsermenü."
+    },
+    "sessions": {
+      "description": "Derzeit bei Ihrem Konto angemeldete Geräte.",
+      "empty": "Keine aktiven Sitzungen gefunden.",
+      "revokeError": "Dieses Gerät konnte nicht abgemeldet werden",
+      "signOut": "Abmelden",
+      "thisDevice": "Dieses Gerät",
+      "title": "Aktive Sitzungen",
+      "unknownDevice": "Unbekanntes Gerät",
+      "unknownIp": "Unbekannter Standort"
+    },
     "subtitle": "Verwalten Sie die Sicherheit Ihres Kontos",
     "title": "Einstellungen",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "Passwort bestätigen",
+    "description": "Sie haben sich mit einem Einmal-Link angemeldet — legen Sie jetzt ein Passwort fest, um sich künftig direkt anzumelden.",
+    "genericError": "Passwort konnte nicht festgelegt werden.",
+    "mismatch": "Passwörter stimmen nicht überein",
+    "newPasswordLabel": "Neues Passwort",
+    "submit": "Passwort speichern",
+    "submitting": "Wird gespeichert…",
+    "title": "Passwort wählen",
+    "tooShort": "Das Passwort muss mindestens 8 Zeichen lang sein"
+  },
   "signup": {
     "accountTypeLabel": "Kontotyp",
     "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+    "backToLogin": "Zurück zur Anmeldung",
     "business": "Unternehmen",
     "businessNameLabel": "Unternehmensname",
     "callingCodeAriaLabel": "Vorwahl",
+    "checkEmailDescription": "Wir haben einen Bestätigungslink an Ihre E-Mail-Adresse gesendet. Bestätigen Sie ihn, um die Kontoeinrichtung abzuschließen.",
+    "checkEmailTitle": "Prüfen Sie Ihre E-Mails",
     "countryLabel": "Land",
     "createAccount": "Konto erstellen",
     "createYourAccount": "Erstellen Sie Ihr Konto",
@@ -902,6 +1138,58 @@
     "signIn": "Anmelden",
     "startSendingDescription": "Beginnen Sie in wenigen Minuten mit Senden, Halten und Ausgeben"
   },
+  "statements": {
+    "amount": "Betrag",
+    "balanceAfter": "Saldo danach",
+    "credit": "Gutschrift",
+    "date": "Datum",
+    "debit": "Belastung",
+    "description": "Beschreibung",
+    "direction": "Gutschrift/Belastung",
+    "downloadError": "Kontoauszug konnte nicht heruntergeladen werden",
+    "downloadExcel": "Excel herunterladen",
+    "downloadPdf": "PDF herunterladen",
+    "emailError": "Kontoauszug konnte nicht per E-Mail gesendet werden",
+    "emailFormat": "Senden als",
+    "emailMe": "Mir diesen Auszug per E-Mail senden",
+    "emailed": "Kontoauszug an {{email}} gesendet",
+    "empty": "Keine Transaktionen in diesem Zeitraum",
+    "from": "Von",
+    "parameters": "Wallet und Zeitraum auswählen",
+    "preview": "Vorschau (die neuesten 100 Zeilen)",
+    "sending": "Wird gesendet…",
+    "subtitle": "Jede Gutschrift, Belastung und der jeweilige Schlusssaldo nach jeder Buchung im gewählten Zeitraum",
+    "title": "Kontoauszug",
+    "to": "Bis",
+    "wallet": "Wallet"
+  },
+  "support": {
+    "chatHint": "Nutzen Sie die Chatblase in der Ecke, um direkt live mit uns zu sprechen",
+    "chatOnline": "Online",
+    "chatUnavailable": "Live-Chat ist derzeit nicht verfügbar",
+    "contact": "Kontakt",
+    "deposit": "Einzahlung",
+    "faq": "Häufig gestellte Fragen",
+    "liveChat": "Live-Chat",
+    "message": "Nachricht",
+    "messagePlaceholder": "Beschreiben Sie Ihr Anliegen…",
+    "noEmail": "Nutzen Sie das untenstehende Formular, um uns zu erreichen",
+    "payout": "Auszahlung",
+    "replyPlaceholder": "Antwort schreiben…",
+    "send": "Nachricht senden",
+    "sendMessage": "Schreiben Sie uns eine Nachricht",
+    "sendMessageDescription": "Wir antworten an die in Ihrem Konto hinterlegte E-Mail-Adresse",
+    "sending": "Wird gesendet…",
+    "subject": "Betreff",
+    "subjectPlaceholder": "Wobei benötigen Sie Hilfe?",
+    "subtitle": "Erhalten Sie Hilfe, chatten Sie mit uns oder durchsuchen Sie die häufigen Fragen",
+    "ticketError": "Nachricht konnte nicht gesendet werden",
+    "ticketSent": "Nachricht gesendet — wir melden uns hier und per E-Mail bei Ihnen",
+    "title": "Support",
+    "viewTransaction": "Transaktion anzeigen",
+    "you": "Sie",
+    "yourTickets": "Ihre Tickets"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "Profil ansehen"
@@ -910,21 +1198,57 @@
       "notifications": "Benachrichtigungen",
       "switchToDarkMode": "Zum Dunkelmodus wechseln",
       "switchToLightMode": "Zum Hellmodus wechseln"
-    }
+    },
+    "switchToDarkMode": "Zum dunklen Modus wechseln",
+    "switchToLightMode": "Zum hellen Modus wechseln"
+  },
+  "transactions": {
+    "allCurrencies": "Alle Währungen",
+    "allStatuses": "Alle Status",
+    "allTypes": "Alle Typen",
+    "amount": "Betrag",
+    "clearFilters": "Filter zurücksetzen",
+    "currency": "Währung",
+    "date": "Datum",
+    "description": "Beschreibung",
+    "empty": "Keine Transaktionen entsprechen diesen Filtern",
+    "from": "Von",
+    "pageOf": "Seite {{page}} von {{totalPages}}",
+    "search": "Suchen",
+    "searchPlaceholder": "Beschreibung, Referenz oder ID",
+    "status": "Status",
+    "subtitle": "Jede Transaktion über alle Ihre Wallets hinweg",
+    "title": "Transaktionsverlauf",
+    "to": "Bis",
+    "type": "Typ"
+  },
+  "verifyEmail": {
+    "backToLogin": "Zurück zur Anmeldung",
+    "errorTitle": "Bestätigung fehlgeschlagen",
+    "genericError": "Ihre E-Mail konnte nicht bestätigt werden.",
+    "missingToken": "Diesem Bestätigungslink fehlt das Token.",
+    "successDescription": "Ihre E-Mail wurde bestätigt — Sie können sich jetzt anmelden.",
+    "successTitle": "E-Mail bestätigt",
+    "verifyingTitle": "Ihre E-Mail wird bestätigt…"
   },
   "virtualAccounts": {
     "accountReady": "Virtuelles Konto bereit",
     "addCurrency": "Währung hinzufügen",
     "allCurrenciesAdded": "Sie haben bereits ein Konto für jede verfügbare Währung.",
+    "backToAccounts": "Virtuelle Konten",
     "copiedToClipboard": "In die Zwischenablage kopiert",
     "copyError": "Kopieren fehlgeschlagen",
     "copyField": "{{field}} kopieren",
     "createAccount": "Konto erstellen",
     "createAccountError": "Konto konnte nicht erstellt werden",
     "creating": "Wird erstellt…",
+    "depositsSubtitle": "Jede eingehende Überweisung auf Ihre virtuellen Konten.",
+    "depositsTitle": "Überweisungseinzahlungen",
     "noAccountsYet": "Noch keine virtuellen Konten — richten Sie unten eines für eine Währung ein.",
+    "noActivity": "Noch keine eingehenden Überweisungen.",
     "noCurrenciesAvailable": "Derzeit sind keine Währungen für virtuelle Konten verfügbar.",
     "noVerificationNeeded": "Keine Verifizierung erforderlich",
+    "recentActivity": "Kürzliche Aktivität",
     "requiresVerification": "Erfordert eine {{endorsement}}-Verifizierung — kontaktieren Sie den Support, um zu starten.",
     "shareDetails": "Teilen Sie diese Angaben mit jedem, der Ihnen Geld sendet.",
     "startVerification": "Verifizierung starten",
@@ -932,6 +1256,8 @@
     "title": "Virtuelle Konten",
     "verificationNote": "Manche Zahlungsschienen erfordern eine einmalige Verifizierung, bevor ein Konto ausgestellt werden kann.",
     "verified": "Verifiziert",
+    "viewAllActivity": "Alle Überweisungseinzahlungen anzeigen",
+    "viewDepositHistory": "Einzahlungshistorie",
     "yourAccounts": "Ihre Konten"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "Wallet konnte nicht entfernt werden",
     "removing": "Wird entfernt…",
     "statement": "Kontoauszug",
+    "viewFullStatement": "Vollständigen Kontoauszug anzeigen / exportieren",
     "walletRemoved": "Wallet entfernt",
     "walletTitle": "{{currencyCode}}-Wallet"
   },

@@ -37,8 +37,10 @@
     "removeDialogTitle": "移除{{name}}？",
     "removeError": "无法移除收款人",
     "removed": "收款人已移除",
+    "requiresVerification": "需要 {{endorsement}} 认证 — 请联系客服以开始。",
     "selectCountryPlaceholder": "选择国家/地区",
     "selectFieldPlaceholder": "选择{{field}}",
+    "startVerification": "开始认证",
     "steps": {
       "paymentDetails": "收款信息",
       "payoutMethod": "收款方式",
@@ -57,7 +59,51 @@
     "transferRange": "每笔转账 {{min}}–{{max}} {{currency}}",
     "updateError": "无法更新收款人",
     "updated": "收款人已更新",
+    "verified": "已认证",
     "whoAreYouSendingTo": "您要向谁转账？"
+  },
+  "businessSpendCards": {
+    "activateCard": "激活企业卡",
+    "addFunds": "充值资金",
+    "cancel": "取消",
+    "cardTitle": "企业卡",
+    "confirmTerminate": "再次点击以确认 — 此操作无法撤销",
+    "emptyState": "暂无企业卡。立即申请一张即可开始使用。",
+    "exp": "有效期至 {{date}}",
+    "fund": "充值",
+    "manage": "管理 →",
+    "monthlySpendingLimit": "每月支出限额 (USD)",
+    "noTransactions": "暂无交易记录。",
+    "requestCard": "申请企业卡",
+    "requestDialogHelp": "发卡初始余额为零 — 卡片准备就绪后即可从您的美元钱包充值。",
+    "requestDialogTitle": "申请企业卡",
+    "requesting": "正在申请…",
+    "retryTermination": "重试注销",
+    "save": "保存",
+    "setPin": "设置 PIN 码",
+    "subtitle": "专为您的企业打造的卡片，由您的美元钱包提供资金",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "暂停企业卡",
+    "terminateCard": "注销企业卡",
+    "title": "企业卡",
+    "toast": {
+      "cardFunded": "企业卡已充值",
+      "cardIssued": "企业卡已签发",
+      "issueCardError": "签发企业卡失败",
+      "limitsError": "更新限额失败",
+      "limitsUpdated": "支出限额已更新",
+      "pinError": "更新 PIN 码失败",
+      "pinUpdated": "PIN 码已更新",
+      "statusError": "更新卡片状态失败",
+      "terminationPending": "企业卡已清空 — 自动注销正在处理中，请稍后在此重试。",
+      "walletActionFailed": "操作失败",
+      "withdrawalSubmitted": "提现申请已提交"
+    },
+    "transactionFallback": "交易",
+    "transactions": "交易明细",
+    "usd": "企业卡 · USD",
+    "withdraw": "提现",
+    "withdrawFeeNote": "将余额提现为零将自动注销卡片。提现可能产生手续费。"
   },
   "cards": {
     "addFunds": "充值",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "提现将先扣除手续费，净额再存入您的钱包。"
   },
   "common": {
-    "language": "语言"
+    "app": "应用",
+    "language": "语言",
+    "loading": "加载中…"
   },
   "crypto": {
     "addressCopied": "地址已复制",
@@ -151,6 +199,7 @@
     },
     "subtitle": "这是您各账户的最新动态",
     "title": "欢迎回来",
+    "titleNamed": "欢迎回来，{{name}}",
     "walletLabel": "钱包"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "返回",
+      "confirmQuote": "确认并获取支付链接",
       "continue": "继续",
-      "startDeposit": "开始充值"
+      "getQuote": "获取报价",
+      "requote": "重新报价",
+      "startDeposit": "开始充值",
+      "startOver": "重新开始"
     },
     "cryptoCard": {
       "description": "加密货币充值地址及链上充值记录现已迁移至独立页面。",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "应付金额",
       "copyLinkAriaLabel": "复制链接",
+      "depositId": "充值 ID",
       "estimatedDelivery": "预计到账时间",
       "exchangeRate": "汇率",
       "fee": "手续费",
+      "goToCheckout": "前往结账",
       "initiated": "充值已发起",
+      "negativeCredit": "费用超出了充值金额 — 您收到的金额将小于零。请尝试充值更大金额。",
       "openLinkAriaLabel": "打开链接",
+      "quoteExpired": "此报价已过期 — 请刷新汇率以继续。",
+      "quoteExpiresIn": "汇率锁定倒计时 {{seconds}} 秒。",
+      "reviewQuote": "核对您的报价",
       "title": "充值资金",
       "youllReceive": "您将收到"
     },
@@ -229,6 +288,11 @@
       "description": "选择您所在的国家/地区，通过本地渠道付款——银行转账、CODI、DEBIN 等。",
       "title": "或使用本地支付方式充值"
     },
+    "recent": {
+      "empty": "暂无充值记录。",
+      "title": "最近充值",
+      "viewAll": "查看全部"
+    },
     "step0": {
       "countryLabel": "国家/地区",
       "countryPlaceholder": "选择国家/地区",
@@ -238,10 +302,14 @@
       "methodRange": "每笔充值 {{min}}–{{max}} {{currency}}",
       "noMethods": "该国家/地区暂无可用的充值方式。",
       "prompt": "您希望从{{country}}以何种方式付款？",
-      "thisCountryFallback": "该国家/地区"
+      "requiresVerification": "需要 {{endorsement}} 认证 — 请联系客服以开始。",
+      "startVerification": "开始认证",
+      "thisCountryFallback": "该国家/地区",
+      "verified": "已认证"
     },
     "step2": {
       "amountLabel": "金额（{{currency}}）",
+      "noEligibleWallet": "您的钱包中没有支持此方式的币种（{{currencies}}）。",
       "prompt": "{{method}} —— 金额与详情",
       "selectFieldPlaceholder": "选择{{field}}",
       "walletLabel": "充值到钱包",
@@ -260,8 +328,26 @@
       "copyFailed": "无法复制",
       "pickCountry": "请选择国家/地区以继续",
       "pickMethod": "请选择支付方式以继续",
+      "quoteFailed": "无法获取报价",
       "startFailed": "无法发起充值"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "重新发送邮件",
+      "message": "请验证您的邮箱地址 ({{email}}) 以保留对账户的完整访问权限。",
+      "resendFailed": "重新发送失败",
+      "sending": "发送中…",
+      "sent": "验证邮件已发送 — 请检查您的收件箱。"
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "返回登录",
+    "description": "输入您的邮箱，我们将向您发送重置密码的链接。",
+    "sending": "发送中…",
+    "sentDescription": "若该邮箱对应有效账户，重置密码链接已发出。",
+    "submit": "发送重置链接",
+    "title": "重置密码"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "返回登录",
+    "errorTitle": "无法继续",
+    "genericError": "无法使用此链接继续认证。",
+    "missingToken": "此链接缺少令牌。",
+    "verifyingTitle": "正在恢复您的认证进度…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "继续",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "返回",
     "chooseCountryFirstPlaceholder": "请先选择国家/地区",
+    "chooseFile": "选择文件",
     "cityLabel": "城市",
     "clickToUpload": "点击上传",
+    "continueDialogHint": "用手机相机扫描或复制链接 — 将直接登录并恢复之前的进度。链接 15 分钟内有效。",
+    "continueDialogTitle": "在其他设备上继续",
+    "continueLinkError": "创建链接失败",
+    "continueOnDevice": "在其他设备上继续",
+    "copyLink": "复制链接",
+    "copyLinkError": "复制链接失败",
     "countryLabel": "国家/地区",
     "dateIssuedLabel": "签发日期",
     "documentBackOptionalLabel": "证件——背面（可选）",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "有效期至（可选）",
     "fixBeforeContinuing": "请先修正以下问题再继续：",
     "issuingCountryLabel": "签发国家/地区",
+    "linkCopied": "链接已复制",
     "loadingEllipsis": "加载中…",
     "noMatches": "无匹配结果。",
     "noPostalCodesText": "该国家/地区不使用邮政编码。",
@@ -517,7 +618,8 @@
     "stepOf": "第 {{current}} 步，共 {{total}} 步",
     "streetAddress2Label": "详细地址 2（可选）",
     "streetAddressLabel": "详细地址",
-    "streetAddressPlaceholder": "示例路 123 号"
+    "streetAddressPlaceholder": "示例路 123 号",
+    "takePhoto": "拍照"
   },
   "kycWizard": {
     "backToDashboard": "返回仪表盘",
@@ -683,19 +785,40 @@
     "createAccount": "创建账户",
     "defaultProductName": "白标平台",
     "emailLabel": "邮箱",
+    "forgotPassword": "忘记密码？",
     "genericError": "无法登录，请核对您的账户信息。",
     "invalidCodeError": "验证码无效，请重试。",
+    "magicLinkDescription": "我们将向您发送免密登录链接。",
+    "magicLinkSend": "发送登录链接",
+    "magicLinkSending": "发送中…",
+    "magicLinkSentBody": "如果 {{email}} 存在注册账户，登录链接已发出。有效时间为 15 分钟。",
+    "magicLinkSentDescription": "请查看您的邮箱以获取登录链接。",
     "newHere": "还没有账户？",
+    "or": "或",
+    "passkeyError": "无法使用该通行密钥登录。",
+    "passkeyWaiting": "正在等待通行密钥…",
     "passwordLabel": "密码",
+    "resendVerification": "重发验证邮件",
+    "resendingVerification": "正在重发…",
     "signIn": "登录",
     "signInDescription": "登录您的账户",
+    "signInWithPasskey": "使用通行密钥登录",
     "signingIn": "登录中…",
+    "stepUpDescription": "检测到您从新地点登录。请输入刚发至您邮箱的验证码。",
     "verificationCodeLabel": "验证码",
+    "verificationResent": "验证邮件已发送 — 请查看收件箱。",
     "verify": "验证",
     "verifyDescription": "请输入验证器应用中的 6 位数验证码，或使用备用代码。",
     "verifyHeading": "验证您的身份",
     "verifying": "验证中…",
     "welcomeBack": "欢迎回来"
+  },
+  "magicLink": {
+    "backToLogin": "返回登录",
+    "errorTitle": "登录失败",
+    "genericError": "无法通过此链接登录。",
+    "missingToken": "此登录链接缺少令牌。",
+    "verifyingTitle": "正在登录…"
   },
   "nav": {
     "account": "账户",
@@ -706,11 +829,14 @@
       "send": "转账"
     },
     "beneficiaries": "收款人",
+    "businessSpendCards": "企业卡",
     "cards": "卡片",
     "cryptoWallets": "加密钱包",
     "dashboard": "仪表盘",
     "deposit": "充值",
+    "home": "首页",
     "logout": "退出登录",
+    "payout": "提现",
     "portal": "门户",
     "profileKyc": "个人资料与认证",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "转账",
     "settings": "设置",
+    "statements": "对账单",
+    "support": "支持",
+    "team": "团队",
+    "transactions": "交易",
     "virtualAccounts": "虚拟账户",
     "wallets": "钱包",
     "whiteLabel": "白标平台"
+  },
+  "notFound": {
+    "message": "这里空空如也。"
+  },
+  "notifications": {
+    "empty": "暂无未读通知。",
+    "loading": "加载中…",
+    "markAllRead": "全部标为已读",
+    "title": "通知"
   },
   "profile": {
     "accountTitle": "账户",
@@ -740,11 +879,36 @@
     "subheading": "管理您的身份信息",
     "typeLabel": "类型"
   },
+  "pwa": {
+    "banner": {
+      "cta": "安装",
+      "dismiss": "忽略",
+      "message": "将 {{name}} 安装至此设备以实现一键访问。"
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "返回登录",
+    "confirmPasswordLabel": "确认新密码",
+    "description": "此链接仅可使用一次，有效期为 1 小时。",
+    "genericError": "重置密码失败。",
+    "mismatch": "两次输入的密码不一致",
+    "missingToken": "此重置链接缺少令牌。",
+    "missingTokenTitle": "无效链接",
+    "newPasswordLabel": "新密码",
+    "requestNewLink": "请求新链接",
+    "submit": "重置密码",
+    "successDescription": "您的密码已重置 — 现在可以登录了。",
+    "successTitle": "密码已更新",
+    "title": "设置新密码",
+    "tooShort": "新密码长度至少需为 8 位字符",
+    "updating": "正在更新…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "转账金额（{{currency}}）",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "扣款钱包",
+      "noEligibleWallet": "您的钱包中没有收款人提现方式所支持的币种（{{currencies}}）。",
       "prompt": "转账金额",
       "promptTo": "转给{{name}}的金额",
       "recipientFallback": "收款人",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "此报价已过期——请获取新报价以继续。",
       "expiresIn": "报价将在 {{seconds}} 秒后过期。",
+      "feeLabel": "平台手续费",
+      "payoutAmountLabel": "出金金额",
       "rateLabel": "汇率",
       "recipientGetsLabel": "收款人到账金额",
       "toLabel": "收款人",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "您账户近期的安全相关动态。",
+      "title": "安全动态"
+    },
     "changePassword": {
       "confirmPasswordLabel": "确认新密码",
       "currentPasswordLabel": "当前密码",
       "description": "请设置一个不与其他平台重复使用的强密码。",
+      "error": "更新密码失败",
+      "mismatch": "两次输入的密码不一致",
       "newPasswordLabel": "新密码",
       "submit": "更新密码",
+      "success": "密码已更新 — 请重新登录",
       "title": "修改密码",
       "toastDescription": "当前版本尚未支持修改密码功能。",
-      "toastTitle": "功能暂未开放"
+      "toastTitle": "功能暂未开放",
+      "tooShort": "新密码长度至少需为 8 位字符",
+      "updating": "正在更新…"
     },
     "copiedToClipboard": "已复制到剪贴板",
     "copyError": "无法复制",
+    "passkeys": {
+      "add": "添加通行密钥",
+      "addError": "无法注册该通行密钥。",
+      "added": "已于 {{date}} 添加",
+      "continue": "继续",
+      "deleteError": "无法移除通行密钥",
+      "description": "使用面容 ID、指纹识别、Windows Hello 或安全密钥免密登录。",
+      "empty": "尚未注册通行密钥。",
+      "lastUsed": "上次使用于 {{date}}",
+      "nameLabel": "为此设备命名",
+      "namePlaceholder": "例如 iPhone 面容 ID",
+      "remove": "移除 {{name}}",
+      "title": "通行密钥",
+      "waiting": "正在等待浏览器…"
+    },
+    "push": {
+      "description": "在此设备上接收充值、提现及安全事件提醒。",
+      "disabled": "已关闭",
+      "enabled": "已在此设备上启用",
+      "genericError": "无法开启通知 — 请重试。",
+      "iosInstallRequired": "在 iPhone/iPad 上，Safari 仅支持对已安装的应用推送通知 — 请点击分享按钮并选择“添加到主屏幕”，然后从中打开以开启此功能。",
+      "notConfigured": "此平台暂未配置推送通知。",
+      "permissionDenied": "未授予通知权限 — 请检查浏览器的网站权限设置。",
+      "title": "推送通知",
+      "unsupported": "此浏览器不支持推送通知。",
+      "unsupportedBrowser": "此浏览器不支持推送通知。"
+    },
+    "pwa": {
+      "description": "将 {{name}} 添加到主屏幕，享受如同原生应用的一触即达体验。",
+      "install": "安装应用",
+      "installed": "已在此设备上安装。",
+      "iosIntro": "在 iPhone/iPad 上，请通过 Safari 分享菜单添加：",
+      "iosStep1": "点击“分享”图标",
+      "iosStep2": "点击“添加到主屏幕”",
+      "title": "安装应用",
+      "unavailable": "浏览器尚未弹出安装提示 — 请尝试刷新页面，或在浏览器菜单中查找“安装应用”选项。"
+    },
+    "sessions": {
+      "description": "当前已登录您账户的设备。",
+      "empty": "未发现活跃会话。",
+      "revokeError": "无法注销该设备",
+      "signOut": "退出会话",
+      "thisDevice": "当前设备",
+      "title": "活跃会话",
+      "unknownDevice": "未知设备",
+      "unknownIp": "未知地点"
+    },
     "subtitle": "管理您的账户安全",
     "title": "设置",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "确认密码",
+    "description": "您通过一次性链接登录 — 请现在设置密码，以便下次直接登录。",
+    "genericError": "设置密码失败。",
+    "mismatch": "密码不一致",
+    "newPasswordLabel": "新密码",
+    "submit": "保存密码",
+    "submitting": "正在保存…",
+    "title": "设置密码",
+    "tooShort": "密码长度至少需为 8 位字符"
+  },
   "signup": {
     "accountTypeLabel": "账户类型",
     "alreadyHaveAccount": "已有账户？",
+    "backToLogin": "返回登录",
     "business": "企业",
     "businessNameLabel": "企业名称",
     "callingCodeAriaLabel": "区号",
+    "checkEmailDescription": "我们已将验证链接发送至您的邮箱。请验证后完成账户设置。",
+    "checkEmailTitle": "查收您的邮件",
     "countryLabel": "国家/地区",
     "createAccount": "创建账户",
     "createYourAccount": "创建您的账户",
@@ -902,6 +1138,58 @@
     "signIn": "登录",
     "startSendingDescription": "几分钟内即可开始转账、存款和消费"
   },
+  "statements": {
+    "amount": "金额",
+    "balanceAfter": "变动后余额",
+    "credit": "入账",
+    "date": "日期",
+    "debit": "出账",
+    "description": "描述",
+    "direction": "入账/出账",
+    "downloadError": "下载对账单失败",
+    "downloadExcel": "下载 Excel",
+    "downloadPdf": "下载 PDF",
+    "emailError": "发送对账单邮件失败",
+    "emailFormat": "发送格式",
+    "emailMe": "将对账单发送至我的邮箱",
+    "emailed": "对账单已发送至 {{email}}",
+    "empty": "该时间段内暂无交易记录",
+    "from": "起始",
+    "parameters": "选择钱包与时间段",
+    "preview": "预览（最近 100 行）",
+    "sending": "发送中…",
+    "subtitle": "自选时间段内每笔交易的入账、出账以及变动后余额明细",
+    "title": "账户对账单",
+    "to": "截止",
+    "wallet": "钱包"
+  },
+  "support": {
+    "chatHint": "点击角落的聊天气泡即可与客服在线交流",
+    "chatOnline": "在线",
+    "chatUnavailable": "在线客服当前不在线",
+    "contact": "联系我们",
+    "deposit": "充值",
+    "faq": "常见问题",
+    "liveChat": "在线客服",
+    "message": "留言内容",
+    "messagePlaceholder": "请描述您遇到的问题…",
+    "noEmail": "请使用下方表单联系我们",
+    "payout": "提现",
+    "replyPlaceholder": "写下回复…",
+    "send": "发送留言",
+    "sendMessage": "给我们留言",
+    "sendMessageDescription": "我们将回复至您账户绑定的邮箱",
+    "sending": "发送中…",
+    "subject": "主题",
+    "subjectPlaceholder": "您需要什么帮助？",
+    "subtitle": "获取帮助、在线交流或浏览常见问题",
+    "ticketError": "发送留言失败",
+    "ticketSent": "留言已发送 — 我们将在此处及通过邮件回复您",
+    "title": "支持与客服",
+    "viewTransaction": "查看交易",
+    "you": "您",
+    "yourTickets": "您的工单"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "查看个人资料"
@@ -910,21 +1198,57 @@
       "notifications": "通知",
       "switchToDarkMode": "切换到深色模式",
       "switchToLightMode": "切换到浅色模式"
-    }
+    },
+    "switchToDarkMode": "切换到深色模式",
+    "switchToLightMode": "切换到浅色模式"
+  },
+  "transactions": {
+    "allCurrencies": "所有币种",
+    "allStatuses": "所有状态",
+    "allTypes": "所有类型",
+    "amount": "金额",
+    "clearFilters": "清除筛选",
+    "currency": "币种",
+    "date": "日期",
+    "description": "描述",
+    "empty": "没有符合这些条件的交易记录",
+    "from": "从",
+    "pageOf": "第 {{page}} / {{totalPages}} 页",
+    "search": "搜索",
+    "searchPlaceholder": "描述、参考号或交易 ID",
+    "status": "状态",
+    "subtitle": "您所有钱包的全部交易明细",
+    "title": "交易记录",
+    "to": "至",
+    "type": "类型"
+  },
+  "verifyEmail": {
+    "backToLogin": "返回登录",
+    "errorTitle": "验证失败",
+    "genericError": "无法验证您的邮箱。",
+    "missingToken": "此验证链接缺少令牌。",
+    "successDescription": "您的邮箱已验证 — 现在可以登录了。",
+    "successTitle": "邮箱已验证",
+    "verifyingTitle": "正在验证您的邮箱…"
   },
   "virtualAccounts": {
     "accountReady": "虚拟账户已就绪",
     "addCurrency": "添加货币",
     "allCurrenciesAdded": "您已为所有可用货币开通了账户。",
+    "backToAccounts": "虚拟账户",
     "copiedToClipboard": "已复制到剪贴板",
     "copyError": "无法复制",
     "copyField": "复制{{field}}",
     "createAccount": "创建账户",
     "createAccountError": "无法创建账户",
     "creating": "创建中…",
+    "depositsSubtitle": "您的虚拟账户收到的所有转账入账。",
+    "depositsTitle": "转账入金",
     "noAccountsYet": "暂无虚拟账户——请在下方为某种货币开通一个。",
+    "noActivity": "暂无转账入账记录。",
     "noCurrenciesAvailable": "暂无可用的虚拟账户货币。",
     "noVerificationNeeded": "无需验证",
+    "recentActivity": "近期动态",
     "requiresVerification": "需要{{endorsement}}认证——请联系客服以开始办理。",
     "shareDetails": "请将这些信息提供给向您付款的一方。",
     "startVerification": "开始验证",
@@ -932,6 +1256,8 @@
     "title": "虚拟账户",
     "verificationNote": "部分收款渠道在开通账户前需要完成一次性验证。",
     "verified": "已验证",
+    "viewAllActivity": "查看所有转账入金",
+    "viewDepositHistory": "入金历史",
     "yourAccounts": "您的账户"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "无法移除钱包",
     "removing": "移除中…",
     "statement": "对账单",
+    "viewFullStatement": "查看完整对账单 / 导出",
     "walletRemoved": "钱包已移除",
     "walletTitle": "{{currencyCode}} 钱包"
   },

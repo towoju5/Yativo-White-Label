@@ -37,8 +37,10 @@
     "removeDialogTitle": "{{name}} verwijderen?",
     "removeError": "Begunstigde kon niet worden verwijderd",
     "removed": "Begunstigde verwijderd",
+    "requiresVerification": "Vereist {{endorsement}}-verificatie — neem contact op met ondersteuning om te beginnen.",
     "selectCountryPlaceholder": "Selecteer een land",
     "selectFieldPlaceholder": "Selecteer {{field}}",
+    "startVerification": "Verificatie starten",
     "steps": {
       "paymentDetails": "Betaalgegevens",
       "payoutMethod": "Uitbetaalmethode",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} per overboeking",
     "updateError": "Begunstigde kon niet worden bijgewerkt",
     "updated": "Begunstigde bijgewerkt",
+    "verified": "Geverifieerd",
     "whoAreYouSendingTo": "Naar wie stuurt u geld?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Zakelijke kaart activeren",
+    "addFunds": "Geld toevoegen",
+    "cancel": "Annuleren",
+    "cardTitle": "Zakelijke kaart",
+    "confirmTerminate": "Klik nogmaals om te bevestigen — dit kan niet ongedaan worden gemaakt",
+    "emptyState": "Nog geen zakelijke kaarten. Vraag er een aan om te beginnen.",
+    "exp": "Vervalt {{date}}",
+    "fund": "Opladen",
+    "manage": "Beheren →",
+    "monthlySpendingLimit": "Maandelijkse bestedingslimiet (USD)",
+    "noTransactions": "Nog geen transacties.",
+    "requestCard": "Zakelijke kaart aanvragen",
+    "requestDialogHelp": "Uitgegeven met een saldo van nul — laad op vanuit uw USD-wallet zodra deze gereed is.",
+    "requestDialogTitle": "Een zakelijke kaart aanvragen",
+    "requesting": "Aanvragen…",
+    "retryTermination": "Beëindiging opnieuw proberen",
+    "save": "Opslaan",
+    "setPin": "Pincode instellen",
+    "subtitle": "Kaarten voor uw bedrijf, gefinancierd vanuit uw USD-wallet",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Zakelijke kaart pauzeren",
+    "terminateCard": "Zakelijke kaart beëindigen",
+    "title": "Zakelijke kaarten",
+    "toast": {
+      "cardFunded": "Zakelijke kaart opgeladen",
+      "cardIssued": "Zakelijke kaart uitgegeven",
+      "issueCardError": "Kon zakelijke kaart niet uitgeven",
+      "limitsError": "Kon limiet niet bijwerken",
+      "limitsUpdated": "Bestedingslimiet bijgewerkt",
+      "pinError": "Kon pincode niet bijwerken",
+      "pinUpdated": "Pincode bijgewerkt",
+      "statusError": "Kon kaart niet bijwerken",
+      "terminationPending": "Zakelijke kaart leeggemaakt — automatische beëindiging is in behandeling, probeer het hier binnenkort opnieuw.",
+      "walletActionFailed": "Actie mislukt",
+      "withdrawalSubmitted": "Opname ingediend"
+    },
+    "transactionFallback": "Transactie",
+    "transactions": "Transacties",
+    "usd": "Zakelijke kaart · USD",
+    "withdraw": "Opnemen",
+    "withdrawFeeNote": "Alles opnemen naar nul beëindigt de kaart automatisch. Er kunnen kosten van toepassing zijn op opnames."
   },
   "cards": {
     "addFunds": "Saldo toevoegen",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "Er worden kosten ingehouden op opnames voordat het nettobedrag uw wallet bereikt."
   },
   "common": {
-    "language": "Taal"
+    "app": "de app",
+    "language": "Taal",
+    "loading": "Laden…"
   },
   "crypto": {
     "addressCopied": "Adres gekopieerd",
@@ -151,6 +199,7 @@
     },
     "subtitle": "Dit gebeurt er momenteel op uw accounts",
     "title": "Welkom terug",
+    "titleNamed": "Welkom terug, {{name}}",
     "walletLabel": "Wallet"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Terug",
+      "confirmQuote": "Bevestigen & betaallink ontvangen",
       "continue": "Doorgaan",
-      "startDeposit": "Storting starten"
+      "getQuote": "Offerte aanvragen",
+      "requote": "Herberekenen",
+      "startDeposit": "Storting starten",
+      "startOver": "Opnieuw beginnen"
     },
     "cryptoCard": {
       "description": "Stortingsadressen en on-chain stortingsgeschiedenis staan nu op hun eigen pagina.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "Te betalen bedrag",
       "copyLinkAriaLabel": "Link kopiëren",
+      "depositId": "Stortings-ID",
       "estimatedDelivery": "Geschatte levertijd",
       "exchangeRate": "Wisselkoers",
       "fee": "Kosten",
+      "goToCheckout": "Naar betalen",
       "initiated": "Storting gestart",
+      "negativeCredit": "De kosten overschrijden dit stortingsbedrag — u zou minder dan niets ontvangen. Probeer een groter bedrag.",
       "openLinkAriaLabel": "Link openen",
+      "quoteExpired": "Deze offerte is verlopen — vraag een actuele koers aan om door te gaan.",
+      "quoteExpiresIn": "Koers vastgelegd voor {{seconds}}s.",
+      "reviewQuote": "Controleer uw offerte",
       "title": "Geld storten",
       "youllReceive": "U ontvangt"
     },
@@ -229,6 +288,11 @@
       "description": "Kies uw land en betaal via de lokale betaalmethode — bankoverschrijving, CODI, DEBIN en meer.",
       "title": "Of stort met een lokale betaalmethode"
     },
+    "recent": {
+      "empty": "Nog geen stortingen.",
+      "title": "Recente stortingen",
+      "viewAll": "Alles bekijken"
+    },
     "step0": {
       "countryLabel": "Land",
       "countryPlaceholder": "Selecteer een land",
@@ -238,10 +302,14 @@
       "methodRange": "{{min}}–{{max}} {{currency}} per storting",
       "noMethods": "Nog geen actieve stortingsmethoden voor dit land.",
       "prompt": "Hoe wilt u vanuit {{country}} betalen?",
-      "thisCountryFallback": "dit land"
+      "requiresVerification": "Vereist {{endorsement}}-verificatie — neem contact op met ondersteuning om te beginnen.",
+      "startVerification": "Verificatie starten",
+      "thisCountryFallback": "dit land",
+      "verified": "Geverifieerd"
     },
     "step2": {
       "amountLabel": "Bedrag ({{currency}})",
+      "noEligibleWallet": "Geen van uw wallets ondersteunt de valuta van deze methode ({{currencies}}).",
       "prompt": "{{method}} — bedrag en gegevens",
       "selectFieldPlaceholder": "Selecteer {{field}}",
       "walletLabel": "Te crediteren wallet",
@@ -260,8 +328,26 @@
       "copyFailed": "Kopiëren mislukt",
       "pickCountry": "Kies een land om door te gaan",
       "pickMethod": "Kies een betaalmethode om door te gaan",
+      "quoteFailed": "Kon geen offerte ophalen",
       "startFailed": "Storting kon niet worden gestart"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "E-mail opnieuw verzenden",
+      "message": "Verifieer uw e-mailadres ({{email}}) om volledige toegang tot uw account te behouden.",
+      "resendFailed": "Opnieuw verzenden mislukt",
+      "sending": "Verzenden…",
+      "sent": "Verificatie-e-mail verzonden — controleer uw inbox."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Terug naar inloggen",
+    "description": "Vul uw e-mailadres in en we sturen u een link om uw wachtwoord opnieuw in te stellen.",
+    "sending": "Verzenden…",
+    "sentDescription": "Als er een account bestaat voor dat e-mailadres, hebben we een link verzonden.",
+    "submit": "Herstellink verzenden",
+    "title": "Wachtwoord opnieuw instellen"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Terug naar inloggen",
+    "errorTitle": "Kon niet doorgaan",
+    "genericError": "Kon de verificatie niet voortzetten met deze link.",
+    "missingToken": "Deze link mist een geldige token.",
+    "verifyingTitle": "Verdergaan waar u gebleven was…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Doorgaan",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "Terug",
     "chooseCountryFirstPlaceholder": "Kies eerst een land",
+    "chooseFile": "Bestand kiezen",
     "cityLabel": "Plaats",
     "clickToUpload": "Klik om te uploaden",
+    "continueDialogHint": "Scan dit met de camera van uw telefoon of kopieer de link — u wordt ingelogd en gaat precies verder waar u gebleven was. Verloopt over 15 minuten.",
+    "continueDialogTitle": "Doorgaan op een ander apparaat",
+    "continueLinkError": "Kon link niet aanmaken",
+    "continueOnDevice": "Doorgaan op een ander apparaat",
+    "copyLink": "Link kopiëren",
+    "copyLinkError": "Kon link niet kopiëren",
     "countryLabel": "Land",
     "dateIssuedLabel": "Afgiftedatum",
     "documentBackOptionalLabel": "Document — achterkant (optioneel)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "Vervaldatum (optioneel)",
     "fixBeforeContinuing": "Los het volgende op voordat u verdergaat:",
     "issuingCountryLabel": "Land van afgifte",
+    "linkCopied": "Link gekopieerd",
     "loadingEllipsis": "Laden…",
     "noMatches": "Geen resultaten.",
     "noPostalCodesText": "Dit land gebruikt geen postcodes.",
@@ -517,7 +618,8 @@
     "stepOf": "Stap {{current}} van {{total}}",
     "streetAddress2Label": "Adresregel 2 (optioneel)",
     "streetAddressLabel": "Straat en huisnummer",
-    "streetAddressPlaceholder": "123 Main St"
+    "streetAddressPlaceholder": "123 Main St",
+    "takePhoto": "Foto maken"
   },
   "kycWizard": {
     "backToDashboard": "Terug naar dashboard",
@@ -683,19 +785,40 @@
     "createAccount": "Account aanmaken",
     "defaultProductName": "White Label",
     "emailLabel": "E-mail",
+    "forgotPassword": "Wachtwoord vergeten?",
     "genericError": "Inloggen niet mogelijk. Controleer uw gegevens.",
     "invalidCodeError": "Ongeldige code. Probeer het opnieuw.",
+    "magicLinkDescription": "We sturen u een inloglink per e-mail — geen wachtwoord nodig.",
+    "magicLinkSend": "Inloglink verzenden",
+    "magicLinkSending": "Verzenden…",
+    "magicLinkSentBody": "Als er een account bestaat voor {{email}}, is er een inloglink onderweg. Deze verloopt na 15 minuten.",
+    "magicLinkSentDescription": "Controleer uw e-mail voor een inloglink.",
     "newHere": "Nieuw hier?",
+    "or": "of",
+    "passkeyError": "Inloggen met die passkey is mislukt.",
+    "passkeyWaiting": "Wachten op passkey…",
     "passwordLabel": "Wachtwoord",
+    "resendVerification": "Verificatie-e-mail opnieuw verzenden",
+    "resendingVerification": "Opnieuw verzenden…",
     "signIn": "Inloggen",
     "signInDescription": "Log in op uw account",
+    "signInWithPasskey": "Inloggen met een passkey",
     "signingIn": "Bezig met inloggen…",
+    "stepUpDescription": "We hebben een inlogpoging vanaf een nieuwe locatie opgemerkt. Voer de code in die we zojuist hebben gemaild.",
     "verificationCodeLabel": "Verificatiecode",
+    "verificationResent": "Verificatie-e-mail verzonden — controleer uw inbox.",
     "verify": "Verifiëren",
     "verifyDescription": "Voer de 6-cijferige code uit uw authenticator-app in, of een back-upcode.",
     "verifyHeading": "Bevestig dat u het bent",
     "verifying": "Bezig met verifiëren…",
     "welcomeBack": "Welkom terug"
+  },
+  "magicLink": {
+    "backToLogin": "Terug naar inloggen",
+    "errorTitle": "Inloggen mislukt",
+    "genericError": "Kon u niet inloggen met deze link.",
+    "missingToken": "Deze inloglink mist een geldige token.",
+    "verifyingTitle": "U wordt ingelogd…"
   },
   "nav": {
     "account": "Account",
@@ -706,11 +829,14 @@
       "send": "Versturen"
     },
     "beneficiaries": "Begunstigden",
+    "businessSpendCards": "Zakelijke kaarten",
     "cards": "Kaarten",
     "cryptoWallets": "Cryptowallets",
     "dashboard": "Dashboard",
     "deposit": "Storten",
+    "home": "Home",
     "logout": "Uitloggen",
+    "payout": "Uitbetalen",
     "portal": "Portaal",
     "profileKyc": "Profiel & KYC",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "Geld versturen",
     "settings": "Instellingen",
+    "statements": "Rekeningoverzichten",
+    "support": "Ondersteuning",
+    "team": "Team",
+    "transactions": "Transacties",
     "virtualAccounts": "Virtuele rekeningen",
     "wallets": "Wallets",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Niets te zien hier."
+  },
+  "notifications": {
+    "empty": "U bent helemaal bij.",
+    "loading": "Laden…",
+    "markAllRead": "Alles als gelezen markeren",
+    "title": "Meldingen"
   },
   "profile": {
     "accountTitle": "Account",
@@ -740,11 +879,36 @@
     "subheading": "Beheer uw identiteitsgegevens",
     "typeLabel": "Type"
   },
+  "pwa": {
+    "banner": {
+      "cta": "Installeren",
+      "dismiss": "Sluiten",
+      "message": "Installeer {{name}} op dit apparaat voor directe toegang met één tik."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Terug naar inloggen",
+    "confirmPasswordLabel": "Nieuw wachtwoord bevestigen",
+    "description": "Deze link kan slechts één keer worden gebruikt en verloopt over 1 uur.",
+    "genericError": "Kon uw wachtwoord niet opnieuw instellen.",
+    "mismatch": "Wachtwoorden komen niet overeen",
+    "missingToken": "Deze herstellink mist een geldige token.",
+    "missingTokenTitle": "Ongeldige link",
+    "newPasswordLabel": "Nieuw wachtwoord",
+    "requestNewLink": "Nieuwe link aanvragen",
+    "submit": "Wachtwoord opnieuw instellen",
+    "successDescription": "Uw wachtwoord is opnieuw ingesteld — u kunt nu inloggen.",
+    "successTitle": "Wachtwoord bijgewerkt",
+    "title": "Kies een nieuw wachtwoord",
+    "tooShort": "Het nieuwe wachtwoord moet minimaal 8 tekens bevatten",
+    "updating": "Bijwerken…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "Te versturen bedrag ({{currency}})",
       "amountPlaceholder": "100,00",
       "debitWalletLabel": "Afschrijven van wallet",
+      "noEligibleWallet": "Geen van uw wallets ondersteunt de uitbetalingsvaluta van deze ontvanger ({{currencies}}).",
       "prompt": "Te versturen bedrag",
       "promptTo": "Te versturen bedrag naar {{name}}",
       "recipientFallback": "de ontvanger",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "Deze koers is verlopen — vraag een nieuwe aan om door te gaan.",
       "expiresIn": "Koers verloopt over {{seconds}} sec.",
+      "feeLabel": "Platformkosten",
+      "payoutAmountLabel": "Uitbetalingsbedrag",
       "rateLabel": "Koers",
       "recipientGetsLabel": "Ontvanger krijgt",
       "toLabel": "Naar",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Recente beveiligingsrelevante gebeurtenissen op uw account.",
+      "title": "Beveiligingsactiviteit"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Nieuw wachtwoord bevestigen",
       "currentPasswordLabel": "Huidig wachtwoord",
       "description": "Kies een sterk wachtwoord dat u nergens anders gebruikt.",
+      "error": "Kon wachtwoord niet bijwerken",
+      "mismatch": "Wachtwoorden komen niet overeen",
       "newPasswordLabel": "Nieuw wachtwoord",
       "submit": "Wachtwoord bijwerken",
+      "success": "Wachtwoord bijgewerkt — log opnieuw in",
       "title": "Wachtwoord wijzigen",
       "toastDescription": "Wachtwoord wijzigen is in deze versie nog niet beschikbaar.",
-      "toastTitle": "Nog niet beschikbaar"
+      "toastTitle": "Nog niet beschikbaar",
+      "tooShort": "Het nieuwe wachtwoord moet minimaal 8 tekens bevatten",
+      "updating": "Bijwerken…"
     },
     "copiedToClipboard": "Gekopieerd naar klembord",
     "copyError": "Kopiëren mislukt",
+    "passkeys": {
+      "add": "Passkey toevoegen",
+      "addError": "Kon die passkey niet registreren.",
+      "added": "Toegevoegd op {{date}}",
+      "continue": "Doorgaan",
+      "deleteError": "Kon passkey niet verwijderen",
+      "description": "Log in zonder wachtwoord met Face ID, Touch ID, Windows Hello of een beveiligingssleutel.",
+      "empty": "Nog geen passkeys geregistreerd.",
+      "lastUsed": "laatst gebruikt op {{date}}",
+      "nameLabel": "Naam voor dit apparaat",
+      "namePlaceholder": "bijv. iPhone Face ID",
+      "remove": "{{name}} verwijderen",
+      "title": "Passkeys",
+      "waiting": "Wachten op browser…"
+    },
+    "push": {
+      "description": "Ontvang waarschuwingen op dit apparaat voor stortingen, uitbetalingen en beveiligingsgebeurtenissen.",
+      "disabled": "Uit",
+      "enabled": "Ingeschakeld op dit apparaat",
+      "genericError": "Kon meldingen niet inschakelen — probeer het opnieuw.",
+      "iosInstallRequired": "Op iPhone/iPad staat Safari alleen pushmeldingen toe voor geïnstalleerde apps — gebruik Delen en \"Zet op beginscherm\" om dit in te schakelen.",
+      "notConfigured": "Pushmeldingen zijn nog niet ingesteld op dit platform.",
+      "permissionDenied": "Meldingen zijn niet toegestaan — controleer de website-instellingen van uw browser.",
+      "title": "Pushmeldingen",
+      "unsupported": "Deze browser ondersteunt geen pushmeldingen.",
+      "unsupportedBrowser": "Deze browser ondersteunt geen pushmeldingen."
+    },
+    "pwa": {
+      "description": "Voeg {{name}} toe aan uw startscherm voor toegang met één tik, net als een app.",
+      "install": "App installeren",
+      "installed": "Al geïnstalleerd op dit apparaat.",
+      "iosIntro": "Voeg toe vanuit het deelmenu van Safari op iPhone/iPad:",
+      "iosStep1": "Tik op het Deel-icoon",
+      "iosStep2": "Tik op \"Zet op beginscherm\"",
+      "title": "App installeren",
+      "unavailable": "Uw browser heeft nog geen installatieprompt aangeboden — vernieuw de pagina of controleer het menu van uw browser."
+    },
+    "sessions": {
+      "description": "Apparaten die momenteel zijn ingelogd op uw account.",
+      "empty": "Geen actieve sessies gevonden.",
+      "revokeError": "Kon dat apparaat niet afmelden",
+      "signOut": "Afmelden",
+      "thisDevice": "Dit apparaat",
+      "title": "Actieve sessies",
+      "unknownDevice": "Onbekend apparaat",
+      "unknownIp": "Onbekende locatie"
+    },
     "subtitle": "Beheer de beveiliging van uw account",
     "title": "Instellingen",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "Wachtwoord bevestigen",
+    "description": "U bent ingelogd met een eenmalige link — stel nu een wachtwoord in om de volgende keer direct in te loggen.",
+    "genericError": "Kon uw wachtwoord niet instellen.",
+    "mismatch": "Wachtwoorden komen niet overeen",
+    "newPasswordLabel": "Nieuw wachtwoord",
+    "submit": "Wachtwoord opslaan",
+    "submitting": "Opslaan…",
+    "title": "Kies een wachtwoord",
+    "tooShort": "Het wachtwoord moet minimaal 8 tekens bevatten"
+  },
   "signup": {
     "accountTypeLabel": "Accounttype",
     "alreadyHaveAccount": "Heeft u al een account?",
+    "backToLogin": "Terug naar inloggen",
     "business": "Zakelijk",
     "businessNameLabel": "Bedrijfsnaam",
     "callingCodeAriaLabel": "Landcode",
+    "checkEmailDescription": "We hebben een verificatielink naar uw e-mailadres gestuurd. Bevestig deze om de installatie van uw account te voltooien.",
+    "checkEmailTitle": "Controleer uw e-mail",
     "countryLabel": "Land",
     "createAccount": "Account aanmaken",
     "createYourAccount": "Maak uw account aan",
@@ -902,6 +1138,58 @@
     "signIn": "Inloggen",
     "startSendingDescription": "Begin binnen enkele minuten met versturen, aanhouden en uitgeven"
   },
+  "statements": {
+    "amount": "Bedrag",
+    "balanceAfter": "Saldo na transactie",
+    "credit": "Bijschrijving",
+    "date": "Datum",
+    "debit": "Afschrijving",
+    "description": "Omschrijving",
+    "direction": "Bij/Af",
+    "downloadError": "Kon rekeningoverzicht niet downloaden",
+    "downloadExcel": "Excel downloaden",
+    "downloadPdf": "PDF downloaden",
+    "emailError": "Kon rekeningoverzicht niet e-mailen",
+    "emailFormat": "Verzenden als",
+    "emailMe": "E-mail mij dit overzicht",
+    "emailed": "Overzicht verzonden naar {{email}}",
+    "empty": "Geen transacties in deze periode",
+    "from": "Van",
+    "parameters": "Kies een wallet en periode",
+    "preview": "Voorbeeld (meest recente 100 rijen)",
+    "sending": "Verzenden…",
+    "subtitle": "Elke bijschrijving, afschrijving en het saldo na elke transactie, voor een gekozen periode",
+    "title": "Rekeningoverzicht",
+    "to": "Tot",
+    "wallet": "Wallet"
+  },
+  "support": {
+    "chatHint": "Gebruik het chatvenster in de hoek om live met ons te praten",
+    "chatOnline": "Online",
+    "chatUnavailable": "Livechat is momenteel niet beschikbaar",
+    "contact": "Contact opnemen",
+    "deposit": "Storting",
+    "faq": "Veelgestelde vragen",
+    "liveChat": "Livechat",
+    "message": "Bericht",
+    "messagePlaceholder": "Beschrijf uw probleem…",
+    "noEmail": "Gebruik het onderstaande formulier om ons te bereiken",
+    "payout": "Uitbetaling",
+    "replyPlaceholder": "Schrijf een antwoord…",
+    "send": "Bericht verzenden",
+    "sendMessage": "Stuur ons een bericht",
+    "sendMessageDescription": "We antwoorden op het e-mailadres dat aan uw account is gekoppeld",
+    "sending": "Verzenden…",
+    "subject": "Onderwerp",
+    "subjectPlaceholder": "Waar kunnen we u bij helpen?",
+    "subtitle": "Krijg hulp, chat met ons of bekijk de veelgestelde vragen",
+    "ticketError": "Kon uw bericht niet verzenden",
+    "ticketSent": "Bericht verzonden — we nemen hier en per e-mail contact met u op",
+    "title": "Ondersteuning",
+    "viewTransaction": "Transactie bekijken",
+    "you": "U",
+    "yourTickets": "Uw tickets"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "Profiel bekijken"
@@ -910,21 +1198,57 @@
       "notifications": "Meldingen",
       "switchToDarkMode": "Overschakelen naar donkere modus",
       "switchToLightMode": "Overschakelen naar lichte modus"
-    }
+    },
+    "switchToDarkMode": "Overschakelen naar donkere modus",
+    "switchToLightMode": "Overschakelen naar lichte modus"
+  },
+  "transactions": {
+    "allCurrencies": "Alle valuta's",
+    "allStatuses": "Alle statussen",
+    "allTypes": "Alle types",
+    "amount": "Bedrag",
+    "clearFilters": "Filters wissen",
+    "currency": "Valuta",
+    "date": "Datum",
+    "description": "Omschrijving",
+    "empty": "Geen transacties gevonden die aan deze filters voldoen",
+    "from": "Van",
+    "pageOf": "Pagina {{page}} / {{totalPages}}",
+    "search": "Zoeken",
+    "searchPlaceholder": "Omschrijving, referentie of ID",
+    "status": "Status",
+    "subtitle": "Elke transactie in al uw wallets",
+    "title": "Transactiegeschiedenis",
+    "to": "Tot",
+    "type": "Type"
+  },
+  "verifyEmail": {
+    "backToLogin": "Terug naar inloggen",
+    "errorTitle": "Verificatie mislukt",
+    "genericError": "Kon uw e-mailadres niet verifiëren.",
+    "missingToken": "Deze verificatielink mist een geldige token.",
+    "successDescription": "Uw e-mailadres is geverifieerd — u kunt nu inloggen.",
+    "successTitle": "E-mailadres geverifieerd",
+    "verifyingTitle": "Uw e-mailadres verifiëren…"
   },
   "virtualAccounts": {
     "accountReady": "Virtuele rekening klaar",
     "addCurrency": "Een valuta toevoegen",
     "allCurrenciesAdded": "U heeft al een rekening voor elke beschikbare valuta.",
+    "backToAccounts": "Virtuele rekeningen",
     "copiedToClipboard": "Gekopieerd naar klembord",
     "copyError": "Kopiëren mislukt",
     "copyField": "{{field}} kopiëren",
     "createAccount": "Rekening aanmaken",
     "createAccountError": "Rekening kon niet worden aangemaakt",
     "creating": "Aanmaken…",
+    "depositsSubtitle": "Elke inkomende overboeking ontvangen op uw virtuele rekeningen.",
+    "depositsTitle": "Overboekingsstortingen",
     "noAccountsYet": "Nog geen virtuele rekeningen — maak er hieronder een aan voor een valuta.",
+    "noActivity": "Nog geen inkomende overboekingen.",
     "noCurrenciesAvailable": "Er zijn nog geen valuta's beschikbaar voor virtuele rekeningen.",
     "noVerificationNeeded": "Geen verificatie nodig",
+    "recentActivity": "Recente activiteit",
     "requiresVerification": "Vereist {{endorsement}}-verificatie — neem contact op met support om te beginnen.",
     "shareDetails": "Deel deze gegevens met iedereen die u geld stuurt.",
     "startVerification": "Verificatie starten",
@@ -932,6 +1256,8 @@
     "title": "Virtuele rekeningen",
     "verificationNote": "Voor sommige betaalmethoden is eenmalige verificatie nodig voordat een rekening kan worden uitgegeven.",
     "verified": "Geverifieerd",
+    "viewAllActivity": "Alle overboekingsstortingen bekijken",
+    "viewDepositHistory": "Stortingsgeschiedenis",
     "yourAccounts": "Uw rekeningen"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "Wallet kon niet worden verwijderd",
     "removing": "Verwijderen…",
     "statement": "Rekeningoverzicht",
+    "viewFullStatement": "Volledig rekeningoverzicht bekijken / exporteren",
     "walletRemoved": "Wallet verwijderd",
     "walletTitle": "{{currencyCode}}-wallet"
   },

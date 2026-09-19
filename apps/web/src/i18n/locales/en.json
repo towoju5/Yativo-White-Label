@@ -37,8 +37,10 @@
     "removeDialogTitle": "Remove {{name}}?",
     "removeError": "Couldn't remove beneficiary",
     "removed": "Beneficiary removed",
+    "requiresVerification": "Requires {{endorsement}} verification — contact support to get started.",
     "selectCountryPlaceholder": "Select a country",
     "selectFieldPlaceholder": "Select {{field}}",
+    "startVerification": "Start verification",
     "steps": {
       "paymentDetails": "Payment details",
       "payoutMethod": "Payout method",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} per transfer",
     "updateError": "Couldn't update beneficiary",
     "updated": "Beneficiary updated",
+    "verified": "Verified",
     "whoAreYouSendingTo": "Who are you sending to?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Activate Business Card",
+    "addFunds": "Add funds",
+    "cancel": "Cancel",
+    "cardTitle": "Business Card",
+    "confirmTerminate": "Click again to confirm — this can't be undone",
+    "emptyState": "No Business Cards yet. Request one to get started.",
+    "exp": "Exp {{date}}",
+    "fund": "Fund",
+    "manage": "Manage →",
+    "monthlySpendingLimit": "Monthly spending limit (USD)",
+    "noTransactions": "No transactions yet.",
+    "requestCard": "Request Business Card",
+    "requestDialogHelp": "Issued with a zero balance — fund it from your USD wallet once it's ready.",
+    "requestDialogTitle": "Request a Business Card",
+    "requesting": "Requesting…",
+    "retryTermination": "Retry termination",
+    "save": "Save",
+    "setPin": "Set PIN",
+    "subtitle": "Cards for your business, funded from your USD wallet",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Suspend Business Card",
+    "terminateCard": "Terminate Business Card",
+    "title": "Business Cards",
+    "toast": {
+      "cardFunded": "Business Card funded",
+      "cardIssued": "Business Card issued",
+      "issueCardError": "Couldn't issue Business Card",
+      "limitsError": "Couldn't update limit",
+      "limitsUpdated": "Spending limit updated",
+      "pinError": "Couldn't update PIN",
+      "pinUpdated": "PIN updated",
+      "statusError": "Couldn't update card",
+      "terminationPending": "Business Card emptied — automatic termination is still pending, retry from here shortly.",
+      "walletActionFailed": "Action failed",
+      "withdrawalSubmitted": "Withdrawal submitted"
+    },
+    "transactionFallback": "Transaction",
+    "transactions": "Transactions",
+    "usd": "Business Card · USD",
+    "withdraw": "Withdraw",
+    "withdrawFeeNote": "Withdrawing to zero automatically terminates the card. A fee may apply to withdrawals."
   },
   "cards": {
     "addFunds": "Add funds",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "A fee is deducted from withdrawals before the net amount reaches your wallet."
   },
   "common": {
-    "language": "Language"
+    "app": "the app",
+    "language": "Language",
+    "loading": "Loading…"
   },
   "crypto": {
     "addressCopied": "Address copied",
@@ -201,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Back",
+      "confirmQuote": "Confirm & get payment link",
       "continue": "Continue",
-      "startDeposit": "Start deposit"
+      "getQuote": "Get quote",
+      "requote": "Re-quote",
+      "startDeposit": "Start deposit",
+      "startOver": "Start over"
     },
     "cryptoCard": {
       "description": "Deposit addresses and on-chain deposit history now live on their own page.",
@@ -212,11 +264,17 @@
     "dialog": {
       "amountToPay": "Amount to pay",
       "copyLinkAriaLabel": "Copy link",
+      "depositId": "Deposit ID",
       "estimatedDelivery": "Estimated delivery",
       "exchangeRate": "Exchange rate",
       "fee": "Fee",
+      "goToCheckout": "Go to checkout",
       "initiated": "Deposit initiated",
+      "negativeCredit": "Fees exceed this deposit amount — you would receive less than nothing. Try a larger amount.",
       "openLinkAriaLabel": "Open link",
+      "quoteExpired": "This quote has expired — get a fresh rate to continue.",
+      "quoteExpiresIn": "Rate locked for {{seconds}}s.",
+      "reviewQuote": "Review your quote",
       "title": "Deposit funds",
       "youllReceive": "You'll receive"
     },
@@ -230,6 +288,11 @@
       "description": "Pick your country and pay via the local rail — bank transfer, CODI, DEBIN and more.",
       "title": "Or deposit with a local payment method"
     },
+    "recent": {
+      "empty": "No deposits yet.",
+      "title": "Recent deposits",
+      "viewAll": "View all"
+    },
     "step0": {
       "countryLabel": "Country",
       "countryPlaceholder": "Select a country",
@@ -239,7 +302,10 @@
       "methodRange": "{{min}}–{{max}} {{currency}} per deposit",
       "noMethods": "No active deposit methods for this country yet.",
       "prompt": "How do you want to pay from {{country}}?",
-      "thisCountryFallback": "this country"
+      "requiresVerification": "Requires {{endorsement}} verification — contact support to get started.",
+      "startVerification": "Start verification",
+      "thisCountryFallback": "this country",
+      "verified": "Verified"
     },
     "step2": {
       "amountLabel": "Amount ({{currency}})",
@@ -262,8 +328,26 @@
       "copyFailed": "Couldn't copy",
       "pickCountry": "Pick a country to continue",
       "pickMethod": "Pick a payment method to continue",
+      "quoteFailed": "Couldn't get a quote",
       "startFailed": "Couldn't start deposit"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "Resend email",
+      "message": "Please verify your email address ({{email}}) to keep full access to your account.",
+      "resendFailed": "Couldn't resend",
+      "sending": "Sending…",
+      "sent": "Verification email sent — check your inbox."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Back to sign in",
+    "description": "Enter your email and we'll send you a link to reset your password.",
+    "sending": "Sending…",
+    "sentDescription": "If an account exists for that email, we've sent a link to reset your password.",
+    "submit": "Send reset link",
+    "title": "Reset your password"
   },
   "kycBusiness": {
     "actions": {
@@ -394,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Back to sign in",
+    "errorTitle": "Couldn't continue",
+    "genericError": "Couldn't continue verification with this link.",
+    "missingToken": "This link is missing its token.",
+    "verifyingTitle": "Picking up where you left off…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Continue",
@@ -489,8 +580,15 @@
   "kycShared": {
     "backButton": "Back",
     "chooseCountryFirstPlaceholder": "Choose a country first",
+    "chooseFile": "Choose file",
     "cityLabel": "City",
     "clickToUpload": "Click to upload",
+    "continueDialogHint": "Scan this with your phone's camera, or copy the link — you'll be signed in and picked up right where you left off. Expires in 15 minutes.",
+    "continueDialogTitle": "Continue on another device",
+    "continueLinkError": "Couldn't create link",
+    "continueOnDevice": "Continue on another device",
+    "copyLink": "Copy link",
+    "copyLinkError": "Couldn't copy link",
     "countryLabel": "Country",
     "dateIssuedLabel": "Date issued",
     "documentBackOptionalLabel": "Document — back (optional)",
@@ -502,6 +600,7 @@
     "expirationDateOptionalLabel": "Expiration date (optional)",
     "fixBeforeContinuing": "Please fix the following before continuing:",
     "issuingCountryLabel": "Issuing country",
+    "linkCopied": "Link copied",
     "loadingEllipsis": "Loading…",
     "noMatches": "No matches.",
     "noPostalCodesText": "This country doesn't use postal codes.",
@@ -519,7 +618,8 @@
     "stepOf": "Step {{current}} of {{total}}",
     "streetAddress2Label": "Street address 2 (optional)",
     "streetAddressLabel": "Street address",
-    "streetAddressPlaceholder": "123 Main St"
+    "streetAddressPlaceholder": "123 Main St",
+    "takePhoto": "Take photo"
   },
   "kycWizard": {
     "backToDashboard": "Back to dashboard",
@@ -685,23 +785,40 @@
     "createAccount": "Create an account",
     "defaultProductName": "White Label",
     "emailLabel": "Email",
+    "forgotPassword": "Forgot password?",
     "genericError": "Unable to sign in. Check your credentials.",
     "invalidCodeError": "Invalid code. Please try again.",
+    "magicLinkDescription": "We'll email you a link to sign in — no password needed.",
+    "magicLinkSend": "Send sign-in link",
+    "magicLinkSending": "Sending…",
+    "magicLinkSentBody": "If an account exists for {{email}}, a sign-in link is on its way. It expires in 15 minutes.",
+    "magicLinkSentDescription": "Check your email for a sign-in link.",
     "newHere": "New here?",
+    "or": "or",
+    "passkeyError": "Couldn't sign in with that passkey.",
+    "passkeyWaiting": "Waiting for passkey…",
     "passwordLabel": "Password",
+    "resendVerification": "Resend verification email",
+    "resendingVerification": "Resending…",
     "signIn": "Sign in",
     "signInDescription": "Sign in to your account",
+    "signInWithPasskey": "Sign in with a passkey",
     "signingIn": "Signing in…",
+    "stepUpDescription": "We noticed a sign-in from a new location. Enter the code we just emailed you.",
     "verificationCodeLabel": "Verification code",
+    "verificationResent": "Verification email sent — check your inbox.",
     "verify": "Verify",
     "verifyDescription": "Enter the 6-digit code from your authenticator app, or a backup code.",
     "verifyHeading": "Verify it's you",
     "verifying": "Verifying…",
-    "welcomeBack": "Welcome back",
-    "or": "or",
-    "passkeyWaiting": "Waiting for passkey…",
-    "signInWithPasskey": "Sign in with a passkey",
-    "passkeyError": "Couldn't sign in with that passkey."
+    "welcomeBack": "Welcome back"
+  },
+  "magicLink": {
+    "backToLogin": "Back to sign in",
+    "errorTitle": "Sign-in failed",
+    "genericError": "Couldn't sign you in with this link.",
+    "missingToken": "This sign-in link is missing its token.",
+    "verifyingTitle": "Signing you in…"
   },
   "nav": {
     "account": "Account",
@@ -712,11 +829,14 @@
       "send": "Send"
     },
     "beneficiaries": "Beneficiaries",
+    "businessSpendCards": "Business Cards",
     "cards": "Cards",
     "cryptoWallets": "Crypto wallets",
     "dashboard": "Dashboard",
     "deposit": "Deposit",
+    "home": "Home",
     "logout": "Log out",
+    "payout": "Payout",
     "portal": "Portal",
     "profileKyc": "Profile & KYC",
     "section": {
@@ -725,10 +845,22 @@
     },
     "sendMoney": "Withdraw",
     "settings": "Settings",
+    "statements": "Statements",
+    "support": "Support",
     "team": "Team",
+    "transactions": "Transactions",
     "virtualAccounts": "Virtual accounts",
     "wallets": "Wallets",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Nothing to see here."
+  },
+  "notifications": {
+    "empty": "You're all caught up.",
+    "loading": "Loading…",
+    "markAllRead": "Mark all read",
+    "title": "Notifications"
   },
   "profile": {
     "accountTitle": "Account",
@@ -746,6 +878,30 @@
     "statusRejected": "Your last submission wasn't approved — start a new one below.",
     "subheading": "Manage your identity details",
     "typeLabel": "Type"
+  },
+  "pwa": {
+    "banner": {
+      "cta": "Install",
+      "dismiss": "Dismiss",
+      "message": "Install {{name}} on this device for one-tap access."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Back to sign in",
+    "confirmPasswordLabel": "Confirm new password",
+    "description": "This link can only be used once and expires in 1 hour.",
+    "genericError": "Couldn't reset your password.",
+    "mismatch": "Passwords don't match",
+    "missingToken": "This reset link is missing its token.",
+    "missingTokenTitle": "Invalid link",
+    "newPasswordLabel": "New password",
+    "requestNewLink": "Request a new link",
+    "submit": "Reset password",
+    "successDescription": "Your password has been reset — you can now sign in.",
+    "successTitle": "Password updated",
+    "title": "Choose a new password",
+    "tooShort": "New password must be at least 8 characters",
+    "updating": "Updating…"
   },
   "send": {
     "amountStep": {
@@ -783,6 +939,8 @@
     "review": {
       "expired": "This quote has expired — get a fresh one to continue.",
       "expiresIn": "Quote expires in {{seconds}}s.",
+      "feeLabel": "Platform fee",
+      "payoutAmountLabel": "Payout amount",
       "rateLabel": "Rate",
       "recipientGetsLabel": "Recipient gets",
       "toLabel": "To",
@@ -838,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Recent security-relevant events on your account.",
+      "title": "Security activity"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Confirm new password",
       "currentPasswordLabel": "Current password",
       "description": "Choose a strong password you don't use elsewhere.",
+      "error": "Couldn't update password",
+      "mismatch": "Passwords don't match",
       "newPasswordLabel": "New password",
       "submit": "Update password",
+      "success": "Password updated — please sign in again",
       "title": "Change password",
       "toastDescription": "Password changes aren't wired up in this build.",
-      "toastTitle": "Not available yet"
+      "toastTitle": "Not available yet",
+      "tooShort": "New password must be at least 8 characters",
+      "updating": "Updating…"
     },
     "copiedToClipboard": "Copied to clipboard",
     "copyError": "Couldn't copy",
+    "passkeys": {
+      "add": "Add a passkey",
+      "addError": "Couldn't register that passkey.",
+      "added": "Added {{date}}",
+      "continue": "Continue",
+      "deleteError": "Couldn't remove passkey",
+      "description": "Sign in without a password using Face ID, Touch ID, Windows Hello, or a security key.",
+      "empty": "No passkeys registered yet.",
+      "lastUsed": "last used {{date}}",
+      "nameLabel": "Name this device",
+      "namePlaceholder": "e.g. iPhone Face ID",
+      "remove": "Remove {{name}}",
+      "title": "Passkeys",
+      "waiting": "Waiting for browser…"
+    },
+    "push": {
+      "description": "Get an alert on this device for deposits, payouts, and security events.",
+      "disabled": "Off",
+      "enabled": "Enabled on this device",
+      "genericError": "Couldn't turn on notifications — please try again.",
+      "iosInstallRequired": "On iPhone/iPad, Safari only allows push notifications for an installed app — use the Share button and \"Add to Home Screen\", then open it from there to turn this on.",
+      "notConfigured": "Push notifications aren't set up on this platform yet.",
+      "permissionDenied": "Notifications permission wasn't granted — check your browser's site settings.",
+      "title": "Push notifications",
+      "unsupported": "This browser doesn't support push notifications.",
+      "unsupportedBrowser": "This browser doesn't support push notifications."
+    },
+    "pwa": {
+      "description": "Add {{name}} to your home screen for one-tap access, like a native app.",
+      "install": "Install app",
+      "installed": "Already installed on this device.",
+      "iosIntro": "On iPhone/iPad, add it from Safari's share menu:",
+      "iosStep1": "Tap the Share icon",
+      "iosStep2": "Tap \"Add to Home Screen\"",
+      "title": "Install app",
+      "unavailable": "Your browser hasn't offered an install prompt yet — try reloading the page, or check your browser's menu for an \"Install app\" option."
+    },
+    "sessions": {
+      "description": "Devices currently signed in to your account.",
+      "empty": "No active sessions found.",
+      "revokeError": "Couldn't sign out that device",
+      "signOut": "Sign out",
+      "thisDevice": "This device",
+      "title": "Active sessions",
+      "unknownDevice": "Unknown device",
+      "unknownIp": "Unknown location"
+    },
     "subtitle": "Manage your account security",
     "title": "Settings",
     "twoFactor": {
@@ -886,29 +1100,28 @@
         "disabled": "Two-factor authentication disabled",
         "setupError": "Couldn't start setup"
       }
-    },
-    "passkeys": {
-      "title": "Passkeys",
-      "description": "Sign in without a password using Face ID, Touch ID, Windows Hello, or a security key.",
-      "add": "Add a passkey",
-      "empty": "No passkeys registered yet.",
-      "added": "Added {{date}}",
-      "lastUsed": "last used {{date}}",
-      "remove": "Remove {{name}}",
-      "nameLabel": "Name this device",
-      "namePlaceholder": "e.g. iPhone Face ID",
-      "continue": "Continue",
-      "waiting": "Waiting for browser…",
-      "addError": "Couldn't register that passkey.",
-      "deleteError": "Couldn't remove passkey"
     }
+  },
+  "setupPassword": {
+    "confirmPasswordLabel": "Confirm password",
+    "description": "You signed in with a one-time link — set a password now so you can sign in directly next time.",
+    "genericError": "Couldn't set your password.",
+    "mismatch": "Passwords don't match",
+    "newPasswordLabel": "New password",
+    "submit": "Save password",
+    "submitting": "Saving…",
+    "title": "Choose a password",
+    "tooShort": "Password must be at least 8 characters"
   },
   "signup": {
     "accountTypeLabel": "Account type",
     "alreadyHaveAccount": "Already have an account?",
+    "backToLogin": "Back to sign in",
     "business": "Business",
     "businessNameLabel": "Business name",
     "callingCodeAriaLabel": "Calling code",
+    "checkEmailDescription": "We've sent a verification link to your email address. Verify it to finish setting up your account.",
+    "checkEmailTitle": "Check your email",
     "countryLabel": "Country",
     "createAccount": "Create account",
     "createYourAccount": "Create your account",
@@ -925,6 +1138,58 @@
     "signIn": "Sign in",
     "startSendingDescription": "Start sending, holding and spending in minutes"
   },
+  "statements": {
+    "amount": "Amount",
+    "balanceAfter": "Balance after",
+    "credit": "Credit",
+    "date": "Date",
+    "debit": "Debit",
+    "description": "Description",
+    "direction": "Credit/Debit",
+    "downloadError": "Couldn't download statement",
+    "downloadExcel": "Download Excel",
+    "downloadPdf": "Download PDF",
+    "emailError": "Couldn't email statement",
+    "emailFormat": "Email as",
+    "emailMe": "Email me this statement",
+    "emailed": "Statement sent to {{email}}",
+    "empty": "No transactions in this period",
+    "from": "From",
+    "parameters": "Choose a wallet and period",
+    "preview": "Preview (most recent 100 rows)",
+    "sending": "Sending…",
+    "subtitle": "Every credit, debit, and balance after each transaction, for a period you choose",
+    "title": "Statement of account",
+    "to": "To",
+    "wallet": "Wallet"
+  },
+  "support": {
+    "chatHint": "Use the chat bubble in the corner to talk to us live",
+    "chatOnline": "Online",
+    "chatUnavailable": "Live chat isn't available right now",
+    "contact": "Contact us",
+    "deposit": "Deposit",
+    "faq": "Frequently asked questions",
+    "liveChat": "Live chat",
+    "message": "Message",
+    "messagePlaceholder": "Describe your issue…",
+    "noEmail": "Use the form below to reach us",
+    "payout": "Payout",
+    "replyPlaceholder": "Write a reply…",
+    "send": "Send message",
+    "sendMessage": "Send us a message",
+    "sendMessageDescription": "We'll reply to the email on your account",
+    "sending": "Sending…",
+    "subject": "Subject",
+    "subjectPlaceholder": "What do you need help with?",
+    "subtitle": "Get help, chat with us, or browse frequently asked questions",
+    "ticketError": "Couldn't send your message",
+    "ticketSent": "Message sent — we'll get back to you here and by email",
+    "title": "Support",
+    "viewTransaction": "View transaction",
+    "you": "You",
+    "yourTickets": "Your tickets"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "View profile"
@@ -933,21 +1198,57 @@
       "notifications": "Notifications",
       "switchToDarkMode": "Switch to dark mode",
       "switchToLightMode": "Switch to light mode"
-    }
+    },
+    "switchToDarkMode": "Switch to dark mode",
+    "switchToLightMode": "Switch to light mode"
+  },
+  "transactions": {
+    "allCurrencies": "All currencies",
+    "allStatuses": "All statuses",
+    "allTypes": "All types",
+    "amount": "Amount",
+    "clearFilters": "Clear filters",
+    "currency": "Currency",
+    "date": "Date",
+    "description": "Description",
+    "empty": "No transactions match these filters",
+    "from": "From",
+    "pageOf": "Page {{page}} / {{totalPages}}",
+    "search": "Search",
+    "searchPlaceholder": "Description, reference, or ID",
+    "status": "Status",
+    "subtitle": "Every transaction across all of your wallets",
+    "title": "Transaction history",
+    "to": "To",
+    "type": "Type"
+  },
+  "verifyEmail": {
+    "backToLogin": "Back to sign in",
+    "errorTitle": "Verification failed",
+    "genericError": "Couldn't verify your email.",
+    "missingToken": "This verification link is missing its token.",
+    "successDescription": "Your email is verified — you can now sign in.",
+    "successTitle": "Email verified",
+    "verifyingTitle": "Verifying your email…"
   },
   "virtualAccounts": {
     "accountReady": "Virtual account ready",
     "addCurrency": "Add a currency",
     "allCurrenciesAdded": "You already have an account for every available currency.",
+    "backToAccounts": "Virtual accounts",
     "copiedToClipboard": "Copied to clipboard",
     "copyError": "Couldn't copy",
     "copyField": "Copy {{field}}",
     "createAccount": "Create account",
     "createAccountError": "Couldn't create account",
     "creating": "Creating…",
+    "depositsSubtitle": "Every incoming transfer received across your virtual accounts.",
+    "depositsTitle": "Transfer deposits",
     "noAccountsYet": "No virtual accounts yet — provision one for a currency below.",
+    "noActivity": "No incoming transfers yet.",
     "noCurrenciesAvailable": "No virtual account currencies are available yet.",
     "noVerificationNeeded": "No verification needed",
+    "recentActivity": "Recent activity",
     "requiresVerification": "Requires {{endorsement}} verification — contact support to get started.",
     "shareDetails": "Share these details with whoever is sending you funds.",
     "startVerification": "Start verification",
@@ -955,6 +1256,8 @@
     "title": "Virtual accounts",
     "verificationNote": "Some rails need a one-time verification before an account can be issued.",
     "verified": "Verified",
+    "viewAllActivity": "View all transfer deposits",
+    "viewDepositHistory": "Deposit history",
     "yourAccounts": "Your accounts"
   },
   "walletBalanceCard": {
@@ -975,6 +1278,7 @@
     "removeWalletError": "Couldn't remove wallet",
     "removing": "Removing…",
     "statement": "Statement",
+    "viewFullStatement": "View full statement / export",
     "walletRemoved": "Wallet removed",
     "walletTitle": "{{currencyCode}} wallet"
   },

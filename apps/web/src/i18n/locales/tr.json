@@ -37,8 +37,10 @@
     "removeDialogTitle": "{{name}} kaldırılsın mı?",
     "removeError": "Alıcı kaldırılamadı",
     "removed": "Alıcı kaldırıldı",
+    "requiresVerification": "{{endorsement}} doğrulaması gereklidir — başlamak için destek ekibiyle iletişime geçin.",
     "selectCountryPlaceholder": "Bir ülke seçin",
     "selectFieldPlaceholder": "{{field}} seçin",
+    "startVerification": "Doğrulamayı başlat",
     "steps": {
       "paymentDetails": "Ödeme bilgileri",
       "payoutMethod": "Ödeme yöntemi",
@@ -57,7 +59,51 @@
     "transferRange": "Transfer başına {{min}}–{{max}} {{currency}}",
     "updateError": "Alıcı güncellenemedi",
     "updated": "Alıcı güncellendi",
+    "verified": "Doğrulandı",
     "whoAreYouSendingTo": "Kime para gönderiyorsunuz?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Şirket kartını etkinleştir",
+    "addFunds": "Bakiye yükle",
+    "cancel": "İptal",
+    "cardTitle": "Şirket kartı",
+    "confirmTerminate": "Onaylamak için tekrar tıklayın — bu işlem geri alınamaz",
+    "emptyState": "Henüz şirket kartı yok. Başlamak için hemen talep edin.",
+    "exp": "Son kullanma: {{date}}",
+    "fund": "Yükle",
+    "manage": "Yönet →",
+    "monthlySpendingLimit": "Aylık harcama limiti (USD)",
+    "noTransactions": "Henüz işlem yok.",
+    "requestCard": "Şirket kartı talep et",
+    "requestDialogHelp": "Sıfır bakiye ile verilir — kart hazır olduğunda USD cüzdanınızdan bakiye yükleyin.",
+    "requestDialogTitle": "Şirket kartı talep et",
+    "requesting": "Talep ediliyor…",
+    "retryTermination": "Kapatmayı tekrar dene",
+    "save": "Kaydet",
+    "setPin": "PIN belirle",
+    "subtitle": "USD cüzdanınızdan finanse edilen işletmeniz için özel kartlar",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Şirket kartını askıya al",
+    "terminateCard": "Şirket kartını kapat",
+    "title": "Şirket kartları",
+    "toast": {
+      "cardFunded": "Şirket kartına bakiye yüklendi",
+      "cardIssued": "Şirket kartı oluşturuldu",
+      "issueCardError": "Şirket kartı oluşturulamadı",
+      "limitsError": "Limit güncellenemedi",
+      "limitsUpdated": "Harcama limiti güncellendi",
+      "pinError": "PIN güncellenemedi",
+      "pinUpdated": "PIN güncellendi",
+      "statusError": "Kart durumu güncellenemedi",
+      "terminationPending": "Şirket kartı boşaltıldı — otomatik kapatma işlemi sürüyor, lütfen birazdan buradan tekrar deneyin.",
+      "walletActionFailed": "İşlem başarısız oldu",
+      "withdrawalSubmitted": "Çekim talebi iletildi"
+    },
+    "transactionFallback": "İşlem",
+    "transactions": "İşlemler",
+    "usd": "Şirket kartı · USD",
+    "withdraw": "Çek",
+    "withdrawFeeNote": "Tüm bakiyeyi sıfırlayacak şekilde çekmek kartı otomatik olarak kapatır. Çekimlerde ücret uygulanabilir."
   },
   "cards": {
     "addFunds": "Bakiye ekle",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "Net tutar cüzdanınıza ulaşmadan önce para çekme işlemlerinden bir ücret düşülür."
   },
   "common": {
-    "language": "Dil"
+    "app": "uygulama",
+    "language": "Dil",
+    "loading": "Yükleniyor…"
   },
   "crypto": {
     "addressCopied": "Adres kopyalandı",
@@ -151,6 +199,7 @@
     },
     "subtitle": "Hesaplarınızda olup bitenler burada",
     "title": "Tekrar hoş geldiniz",
+    "titleNamed": "Tekrar hoş geldiniz, {{name}}",
     "walletLabel": "Cüzdan"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Geri",
+      "confirmQuote": "Onayla ve ödeme bağlantısını al",
       "continue": "Devam et",
-      "startDeposit": "Para yatırmayı başlat"
+      "getQuote": "Fiyat teklifi al",
+      "requote": "Yeniden teklif al",
+      "startDeposit": "Para yatırmayı başlat",
+      "startOver": "Baştan başla"
     },
     "cryptoCard": {
       "description": "Yatırma adresleri ve zincir üstü yatırma geçmişi artık kendi sayfasında.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "Ödenecek tutar",
       "copyLinkAriaLabel": "Bağlantıyı kopyala",
+      "depositId": "Yatırma ID'si",
       "estimatedDelivery": "Tahmini teslim süresi",
       "exchangeRate": "Döviz kuru",
       "fee": "Ücret",
+      "goToCheckout": "Ödemeye git",
       "initiated": "Para yatırma işlemi başlatıldı",
+      "negativeCredit": "Ücretler bu yatırma tutarını aşıyor — elinize sıfırdan az geçer. Lütfen daha yüksek bir tutar deneyin.",
       "openLinkAriaLabel": "Bağlantıyı aç",
+      "quoteExpired": "Bu fiyat teklifinin süresi doldu — devam etmek için güncel kuru alın.",
+      "quoteExpiresIn": "Kur {{seconds}} saniye boyunca sabitlendi.",
+      "reviewQuote": "Fiyat teklifinizi inceleyin",
       "title": "Para yatır",
       "youllReceive": "Alacağınız tutar"
     },
@@ -229,6 +288,11 @@
       "description": "Ülkenizi seçin ve yerel kanal üzerinden ödeyin — banka havalesi, CODI, DEBIN ve daha fazlası.",
       "title": "Veya yerel bir ödeme yöntemiyle para yatırın"
     },
+    "recent": {
+      "empty": "Henüz yatırma işlemi yok.",
+      "title": "Son yatırma işlemleri",
+      "viewAll": "Tümünü gör"
+    },
     "step0": {
       "countryLabel": "Ülke",
       "countryPlaceholder": "Bir ülke seçin",
@@ -238,10 +302,14 @@
       "methodRange": "Yatırım başına {{min}}–{{max}} {{currency}}",
       "noMethods": "Bu ülke için henüz aktif para yatırma yöntemi yok.",
       "prompt": "{{country}} ülkesinden nasıl ödeme yapmak istiyorsunuz?",
-      "thisCountryFallback": "bu ülke"
+      "requiresVerification": "{{endorsement}} doğrulaması gereklidir — başlamak için destek ekibiyle iletişime geçin.",
+      "startVerification": "Doğrulamayı başlat",
+      "thisCountryFallback": "bu ülke",
+      "verified": "Doğrulandı"
     },
     "step2": {
       "amountLabel": "Tutar ({{currency}})",
+      "noEligibleWallet": "Cüzdanlarınızdan hiçbiri bu yöntemin desteklediği para biriminde değil ({{currencies}}).",
       "prompt": "{{method}} — tutar ve bilgiler",
       "selectFieldPlaceholder": "{{field}} seçin",
       "walletLabel": "Yüklenecek cüzdan",
@@ -260,8 +328,26 @@
       "copyFailed": "Kopyalanamadı",
       "pickCountry": "Devam etmek için bir ülke seçin",
       "pickMethod": "Devam etmek için bir ödeme yöntemi seçin",
+      "quoteFailed": "Fiyat teklifi alınamadı",
       "startFailed": "Para yatırma işlemi başlatılamadı"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "E-postayı tekrar gönder",
+      "message": "Hesabınıza tam erişimi sürdürmek için lütfen e-posta adresinizi ({{email}}) doğrulayın.",
+      "resendFailed": "Tekrar gönderilemedi",
+      "sending": "Gönderiliyor…",
+      "sent": "Doğrulama e-postası gönderildi — gelen kutunuzu kontrol edin."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Girişe dön",
+    "description": "E-posta adresinizi girin, şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
+    "sending": "Gönderiliyor…",
+    "sentDescription": "Bu e-postaya ait bir hesap varsa, şifre sıfırlama bağlantısı gönderildi.",
+    "submit": "Sıfırlama bağlantısı gönder",
+    "title": "Şifrenizi sıfırlayın"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Girişe dön",
+    "errorTitle": "Devam edilemedi",
+    "genericError": "Bu bağlantıyla doğrulamaya devam edilemedi.",
+    "missingToken": "Bu bağlantıda belirteç eksik.",
+    "verifyingTitle": "Kaldığınız yerden devam ediliyor…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Devam et",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "Geri",
     "chooseCountryFirstPlaceholder": "Önce bir ülke seçin",
+    "chooseFile": "Dosya seç",
     "cityLabel": "Şehir",
     "clickToUpload": "Yüklemek için tıklayın",
+    "continueDialogHint": "Bunu telefonunuzun kamerasıyla tarayın veya bağlantıyı kopyalayın — oturum açmış olacak ve tam kaldığınız yerden devam edeceksiniz. 15 dakika geçerlidir.",
+    "continueDialogTitle": "Başka bir cihazda devam et",
+    "continueLinkError": "Bağlantı oluşturulamadı",
+    "continueOnDevice": "Başka bir cihazda devam et",
+    "copyLink": "Bağlantıyı kopyala",
+    "copyLinkError": "Bağlantı kopyalanamadı",
     "countryLabel": "Ülke",
     "dateIssuedLabel": "Düzenlenme tarihi",
     "documentBackOptionalLabel": "Belge — arka yüz (isteğe bağlı)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "Son geçerlilik tarihi (isteğe bağlı)",
     "fixBeforeContinuing": "Devam etmeden önce lütfen aşağıdakileri düzeltin:",
     "issuingCountryLabel": "Düzenleyen ülke",
+    "linkCopied": "Bağlantı kopyalandı",
     "loadingEllipsis": "Yükleniyor…",
     "noMatches": "Eşleşme bulunamadı.",
     "noPostalCodesText": "Bu ülke posta kodu kullanmıyor.",
@@ -517,7 +618,8 @@
     "stepOf": "Adım {{current}} / {{total}}",
     "streetAddress2Label": "Adres satırı 2 (isteğe bağlı)",
     "streetAddressLabel": "Adres",
-    "streetAddressPlaceholder": "123 Main St"
+    "streetAddressPlaceholder": "123 Main St",
+    "takePhoto": "Fotoğraf çek"
   },
   "kycWizard": {
     "backToDashboard": "Panele dön",
@@ -683,19 +785,40 @@
     "createAccount": "Hesap oluştur",
     "defaultProductName": "White Label",
     "emailLabel": "E-posta",
+    "forgotPassword": "Şifrenizi mi unuttunuz?",
     "genericError": "Giriş yapılamıyor. Bilgilerinizi kontrol edin.",
     "invalidCodeError": "Geçersiz kod. Lütfen tekrar deneyin.",
+    "magicLinkDescription": "Şifreye gerek kalmadan giriş yapabilmeniz için size bir e-posta bağlantısı göndereceğiz.",
+    "magicLinkSend": "Giriş bağlantısı gönder",
+    "magicLinkSending": "Gönderiliyor…",
+    "magicLinkSentBody": "{{email}} için bir hesap varsa, giriş bağlantısı yola çıktı. 15 dakika içinde geçerliliğini yitirir.",
+    "magicLinkSentDescription": "Giriş bağlantısı için e-postanızı kontrol edin.",
     "newHere": "Yeni misiniz?",
+    "or": "veya",
+    "passkeyError": "Bu geçiş anahtarıyla giriş yapılamadı.",
+    "passkeyWaiting": "Geçiş anahtarı bekleniyor…",
     "passwordLabel": "Şifre",
+    "resendVerification": "Doğrulama e-postasını tekrar gönder",
+    "resendingVerification": "Tekrar gönderiliyor…",
     "signIn": "Giriş yap",
     "signInDescription": "Hesabınıza giriş yapın",
+    "signInWithPasskey": "Geçiş anahtarı ile giriş yap",
     "signingIn": "Giriş yapılıyor…",
+    "stepUpDescription": "Yeni bir konumdan giriş yapıldığını fark ettik. Az önce e-postanıza gönderdiğimiz kodu girin.",
     "verificationCodeLabel": "Doğrulama kodu",
+    "verificationResent": "Doğrulama e-postası gönderildi — gelen kutunuzu kontrol edin.",
     "verify": "Doğrula",
     "verifyDescription": "Kimlik doğrulama uygulamanızdaki 6 haneli kodu veya bir yedek kod girin.",
     "verifyHeading": "Kimliğinizi doğrulayın",
     "verifying": "Doğrulanıyor…",
     "welcomeBack": "Tekrar hoş geldiniz"
+  },
+  "magicLink": {
+    "backToLogin": "Girişe dön",
+    "errorTitle": "Giriş başarısız",
+    "genericError": "Bu bağlantıyla giriş yapılamadı.",
+    "missingToken": "Bu giriş bağlantısında belirteç eksik.",
+    "verifyingTitle": "Giriş yapılıyor…"
   },
   "nav": {
     "account": "Hesap",
@@ -706,11 +829,14 @@
       "send": "Gönder"
     },
     "beneficiaries": "Alıcılar",
+    "businessSpendCards": "Şirket kartları",
     "cards": "Kartlar",
     "cryptoWallets": "Kripto cüzdanlar",
     "dashboard": "Panel",
     "deposit": "Para yatır",
+    "home": "Ana Sayfa",
     "logout": "Çıkış yap",
+    "payout": "Para çek",
     "portal": "Portal",
     "profileKyc": "Profil ve KYC",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "Para gönder",
     "settings": "Ayarlar",
+    "statements": "Hesap özetleri",
+    "support": "Destek",
+    "team": "Ekip",
+    "transactions": "İşlemler",
     "virtualAccounts": "Sanal hesaplar",
     "wallets": "Cüzdanlar",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Burada görülecek bir şey yok."
+  },
+  "notifications": {
+    "empty": "Hepsini gördünüz.",
+    "loading": "Yükleniyor…",
+    "markAllRead": "Tümünü okundu olarak işaretle",
+    "title": "Bildirimler"
   },
   "profile": {
     "accountTitle": "Hesap",
@@ -740,11 +879,36 @@
     "subheading": "Kimlik bilgilerinizi yönetin",
     "typeLabel": "Tür"
   },
+  "pwa": {
+    "banner": {
+      "cta": "Yükle",
+      "dismiss": "Kapat",
+      "message": "Tek dokunuşla erişim için {{name}} uygulamasını bu cihaza yükleyin."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Girişe dön",
+    "confirmPasswordLabel": "Yeni şifreyi onayla",
+    "description": "Bu bağlantı yalnızca bir kez kullanılabilir ve 1 saat içinde süresi dolar.",
+    "genericError": "Şifreniz sıfırlanamadı.",
+    "mismatch": "Şifreler eşleşmiyor",
+    "missingToken": "Bu sıfırlama bağlantısında belirteç eksik.",
+    "missingTokenTitle": "Geçersiz bağlantı",
+    "newPasswordLabel": "Yeni şifre",
+    "requestNewLink": "Yeni bir bağlantı iste",
+    "submit": "Şifreyi sıfırla",
+    "successDescription": "Şifreniz sıfırlandı — artık giriş yapabilirsiniz.",
+    "successTitle": "Şifre güncellendi",
+    "title": "Yeni bir şifre seçin",
+    "tooShort": "Yeni şifre en az 8 karakter olmalıdır",
+    "updating": "Güncelleniyor…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "Gönderilecek tutar ({{currency}})",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "Çekilecek cüzdan",
+      "noEligibleWallet": "Cüzdanlarınızdan hiçbiri alıcının çekim yönteminin desteklediği para biriminde değil ({{currencies}}).",
       "prompt": "Gönderilecek tutar",
       "promptTo": "{{name}} adlı alıcıya gönderilecek tutar",
       "recipientFallback": "alıcı",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "Bu kurun süresi doldu — devam etmek için yeni bir kur alın.",
       "expiresIn": "Kurun süresi {{seconds}} saniye içinde dolacak.",
+      "feeLabel": "Platform ücreti",
+      "payoutAmountLabel": "Çekim tutarı",
       "rateLabel": "Kur",
       "recipientGetsLabel": "Alıcının alacağı tutar",
       "toLabel": "Alıcı",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Hesabınızdaki son güvenlik olayları.",
+      "title": "Güvenlik hareketleri"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Yeni şifreyi onayla",
       "currentPasswordLabel": "Mevcut şifre",
       "description": "Başka yerde kullanmadığınız güçlü bir şifre seçin.",
+      "error": "Şifre güncellenemedi",
+      "mismatch": "Şifreler eşleşmiyor",
       "newPasswordLabel": "Yeni şifre",
       "submit": "Şifreyi güncelle",
+      "success": "Şifre güncellendi — lütfen tekrar giriş yapın",
       "title": "Şifre değiştir",
       "toastDescription": "Şifre değişiklikleri bu sürümde henüz etkin değil.",
-      "toastTitle": "Henüz kullanılamıyor"
+      "toastTitle": "Henüz kullanılamıyor",
+      "tooShort": "Yeni şifre en az 8 karakter olmalıdır",
+      "updating": "Güncelleniyor…"
     },
     "copiedToClipboard": "Panoya kopyalandı",
     "copyError": "Kopyalanamadı",
+    "passkeys": {
+      "add": "Geçiş anahtarı ekle",
+      "addError": "Bu geçiş anahtarı kaydedilemedi.",
+      "added": "{{date}} tarihinde eklendi",
+      "continue": "Devam et",
+      "deleteError": "Geçiş anahtarı kaldırılamadı",
+      "description": "Face ID, Touch ID, Windows Hello veya güvenlik anahtarı kullanarak şifresiz giriş yapın.",
+      "empty": "Henüz kayıtlı geçiş anahtarı yok.",
+      "lastUsed": "son kullanım: {{date}}",
+      "nameLabel": "Bu cihaza bir ad verin",
+      "namePlaceholder": "örn. iPhone Face ID",
+      "remove": "{{name}} kaldır",
+      "title": "Geçiş anahtarları",
+      "waiting": "Tarayıcı bekleniyor…"
+    },
+    "push": {
+      "description": "Yatırma, çekme ve güvenlik olayları için bu cihazda anlık bildirimler alın.",
+      "disabled": "Kapalı",
+      "enabled": "Bu cihazda etkin",
+      "genericError": "Bildirimler açılamadı — lütfen tekrar deneyin.",
+      "iosInstallRequired": "iPhone/iPad'de Safari yalnızca yüklü uygulamalar için anlık bildirimlere izin verir — Paylaş düğmesini ve \"Ana Ekrana Ekle\"yi kullanın, ardından açmak için oradan başlatın.",
+      "notConfigured": "Bu platformda henüz anlık bildirimler ayarlanmadı.",
+      "permissionDenied": "Bildirim izni verilmedi — tarayıcınızın site ayarlarını kontrol edin.",
+      "title": "Anlık bildirimler",
+      "unsupported": "Bu tarayıcı anlık bildirimleri desteklemiyor.",
+      "unsupportedBrowser": "Bu tarayıcı anlık bildirimleri desteklemiyor."
+    },
+    "pwa": {
+      "description": "Tıpkı yerel bir uygulama gibi tek dokunuşla erişim için {{name}} uygulamasını ana ekranınıza ekleyin.",
+      "install": "Uygulamayı yükle",
+      "installed": "Bu cihaza zaten yüklendi.",
+      "iosIntro": "iPhone/iPad'de Safari'nin paylaşım menüsünden ekleyin:",
+      "iosStep1": "Paylaş simgesine dokunun",
+      "iosStep2": "\"Ana Ekrana Ekle\"ye dokunun",
+      "title": "Uygulamayı yükle",
+      "unavailable": "Tarayıcınız henüz bir yükleme uyarısı sunmadı — sayfayı yenilemeyi deneyin veya tarayıcınızın menüsünü kontrol edin."
+    },
+    "sessions": {
+      "description": "Şu anda hesabınıza giriş yapmış olan cihazlar.",
+      "empty": "Aktif oturum bulunamadı.",
+      "revokeError": "O cihazdan çıkış yapılamadı",
+      "signOut": "Çıkış yap",
+      "thisDevice": "Bu cihaz",
+      "title": "Aktif oturumlar",
+      "unknownDevice": "Bilinmeyen cihaz",
+      "unknownIp": "Bilinmeyen konum"
+    },
     "subtitle": "Hesap güvenliğinizi yönetin",
     "title": "Ayarlar",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "Şifreyi onayla",
+    "description": "Tek kullanımlık bir bağlantıyla giriş yaptınız — bir sonraki sefer doğrudan giriş yapabilmek için şimdi bir şifre belirleyin.",
+    "genericError": "Şifreniz belirlenemedi.",
+    "mismatch": "Şifreler eşleşmiyor",
+    "newPasswordLabel": "Yeni şifre",
+    "submit": "Şifreyi kaydet",
+    "submitting": "Kaydediliyor…",
+    "title": "Bir şifre seçin",
+    "tooShort": "Şifre en az 8 karakter olmalıdır"
+  },
   "signup": {
     "accountTypeLabel": "Hesap türü",
     "alreadyHaveAccount": "Zaten bir hesabınız var mı?",
+    "backToLogin": "Girişe dön",
     "business": "İşletme",
     "businessNameLabel": "İşletme adı",
     "callingCodeAriaLabel": "Arama kodu",
+    "checkEmailDescription": "E-posta adresinize bir doğrulama bağlantısı gönderdik. Hesabınızı kurmayı tamamlamak için onaylayın.",
+    "checkEmailTitle": "E-postanızı kontrol edin",
     "countryLabel": "Ülke",
     "createAccount": "Hesap oluştur",
     "createYourAccount": "Hesabınızı oluşturun",
@@ -902,6 +1138,58 @@
     "signIn": "Giriş yap",
     "startSendingDescription": "Dakikalar içinde göndermeye, tutmaya ve harcamaya başlayın"
   },
+  "statements": {
+    "amount": "Tutar",
+    "balanceAfter": "İşlem sonrası bakiye",
+    "credit": "Alacak",
+    "date": "Tarih",
+    "debit": "Borç",
+    "description": "Açıklama",
+    "direction": "Giriş/Çıkış",
+    "downloadError": "Hesap özeti indirilemedi",
+    "downloadExcel": "Excel indir",
+    "downloadPdf": "PDF indir",
+    "emailError": "Hesap özeti e-posta ile gönderilemedi",
+    "emailFormat": "Gönderim formatı",
+    "emailMe": "Bu hesap özetini bana e-postayla gönder",
+    "emailed": "Hesap özeti {{email}} adresine gönderildi",
+    "empty": "Bu dönemde işlem yok",
+    "from": "Başlangıç",
+    "parameters": "Bir cüzdan ve dönem seçin",
+    "preview": "Önizleme (en son 100 satır)",
+    "sending": "Gönderiliyor…",
+    "subtitle": "Seçtiğiniz bir dönem için her işlemin ardından gerçekleşen her giriş, çıkış ve bakiye",
+    "title": "Hesap özeti",
+    "to": "Bitiş",
+    "wallet": "Cüzdan"
+  },
+  "support": {
+    "chatHint": "Bizimle canlı konuşmak için köşedeki sohbet balonunu kullanın",
+    "chatOnline": "Çevrimiçi",
+    "chatUnavailable": "Canlı sohbet şu anda kullanılamıyor",
+    "contact": "Bize ulaşın",
+    "deposit": "Yatırma",
+    "faq": "Sıkça sorulan sorular",
+    "liveChat": "Canlı sohbet",
+    "message": "Mesaj",
+    "messagePlaceholder": "Sorununuzu açıklayın…",
+    "noEmail": "Bize ulaşmak için aşağıdaki formu kullanın",
+    "payout": "Çekim",
+    "replyPlaceholder": "Bir yanıt yazın…",
+    "send": "Mesaj gönder",
+    "sendMessage": "Bize bir mesaj gönderin",
+    "sendMessageDescription": "Hesabınızdaki e-posta adresine yanıt vereceğiz",
+    "sending": "Gönderiliyor…",
+    "subject": "Konu",
+    "subjectPlaceholder": "Hangi konuda yardıma ihtiyacınız var?",
+    "subtitle": "Yardım alın, bizimle sohbet edin veya sık sorulan sorulara göz atın",
+    "ticketError": "Mesajınız gönderilemedi",
+    "ticketSent": "Mesaj gönderildi — size buradan ve e-posta yoluyla yanıt vereceğiz",
+    "title": "Destek",
+    "viewTransaction": "İşlemi görüntüle",
+    "you": "Siz",
+    "yourTickets": "Destek talepleriniz"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "Profili görüntüle"
@@ -910,21 +1198,57 @@
       "notifications": "Bildirimler",
       "switchToDarkMode": "Koyu moda geç",
       "switchToLightMode": "Açık moda geç"
-    }
+    },
+    "switchToDarkMode": "Karanlık moda geç",
+    "switchToLightMode": "Aydınlık moda geç"
+  },
+  "transactions": {
+    "allCurrencies": "Tüm para birimleri",
+    "allStatuses": "Tüm durumlar",
+    "allTypes": "Tüm türler",
+    "amount": "Tutar",
+    "clearFilters": "Filtreleri temizle",
+    "currency": "Para birimi",
+    "date": "Tarih",
+    "description": "Açıklama",
+    "empty": "Bu filtrelere uyan işlem bulunamadı",
+    "from": "Başlangıç",
+    "pageOf": "Sayfa {{page}} / {{totalPages}}",
+    "search": "Ara",
+    "searchPlaceholder": "Açıklama, referans veya ID",
+    "status": "Durum",
+    "subtitle": "Tüm cüzdanlarınızdaki tüm işlemler",
+    "title": "İşlem geçmişi",
+    "to": "Bitiş",
+    "type": "Tür"
+  },
+  "verifyEmail": {
+    "backToLogin": "Girişe dön",
+    "errorTitle": "Doğrulama başarısız",
+    "genericError": "E-posta adresiniz doğrulanamadı.",
+    "missingToken": "Bu doğrulama bağlantısında belirteç eksik.",
+    "successDescription": "E-posta adresiniz doğrulandı — artık giriş yapabilirsiniz.",
+    "successTitle": "E-posta doğrulandı",
+    "verifyingTitle": "E-postanız doğrulanıyor…"
   },
   "virtualAccounts": {
     "accountReady": "Sanal hesap hazır",
     "addCurrency": "Bir para birimi ekleyin",
     "allCurrenciesAdded": "Mevcut her para birimi için zaten bir hesabınız var.",
+    "backToAccounts": "Sanal hesaplar",
     "copiedToClipboard": "Panoya kopyalandı",
     "copyError": "Kopyalanamadı",
     "copyField": "{{field}} kopyala",
     "createAccount": "Hesap oluştur",
     "createAccountError": "Hesap oluşturulamadı",
     "creating": "Oluşturuluyor…",
+    "depositsSubtitle": "Sanal hesaplarınıza gelen tüm transferler.",
+    "depositsTitle": "Transfer yatırmaları",
     "noAccountsYet": "Henüz sanal hesabınız yok — aşağıdan bir para birimi için hesap oluşturun.",
+    "noActivity": "Henüz gelen bir transfer yok.",
     "noCurrenciesAvailable": "Henüz kullanılabilir sanal hesap para birimi yok.",
     "noVerificationNeeded": "Doğrulama gerekmiyor",
+    "recentActivity": "Son hareketler",
     "requiresVerification": "{{endorsement}} doğrulaması gerektirir — başlamak için destek ekibiyle iletişime geçin.",
     "shareDetails": "Bu bilgileri size para gönderecek kişiyle paylaşın.",
     "startVerification": "Doğrulamayı başlat",
@@ -932,6 +1256,8 @@
     "title": "Sanal hesaplar",
     "verificationNote": "Bazı raylar bir hesap oluşturulmadan önce tek seferlik bir doğrulama gerektirir.",
     "verified": "Doğrulandı",
+    "viewAllActivity": "Tüm transfer yatırmalarını gör",
+    "viewDepositHistory": "Yatırma geçmişi",
     "yourAccounts": "Hesaplarınız"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "Cüzdan kaldırılamadı",
     "removing": "Kaldırılıyor…",
     "statement": "Ekstre",
+    "viewFullStatement": "Tüm hesap özetini gör / dışa aktar",
     "walletRemoved": "Cüzdan kaldırıldı",
     "walletTitle": "{{currencyCode}} cüzdanı"
   },

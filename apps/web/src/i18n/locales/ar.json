@@ -37,8 +37,10 @@
     "removeDialogTitle": "هل تريد إزالة {{name}}؟",
     "removeError": "تعذّرت إزالة المستفيد",
     "removed": "تمت إزالة المستفيد",
+    "requiresVerification": "يتطلب التحقق من {{endorsement}} — تواصل مع الدعم للبدء.",
     "selectCountryPlaceholder": "اختر دولة",
     "selectFieldPlaceholder": "اختر {{field}}",
+    "startVerification": "بدء التحقق",
     "steps": {
       "paymentDetails": "تفاصيل الدفع",
       "payoutMethod": "طريقة الدفع",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} لكل تحويل",
     "updateError": "تعذّر تحديث المستفيد",
     "updated": "تم تحديث المستفيد",
+    "verified": "تم التحقق",
     "whoAreYouSendingTo": "إلى من تريد الإرسال؟"
+  },
+  "businessSpendCards": {
+    "activateCard": "تفعيل بطاقة الأعمال",
+    "addFunds": "إضافة رصيد",
+    "cancel": "إلغاء",
+    "cardTitle": "بطاقة الأعمال",
+    "confirmTerminate": "انقر مرة أخرى للتأكيد — لا يمكن التراجع عن هذا الإجراء",
+    "emptyState": "لا توجد بطاقات أعمال بعد. اطلب بطاقة للبدء.",
+    "exp": "تنتهي في {{date}}",
+    "fund": "شحن الرصيد",
+    "manage": "إدارة ←",
+    "monthlySpendingLimit": "الحد الشهري للإنفاق (بالدولار الأمريكي)",
+    "noTransactions": "لا توجد معاملات بعد.",
+    "requestCard": "طلب بطاقة أعمال",
+    "requestDialogHelp": "تُصدر برصيد صفري — اشحنها من محفظة الدولار الأمريكي فور جاهزيتها.",
+    "requestDialogTitle": "طلب بطاقة أعمال",
+    "requesting": "جارٍ تقديم الطلب…",
+    "retryTermination": "إعادة محاولة الإلغاء",
+    "save": "حفظ",
+    "setPin": "تعيين الرمز السري PIN",
+    "subtitle": "بطاقات مخصصة لشركتك، ممولة من محفظة الدولار الأمريكي",
+    "subtitleUsd": "فيزا · USD",
+    "suspendCard": "إيقاف بطاقة الأعمال مؤقتًا",
+    "terminateCard": "إنهاء بطاقة الأعمال",
+    "title": "بطاقات الأعمال",
+    "toast": {
+      "cardFunded": "تم شحن بطاقة الأعمال",
+      "cardIssued": "تم إصدار بطاقة الأعمال",
+      "issueCardError": "تعذر إصدار بطاقة الأعمال",
+      "limitsError": "تعذر تحديث الحد المالي",
+      "limitsUpdated": "تم تحديث حد الإنفاق",
+      "pinError": "تعذر تحديث الرمز السري",
+      "pinUpdated": "تم تحديث الرمز السري",
+      "statusError": "تعذر تحديث حالة البطاقة",
+      "terminationPending": "تم إفراغ بطاقة الأعمال — الإلغاء التلقائي قيد المعالجة، يرجى المحاولة هنا بعد قليل.",
+      "walletActionFailed": "فشلت العملية",
+      "withdrawalSubmitted": "تم إرسال طلب السحب"
+    },
+    "transactionFallback": "معاملة",
+    "transactions": "المعاملات",
+    "usd": "بطاقة أعمال · USD",
+    "withdraw": "سحب",
+    "withdrawFeeNote": "سحب كامل الرصيد حتى الصفر يؤدي تلقائيًا إلى إنهاء البطاقة. قد يتم تطبيق رسوم على السحب."
   },
   "cards": {
     "addFunds": "إضافة رصيد",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "تُخصم رسوم من عمليات السحب قبل وصول المبلغ الصافي إلى محفظتك."
   },
   "common": {
-    "language": "اللغة"
+    "app": "التطبيق",
+    "language": "اللغة",
+    "loading": "جارٍ التحميل…"
   },
   "crypto": {
     "addressCopied": "تم نسخ العنوان",
@@ -151,6 +199,7 @@
     },
     "subtitle": "إليك ما يحدث في حساباتك",
     "title": "مرحبًا بعودتك",
+    "titleNamed": "مرحبًا بعودتك، {{name}}",
     "walletLabel": "المحفظة"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "رجوع",
+      "confirmQuote": "تأكيد والحصول على رابط الدفع",
       "continue": "متابعة",
-      "startDeposit": "بدء الإيداع"
+      "getQuote": "طلب عرض سعر",
+      "requote": "إعادة التسعير",
+      "startDeposit": "بدء الإيداع",
+      "startOver": "البدء من جديد"
     },
     "cryptoCard": {
       "description": "أصبحت عناوين الإيداع وسجل الإيداعات على السلسلة الآن في صفحتها الخاصة.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "المبلغ المطلوب دفعه",
       "copyLinkAriaLabel": "نسخ الرابط",
+      "depositId": "معرّف الإيداع",
       "estimatedDelivery": "الوصول المتوقع",
       "exchangeRate": "سعر الصرف",
       "fee": "الرسوم",
+      "goToCheckout": "الانتقال إلى الدفع",
       "initiated": "تم بدء الإيداع",
+      "negativeCredit": "الرسوم تتجاوز مبلغ الإيداع هذا — ستتلقى أقل من لا شيء. يرجى تجربة مبلغ أكبر.",
       "openLinkAriaLabel": "فتح الرابط",
+      "quoteExpired": "انتهت صلاحية عرض السعر هذا — يرجى الحصول على سعر جديد للمتابعة.",
+      "quoteExpiresIn": "السعر مضمون لمدة {{seconds}} ثانية.",
+      "reviewQuote": "مراجعة عرض السعر",
       "title": "إيداع الأموال",
       "youllReceive": "ستستلم"
     },
@@ -229,6 +288,11 @@
       "description": "اختر دولتك وادفع عبر القناة المحلية — تحويل مصرفي، CODI، DEBIN وغيرها.",
       "title": "أو أودِع بطريقة دفع محلية"
     },
+    "recent": {
+      "empty": "لا توجد عمليات إيداع بعد.",
+      "title": "عمليات الإيداع الأخيرة",
+      "viewAll": "عرض الكل"
+    },
     "step0": {
       "countryLabel": "الدولة",
       "countryPlaceholder": "اختر دولة",
@@ -238,10 +302,14 @@
       "methodRange": "{{min}}–{{max}} {{currency}} لكل إيداع",
       "noMethods": "لا توجد طرق إيداع نشطة لهذه الدولة حاليًا.",
       "prompt": "كيف تريد الدفع من {{country}}؟",
-      "thisCountryFallback": "هذه الدولة"
+      "requiresVerification": "يتطلب التحقق من {{endorsement}} — تواصل مع الدعم للبدء.",
+      "startVerification": "بدء التحقق",
+      "thisCountryFallback": "هذه الدولة",
+      "verified": "تم التحقق"
     },
     "step2": {
       "amountLabel": "المبلغ ({{currency}})",
+      "noEligibleWallet": "لا توجد أي من محافظك بعملة يدعمها هذا الخيار ({{currencies}}).",
       "prompt": "{{method}} — المبلغ والتفاصيل",
       "selectFieldPlaceholder": "اختر {{field}}",
       "walletLabel": "المحفظة المراد إيداع الرصيد فيها",
@@ -260,8 +328,26 @@
       "copyFailed": "تعذّر النسخ",
       "pickCountry": "اختر دولة للمتابعة",
       "pickMethod": "اختر طريقة دفع للمتابعة",
+      "quoteFailed": "تعذر الحصول على عرض السعر",
       "startFailed": "تعذّر بدء الإيداع"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "إعادة إرسال البريد",
+      "message": "يرجى تأكيد عنوان بريدك الإلكتروني ({{email}}) للاحتفاظ بالوصول الكامل إلى حسابك.",
+      "resendFailed": "تعذر إعادة الإرسال",
+      "sending": "جارٍ الإرسال…",
+      "sent": "تم إرسال رسالة التأكيد الإلكترونية — تحقق من بريدك الوارد."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "العودة لتسجيل الدخول",
+    "description": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.",
+    "sending": "جارٍ الإرسال…",
+    "sentDescription": "إذا كان هناك حساب مرتبط بهذا البريد، فقد أرسلنا رابطًا لإعادة تعيين كلمة المرور.",
+    "submit": "إرسال رابط إعادة التعيين",
+    "title": "إعادة تعيين كلمة المرور"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "العودة لتسجيل الدخول",
+    "errorTitle": "تعذرت المتابعة",
+    "genericError": "تعذر مواصلة التحقق عبر هذا الرابط.",
+    "missingToken": "هذا الرابط يفتقد الرمز المميز الخاص به.",
+    "verifyingTitle": "المتابعة من حيث توقفت…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "متابعة",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "رجوع",
     "chooseCountryFirstPlaceholder": "اختر دولة أولًا",
+    "chooseFile": "اختيار ملف",
     "cityLabel": "المدينة",
     "clickToUpload": "انقر للرفع",
+    "continueDialogHint": "امسح هذا الرمز بكاميرا هاتفك أو انسخ الرابط — سيتم تسجيل دخولك ومتابعة العملية من حيث توقفت. ينتهي خلال 15 دقيقة.",
+    "continueDialogTitle": "المتابعة على جهاز آخر",
+    "continueLinkError": "تعذر إنشاء الرابط",
+    "continueOnDevice": "المتابعة على جهاز آخر",
+    "copyLink": "نسخ الرابط",
+    "copyLinkError": "تعذر نسخ الرابط",
     "countryLabel": "الدولة",
     "dateIssuedLabel": "تاريخ الإصدار",
     "documentBackOptionalLabel": "الوثيقة — الوجه الخلفي (اختياري)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "تاريخ الانتهاء (اختياري)",
     "fixBeforeContinuing": "يُرجى تصحيح ما يلي قبل المتابعة:",
     "issuingCountryLabel": "دولة الإصدار",
+    "linkCopied": "تم نسخ الرابط",
     "loadingEllipsis": "جارٍ التحميل…",
     "noMatches": "لا توجد نتائج مطابقة.",
     "noPostalCodesText": "هذه الدولة لا تستخدم الرموز البريدية.",
@@ -517,7 +618,8 @@
     "stepOf": "الخطوة {{current}} من {{total}}",
     "streetAddress2Label": "العنوان (السطر الثاني) (اختياري)",
     "streetAddressLabel": "عنوان الشارع",
-    "streetAddressPlaceholder": "123 Main St"
+    "streetAddressPlaceholder": "123 Main St",
+    "takePhoto": "التقاط صورة"
   },
   "kycWizard": {
     "backToDashboard": "العودة إلى لوحة التحكم",
@@ -683,19 +785,40 @@
     "createAccount": "إنشاء حساب",
     "defaultProductName": "White Label",
     "emailLabel": "البريد الإلكتروني",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
     "genericError": "تعذّر تسجيل الدخول. تحقق من بيانات الاعتماد الخاصة بك.",
     "invalidCodeError": "رمز غير صحيح. يُرجى المحاولة مرة أخرى.",
+    "magicLinkDescription": "سنرسل لك رابطًا عبر البريد الإلكتروني لتسجيل الدخول — دون الحاجة إلى كلمة مرور.",
+    "magicLinkSend": "إرسال رابط تسجيل الدخول",
+    "magicLinkSending": "جارٍ الإرسال…",
+    "magicLinkSentBody": "إذا كان هناك حساب مسجل للبريد {{email}}، فإن رابط تسجيل الدخول في طريقه إليك. تنتهي صلاحيته خلال 15 دقيقة.",
+    "magicLinkSentDescription": "تحقق من بريدك الإلكتروني للحصول على رابط تسجيل الدخول.",
     "newHere": "مستخدم جديد؟",
+    "or": "أو",
+    "passkeyError": "تعذر تسجيل الدخول باستخدام مفتاح المرور هذا.",
+    "passkeyWaiting": "في انتظار مفتاح المرور…",
     "passwordLabel": "كلمة المرور",
+    "resendVerification": "إعادة إرسال بريد التحقق",
+    "resendingVerification": "جارٍ إعادة الإرسال…",
     "signIn": "تسجيل الدخول",
     "signInDescription": "سجِّل الدخول إلى حسابك",
+    "signInWithPasskey": "تسجيل الدخول باستخدام مفتاح مرور",
     "signingIn": "جارٍ تسجيل الدخول…",
+    "stepUpDescription": "لاحظنا تسجيل دخول من موقع جديد. أدخل الرمز الذي أرسلناه للتو إلى بريدك الإلكتروني.",
     "verificationCodeLabel": "رمز التحقق",
+    "verificationResent": "تم إرسال بريد التحقق — تفقد صندوق الوارد الخاص بك.",
     "verify": "تحقق",
     "verifyDescription": "أدخل الرمز المكوَّن من 6 أرقام من تطبيق المصادقة الخاص بك، أو رمز احتياطي.",
     "verifyHeading": "تحقق من هويتك",
     "verifying": "جارٍ التحقق…",
     "welcomeBack": "مرحبًا بعودتك"
+  },
+  "magicLink": {
+    "backToLogin": "العودة لتسجيل الدخول",
+    "errorTitle": "فشل تسجيل الدخول",
+    "genericError": "تعذر تسجيل دخولك باستخدام هذا الرابط.",
+    "missingToken": "رابط تسجيل الدخول هذا يفتقد الرمز المميز.",
+    "verifyingTitle": "جارٍ تسجيل الدخول…"
   },
   "nav": {
     "account": "الحساب",
@@ -706,11 +829,14 @@
       "send": "إرسال"
     },
     "beneficiaries": "المستفيدون",
+    "businessSpendCards": "بطاقات الأعمال",
     "cards": "البطاقات",
     "cryptoWallets": "محافظ العملات الرقمية",
     "dashboard": "لوحة التحكم",
     "deposit": "إيداع",
+    "home": "الرئيسية",
     "logout": "تسجيل الخروج",
+    "payout": "سحب",
     "portal": "البوابة",
     "profileKyc": "الملف الشخصي والتوثيق",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "إرسال الأموال",
     "settings": "الإعدادات",
+    "statements": "كشوف الحساب",
+    "support": "الدعم",
+    "team": "الفريق",
+    "transactions": "المعاملات",
     "virtualAccounts": "الحسابات الافتراضية",
     "wallets": "المحافظ",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "لا يوجد شيء لعرضه هنا."
+  },
+  "notifications": {
+    "empty": "لقد اطلعت على كل شيء.",
+    "loading": "جارٍ التحميل…",
+    "markAllRead": "تحديد الكل كمقروء",
+    "title": "الإشعارات"
   },
   "profile": {
     "accountTitle": "الحساب",
@@ -740,11 +879,36 @@
     "subheading": "إدارة بيانات هويتك",
     "typeLabel": "النوع"
   },
+  "pwa": {
+    "banner": {
+      "cta": "تثبيت",
+      "dismiss": "إغلاق",
+      "message": "قم بتثبيت {{name}} على هذا الجهاز للوصول السريع بنقرة واحدة."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "العودة لتسجيل الدخول",
+    "confirmPasswordLabel": "تأكيد كلمة المرور الجديدة",
+    "description": "يمكن استخدام هذا الرابط لمرة واحدة فقط وتنتهي صلاحيته خلال ساعة واحدة.",
+    "genericError": "تعذر إعادة تعيين كلمة المرور الخاصة بك.",
+    "mismatch": "كلمات المرور غير متطابقة",
+    "missingToken": "رابط إعادة التعيين هذا يفتقد الرمز المميز.",
+    "missingTokenTitle": "رابط غير صالح",
+    "newPasswordLabel": "كلمة المرور الجديدة",
+    "requestNewLink": "طلب رابط جديد",
+    "submit": "إعادة تعيين كلمة المرور",
+    "successDescription": "تمت إعادة تعيين كلمة المرور بنجاح — يمكنك الآن تسجيل الدخول.",
+    "successTitle": "تم تحديث كلمة المرور",
+    "title": "اختر كلمة مرور جديدة",
+    "tooShort": "يجب ألا تقل كلمة المرور الجديدة عن 8 أحرف",
+    "updating": "جارٍ التحديث…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "المبلغ المراد إرساله ({{currency}})",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "الخصم من المحفظة",
+      "noEligibleWallet": "لا توجد أي من محافظك بعملة تدعمها طريقة استلام المستفيد ({{currencies}}).",
       "prompt": "المبلغ المراد إرساله",
       "promptTo": "المبلغ المراد إرساله إلى {{name}}",
       "recipientFallback": "المستلم",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "انتهت صلاحية عرض السعر هذا — احصل على عرض جديد للمتابعة.",
       "expiresIn": "تنتهي صلاحية عرض السعر خلال {{seconds}} ثانية.",
+      "feeLabel": "رسوم المنصة",
+      "payoutAmountLabel": "مبلغ التحويل",
       "rateLabel": "سعر الصرف",
       "recipientGetsLabel": "المبلغ الذي يستلمه المستلم",
       "toLabel": "إلى",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "الأحداث الأمنية الأخيرة المرتبطة بحسابك.",
+      "title": "النشاط الأمني"
+    },
     "changePassword": {
       "confirmPasswordLabel": "تأكيد كلمة المرور الجديدة",
       "currentPasswordLabel": "كلمة المرور الحالية",
       "description": "اختر كلمة مرور قوية لا تستخدمها في أي مكان آخر.",
+      "error": "تعذر تحديث كلمة المرور",
+      "mismatch": "كلمات المرور غير متطابقة",
       "newPasswordLabel": "كلمة المرور الجديدة",
       "submit": "تحديث كلمة المرور",
+      "success": "تم تحديث كلمة المرور — يرجى تسجيل الدخول مجددًا",
       "title": "تغيير كلمة المرور",
       "toastDescription": "تغيير كلمة المرور غير مفعَّل في هذا الإصدار.",
-      "toastTitle": "غير متاح بعد"
+      "toastTitle": "غير متاح بعد",
+      "tooShort": "يجب ألا تقل كلمة المرور الجديدة عن 8 أحرف",
+      "updating": "جارٍ التحديث…"
     },
     "copiedToClipboard": "تم النسخ إلى الحافظة",
     "copyError": "تعذّر النسخ",
+    "passkeys": {
+      "add": "إضافة مفتاح مرور",
+      "addError": "تعذر تسجيل مفتاح المرور هذا.",
+      "added": "تمت الإضافة في {{date}}",
+      "continue": "متابعة",
+      "deleteError": "تعذر حذف مفتاح المرور",
+      "description": "سجّل الدخول بدون كلمة مرور باستخدام Face ID أو Touch ID أو Windows Hello أو مفتاح أمان.",
+      "empty": "لا توجد مفاتيح مرور مسجلة بعد.",
+      "lastUsed": "آخر استخدام {{date}}",
+      "nameLabel": "تسمية هذا الجهاز",
+      "namePlaceholder": "مثال: iPhone Face ID",
+      "remove": "إزالة {{name}}",
+      "title": "مفاتيح المرور",
+      "waiting": "في انتظار المتصفح…"
+    },
+    "push": {
+      "description": "احصل على تنبيهات على هذا الجهاز بشأن الإيداعات والسحوبات وأحداث الأمان.",
+      "disabled": "معطل",
+      "enabled": "مفعل على هذا الجهاز",
+      "genericError": "تعذر تفعيل الإشعارات — يرجى المحاولة مرة أخرى.",
+      "iosInstallRequired": "على iPhone/iPad، لا يسمح متصفح Safari بالإشعارات إلا للتطبيقات المثبتة — استخدم زر المشاركة ثم \"إضافة إلى الشاشة الرئيسية\" وافتحه من هناك للتفعيل.",
+      "notConfigured": "الإشعارات الفورية غير مهيأة على هذه المنصة بعد.",
+      "permissionDenied": "لم يتم منح إذن الإشعارات — تحقق من إعدادات الموقع في متصفحك.",
+      "title": "الإشعارات الفورية",
+      "unsupported": "هذا المتصفح لا يدعم الإشعارات الفورية.",
+      "unsupportedBrowser": "هذا المتصفح لا يدعم الإشعارات الفورية."
+    },
+    "pwa": {
+      "description": "أضف {{name}} إلى شاشتك الرئيسية للوصول السريع بنقرة واحدة، تمامًا مثل التطبيقات الأصلية.",
+      "install": "تثبيت التطبيق",
+      "installed": "مثبت بالفعل على هذا الجهاز.",
+      "iosIntro": "على iPhone/iPad، أضفه من قائمة المشاركة في Safari:",
+      "iosStep1": "اضغط على أيقونة المشاركة",
+      "iosStep2": "اضغط على \"إضافة إلى الشاشة الرئيسية\"",
+      "title": "تثبيت التطبيق",
+      "unavailable": "لم يقدم متصفحك خيار التثبيت بعد — حاول إعادة تحميل الصفحة أو تحقق من قائمة المتصفح."
+    },
+    "sessions": {
+      "description": "الأجهزة التي قامت بتسجيل الدخول إلى حسابك حاليًا.",
+      "empty": "لم يتم العثور على جلسات نشطة.",
+      "revokeError": "تعذر تسجيل الخروج من ذلك الجهاز",
+      "signOut": "تسجيل الخروج",
+      "thisDevice": "هذا الجهاز",
+      "title": "الجلسات النشطة",
+      "unknownDevice": "جهاز غير معروف",
+      "unknownIp": "موقع غير معروف"
+    },
     "subtitle": "إدارة أمان حسابك",
     "title": "الإعدادات",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "description": "لقد قمت بتسجيل الدخول عبر رابط لمرة واحدة — قم بتعيين كلمة مرور الآن لتتمكن من تسجيل الدخول مباشرة في المرة القادمة.",
+    "genericError": "تعذر تعيين كلمة المرور.",
+    "mismatch": "كلمات المرور غير متطابقة",
+    "newPasswordLabel": "كلمة المرور الجديدة",
+    "submit": "حفظ كلمة المرور",
+    "submitting": "جارٍ الحفظ…",
+    "title": "اختر كلمة مرور",
+    "tooShort": "يجب ألا تقل كلمة المرور عن 8 أحرف"
+  },
   "signup": {
     "accountTypeLabel": "نوع الحساب",
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "backToLogin": "العودة لتسجيل الدخول",
     "business": "شركة",
     "businessNameLabel": "اسم الشركة",
     "callingCodeAriaLabel": "رمز الاتصال",
+    "checkEmailDescription": "لقد أرسلنا رابط تحقق إلى عنوان بريدك الإلكتروني. قم بتأكيده لإكمال إعداد حسابك.",
+    "checkEmailTitle": "تحقق من بريدك الإلكتروني",
     "countryLabel": "الدولة",
     "createAccount": "إنشاء حساب",
     "createYourAccount": "أنشئ حسابك",
@@ -902,6 +1138,58 @@
     "signIn": "تسجيل الدخول",
     "startSendingDescription": "ابدأ الإرسال والاحتفاظ بالأموال وإنفاقها في دقائق"
   },
+  "statements": {
+    "amount": "المبلغ",
+    "balanceAfter": "الرصيد بعد المعاملة",
+    "credit": "إيداع",
+    "date": "التاريخ",
+    "debit": "خصم",
+    "description": "الوصف",
+    "direction": "إيداع/خصم",
+    "downloadError": "تعذر تنزيل كشف الحساب",
+    "downloadExcel": "تنزيل بصيغة Excel",
+    "downloadPdf": "تنزيل بصيغة PDF",
+    "emailError": "تعذر إرسال كشف الحساب عبر البريد الإلكتروني",
+    "emailFormat": "الإرسال بصيغة",
+    "emailMe": "إرسال كشف الحساب هذا إلى بريدي",
+    "emailed": "تم إرسال كشف الحساب إلى {{email}}",
+    "empty": "لا توجد معاملات في هذه الفترة",
+    "from": "من",
+    "parameters": "اختر محفظة وفترة زمنية",
+    "preview": "معاينة (أحدث 100 صف)",
+    "sending": "جارٍ الإرسال…",
+    "subtitle": "كل عملية إيداع وخصم والرصيد بعد كل معاملة، خلال الفترة التي تختارها",
+    "title": "كشف الحساب",
+    "to": "إلى",
+    "wallet": "المحفظة"
+  },
+  "support": {
+    "chatHint": "استخدم فقاعة الدردشة في الزاوية للتحدث معنا مباشرة",
+    "chatOnline": "متصل",
+    "chatUnavailable": "المحادثة المباشرة غير متاحة حاليًا",
+    "contact": "اتصل بنا",
+    "deposit": "إيداع",
+    "faq": "الأسئلة الشائعة",
+    "liveChat": "محادثة مباشرة",
+    "message": "الرسالة",
+    "messagePlaceholder": "صف مشكلتك بالتفصيل…",
+    "noEmail": "استخدم النموذج أدناه للتواصل معنا",
+    "payout": "سحب",
+    "replyPlaceholder": "اكتب ردًا…",
+    "send": "إرسال الرسالة",
+    "sendMessage": "أرسل لنا رسالة",
+    "sendMessageDescription": "سنرد على البريد الإلكتروني المسجل في حسابك",
+    "sending": "جارٍ الإرسال…",
+    "subject": "الموضوع",
+    "subjectPlaceholder": "ما الذي تحتاج إلى مساعدة بشأنه؟",
+    "subtitle": "احصل على المساعدة، تحدث معنا، أو تصفح الأسئلة الشائعة",
+    "ticketError": "تعذر إرسال رسالتك",
+    "ticketSent": "تم إرسال الرسالة — سنرد عليك هنا وعبر البريد الإلكتروني",
+    "title": "الدعم",
+    "viewTransaction": "عرض المعاملة",
+    "you": "أنت",
+    "yourTickets": "تذاكرك"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "عرض الملف الشخصي"
@@ -910,21 +1198,57 @@
       "notifications": "الإشعارات",
       "switchToDarkMode": "التبديل إلى الوضع الداكن",
       "switchToLightMode": "التبديل إلى الوضع الفاتح"
-    }
+    },
+    "switchToDarkMode": "التبديل إلى الوضع الداكن",
+    "switchToLightMode": "التبديل إلى الوضع الفاتح"
+  },
+  "transactions": {
+    "allCurrencies": "جميع العملات",
+    "allStatuses": "جميع الحالات",
+    "allTypes": "جميع الأنواع",
+    "amount": "المبلغ",
+    "clearFilters": "مسح الفلاتر",
+    "currency": "العملة",
+    "date": "التاريخ",
+    "description": "الوصف",
+    "empty": "لا توجد معاملات تطابق هذه الفلاتر",
+    "from": "من",
+    "pageOf": "صفحة {{page}} من {{totalPages}}",
+    "search": "بحث",
+    "searchPlaceholder": "الوصف، المرجع، أو المعرّف",
+    "status": "الحالة",
+    "subtitle": "كل معاملة عبر جميع محافظك",
+    "title": "سجل المعاملات",
+    "to": "إلى",
+    "type": "النوع"
+  },
+  "verifyEmail": {
+    "backToLogin": "العودة لتسجيل الدخول",
+    "errorTitle": "فشل التحقق",
+    "genericError": "تعذر التحقق من بريدك الإلكتروني.",
+    "missingToken": "رابط التحقق هذا يفتقد الرمز المميز.",
+    "successDescription": "تم التحقق من بريدك الإلكتروني بنجاح — يمكنك الآن تسجيل الدخول.",
+    "successTitle": "تم التحقق من البريد",
+    "verifyingTitle": "جارٍ التحقق من بريدك الإلكتروني…"
   },
   "virtualAccounts": {
     "accountReady": "الحساب الافتراضي جاهز",
     "addCurrency": "إضافة عملة",
     "allCurrenciesAdded": "لديك بالفعل حساب لكل عملة متاحة.",
+    "backToAccounts": "الحسابات الافتراضية",
     "copiedToClipboard": "تم النسخ إلى الحافظة",
     "copyError": "تعذّر النسخ",
     "copyField": "نسخ {{field}}",
     "createAccount": "إنشاء حساب",
     "createAccountError": "تعذّر إنشاء الحساب",
     "creating": "جارٍ الإنشاء…",
+    "depositsSubtitle": "جميع التحويلات الواردة المستلمة عبر حساباتك الافتراضية.",
+    "depositsTitle": "إيداعات التحويل",
     "noAccountsYet": "لا توجد حسابات افتراضية بعد — فعِّل حسابًا لعملة أدناه.",
+    "noActivity": "لا توجد تحويلات واردة بعد.",
     "noCurrenciesAvailable": "لا توجد عملات حسابات افتراضية متاحة بعد.",
     "noVerificationNeeded": "لا حاجة إلى توثيق",
+    "recentActivity": "النشاط الأخير",
     "requiresVerification": "يتطلب توثيق {{endorsement}} — تواصل مع الدعم للبدء.",
     "shareDetails": "شارك هذه التفاصيل مع من يرسل لك الأموال.",
     "startVerification": "بدء التوثيق",
@@ -932,6 +1256,8 @@
     "title": "الحسابات الافتراضية",
     "verificationNote": "تحتاج بعض القنوات إلى توثيق لمرة واحدة قبل إمكانية إصدار حساب.",
     "verified": "موثَّق",
+    "viewAllActivity": "عرض جميع إيداعات التحويل",
+    "viewDepositHistory": "سجل الإيداعات",
     "yourAccounts": "حساباتك"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "تعذّرت إزالة المحفظة",
     "removing": "جارٍ الإزالة…",
     "statement": "كشف الحساب",
+    "viewFullStatement": "عرض كشف الحساب الكامل / تصدير",
     "walletRemoved": "تمت إزالة المحفظة",
     "walletTitle": "محفظة {{currencyCode}}"
   },

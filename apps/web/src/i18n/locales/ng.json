@@ -37,8 +37,10 @@
     "removeDialogTitle": "Comot {{name}}?",
     "removeError": "We no fit comot beneficiary",
     "removed": "We don comot beneficiary",
+    "requiresVerification": "You need {{endorsement}} verification — talk to support make you start.",
     "selectCountryPlaceholder": "Select country",
     "selectFieldPlaceholder": "Pick {{field}}",
+    "startVerification": "Start verification",
     "steps": {
       "paymentDetails": "How you go pay",
       "payoutMethod": "How you wan pay",
@@ -57,7 +59,51 @@
     "transferRange": "{{min}}–{{max}} {{currency}} for each transfer",
     "updateError": "We no fit update beneficiary",
     "updated": "We don update beneficiary",
+    "verified": "Verified",
     "whoAreYouSendingTo": "You dey send money go who?"
+  },
+  "businessSpendCards": {
+    "activateCard": "Activate Business Card",
+    "addFunds": "Add money",
+    "cancel": "Forget am",
+    "cardTitle": "Business Card",
+    "confirmTerminate": "Click am again make you confirm — you no go fit undo am",
+    "emptyState": "No Business Card dey yet. Request one make you start.",
+    "exp": "E dey expire {{date}}",
+    "fund": "Put money",
+    "manage": "Manage am →",
+    "monthlySpendingLimit": "Monthly limit to spend (USD)",
+    "noTransactions": "No transaction dey yet.",
+    "requestCard": "Request Business Card",
+    "requestDialogHelp": "Dem go give you card with zero balance — add money from your USD wallet once e ready.",
+    "requestDialogTitle": "Request Business Card",
+    "requesting": "We dey request am…",
+    "retryTermination": "Try close am again",
+    "save": "Save am",
+    "setPin": "Set PIN",
+    "subtitle": "Cards for your business, wey you go fund from your USD wallet",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "Hold Business Card first",
+    "terminateCard": "Close Business Card",
+    "title": "Business Cards",
+    "toast": {
+      "cardFunded": "We don add money to Business Card",
+      "cardIssued": "We don issue Business Card",
+      "issueCardError": "We no fit issue Business Card",
+      "limitsError": "We no fit change limit",
+      "limitsUpdated": "We don update spending limit",
+      "pinError": "We no fit change PIN",
+      "pinUpdated": "We don change PIN",
+      "statusError": "We no fit update card",
+      "terminationPending": "Money don comot for Business Card — e dey close automatically, try again here small time.",
+      "walletActionFailed": "Wetin you do fail",
+      "withdrawalSubmitted": "We don send withdrawal"
+    },
+    "transactionFallback": "Transaction",
+    "transactions": "Transactions",
+    "usd": "Business Card · USD",
+    "withdraw": "Withdraw",
+    "withdrawFeeNote": "If you withdraw all the money to zero, the card go close automatically. Fee fit dey for withdrawal."
   },
   "cards": {
     "addFunds": "Put money inside",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "We dey deduct fee from withdrawals before the net amount reach your wallet."
   },
   "common": {
-    "language": "Pidgin"
+    "app": "the app",
+    "language": "Pidgin",
+    "loading": "E dey load…"
   },
   "crypto": {
     "addressCopied": "We don copy address",
@@ -151,6 +199,7 @@
     },
     "subtitle": "See wetin dey happen across your accounts",
     "title": "Welcome back",
+    "titleNamed": "Welcome back, {{name}}",
     "walletLabel": "Wallet"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "Go back",
+      "confirmQuote": "Confirm & get payment link",
       "continue": "Continue",
-      "startDeposit": "Start to deposit"
+      "getQuote": "Get quote",
+      "requote": "Get new quote",
+      "startDeposit": "Start to deposit",
+      "startOver": "Start again"
     },
     "cryptoCard": {
       "description": "Deposit addresses and on-chain deposit history don move go their own page.",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "Amount wey you go pay",
       "copyLinkAriaLabel": "Copy the link",
+      "depositId": "Deposit ID",
       "estimatedDelivery": "How long e go take",
       "exchangeRate": "Exchange rate",
       "fee": "Charge",
+      "goToCheckout": "Go pay",
       "initiated": "Deposit don start",
+      "negativeCredit": "The fee pass this deposit amount — you no go receive anything. Put bigger amount.",
       "openLinkAriaLabel": "Open the link",
+      "quoteExpired": "This quote don expire — get new rate make you continue.",
+      "quoteExpiresIn": "Rate go stay for {{seconds}}s.",
+      "reviewQuote": "Check your quote",
       "title": "Deposit money",
       "youllReceive": "You go collect"
     },
@@ -229,6 +288,11 @@
       "description": "Pick your country and pay through local way — bank transfer, CODI, DEBIN and more.",
       "title": "Or deposit with local payment method"
     },
+    "recent": {
+      "empty": "No deposit dey yet.",
+      "title": "Recent deposits",
+      "viewAll": "See all"
+    },
     "step0": {
       "countryLabel": "Country",
       "countryPlaceholder": "Select country",
@@ -238,10 +302,14 @@
       "methodRange": "{{min}}–{{max}} {{currency}} for each deposit",
       "noMethods": "No deposit method dey active for this country yet.",
       "prompt": "How you wan pay from {{country}}?",
-      "thisCountryFallback": "this country"
+      "requiresVerification": "You need {{endorsement}} verification — talk to support make you start.",
+      "startVerification": "Start verification",
+      "thisCountryFallback": "this country",
+      "verified": "Verified"
     },
     "step2": {
       "amountLabel": "Amount ({{currency}})",
+      "noEligibleWallet": "None of your wallet dey in the currency wey this method support ({{currencies}}).",
       "prompt": "{{method}} — amount & wetin we need",
       "selectFieldPlaceholder": "Pick {{field}}",
       "walletLabel": "Wallet wey you wan put am",
@@ -260,8 +328,26 @@
       "copyFailed": "We no fit copy am",
       "pickCountry": "Pick country make you continue",
       "pickMethod": "Pick payment method make you continue",
+      "quoteFailed": "We no fit get quote",
       "startFailed": "We no fit start deposit"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "Send email again",
+      "message": "Abeg verify your email address ({{email}}) make you fit get full access to your account.",
+      "resendFailed": "We no fit resend am",
+      "sending": "E dey send…",
+      "sent": "We don send verification email — check your inbox."
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "Go back to sign in",
+    "description": "Put your email make we send you link to reset your password.",
+    "sending": "E dey send…",
+    "sentDescription": "If account dey for that email, we don send link to reset your password.",
+    "submit": "Send reset link",
+    "title": "Reset your password"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "Go back to sign in",
+    "errorTitle": "We no fit continue",
+    "genericError": "We no fit continue verification with this link.",
+    "missingToken": "Token no dey this link.",
+    "verifyingTitle": "We dey pick up where you stop…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "Continue",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "Go back",
     "chooseCountryFirstPlaceholder": "Choose country first",
+    "chooseFile": "Pick file",
     "cityLabel": "Town",
     "clickToUpload": "Click make you upload",
+    "continueDialogHint": "Scan this with your phone camera, or copy the link — you go sign in and continue where you stop. E go expire for 15 minutes.",
+    "continueDialogTitle": "Continue on another device",
+    "continueLinkError": "We no fit create link",
+    "continueOnDevice": "Continue on another device",
+    "copyLink": "Copy link",
+    "copyLinkError": "We no fit copy link",
     "countryLabel": "Country",
     "dateIssuedLabel": "Date wey dem issue am",
     "documentBackOptionalLabel": "Document — back side (no compulsory)",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "Day e go expire (no compulsory)",
     "fixBeforeContinuing": "Abeg fix these ones before you continue:",
     "issuingCountryLabel": "Country wey give am",
+    "linkCopied": "Link don copy",
     "loadingEllipsis": "E dey load…",
     "noMatches": "Nothing match.",
     "noPostalCodesText": "This country no dey use postal codes.",
@@ -517,7 +618,8 @@
     "stepOf": "Step {{current}} out of {{total}}",
     "streetAddress2Label": "Street address 2 (no compulsory)",
     "streetAddressLabel": "Street address",
-    "streetAddressPlaceholder": "123 Main St"
+    "streetAddressPlaceholder": "123 Main St",
+    "takePhoto": "Snap picture"
   },
   "kycWizard": {
     "backToDashboard": "Go back dashboard",
@@ -683,23 +785,40 @@
     "createAccount": "Open account",
     "defaultProductName": "White Label",
     "emailLabel": "Email",
+    "forgotPassword": "You forget password?",
     "genericError": "We no fit sign you in. Check your credentials.",
     "invalidCodeError": "Code no correct. Abeg try again.",
+    "magicLinkDescription": "We go send you link for email make you sign in — no password needed.",
+    "magicLinkSend": "Send sign-in link",
+    "magicLinkSending": "E dey send…",
+    "magicLinkSentBody": "If account dey for {{email}}, sign-in link dey come. E go expire in 15 minutes.",
+    "magicLinkSentDescription": "Check your email for sign-in link.",
     "newHere": "You new here?",
+    "or": "or",
+    "passkeyError": "We no fit sign you in with that passkey.",
+    "passkeyWaiting": "We dey wait for your passkey…",
     "passwordLabel": "Password",
+    "resendVerification": "Send verification email again",
+    "resendingVerification": "E dey send again…",
     "signIn": "Sign in",
     "signInDescription": "Sign in to your account",
+    "signInWithPasskey": "Sign in with passkey",
     "signingIn": "We dey sign you in…",
+    "stepUpDescription": "We notice sign-in from new place. Put the code wey we just email you.",
     "verificationCodeLabel": "The code wey dem send you",
+    "verificationResent": "We don send verification email — check your inbox.",
     "verify": "Verify am",
     "verifyDescription": "Enter the 6-digit code from your authenticator app, or backup code.",
     "verifyHeading": "Verify say na you",
     "verifying": "We dey verify…",
-    "welcomeBack": "Welcome back",
-    "or": "or",
-    "passkeyWaiting": "We dey wait for your passkey…",
-    "signInWithPasskey": "Sign in with passkey",
-    "passkeyError": "We no fit sign you in with that passkey."
+    "welcomeBack": "Welcome back"
+  },
+  "magicLink": {
+    "backToLogin": "Go back to sign in",
+    "errorTitle": "Sign-in fail",
+    "genericError": "We no fit sign you in with this link.",
+    "missingToken": "Token no dey this sign-in link.",
+    "verifyingTitle": "We dey sign you in…"
   },
   "nav": {
     "account": "Account",
@@ -710,11 +829,14 @@
       "send": "Send"
     },
     "beneficiaries": "People wey dey collect money from you",
+    "businessSpendCards": "Business Cards",
     "cards": "Cards",
     "cryptoWallets": "Crypto wallets",
     "dashboard": "Dashboard",
     "deposit": "Deposit",
+    "home": "Home",
     "logout": "Comot",
+    "payout": "Payout",
     "portal": "Portal",
     "profileKyc": "Profile & KYC",
     "section": {
@@ -723,9 +845,22 @@
     },
     "sendMoney": "Send money",
     "settings": "Settings",
+    "statements": "Statements",
+    "support": "Support",
+    "team": "Team",
+    "transactions": "Transactions",
     "virtualAccounts": "Virtual accounts",
     "wallets": "Wallets",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "Nothing dey here."
+  },
+  "notifications": {
+    "empty": "You don see everything.",
+    "loading": "E dey load…",
+    "markAllRead": "Mark all as read",
+    "title": "Notifications"
   },
   "profile": {
     "accountTitle": "Account",
@@ -744,11 +879,36 @@
     "subheading": "Manage how your identity details be",
     "typeLabel": "Kind"
   },
+  "pwa": {
+    "banner": {
+      "cta": "Install am",
+      "dismiss": "Dismiss",
+      "message": "Install {{name}} for this device make you enter sharp-sharp with one tap."
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "Go back to sign in",
+    "confirmPasswordLabel": "Confirm new password",
+    "description": "You fit use this link once only, and e go expire in 1 hour.",
+    "genericError": "We no fit reset your password.",
+    "mismatch": "Passwords no match",
+    "missingToken": "Token no dey this reset link.",
+    "missingTokenTitle": "Link no good",
+    "newPasswordLabel": "New password",
+    "requestNewLink": "Request new link",
+    "submit": "Reset password",
+    "successDescription": "We don reset your password — you fit sign in now.",
+    "successTitle": "Password don update",
+    "title": "Choose new password",
+    "tooShort": "New password must be at least 8 characters",
+    "updating": "E dey update…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "Amount wey you wan send ({{currency}})",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "Deduct from wallet",
+      "noEligibleWallet": "None of your wallet dey in the currency wey this recipient payout method support ({{currencies}}).",
       "prompt": "Amount wey you wan send",
       "promptTo": "Amount wey you wan send go {{name}}",
       "recipientFallback": "the person",
@@ -779,6 +939,8 @@
     "review": {
       "expired": "This quote don expire — get fresh one make you continue.",
       "expiresIn": "Quote go expire for {{seconds}}s.",
+      "feeLabel": "Platform fee",
+      "payoutAmountLabel": "Payout amount",
       "rateLabel": "Rate",
       "recipientGetsLabel": "Recipient go collect",
       "toLabel": "To",
@@ -834,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "Recent security events wey happen for your account.",
+      "title": "Security activity"
+    },
     "changePassword": {
       "confirmPasswordLabel": "Type the new password again",
       "currentPasswordLabel": "Password wey you dey use now",
       "description": "Choose strong password wey you no dey use for other place.",
+      "error": "We no fit update password",
+      "mismatch": "Passwords no match",
       "newPasswordLabel": "New password",
       "submit": "Change the password",
+      "success": "Password don update — abeg sign in again",
       "title": "Change password",
       "toastDescription": "Password changes no dey work for this build yet.",
-      "toastTitle": "E no dey available yet"
+      "toastTitle": "E no dey available yet",
+      "tooShort": "New password must be at least 8 characters",
+      "updating": "E dey update…"
     },
     "copiedToClipboard": "We don copy am",
     "copyError": "We no fit copy am",
+    "passkeys": {
+      "add": "Add passkey",
+      "addError": "We no fit register that passkey.",
+      "added": "You add am {{date}}",
+      "continue": "Continue",
+      "deleteError": "We no fit remove passkey",
+      "description": "Sign in without password — use Face ID, Touch ID, Windows Hello, or security key.",
+      "empty": "No passkey dey registered yet.",
+      "lastUsed": "you use am last {{date}}",
+      "nameLabel": "Give this device name",
+      "namePlaceholder": "e.g. iPhone Face ID",
+      "remove": "Remove {{name}}",
+      "title": "Passkeys",
+      "waiting": "We dey wait for browser…"
+    },
+    "push": {
+      "description": "Get alert for this device for deposits, payouts, and security events.",
+      "disabled": "Off",
+      "enabled": "E dey active on this device",
+      "genericError": "We no fit turn on notifications — abeg try again.",
+      "iosInstallRequired": "For iPhone/iPad, Safari dey only allow push notifications for installed app — use Share button and \"Add to Home Screen\", then open am from there.",
+      "notConfigured": "Push notifications never dey setup on this platform yet.",
+      "permissionDenied": "You no give permission for notifications — check your browser site settings.",
+      "title": "Push notifications",
+      "unsupported": "This browser no support push notifications.",
+      "unsupportedBrowser": "This browser no support push notifications."
+    },
+    "pwa": {
+      "description": "Add {{name}} to your home screen make you enter with one tap, like normal app.",
+      "install": "Install app",
+      "installed": "E don install for this device already.",
+      "iosIntro": "For iPhone/iPad, add am from Safari share menu:",
+      "iosStep1": "Tap Share icon",
+      "iosStep2": "Tap \"Add to Home Screen\"",
+      "title": "Install app",
+      "unavailable": "Your browser never show install prompt yet — try reload the page, or check browser menu."
+    },
+    "sessions": {
+      "description": "Devices wey currently sign in to your account.",
+      "empty": "No active session dey.",
+      "revokeError": "We no fit sign out that device",
+      "signOut": "Sign out",
+      "thisDevice": "This device",
+      "title": "Active sessions",
+      "unknownDevice": "Unknown device",
+      "unknownIp": "Unknown location"
+    },
     "subtitle": "Manage how your account dey safe",
     "title": "Settings",
     "twoFactor": {
@@ -882,29 +1100,28 @@
         "disabled": "We don disable two-factor authentication",
         "setupError": "We no fit start setup"
       }
-    },
-    "passkeys": {
-      "title": "Passkeys",
-      "description": "Sign in without password — use Face ID, Touch ID, Windows Hello, or security key.",
-      "add": "Add passkey",
-      "empty": "No passkey dey registered yet.",
-      "added": "You add am {{date}}",
-      "lastUsed": "you use am last {{date}}",
-      "remove": "Remove {{name}}",
-      "nameLabel": "Give this device name",
-      "namePlaceholder": "e.g. iPhone Face ID",
-      "continue": "Continue",
-      "waiting": "We dey wait for browser…",
-      "addError": "We no fit register that passkey.",
-      "deleteError": "We no fit remove passkey"
     }
+  },
+  "setupPassword": {
+    "confirmPasswordLabel": "Confirm password",
+    "description": "You sign in with one-time link — set password now make you fit sign in directly next time.",
+    "genericError": "We no fit set your password.",
+    "mismatch": "Passwords no match",
+    "newPasswordLabel": "New password",
+    "submit": "Save password",
+    "submitting": "E dey save…",
+    "title": "Choose password",
+    "tooShort": "Password must be at least 8 characters"
   },
   "signup": {
     "accountTypeLabel": "Wetin kind account",
     "alreadyHaveAccount": "You get account already?",
+    "backToLogin": "Go back to sign in",
     "business": "Business",
     "businessNameLabel": "Business name",
     "callingCodeAriaLabel": "Calling code",
+    "checkEmailDescription": "We don send verification link go your email address. Verify am make you finish set up your account.",
+    "checkEmailTitle": "Check your email",
     "countryLabel": "Country",
     "createAccount": "Open account",
     "createYourAccount": "Open your account",
@@ -921,6 +1138,58 @@
     "signIn": "Sign in",
     "startSendingDescription": "Start send, hold and spend for minutes"
   },
+  "statements": {
+    "amount": "Amount",
+    "balanceAfter": "Balance after",
+    "credit": "Credit",
+    "date": "Date",
+    "debit": "Debit",
+    "description": "Description",
+    "direction": "Credit/Debit",
+    "downloadError": "We no fit download statement",
+    "downloadExcel": "Download Excel",
+    "downloadPdf": "Download PDF",
+    "emailError": "We no fit email statement",
+    "emailFormat": "Email as",
+    "emailMe": "Email me this statement",
+    "emailed": "We don send statement to {{email}}",
+    "empty": "No transaction dey for this period",
+    "from": "From",
+    "parameters": "Pick wallet and period",
+    "preview": "Preview (last 100 lines)",
+    "sending": "E dey send…",
+    "subtitle": "Every credit, debit, and balance after each transaction, for the period wey you pick",
+    "title": "Statement of account",
+    "to": "To",
+    "wallet": "Wallet"
+  },
+  "support": {
+    "chatHint": "Use the chat bubble for corner make you talk to us live",
+    "chatOnline": "Online",
+    "chatUnavailable": "Live chat no dey available now",
+    "contact": "Contact us",
+    "deposit": "Deposit",
+    "faq": "Questions wey people dey ask",
+    "liveChat": "Live chat",
+    "message": "Message",
+    "messagePlaceholder": "Tell us wetin happen…",
+    "noEmail": "Use the form below make you reach us",
+    "payout": "Payout",
+    "replyPlaceholder": "Write reply…",
+    "send": "Send message",
+    "sendMessage": "Send us message",
+    "sendMessageDescription": "We go reply to the email on your account",
+    "sending": "E dey send…",
+    "subject": "Subject",
+    "subjectPlaceholder": "Wetin you need help with?",
+    "subtitle": "Get help, chat with us, or read questions wey people dey ask",
+    "ticketError": "We no fit send your message",
+    "ticketSent": "We don send message — we go reply you here and for email",
+    "title": "Support",
+    "viewTransaction": "See transaction",
+    "you": "You",
+    "yourTickets": "Your tickets"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "Check profile"
@@ -929,21 +1198,57 @@
       "notifications": "Notifications",
       "switchToDarkMode": "Change to dark mode",
       "switchToLightMode": "Change to light mode"
-    }
+    },
+    "switchToDarkMode": "Switch to dark mode",
+    "switchToLightMode": "Switch to light mode"
+  },
+  "transactions": {
+    "allCurrencies": "All currencies",
+    "allStatuses": "All statuses",
+    "allTypes": "All types",
+    "amount": "Amount",
+    "clearFilters": "Clear filters",
+    "currency": "Currency",
+    "date": "Date",
+    "description": "Description",
+    "empty": "No transaction match these filters",
+    "from": "From",
+    "pageOf": "Page {{page}} / {{totalPages}}",
+    "search": "Search",
+    "searchPlaceholder": "Description, reference, or ID",
+    "status": "Status",
+    "subtitle": "Every transaction across all of your wallets",
+    "title": "Transaction history",
+    "to": "To",
+    "type": "Type"
+  },
+  "verifyEmail": {
+    "backToLogin": "Go back to sign in",
+    "errorTitle": "Verification fail",
+    "genericError": "We no fit verify your email.",
+    "missingToken": "Token no dey this verification link.",
+    "successDescription": "Your email don verify — you fit sign in now.",
+    "successTitle": "Email verified",
+    "verifyingTitle": "We dey verify your email…"
   },
   "virtualAccounts": {
     "accountReady": "Virtual account don ready",
     "addCurrency": "Add currency",
     "allCurrenciesAdded": "You don get account for every currency wey dey available.",
+    "backToAccounts": "Virtual accounts",
     "copiedToClipboard": "We don copy am",
     "copyError": "We no fit copy am",
     "copyField": "Copy {{field}}",
     "createAccount": "Create account",
     "createAccountError": "We no fit create account",
     "creating": "We dey create am…",
+    "depositsSubtitle": "Every incoming transfer wey enter your virtual accounts.",
+    "depositsTitle": "Transfer deposits",
     "noAccountsYet": "No virtual accounts yet — provision one for currency below.",
+    "noActivity": "No transfer don enter yet.",
     "noCurrenciesAvailable": "No virtual account currencies dey available yet.",
     "noVerificationNeeded": "No verification need",
+    "recentActivity": "Recent activity",
     "requiresVerification": "E need {{endorsement}} verification — contact support make you start.",
     "shareDetails": "Share these details with anybody wey dey send money come.",
     "startVerification": "Start verification",
@@ -951,6 +1256,8 @@
     "title": "Virtual accounts",
     "verificationNote": "Some rails need one-time verification before we fit issue account.",
     "verified": "We don verify am",
+    "viewAllActivity": "See all transfer deposits",
+    "viewDepositHistory": "Deposit history",
     "yourAccounts": "Your accounts"
   },
   "walletBalanceCard": {
@@ -971,6 +1278,7 @@
     "removeWalletError": "We no fit comot wallet",
     "removing": "We dey comot am…",
     "statement": "Statement",
+    "viewFullStatement": "See full statement / export",
     "walletRemoved": "We don comot wallet",
     "walletTitle": "{{currencyCode}} wallet"
   },

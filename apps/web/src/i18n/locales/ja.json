@@ -37,8 +37,10 @@
     "removeDialogTitle": "{{name}}を削除しますか？",
     "removeError": "受取人を削除できませんでした",
     "removed": "受取人を削除しました",
+    "requiresVerification": "{{endorsement}} の認証が必要です — サポートにお問い合わせください。",
     "selectCountryPlaceholder": "国を選択",
     "selectFieldPlaceholder": "{{field}}を選択",
+    "startVerification": "認証を開始",
     "steps": {
       "paymentDetails": "支払い情報",
       "payoutMethod": "受取方法",
@@ -57,7 +59,51 @@
     "transferRange": "1回の送金につき{{min}}〜{{max}} {{currency}}",
     "updateError": "受取人を更新できませんでした",
     "updated": "受取人を更新しました",
+    "verified": "認証済み",
     "whoAreYouSendingTo": "誰に送金しますか？"
+  },
+  "businessSpendCards": {
+    "activateCard": "ビジネスカードを有効化",
+    "addFunds": "資金を追加",
+    "cancel": "キャンセル",
+    "cardTitle": "ビジネスカード",
+    "confirmTerminate": "もう一度クリックして確認 — この操作は取り消せません",
+    "emptyState": "ビジネスカードはまだありません。申し込んで利用を開始してください。",
+    "exp": "有効期限 {{date}}",
+    "fund": "チャージ",
+    "manage": "管理 →",
+    "monthlySpendingLimit": "月間利用限度額 (USD)",
+    "noTransactions": "取引はまだありません。",
+    "requestCard": "ビジネスカードを申し込む",
+    "requestDialogHelp": "残高ゼロで発行されます — 準備ができたらUSDウォレットからチャージしてください。",
+    "requestDialogTitle": "ビジネスカードの申し込み",
+    "requesting": "申し込み中…",
+    "retryTermination": "解約を再試行",
+    "save": "保存",
+    "setPin": "PINを設定",
+    "subtitle": "貴社向けのビジネスカード、USDウォレットから資金供給",
+    "subtitleUsd": "Visa · USD",
+    "suspendCard": "ビジネスカードを一時停止",
+    "terminateCard": "ビジネスカードを解約",
+    "title": "ビジネスカード",
+    "toast": {
+      "cardFunded": "ビジネスカードにチャージしました",
+      "cardIssued": "ビジネスカードが発行されました",
+      "issueCardError": "ビジネスカードを発行できませんでした",
+      "limitsError": "利用限度額を更新できませんでした",
+      "limitsUpdated": "利用限度額を更新しました",
+      "pinError": "PINを更新できませんでした",
+      "pinUpdated": "PINを更新しました",
+      "statusError": "カードの状態を更新できませんでした",
+      "terminationPending": "カード残高が空になりました — 自動解約処理中です。しばらくしてからここでお試しください。",
+      "walletActionFailed": "操作に失敗しました",
+      "withdrawalSubmitted": "出金リクエストを送信しました"
+    },
+    "transactionFallback": "取引",
+    "transactions": "取引履歴",
+    "usd": "ビジネスカード · USD",
+    "withdraw": "出金",
+    "withdrawFeeNote": "残高をゼロまで全額出金するとカードは自動的に解約されます。出金には手数料が発生する場合があります。"
   },
   "cards": {
     "addFunds": "入金する",
@@ -120,7 +166,9 @@
     "withdrawFeeNote": "出金額がウォレットに反映される前に手数料が差し引かれます。"
   },
   "common": {
-    "language": "言語"
+    "app": "アプリ",
+    "language": "言語",
+    "loading": "読み込み中…"
   },
   "crypto": {
     "addressCopied": "アドレスをコピーしました",
@@ -151,6 +199,7 @@
     },
     "subtitle": "お客様のアカウントの最新状況です",
     "title": "おかえりなさい",
+    "titleNamed": "おかえりなさい、{{name}}さん",
     "walletLabel": "ウォレット"
   },
   "dashboardLayout": {
@@ -200,8 +249,12 @@
   "deposit": {
     "buttons": {
       "back": "戻る",
+      "confirmQuote": "確定して支払いリンクを取得",
       "continue": "続ける",
-      "startDeposit": "入金を開始"
+      "getQuote": "見積もりを取得",
+      "requote": "再見積もり",
+      "startDeposit": "入金を開始",
+      "startOver": "最初からやり直す"
     },
     "cryptoCard": {
       "description": "入金アドレスとオンチェーン入金履歴は専用ページに移動しました。",
@@ -211,11 +264,17 @@
     "dialog": {
       "amountToPay": "お支払い金額",
       "copyLinkAriaLabel": "リンクをコピー",
+      "depositId": "入金ID",
       "estimatedDelivery": "着金予定日",
       "exchangeRate": "為替レート",
       "fee": "手数料",
+      "goToCheckout": "決済へ進む",
       "initiated": "入金を開始しました",
+      "negativeCredit": "手数料が入金額を上回っています — 入金後の金額がマイナスになります。より大きな金額をお試しください。",
       "openLinkAriaLabel": "リンクを開く",
+      "quoteExpired": "この見積もりは有効期限が切れました — 最新のレートを取得して続行してください。",
+      "quoteExpiresIn": "レート保証期間 {{seconds}}秒。",
+      "reviewQuote": "見積もり内容を確認",
       "title": "入金する",
       "youllReceive": "受取金額"
     },
@@ -229,6 +288,11 @@
       "description": "国を選択し、銀行振込、CODI、DEBINなどのローカル決済で入金してください。",
       "title": "またはローカル決済方法で入金"
     },
+    "recent": {
+      "empty": "入金履歴はまだありません。",
+      "title": "最近の入金",
+      "viewAll": "すべて表示"
+    },
     "step0": {
       "countryLabel": "国",
       "countryPlaceholder": "国を選択",
@@ -238,10 +302,14 @@
       "methodRange": "1回の入金につき{{min}}〜{{max}} {{currency}}",
       "noMethods": "この国に対応する入金方法は現在ありません。",
       "prompt": "{{country}}からどのようにお支払いしますか？",
-      "thisCountryFallback": "この国"
+      "requiresVerification": "{{endorsement}} の認証が必要です — サポートにお問い合わせください。",
+      "startVerification": "認証を開始",
+      "thisCountryFallback": "この国",
+      "verified": "認証済み"
     },
     "step2": {
       "amountLabel": "金額（{{currency}}）",
+      "noEligibleWallet": "この方法でサポートされている通貨のウォレットがありません（{{currencies}}）。",
       "prompt": "{{method}} — 金額と詳細",
       "selectFieldPlaceholder": "{{field}}を選択",
       "walletLabel": "入金先ウォレット",
@@ -260,8 +328,26 @@
       "copyFailed": "コピーできませんでした",
       "pickCountry": "続けるには国を選択してください",
       "pickMethod": "続けるには支払い方法を選択してください",
+      "quoteFailed": "見積もりを取得できませんでした",
       "startFailed": "入金を開始できませんでした"
     }
+  },
+  "email": {
+    "banner": {
+      "cta": "メールを再送",
+      "message": "アカウントの全機能をご利用いただくため、メールアドレス ({{email}}) の認証を完了してください。",
+      "resendFailed": "再送できませんでした",
+      "sending": "送信中…",
+      "sent": "確認メールを送信しました — 受信トレイをご確認ください。"
+    }
+  },
+  "forgotPassword": {
+    "backToLogin": "サインインに戻る",
+    "description": "メールアドレスを入力してください。パスワード再設定用のリンクをお送りします。",
+    "sending": "送信中…",
+    "sentDescription": "そのメールアドレスのアカウントが存在する場合、パスワード再設定リンクを送信しました。",
+    "submit": "再設定リンクを送信",
+    "title": "パスワードの再設定"
   },
   "kycBusiness": {
     "actions": {
@@ -392,6 +478,13 @@
       }
     }
   },
+  "kycContinue": {
+    "backToLogin": "サインインに戻る",
+    "errorTitle": "続行できません",
+    "genericError": "このリンクでは認証を続行できませんでした。",
+    "missingToken": "このリンクにはトークンがありません。",
+    "verifyingTitle": "前回の続きから再開中…"
+  },
   "kycIndividual": {
     "actions": {
       "continue": "続ける",
@@ -487,8 +580,15 @@
   "kycShared": {
     "backButton": "戻る",
     "chooseCountryFirstPlaceholder": "先に国を選択してください",
+    "chooseFile": "ファイルを選択",
     "cityLabel": "市区町村",
     "clickToUpload": "クリックしてアップロード",
+    "continueDialogHint": "スマートフォンのカメラでスキャンするかリンクをコピーしてください — サインインした状態で中断した場所から再開できます。15分間有効です。",
+    "continueDialogTitle": "別のデバイスで続行",
+    "continueLinkError": "リンクを作成できませんでした",
+    "continueOnDevice": "別のデバイスで続行",
+    "copyLink": "リンクをコピー",
+    "copyLinkError": "リンクをコピーできませんでした",
     "countryLabel": "国",
     "dateIssuedLabel": "発行日",
     "documentBackOptionalLabel": "書類 — 裏面（任意）",
@@ -500,6 +600,7 @@
     "expirationDateOptionalLabel": "有効期限（任意）",
     "fixBeforeContinuing": "続ける前に、以下の内容を修正してください。",
     "issuingCountryLabel": "発行国",
+    "linkCopied": "リンクをコピーしました",
     "loadingEllipsis": "読み込み中…",
     "noMatches": "一致する結果はありません。",
     "noPostalCodesText": "この国では郵便番号は使用されません。",
@@ -517,7 +618,8 @@
     "stepOf": "ステップ {{current}} / {{total}}",
     "streetAddress2Label": "番地・建物名2（任意）",
     "streetAddressLabel": "番地・建物名",
-    "streetAddressPlaceholder": "123 Main St"
+    "streetAddressPlaceholder": "123 Main St",
+    "takePhoto": "写真を撮る"
   },
   "kycWizard": {
     "backToDashboard": "ダッシュボードに戻る",
@@ -683,19 +785,40 @@
     "createAccount": "アカウントを作成",
     "defaultProductName": "White Label",
     "emailLabel": "メールアドレス",
+    "forgotPassword": "パスワードをお忘れですか？",
     "genericError": "サインインできません。認証情報をご確認ください。",
     "invalidCodeError": "コードが正しくありません。もう一度お試しください。",
+    "magicLinkDescription": "パスワード不要でサインインできるリンクをメールでお送りします。",
+    "magicLinkSend": "サインインリンクを送信",
+    "magicLinkSending": "送信中…",
+    "magicLinkSentBody": "{{email}} のアカウントが存在する場合、サインインリンクを送信しました。15分間有効です。",
+    "magicLinkSentDescription": "メールでサインインリンクをご確認ください。",
     "newHere": "初めてご利用ですか？",
+    "or": "または",
+    "passkeyError": "そのパスキーでサインインできませんでした。",
+    "passkeyWaiting": "パスキーを待機中…",
     "passwordLabel": "パスワード",
+    "resendVerification": "確認メールを再送",
+    "resendingVerification": "再送中…",
     "signIn": "サインイン",
     "signInDescription": "アカウントにサインインしてください",
+    "signInWithPasskey": "パスキーでサインイン",
     "signingIn": "サインイン中…",
+    "stepUpDescription": "新しい場所からのサインインが検出されました。メールでお送りした確認コードを入力してください。",
     "verificationCodeLabel": "確認コード",
+    "verificationResent": "確認メールを送信しました — 受信トレイをご確認ください。",
     "verify": "確認",
     "verifyDescription": "認証アプリに表示された6桁のコード、またはバックアップコードを入力してください。",
     "verifyHeading": "本人確認",
     "verifying": "確認中…",
     "welcomeBack": "おかえりなさい"
+  },
+  "magicLink": {
+    "backToLogin": "サインインに戻る",
+    "errorTitle": "サインインに失敗しました",
+    "genericError": "このリンクでサインインできませんでした。",
+    "missingToken": "このサインインリンクにはトークンがありません。",
+    "verifyingTitle": "サインイン中…"
   },
   "nav": {
     "account": "アカウント",
@@ -706,11 +829,14 @@
       "send": "送金"
     },
     "beneficiaries": "受取人",
+    "businessSpendCards": "ビジネスカード",
     "cards": "カード",
     "cryptoWallets": "暗号資産ウォレット",
     "dashboard": "ダッシュボード",
     "deposit": "入金",
+    "home": "ホーム",
     "logout": "ログアウト",
+    "payout": "出金",
     "portal": "ポータル",
     "profileKyc": "プロフィール・本人確認",
     "section": {
@@ -719,9 +845,22 @@
     },
     "sendMoney": "送金する",
     "settings": "設定",
+    "statements": "明細書",
+    "support": "サポート",
+    "team": "チーム",
+    "transactions": "取引履歴",
     "virtualAccounts": "バーチャルアカウント",
     "wallets": "ウォレット",
     "whiteLabel": "White Label"
+  },
+  "notFound": {
+    "message": "お探しのページは見つかりませんでした。"
+  },
+  "notifications": {
+    "empty": "すべて確認済みです。",
+    "loading": "読み込み中…",
+    "markAllRead": "すべて既読にする",
+    "title": "通知"
   },
   "profile": {
     "accountTitle": "アカウント",
@@ -740,11 +879,36 @@
     "subheading": "本人確認情報を管理する",
     "typeLabel": "種類"
   },
+  "pwa": {
+    "banner": {
+      "cta": "インストール",
+      "dismiss": "閉じる",
+      "message": "このデバイスに {{name}} をインストールして、1タップでアクセス。"
+    }
+  },
+  "resetPassword": {
+    "backToLogin": "サインインに戻る",
+    "confirmPasswordLabel": "新しいパスワード（確認）",
+    "description": "このリンクは1回のみ使用可能で、有効期限は1時間です。",
+    "genericError": "パスワードを再設定できませんでした。",
+    "mismatch": "パスワードが一致しません",
+    "missingToken": "この再設定リンクにはトークンがありません。",
+    "missingTokenTitle": "無効なリンク",
+    "newPasswordLabel": "新しいパスワード",
+    "requestNewLink": "新しいリンクをリクエスト",
+    "submit": "パスワードを再設定",
+    "successDescription": "パスワードが再設定されました — サインインできます。",
+    "successTitle": "パスワードを更新しました",
+    "title": "新しいパスワードを設定",
+    "tooShort": "新しいパスワードは8文字以上である必要があります",
+    "updating": "更新中…"
+  },
   "send": {
     "amountStep": {
       "amountLabel": "送金額（{{currency}}）",
       "amountPlaceholder": "100.00",
       "debitWalletLabel": "引き落とし元ウォレット",
+      "noEligibleWallet": "受取人の出金方法がサポートしている通貨のウォレットがありません（{{currencies}}）。",
       "prompt": "送金額",
       "promptTo": "{{name}}への送金額",
       "recipientFallback": "受取人",
@@ -775,6 +939,8 @@
     "review": {
       "expired": "この見積もりの有効期限が切れました — 続けるには再取得してください。",
       "expiresIn": "見積もりの有効期限まであと{{seconds}}秒です。",
+      "feeLabel": "プラットフォーム手数料",
+      "payoutAmountLabel": "出金金額",
       "rateLabel": "レート",
       "recipientGetsLabel": "受取人の受取額",
       "toLabel": "宛先",
@@ -830,18 +996,74 @@
     }
   },
   "settings": {
+    "activity": {
+      "description": "アカウントに関する最近のセキュリティイベント。",
+      "title": "セキュリティアクティビティ"
+    },
     "changePassword": {
       "confirmPasswordLabel": "新しいパスワード（確認）",
       "currentPasswordLabel": "現在のパスワード",
       "description": "他では使用していない、強固なパスワードを設定してください。",
+      "error": "パスワードを更新できませんでした",
+      "mismatch": "パスワードが一致しません",
       "newPasswordLabel": "新しいパスワード",
       "submit": "パスワードを更新",
+      "success": "パスワードを更新しました — 再度サインインしてください",
       "title": "パスワードを変更",
       "toastDescription": "パスワード変更機能は現在このビルドでは利用できません。",
-      "toastTitle": "まだご利用いただけません"
+      "toastTitle": "まだご利用いただけません",
+      "tooShort": "新しいパスワードは8文字以上である必要があります",
+      "updating": "更新中…"
     },
     "copiedToClipboard": "クリップボードにコピーしました",
     "copyError": "コピーできませんでした",
+    "passkeys": {
+      "add": "パスキーを追加",
+      "addError": "そのパスキーを登録できませんでした。",
+      "added": "{{date}} に追加",
+      "continue": "続ける",
+      "deleteError": "パスキーを削除できませんでした",
+      "description": "Face ID、Touch ID、Windows Hello、またはセキュリティキーを使用してパスワードなしでサインインします。",
+      "empty": "登録されたパスキーはまだありません。",
+      "lastUsed": "最終使用 {{date}}",
+      "nameLabel": "このデバイスの名前",
+      "namePlaceholder": "例: iPhone Face ID",
+      "remove": "{{name}} を削除",
+      "title": "パスキー",
+      "waiting": "ブラウザを待機中…"
+    },
+    "push": {
+      "description": "入金、出金、セキュリティイベントに関する通知をこのデバイスで受け取ります。",
+      "disabled": "オフ",
+      "enabled": "このデバイスで有効",
+      "genericError": "通知を有効にできませんでした — もう一度お試しください。",
+      "iosInstallRequired": "iPhone/iPadのSafariではインストールされたアプリでのみプッシュ通知が許可されます — 共有ボタンから「ホーム画面に追加」し、そこから開いて有効にしてください。",
+      "notConfigured": "このプラットフォームではプッシュ通知がまだ設定されていません。",
+      "permissionDenied": "通知の許可が得られませんでした — ブラウザのサイト設定をご確認ください。",
+      "title": "プッシュ通知",
+      "unsupported": "このブラウザはプッシュ通知に対応していません。",
+      "unsupportedBrowser": "このブラウザはプッシュ通知に対応していません。"
+    },
+    "pwa": {
+      "description": "{{name}} をホーム画面に追加して、ネイティブアプリのように1タップでアクセス。",
+      "install": "アプリをインストール",
+      "installed": "このデバイスにはすでにインストールされています。",
+      "iosIntro": "iPhone/iPadでは、Safariの共有メニューから追加してください:",
+      "iosStep1": "共有アイコンをタップ",
+      "iosStep2": "「ホーム画面に追加」をタップ",
+      "title": "アプリをインストール",
+      "unavailable": "ブラウザからインストールプロンプトが表示されていません — ページを再読み込みするかブラウザメニューを確認してください。"
+    },
+    "sessions": {
+      "description": "現在アカウントにサインインしているデバイス。",
+      "empty": "アクティブなセッションはありません。",
+      "revokeError": "そのデバイスをサインアウトできませんでした",
+      "signOut": "サインアウト",
+      "thisDevice": "このデバイス",
+      "title": "アクティブなセッション",
+      "unknownDevice": "不明なデバイス",
+      "unknownIp": "不明な場所"
+    },
     "subtitle": "アカウントのセキュリティを管理する",
     "title": "設定",
     "twoFactor": {
@@ -880,12 +1102,26 @@
       }
     }
   },
+  "setupPassword": {
+    "confirmPasswordLabel": "パスワード（確認）",
+    "description": "ワンタイムリンクでサインインしました — 次回直接サインインできるようにパスワードを設定してください。",
+    "genericError": "パスワードを設定できませんでした。",
+    "mismatch": "パスワードが一致しません",
+    "newPasswordLabel": "新しいパスワード",
+    "submit": "パスワードを保存",
+    "submitting": "保存中…",
+    "title": "パスワードを設定",
+    "tooShort": "パスワードは8文字以上である必要があります"
+  },
   "signup": {
     "accountTypeLabel": "アカウントの種類",
     "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "backToLogin": "サインインに戻る",
     "business": "法人",
     "businessNameLabel": "会社名",
     "callingCodeAriaLabel": "国番号",
+    "checkEmailDescription": "ご登録のメールアドレスに確認リンクを送信しました。認証を完了してアカウント設定を完了してください。",
+    "checkEmailTitle": "メールをご確認ください",
     "countryLabel": "国",
     "createAccount": "アカウントを作成",
     "createYourAccount": "アカウントを作成する",
@@ -902,6 +1138,58 @@
     "signIn": "サインイン",
     "startSendingDescription": "数分で送金・保有・利用を始められます"
   },
+  "statements": {
+    "amount": "金額",
+    "balanceAfter": "取引後残高",
+    "credit": "入金",
+    "date": "日付",
+    "debit": "出金",
+    "description": "詳細",
+    "direction": "入出金",
+    "downloadError": "明細書をダウンロードできませんでした",
+    "downloadExcel": "Excelをダウンロード",
+    "downloadPdf": "PDFをダウンロード",
+    "emailError": "明細書をメール送信できませんでした",
+    "emailFormat": "送信形式",
+    "emailMe": "この明細書をメールで受信",
+    "emailed": "明細書を {{email}} に送信しました",
+    "empty": "この期間の取引はありません",
+    "from": "開始日",
+    "parameters": "ウォレットと期間を選択",
+    "preview": "プレビュー（直近100件）",
+    "sending": "送信中…",
+    "subtitle": "選択した期間中のすべての入金、出金、および各取引後の残高",
+    "title": "取引明細書",
+    "to": "終了日",
+    "wallet": "ウォレット"
+  },
+  "support": {
+    "chatHint": "画面下のチャットアイコンからリアルタイムでお問い合わせいただけます",
+    "chatOnline": "オンライン",
+    "chatUnavailable": "ライブチャットは現在ご利用いただけません",
+    "contact": "お問い合わせ",
+    "deposit": "入金",
+    "faq": "よくある質問",
+    "liveChat": "ライブチャット",
+    "message": "メッセージ",
+    "messagePlaceholder": "お問い合わせ内容をご記入ください…",
+    "noEmail": "以下のお問い合わせフォームをご利用ください",
+    "payout": "出金",
+    "replyPlaceholder": "返信を入力…",
+    "send": "メッセージを送信",
+    "sendMessage": "メッセージを送信する",
+    "sendMessageDescription": "アカウントに登録されているメールアドレスに返信いたします",
+    "sending": "送信中…",
+    "subject": "件名",
+    "subjectPlaceholder": "どのようなご用件でしょうか？",
+    "subtitle": "サポートの利用、チャット、よくある質問の閲覧",
+    "ticketError": "メッセージを送信できませんでした",
+    "ticketSent": "メッセージを送信しました — こちらおよびメールにてご連絡いたします",
+    "title": "サポート",
+    "viewTransaction": "取引を表示",
+    "you": "お客様",
+    "yourTickets": "お問い合わせ履歴"
+  },
   "topbar": {
     "aurora": {
       "viewProfile": "プロフィールを表示"
@@ -910,21 +1198,57 @@
       "notifications": "通知",
       "switchToDarkMode": "ダークモードに切り替え",
       "switchToLightMode": "ライトモードに切り替え"
-    }
+    },
+    "switchToDarkMode": "ダークモードに切り替え",
+    "switchToLightMode": "ライトモードに切り替え"
+  },
+  "transactions": {
+    "allCurrencies": "すべての通貨",
+    "allStatuses": "すべてのステータス",
+    "allTypes": "すべての種類",
+    "amount": "金額",
+    "clearFilters": "フィルターをクリア",
+    "currency": "通貨",
+    "date": "日付",
+    "description": "詳細",
+    "empty": "条件に一致する取引はありません",
+    "from": "開始",
+    "pageOf": "{{page}} / {{totalPages}} ページ",
+    "search": "検索",
+    "searchPlaceholder": "詳細、照会番号、またはID",
+    "status": "ステータス",
+    "subtitle": "すべてのウォレットにおけるすべての取引",
+    "title": "取引履歴",
+    "to": "終了",
+    "type": "種類"
+  },
+  "verifyEmail": {
+    "backToLogin": "サインインに戻る",
+    "errorTitle": "認証に失敗しました",
+    "genericError": "メールアドレスを認証できませんでした。",
+    "missingToken": "この確認リンクにはトークンがありません。",
+    "successDescription": "メールアドレスが認証されました — サインインできます。",
+    "successTitle": "メール認証完了",
+    "verifyingTitle": "メールアドレスを認証中…"
   },
   "virtualAccounts": {
     "accountReady": "バーチャルアカウントの準備ができました",
     "addCurrency": "通貨を追加",
     "allCurrenciesAdded": "利用可能なすべての通貨のアカウントをすでにお持ちです。",
+    "backToAccounts": "バーチャル口座",
     "copiedToClipboard": "クリップボードにコピーしました",
     "copyError": "コピーできませんでした",
     "copyField": "{{field}}をコピー",
     "createAccount": "アカウントを作成",
     "createAccountError": "アカウントを作成できませんでした",
     "creating": "作成中…",
+    "depositsSubtitle": "バーチャル口座に受領したすべての着金履歴。",
+    "depositsTitle": "振込入金",
     "noAccountsYet": "バーチャルアカウントはまだありません — 下から通貨を選んで発行してください。",
+    "noActivity": "着金履歴はまだありません。",
     "noCurrenciesAvailable": "現在利用可能なバーチャルアカウントの通貨はありません。",
     "noVerificationNeeded": "本人確認は不要です",
+    "recentActivity": "最近のアクティビティ",
     "requiresVerification": "{{endorsement}}の本人確認が必要です — 開始するにはサポートまでお問い合わせください。",
     "shareDetails": "この情報を送金元の相手に共有してください。",
     "startVerification": "本人確認を開始",
@@ -932,6 +1256,8 @@
     "title": "バーチャルアカウント",
     "verificationNote": "一部のレールでは、アカウント発行前に一度限りの本人確認が必要です。",
     "verified": "確認済み",
+    "viewAllActivity": "すべての振込入金を表示",
+    "viewDepositHistory": "入金履歴",
     "yourAccounts": "お客様のアカウント"
   },
   "walletBalanceCard": {
@@ -952,6 +1278,7 @@
     "removeWalletError": "ウォレットを削除できませんでした",
     "removing": "削除中…",
     "statement": "明細書",
+    "viewFullStatement": "完全な明細書を表示 / エクスポート",
     "walletRemoved": "ウォレットを削除しました",
     "walletTitle": "{{currencyCode}}ウォレット"
   },
