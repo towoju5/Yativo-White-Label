@@ -20,5 +20,11 @@ export const EXTENSION_BY_MIME: Record<string, string> = {
   "image/svg+xml": "svg",
 };
 
-/** A local storage key is always `${randomUUID()}.${ext}` — never derived from client input. */
-export const LOCAL_STORAGE_KEY_PATTERN = /^[a-f0-9-]{36}\.(png|jpg|jpeg|webp|svg)$/i;
+/**
+ * A local storage key is always `${randomUUID()}.${ext}`, optionally with a leading
+ * `demo_<32 hex chars>_` prefix (see demoStorageKeyPrefix()) for keys written during a demo
+ * session — never derived from client input either way, so this stays a closed, generated shape
+ * rather than something an attacker could widen. No `/` is ever permitted, which is what defeats
+ * path traversal in localAssets.routes.ts.
+ */
+export const LOCAL_STORAGE_KEY_PATTERN = /^(demo_[0-9a-f]{32}_)?[a-f0-9-]{36}\.(png|jpg|jpeg|webp|svg)$/i;

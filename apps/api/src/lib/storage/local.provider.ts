@@ -6,6 +6,8 @@ import { env } from "../../config/env.js";
 import { AppError } from "../errors.js";
 import { EXTENSION_BY_MIME, LOCAL_STORAGE_KEY_PATTERN } from "./localStorageConstants.js";
 import type { StorageProvider, UploadMeta, UploadResult } from "./StorageProvider.js";
+import { getCurrentDemoContext } from "../../modules/demo/demoContext.js";
+import { demoStorageKeyPrefix } from "../../modules/demo/demoStorage.js";
 
 /** Outside apps/api/src — never inside anything @fastify/static or similar could ever be pointed at. */
 const DEFAULT_ROOT_DIR = fileURLToPath(new URL("../../../storage-uploads", import.meta.url));
@@ -24,7 +26,13 @@ export class LocalStorageProvider implements StorageProvider {
   async upload(buffer: Buffer, meta: UploadMeta): Promise<UploadResult> {
     const ext = EXTENSION_BY_MIME[meta.mimetype];
     if (!ext) throw new AppError(`Unsupported image type for local storage: ${meta.mimetype}`, 400, "UNSUPPORTED_FILE_TYPE");
-    const key = `${randomUUID()}.${ext}`;
+    // Demo requests get keys namespaced under a flat `demo_<sessionId>_` prefix (same scheme
+    // deleteLocalDemoStoragePrefix()'s flat-key fallback already scans for) so demo uploads are
+    // trivially bulk-deletable on cleanup and never collide with or get confused for production
+    // uploads. Outside a demo context this is a no-op — key shape is byte-for-byte unchanged.
+    const demoCtx = getCurrentDemoContext();
+    const prefix = demoCtx ? demoStorageKeyPrefix(demoCtx.demoSessionId).replace(/\//g, "_") : "";
+    const key = `${prefix}${randomUUID()}.${ext}`;
     await mkdir(LOCAL_STORAGE_ROOT_DIR, { recursive: true });
     await writeFile(path.join(LOCAL_STORAGE_ROOT_DIR, key), buffer);
     return { url: this.getUrl(key), key };
