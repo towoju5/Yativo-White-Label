@@ -63,6 +63,17 @@ const envSchema = z.object({
   // app runs) below. Set this explicitly in production if you want it rotatable independently of
   // that key.
   STATEMENT_VERIFY_SECRET: z.string().min(16).optional(),
+
+  // Temporary demo-environment system (see modules/demo/). Off by default — when false, demo
+  // routes/middleware/cron must not even register (checked at registration time, not just
+  // returning 404), so an unconfigured deployment is completely unaffected.
+  DEMO_ENABLED: z.coerce.boolean().default(false),
+  DEMO_DURATION_HOURS: z.coerce.number().positive().default(6),
+  // Public base URL the one-time demo link is built from, e.g. https://demo.example.com. Falls
+  // back to APP_BASE_URL below (parsedEnv not available yet here, resolved after parse).
+  DEMO_BASE_URL: z.string().url().optional(),
+  DEMO_DATABASE_PREFIX: z.string().min(1).default("demo_"),
+  DEMO_STORAGE_PREFIX: z.string().min(1).default("demo/"),
 });
 
 const parsedEnv = envSchema.parse(process.env);
@@ -70,5 +81,6 @@ const parsedEnv = envSchema.parse(process.env);
 export const env = {
   ...parsedEnv,
   STATEMENT_VERIFY_SECRET: parsedEnv.STATEMENT_VERIFY_SECRET ?? parsedEnv.CREDENTIAL_ENCRYPTION_KEY,
+  DEMO_BASE_URL: parsedEnv.DEMO_BASE_URL ?? parsedEnv.APP_BASE_URL,
 };
 export type Env = typeof env;

@@ -70,6 +70,8 @@ import { limitsRoutes } from "./modules/security/limits.routes.js";
 import { storageSettingsRoutes } from "./modules/storage/storageSettings.routes.js";
 import { localAssetsRoutes } from "./modules/storage/localAssets.routes.js";
 import { customerTeamRoutes } from "./modules/customerTeam/customerTeam.routes.js";
+import { demoRoutes } from "./modules/demo/demo.routes.js";
+import { demoContextPlugin } from "./modules/demo/demo.plugin.js";
 
 export async function buildApp() {
   // Fastify's default bodyLimit is 1MB — comfortably exceeded by a KYC submission carrying a
@@ -227,6 +229,15 @@ export async function buildApp() {
   await app.register(localAssetsRoutes);
   await app.register(customerTeamRoutes);
   await app.register(realtimeRoutes);
+
+  // Demo-environment system: only ever registered when DEMO_ENABLED=true. This is a real
+  // registration-time gate, not just a runtime 404 — with the flag off, demoContextPlugin's
+  // onRequest hook and every /admin/demo-sessions*/portal/demo/* route simply never exist on
+  // this Fastify instance.
+  if (env.DEMO_ENABLED) {
+    await app.register(demoContextPlugin);
+    await app.register(demoRoutes);
+  }
 
   return app;
 }

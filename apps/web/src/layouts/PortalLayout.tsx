@@ -3,11 +3,13 @@ import { useTemplate } from "@/templates/useTemplate";
 import { LiveChatWidget } from "@/components/LiveChatWidget";
 import { EmailVerificationBanner } from "@/components/kyc/EmailVerificationBanner";
 import { InstallAppBanner } from "@/components/pwa/InstallAppBanner";
+import { DemoExpiryBanner } from "@/components/demo/DemoExpiryBanner";
 
 export default function PortalLayout() {
   const T = useTemplate();
   return (
     <T.PortalShell>
+      <DemoExpiryBanner />
       <EmailVerificationBanner />
       <InstallAppBanner />
       <LiveChatWidget />

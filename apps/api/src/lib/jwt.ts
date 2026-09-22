@@ -7,6 +7,8 @@ export type StaffAccessClaims = {
   role: "OWNER" | "ADMIN" | "STAFF";
   /** The effective permission set at issue time — see resolveStaffPermissions(). Only meaningful for STAFF; OWNER/ADMIN bypass permission checks by role alone. */
   permissions: string[];
+  /** Present only for a token issued through the demo-environment flow (see modules/demo/). Lets downstream code route to the isolated demo Prisma client instead of app.prisma — see modules/demo/demoContext.ts. Never present on a normal staff login token. */
+  demoSessionId?: string;
 };
 /**
  * `sub` is the Customer id for the business owner's own login, or the CustomerTeamMember id for
@@ -26,6 +28,8 @@ export type PortalAccessClaims = {
   permissions?: string[];
   /** The CustomerRefreshToken row id this access token was issued alongside — lets the "active sessions" list (security/sessions.routes.ts) identify which row is the caller's own current session. Optional so a token issued before this existed keeps working (just never matches as current). */
   sessionId?: string;
+  /** Present only for a token issued through the demo-environment flow (see modules/demo/). Never present on a normal portal login token. */
+  demoSessionId?: string;
 };
 
 export function signStaffAccessToken(payload: Omit<StaffAccessClaims, "aud">): string {
