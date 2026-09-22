@@ -4,7 +4,7 @@ import qrcode from "qrcode";
 import { generateBase32Secret, buildOtpauthUrl, verifyTotp, generateBackupCodes } from "../../lib/totp.js";
 import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { getBranding } from "../branding/branding.service.js";
-import { enqueueEmail } from "../../jobs/emailQueue.js";
+import { sendSystemEmail } from "../notifications/notifications.service.js";
 import { logAdminAction } from "../../lib/adminAuditLog.js";
 import { AppError, UnauthorizedError, NotFoundError } from "../../lib/errors.js";
 
@@ -47,7 +47,7 @@ export async function confirmStaffTwoFactorSetup(prisma: PrismaClient, redis: Re
   });
   await redis.del(pendingKey(staffId));
   try {
-    await enqueueEmail({ to: staff.email, subject: "Two-factor authentication enabled", html: "<p>Two-factor authentication was just turned on for your admin account.</p>" });
+    await sendSystemEmail(prisma, "STAFF_TWO_FACTOR_ENABLED", staff.email, {});
   } catch {
     // Never blocks — same posture as every other auth email in this codebase.
   }
@@ -67,7 +67,7 @@ export async function disableStaffTwoFactor(prisma: PrismaClient, staffId: strin
     data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorBackupCodeHashes: [] },
   });
   try {
-    await enqueueEmail({ to: staff.email, subject: "Two-factor authentication disabled", html: "<p>Two-factor authentication was just turned off for your admin account. If this wasn't you, contact another owner/admin immediately.</p>" });
+    await sendSystemEmail(prisma, "STAFF_TWO_FACTOR_DISABLED", staff.email, {});
   } catch {
     // Never blocks.
   }

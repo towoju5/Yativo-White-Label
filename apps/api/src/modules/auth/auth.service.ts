@@ -8,8 +8,7 @@ import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { signStaffAccessToken, signStaffTwoFactorChallengeToken, verifyStaffTwoFactorChallengeToken, signStaffStepUpChallengeToken, verifyStaffStepUpChallengeToken } from "../../lib/jwt.js";
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
-import { enqueueEmail } from "../../jobs/emailQueue.js";
-import { getBranding } from "../branding/branding.service.js";
+import { sendSystemEmail } from "../notifications/notifications.service.js";
 import { UnauthorizedError, ConflictError, ForbiddenError, NotFoundError, AppError } from "../../lib/errors.js";
 import { logAdminAction } from "../../lib/adminAuditLog.js";
 import { verifyTotp } from "../../lib/totp.js";
@@ -74,11 +73,7 @@ export async function loginStaff(prisma: PrismaClient, redis: Redis, email: stri
   if (await isNewLoginLocation(prisma, "staff", user.id, meta.ip)) {
     const code = await issueEmailStepUpCode(redis, "staff", user.id);
     try {
-      await enqueueEmail({
-        to: user.email,
-        subject: "Verify this sign-in",
-        html: `<p>We noticed a sign-in to your admin account from a location you haven't used before.</p><p>Enter this code to continue: <b style="font-size:20px">${code}</b></p><p>This code expires in 10 minutes. If this wasn't you, contact another owner/admin immediately.</p>`,
-      });
+      await sendSystemEmail(prisma, "STAFF_LOGIN_VERIFICATION_CODE", user.email, { code });
     } catch {
       // Falls through regardless — same posture as every other auth email in this codebase.
     }
@@ -245,14 +240,10 @@ export async function inviteStaff(
     ...staffWithRole,
   });
 
-  const branding = await getBranding(prisma);
   const acceptUrl = `${env.WEB_APP_URL}/admin/accept-invite?token=${token}`;
   try {
-    await enqueueEmail({
-      to: email,
-      subject: `You've been invited to join ${branding.productName}`,
-      html: `<p>You've been invited to join ${branding.productName}'s admin team as ${role.toLowerCase()}.</p><p><a href="${acceptUrl}">Accept your invite</a> to set a password and get started. This link expires in 7 days.</p>`,
-    });
+    const roleLabel = role.charAt(0) + role.slice(1).toLowerCase();
+    await sendSystemEmail(prisma, "STAFF_INVITE", email, { role: roleLabel, acceptUrl });
   } catch {
     // Falls through to the tempPassword-less response below regardless — an admin can always
     // regenerate/resend from Team settings if the email genuinely never arrives (out of scope for

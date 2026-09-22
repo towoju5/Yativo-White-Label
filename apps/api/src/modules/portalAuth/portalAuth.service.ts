@@ -8,8 +8,7 @@ import { hashPassword, verifyPassword } from "../../lib/passwords.js";
 import { signPortalAccessToken, signPortal2faChallengeToken, verifyPortal2faChallengeToken, signPortalStepUpChallengeToken, verifyPortalStepUpChallengeToken } from "../../lib/jwt.js";
 import { generateRefreshToken, hashRefreshToken, parseTtlToMs } from "../../lib/refreshTokens.js";
 import { webauthnOrigin, webauthnRpID } from "../../lib/webauthn.js";
-import { sendNotificationEmail } from "../notifications/notifications.service.js";
-import { enqueueEmail } from "../../jobs/emailQueue.js";
+import { sendNotificationEmail, sendSystemEmail } from "../notifications/notifications.service.js";
 import { AppError, UnauthorizedError, ConflictError, EmailNotVerifiedError } from "../../lib/errors.js";
 import { ensureYativoCustomer, tryEnsureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { provisionDefaultWallets, tryProvisionDefaultWallets } from "../wallets/wallets.service.js";
@@ -78,11 +77,7 @@ async function issueEmailVerification(prisma: PrismaClient, customerId: string, 
     data: { emailVerificationTokenHash: tokenHash, emailVerificationExpiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS) },
   });
   const verifyUrl = `${env.WEB_APP_URL}/portal/verify-email?token=${token}`;
-  await enqueueEmail({
-    to: email,
-    subject: "Verify your email address",
-    html: `<p>Hi ${name},</p><p>Please confirm your email address to finish setting up your account. <a href="${verifyUrl}">Verify your email</a>. This link expires in 24 hours.</p>`,
-  });
+  await sendSystemEmail(prisma, "EMAIL_VERIFICATION", email, { firstName: name.split(" ")[0] || "there", verifyUrl });
 }
 
 /**
@@ -172,11 +167,7 @@ export async function requestPasswordReset(prisma: PrismaClient, email: string):
   });
   const resetUrl = `${env.WEB_APP_URL}/portal/reset-password?token=${token}`;
   const name = customer.fullName ?? customer.businessName ?? "there";
-  await enqueueEmail({
-    to: customer.email,
-    subject: "Reset your password",
-    html: `<p>Hi ${name},</p><p>We got a request to reset your password. <a href="${resetUrl}">Choose a new password</a>. This link expires in 1 hour. If you didn't request this, you can safely ignore this email — your password won't change.</p>`,
-  });
+  await sendSystemEmail(prisma, "PASSWORD_RESET", customer.email, { firstName: name.split(" ")[0] || "there", resetUrl });
 }
 
 /** Redeems a reset link — revokes every active session on success, same as changeCustomerPassword, since a password reset is exactly the situation where any existing session might not be the account owner's. */
@@ -214,11 +205,7 @@ export async function requestMagicLink(prisma: PrismaClient, email: string): Pro
   });
   const magicLinkUrl = `${env.WEB_APP_URL}/portal/magic-link?token=${token}`;
   const name = customer.fullName ?? customer.businessName ?? "there";
-  await enqueueEmail({
-    to: customer.email,
-    subject: "Your sign-in link",
-    html: `<p>Hi ${name},</p><p><a href="${magicLinkUrl}">Click here to sign in</a>. This link expires in 15 minutes and can only be used once. If you didn't request this, you can safely ignore this email.</p>`,
-  });
+  await sendSystemEmail(prisma, "MAGIC_LINK", customer.email, { firstName: name.split(" ")[0] || "there", magicLinkUrl });
 }
 
 /** Redeems a magic link into a real session — a single-use, short-lived token stands in for password+2FA together, same trust level this app already gives a passkey login. */
@@ -308,11 +295,8 @@ export async function loginCustomer(prisma: PrismaClient, redis: Redis, email: s
   if (await isNewLoginLocation(prisma, "customer", customer.id, meta.ip)) {
     const code = await issueEmailStepUpCode(redis, "portal", customer.id);
     try {
-      await enqueueEmail({
-        to: customer.email,
-        subject: "Verify this sign-in",
-        html: `<p>We noticed a sign-in to your account from a location you haven't used before.</p><p>Enter this code to continue: <b style="font-size:20px">${code}</b></p><p>This code expires in 10 minutes. If this wasn't you, please reset your password immediately.</p>`,
-      });
+      const firstName = (customer.fullName ?? customer.businessName ?? "there").split(" ")[0] || "there";
+      await sendSystemEmail(prisma, "LOGIN_VERIFICATION_CODE", customer.email, { firstName, code });
     } catch {
       // Falls through regardless — same posture as every other auth email in this file.
     }

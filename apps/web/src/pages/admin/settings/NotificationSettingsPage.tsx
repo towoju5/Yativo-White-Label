@@ -10,7 +10,10 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const GROUPS = Array.from(new Set(EMAIL_NOTIFICATION_CATALOG.map((c) => c.group)));
+// Sign-in emails (magic links, verification codes, invites) are always sent — switching one off
+// would lock people out — so they're only editable under Email templates, never toggled here.
+const TOGGLEABLE = EMAIL_NOTIFICATION_CATALOG.filter((c) => !c.alwaysOn);
+const GROUPS = Array.from(new Set(TOGGLEABLE.map((c) => c.group)));
 
 export default function NotificationSettingsPage() {
   const { toast } = useToast();
@@ -71,7 +74,7 @@ export default function NotificationSettingsPage() {
               <CardTitle className="text-base">{group}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {EMAIL_NOTIFICATION_CATALOG.filter((c) => c.group === group).map((c) => (
+              {TOGGLEABLE.filter((c) => c.group === group).map((c) => (
                 <div key={c.type} className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
                   <div>
                     <p className="text-sm font-medium">{c.label}</p>
@@ -90,7 +93,7 @@ export default function NotificationSettingsPage() {
       </Button>
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Mail className="h-3.5 w-3.5" /> Manage the wording of these emails from Settings → Email templates.
+        <Mail className="h-3.5 w-3.5" /> Manage the wording of these emails, and of sign-in emails like magic links and verification codes (always sent), from Settings → Email templates.
       </p>
     </div>
   );

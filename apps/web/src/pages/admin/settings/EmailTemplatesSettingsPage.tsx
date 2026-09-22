@@ -34,6 +34,13 @@ const SAMPLE_VARS: Record<string, string> = {
   merchant: "Example Store",
   passkeyName: "MacBook Touch ID",
   beneficiaryName: "Jane's Checking Account",
+  magicLinkUrl: "https://example.com/portal/magic-link?token=sample",
+  verifyUrl: "https://example.com/portal/verify-email?token=sample",
+  resetUrl: "https://example.com/portal/reset-password?token=sample",
+  acceptUrl: "https://example.com/accept-invite?token=sample",
+  code: "482913",
+  businessName: "Acme Inc.",
+  role: "Admin",
 };
 
 function renderPreview(template: string, extraVars: Record<string, string>): string {
@@ -170,7 +177,14 @@ export default function EmailTemplatesSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{catalogEntry.label}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              {catalogEntry.label}
+              {catalogEntry.alwaysOn && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground" title="Sign-in emails can't be switched off, only customized">
+                  Always sent
+                </span>
+              )}
+            </CardTitle>
             <CardDescription>
               {catalogEntry.description}
               {catalogEntry.variables.length > 0 && (

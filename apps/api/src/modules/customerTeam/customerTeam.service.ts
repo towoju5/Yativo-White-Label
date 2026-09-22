@@ -2,7 +2,7 @@ import type { CustomerTeamMember, PrismaClient } from "@prisma/client";
 import { PORTAL_PERMISSIONS, type CustomerTeamMemberDto, type InviteTeamMemberInput, type UpdateTeamMemberInput } from "@white-label/shared-types";
 import { generateRefreshToken, hashRefreshToken } from "../../lib/refreshTokens.js";
 import { hashPassword } from "../../lib/passwords.js";
-import { enqueueEmail } from "../../jobs/emailQueue.js";
+import { sendSystemEmail } from "../notifications/notifications.service.js";
 import { env } from "../../config/env.js";
 import { AppError, ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
 
@@ -57,11 +57,7 @@ export async function inviteTeamMember(
   });
 
   const acceptUrl = `${env.WEB_APP_URL}/portal/accept-invite?token=${token}`;
-  await enqueueEmail({
-    to: input.email,
-    subject: `You've been invited to join ${businessDisplayName}'s team`,
-    html: `<p>Hi ${input.fullName},</p><p>You've been invited to join ${businessDisplayName}'s team. <a href="${acceptUrl}">Accept your invite</a> to set a password and get started. This link expires in 7 days.</p>`,
-  });
+  await sendSystemEmail(prisma, "TEAM_INVITE", input.email, { firstName: input.fullName.split(" ")[0] || "there", businessName: businessDisplayName, acceptUrl });
 
   return memberToDto(member);
 }

@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import sanitizeHtml from "sanitize-html";
-import { EMAIL_NOTIFICATION_TYPES, EMAIL_NOTIFICATION_CATALOG, type EmailNotificationType, type UpdateNotificationSettingsInput, type UpdateEmailTemplateInput } from "@white-label/shared-types";
+import { EMAIL_NOTIFICATION_TYPES, EMAIL_NOTIFICATION_CATALOG, isAuthEmailType, type AuthEmailType, type EmailNotificationType, type UpdateNotificationSettingsInput, type UpdateEmailTemplateInput } from "@white-label/shared-types";
 import { getBranding } from "../branding/branding.service.js";
 import { renderTemplate } from "../../lib/renderTemplate.js";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
@@ -95,6 +95,10 @@ type EmailTemplateSpec = {
   extra?: string;
   /** Optional button — href may be a mailto: link. */
   cta?: { label: string; href: string };
+  /** Optional one-time code, shown large and centered (sign-in verification emails). */
+  code?: string;
+  /** Optional plain-text copy of the CTA's URL under the button, for mail clients that block or mangle buttons. */
+  linkFallback?: string;
 };
 
 /**
@@ -133,6 +137,15 @@ function buildEmailTemplate(spec: EmailTemplateSpec): string {
             <p style="margin: 0 0 20px; font-family: ${font}; font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.3px;">Hi {{firstName}},</p>
             <p style="margin: 0 0 20px; font-family: ${font}; font-size: 15px; line-height: 1.65; color: #374151;">${spec.intro}</p>
             ${
+              spec.code
+                ? `<table style="width: 100%; background-color: #f9fafb; border: 1px dashed #d1d5db; border-radius: 10px; margin-bottom: 24px;">
+              <tr>
+                <td align="center" style="padding: 20px 16px; font-family: 'SF Mono', SFMono-Regular, Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #111827;">${spec.code}</td>
+              </tr>
+            </table>`
+                : ""
+            }
+            ${
               spec.detail
                 ? `<table style="width: 100%; background-color: ${tone.bg}; border: 1px solid ${tone.border}; border-radius: 8px; margin-bottom: 24px;">
               <tr>
@@ -160,6 +173,11 @@ function buildEmailTemplate(spec: EmailTemplateSpec): string {
                 </td>
               </tr>
             </table>`
+                : ""
+            }
+            ${
+              spec.linkFallback
+                ? `<p style="margin: 16px 0 8px; font-family: ${font}; font-size: 12px; line-height: 1.6; color: #6b7280; text-align: center;">Button not working? Copy and paste this link into your browser:<br /><a href="${spec.linkFallback}" style="color: {{brandColorFrom}}; word-break: break-all;">${spec.linkFallback}</a></p>`
                 : ""
             }
           </td>
@@ -402,6 +420,102 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
       intro: '"{{beneficiaryName}}" was just added as a payout beneficiary on your account.',
     }),
   },
+  MAGIC_LINK: {
+    subject: "Your {{productName}} sign-in link",
+    bodyHtml: buildEmailTemplate({
+      icon: "✨",
+      heading: "Sign in to {{productName}}",
+      intro: "Tap the button below to sign in. No password needed.",
+      cta: { label: "Sign in", href: "{{magicLinkUrl}}" },
+      extra: "This link expires in <strong>15 minutes</strong> and can only be used once. If you didn't ask to sign in, you can safely ignore this email.",
+      linkFallback: "{{magicLinkUrl}}",
+    }),
+  },
+  EMAIL_VERIFICATION: {
+    subject: "Verify your email for {{productName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "✉️",
+      heading: "Confirm your email",
+      intro: "Please confirm this is your email address to finish setting up your account.",
+      cta: { label: "Verify email address", href: "{{verifyUrl}}" },
+      extra: "This link expires in <strong>24 hours</strong>. If you didn't create an account, you can safely ignore this email.",
+      linkFallback: "{{verifyUrl}}",
+    }),
+  },
+  PASSWORD_RESET: {
+    subject: "Reset your {{productName}} password",
+    bodyHtml: buildEmailTemplate({
+      icon: "🔑",
+      heading: "Reset your password",
+      intro: "We received a request to reset your password. Choose a new one using the button below.",
+      cta: { label: "Choose a new password", href: "{{resetUrl}}" },
+      extra: "This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email. Your password won't change.",
+      linkFallback: "{{resetUrl}}",
+    }),
+  },
+  LOGIN_VERIFICATION_CODE: {
+    subject: "{{code}} is your {{productName}} verification code",
+    bodyHtml: buildEmailTemplate({
+      icon: "📍",
+      heading: "Verify this sign-in",
+      intro: "We noticed a sign-in to your account from a location you haven't used before. Enter this code to continue:",
+      code: "{{code}}",
+      extra: "This code expires in <strong>10 minutes</strong>. If this wasn't you, <strong>reset your password immediately</strong>.",
+    }),
+  },
+  TEAM_INVITE: {
+    subject: "You've been invited to join {{businessName}} on {{productName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "🤝",
+      heading: "You're invited",
+      intro: "<strong>{{businessName}}</strong> has invited you to join their team on {{productName}}.",
+      cta: { label: "Accept invite", href: "{{acceptUrl}}" },
+      extra: "You'll set your password when you accept. This invite expires in <strong>7 days</strong>.",
+      linkFallback: "{{acceptUrl}}",
+    }),
+  },
+  STAFF_INVITE: {
+    subject: "You've been invited to the {{productName}} admin team",
+    bodyHtml: buildEmailTemplate({
+      icon: "🛠️",
+      heading: "Join the admin team",
+      intro: "You've been invited to join the {{productName}} admin team.",
+      detail: { label: "Role", value: "{{role}}" },
+      cta: { label: "Accept invite", href: "{{acceptUrl}}" },
+      extra: "You'll set your password when you accept. This invite expires in <strong>7 days</strong>.",
+      linkFallback: "{{acceptUrl}}",
+    }),
+  },
+  STAFF_LOGIN_VERIFICATION_CODE: {
+    subject: "{{code}} is your {{productName}} admin verification code",
+    bodyHtml: buildEmailTemplate({
+      icon: "📍",
+      heading: "Verify this admin sign-in",
+      intro: "We noticed a sign-in to your admin account from a location you haven't used before. Enter this code to continue:",
+      code: "{{code}}",
+      extra: "This code expires in <strong>10 minutes</strong>. If this wasn't you, <strong>contact another owner or admin immediately</strong>.",
+    }),
+  },
+  STAFF_TWO_FACTOR_ENABLED: {
+    subject: "Two-factor authentication enabled on your admin account",
+    bodyHtml: buildEmailTemplate({
+      icon: "🔐",
+      heading: "2FA Enabled",
+      intro: "Two-factor authentication was just turned on for your admin account.",
+      detail: { label: "Status", value: "Protected", tone: "success" },
+      extra: "If this wasn't you, contact another owner or admin immediately.",
+    }),
+  },
+  STAFF_TWO_FACTOR_DISABLED: {
+    subject: "Security Alert — Two-factor authentication disabled on your admin account",
+    bodyHtml: buildEmailTemplate({
+      icon: "⚠️",
+      heading: "2FA Disabled",
+      intro: "Two-factor authentication was just turned off for your admin account.",
+      detail: { label: "Status", value: "Less protected", tone: "danger" },
+      extra: "If this wasn't you, <strong>contact another owner or admin immediately</strong> to secure the account.",
+    }),
+  },
 };
 
 function settingsToDto(s: { disabledTypes: EmailNotificationType[]; updatedAt: Date }) {
@@ -417,8 +531,8 @@ export async function getNotificationSettings(prisma: PrismaClient) {
 export async function updateNotificationSettings(prisma: PrismaClient, input: UpdateNotificationSettingsInput) {
   const settings = await prisma.notificationSettings.upsert({
     where: { id: 1 },
-    update: { disabledTypes: input.disabledTypes },
-    create: { id: 1, disabledTypes: input.disabledTypes },
+    update: { disabledTypes: input.disabledTypes.filter((t) => !isAuthEmailType(t)) },
+    create: { id: 1, disabledTypes: input.disabledTypes.filter((t) => !isAuthEmailType(t)) },
   });
   return settingsToDto(settings);
 }
@@ -470,6 +584,16 @@ export async function updateEmailTemplate(prisma: PrismaClient, type: EmailNotif
   return templateToDto(template);
 }
 
+const AUTH_SAMPLE_VARS: Record<string, string> = {
+  magicLinkUrl: "https://example.com/portal/magic-link?token=sample",
+  verifyUrl: "https://example.com/portal/verify-email?token=sample",
+  resetUrl: "https://example.com/portal/reset-password?token=sample",
+  acceptUrl: "https://example.com/accept-invite?token=sample",
+  code: "482913",
+  businessName: "Acme Inc.",
+  role: "Admin",
+};
+
 /** Renders a type's effective template (admin override if one exists, else the built-in default) against sample data — used by the "send test" admin action, never by a real customer send. */
 export async function renderSampleEmail(prisma: PrismaClient, type: EmailNotificationType) {
   const [row, branding] = await Promise.all([prisma.emailTemplate.findUnique({ where: { type } }), getBranding(prisma)]);
@@ -491,6 +615,7 @@ export async function renderSampleEmail(prisma: PrismaClient, type: EmailNotific
     merchant: "Example Store",
     passkeyName: "MacBook Touch ID",
     beneficiaryName: "Jane's Checking Account",
+    ...AUTH_SAMPLE_VARS,
   };
   return { subject: renderTemplate(template.subject, sampleVars), html: renderTemplate(template.bodyHtml, sampleVars) };
 }
@@ -545,4 +670,42 @@ export async function sendNotificationEmail(
   } catch (err) {
     logger.error({ err, type, customerId }, "Couldn't send notification email");
   }
+}
+
+/**
+ * Sends one of the AUTH_EMAIL_TYPES (sign-in links, verification codes, invites) using the admin's
+ * saved template if there is one, else the built-in default. Unlike sendNotificationEmail this
+ * goes to an arbitrary address (staff, invitees, not-yet-verified customers), skips every other
+ * channel and the in-app notification row, ignores disabledTypes, and throws on enqueue failure so
+ * each caller keeps its existing error posture.
+ *
+ * Every var is HTML-escaped: names, business names, and roles are user-entered, and the template
+ * drops them straight into HTML. URLs survive escaping intact (`&` → `&amp;` is correct in href).
+ */
+export async function sendSystemEmail(
+  prisma: PrismaClient,
+  type: AuthEmailType,
+  to: string,
+  vars: Record<string, string> & { firstName?: string },
+): Promise<void> {
+  const [row, branding] = await Promise.all([prisma.emailTemplate.findUnique({ where: { type } }), getBranding(prisma)]);
+  const template = row ? { subject: row.subject, bodyHtml: row.bodyHtml } : EMAIL_DEFAULTS[type];
+
+  const textVars: Record<string, string> = {
+    firstName: "there",
+    productName: branding.productName,
+    supportEmail: branding.supportEmail ?? "",
+    ...vars,
+  };
+  const htmlVars: Record<string, string> = {
+    ...Object.fromEntries(Object.entries(textVars).map(([k, v]) => [k, escapeHtml(v)])),
+    ...buildBrandVars(branding),
+  };
+
+  await enqueueEmail({
+    to,
+    // Subjects are plain text headers, so they get the raw (unescaped) values.
+    subject: renderTemplate(template.subject, textVars),
+    html: renderTemplate(template.bodyHtml, htmlVars),
+  });
 }

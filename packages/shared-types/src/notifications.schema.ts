@@ -25,13 +25,44 @@ export const EMAIL_NOTIFICATION_TYPES = [
   "PASSKEY_ADDED",
   "PASSKEY_REMOVED",
   "BENEFICIARY_ADDED",
+  "MAGIC_LINK",
+  "EMAIL_VERIFICATION",
+  "PASSWORD_RESET",
+  "LOGIN_VERIFICATION_CODE",
+  "TEAM_INVITE",
+  "STAFF_INVITE",
+  "STAFF_LOGIN_VERIFICATION_CODE",
+  "STAFF_TWO_FACTOR_ENABLED",
+  "STAFF_TWO_FACTOR_DISABLED",
 ] as const;
 
 export const emailNotificationTypeSchema = z.enum(EMAIL_NOTIFICATION_TYPES);
 export type EmailNotificationType = z.infer<typeof emailNotificationTypeSchema>;
 
-/** Drives both the admin toggle list and the template editor's "available variables" hints. `firstName` and `productName` are always available on top of whatever's listed here. */
-export const EMAIL_NOTIFICATION_CATALOG: { type: EmailNotificationType; label: string; description: string; group: string; variables: string[] }[] = [
+/**
+ * Sign-in and account-access emails. Always sent (never shown in the notification on/off toggles,
+ * and ignored if one ever ends up in disabledTypes) since switching one off would lock people out;
+ * they appear in the template editor only so their wording and design can be customized.
+ */
+export const AUTH_EMAIL_TYPES = [
+  "MAGIC_LINK",
+  "EMAIL_VERIFICATION",
+  "PASSWORD_RESET",
+  "LOGIN_VERIFICATION_CODE",
+  "TEAM_INVITE",
+  "STAFF_INVITE",
+  "STAFF_LOGIN_VERIFICATION_CODE",
+  "STAFF_TWO_FACTOR_ENABLED",
+  "STAFF_TWO_FACTOR_DISABLED",
+] as const satisfies readonly EmailNotificationType[];
+export type AuthEmailType = (typeof AUTH_EMAIL_TYPES)[number];
+
+export function isAuthEmailType(type: EmailNotificationType): type is AuthEmailType {
+  return (AUTH_EMAIL_TYPES as readonly EmailNotificationType[]).includes(type);
+}
+
+/** Drives both the admin toggle list and the template editor's "available variables" hints. `firstName` and `productName` are always available on top of whatever's listed here. `alwaysOn` entries (the AUTH_EMAIL_TYPES) are editable templates but never toggleable. */
+export const EMAIL_NOTIFICATION_CATALOG: { type: EmailNotificationType; label: string; description: string; group: string; variables: string[]; alwaysOn?: boolean }[] = [
   { type: "WELCOME", label: "Welcome email", description: "Sent right after a customer creates an account.", group: "Account", variables: [] },
   { type: "KYC_APPROVED", label: "Verification approved", description: "Sent when an admin approves a customer's identity verification.", group: "Account", variables: [] },
   { type: "KYC_REJECTED", label: "Verification rejected", description: "Sent when an admin rejects a customer's identity verification.", group: "Account", variables: ["reason"] },
@@ -61,6 +92,15 @@ export const EMAIL_NOTIFICATION_CATALOG: { type: EmailNotificationType; label: s
   { type: "TWO_FACTOR_DISABLED", label: "Two-factor authentication disabled", description: "Security notice sent when 2FA is turned off.", group: "Security", variables: [] },
   { type: "PASSKEY_ADDED", label: "Passkey added", description: "Security notice sent when a new passkey is registered.", group: "Security", variables: ["passkeyName"] },
   { type: "PASSKEY_REMOVED", label: "Passkey removed", description: "Security notice sent when a passkey is removed.", group: "Security", variables: ["passkeyName"] },
+  { type: "MAGIC_LINK", label: "Passwordless sign-in link", description: "The one-time magic link a customer requests to sign in without a password.", group: "Customer sign-in", variables: ["magicLinkUrl"], alwaysOn: true },
+  { type: "EMAIL_VERIFICATION", label: "Verify email address", description: "Sent after signup (and on resend) to confirm the customer's email address.", group: "Customer sign-in", variables: ["verifyUrl"], alwaysOn: true },
+  { type: "PASSWORD_RESET", label: "Password reset", description: "Sent when a customer uses \"Forgot password\".", group: "Customer sign-in", variables: ["resetUrl"], alwaysOn: true },
+  { type: "LOGIN_VERIFICATION_CODE", label: "New-location sign-in code", description: "One-time code sent when a customer signs in from a location they haven't used before.", group: "Customer sign-in", variables: ["code"], alwaysOn: true },
+  { type: "TEAM_INVITE", label: "Business team invite", description: "Sent when a business customer invites someone to their team.", group: "Customer sign-in", variables: ["businessName", "acceptUrl"], alwaysOn: true },
+  { type: "STAFF_INVITE", label: "Admin team invite", description: "Sent when an admin invites a new staff member.", group: "Admin sign-in", variables: ["role", "acceptUrl"], alwaysOn: true },
+  { type: "STAFF_LOGIN_VERIFICATION_CODE", label: "Admin new-location sign-in code", description: "One-time code sent when a staff member signs in from a location they haven't used before.", group: "Admin sign-in", variables: ["code"], alwaysOn: true },
+  { type: "STAFF_TWO_FACTOR_ENABLED", label: "Admin 2FA enabled", description: "Security notice sent when a staff member turns on two-factor authentication.", group: "Admin sign-in", variables: [], alwaysOn: true },
+  { type: "STAFF_TWO_FACTOR_DISABLED", label: "Admin 2FA disabled", description: "Security notice sent when a staff member turns off two-factor authentication.", group: "Admin sign-in", variables: [], alwaysOn: true },
 ];
 
 export const notificationSettingsSchema = z.object({

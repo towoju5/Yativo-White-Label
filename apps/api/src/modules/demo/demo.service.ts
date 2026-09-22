@@ -6,6 +6,7 @@ import { generateDemoDatabaseName, provisionDemoDatabase, getDemoPrismaClient } 
 import { seedDemoDatabase } from "./demoSeed.js";
 import { AppError } from "../../lib/errors.js";
 import { enqueueEmail } from "../../jobs/emailQueue.js";
+import { renderDemoReadyEmail } from "./demoEmail.js";
 
 export class DemoSessionInvalidError extends AppError {
   constructor(message = "This demo link is invalid or has expired") {
@@ -53,7 +54,7 @@ export async function createDemoSession(
     logger.info({ demoId: session.id, status: "ACTIVE" }, "demo.created");
 
     if (requester?.email) {
-      await sendDemoCredentialsEmail({ to: requester.email, businessName: requester.businessName, demoUrl: url, adminEmail, adminPassword, expiresAt });
+      await sendDemoCredentialsEmail(prisma, { to: requester.email, businessName: requester.businessName, demoUrl: url, adminEmail, adminPassword, expiresAt });
     }
   } catch (err) {
     await prisma.demoSession.update({
@@ -77,32 +78,34 @@ export async function createDemoSession(
  * throws (caught by createDemoSession's try/catch, which marks the session FAILED) rather than
  * silently leaving a session ACTIVE with nobody able to reach it.
  */
-async function sendDemoCredentialsEmail(params: {
-  to: string;
-  businessName: string;
-  demoUrl: string;
-  adminEmail: string;
-  adminPassword: string;
-  expiresAt: Date;
-}): Promise<void> {
-  const adminUrl = `${env.DEMO_BASE_URL}/admin/login`;
-  const hours = env.DEMO_DURATION_HOURS;
-  await enqueueEmail({
-    to: params.to,
-    subject: `Your demo environment for ${params.businessName} is ready`,
-    html: `
-      <p>Hi there,</p>
-      <p>Your live demo environment for <strong>${params.businessName}</strong> is ready and will stay active for ${hours} hours (until ${params.expiresAt.toUTCString()}).</p>
-      <p><strong>Customer portal</strong><br/>
-      <a href="${params.demoUrl}">${params.demoUrl}</a><br/>
-      One click, no password needed — this link signs you straight in.</p>
-      <p><strong>Admin panel</strong><br/>
-      <a href="${adminUrl}">${adminUrl}</a><br/>
-      Email: ${params.adminEmail}<br/>
-      Temporary password: ${params.adminPassword}</p>
-      <p>Everything in this environment — data, uploads, settings — is isolated to this demo and is automatically and permanently deleted when it expires.</p>
-    `,
+async function sendDemoCredentialsEmail(
+  prisma: PrismaClient,
+  params: {
+    to: string;
+    businessName: string;
+    demoUrl: string;
+    adminEmail: string;
+    adminPassword: string;
+    expiresAt: Date;
+  },
+): Promise<void> {
+  // Branding comes from the production database (`prisma` here is the main client, never the
+  // demo one) so the email matches the real platform's name, logo, and color.
+  const branding = await prisma.brandingConfig.findUnique({ where: { id: 1 } });
+  const { subject, html, text } = renderDemoReadyEmail({
+    productName: branding?.productName ?? "Demo",
+    logoUrl: branding?.logoUrl ?? null,
+    primaryColor: branding?.primaryColor ?? "#4f46e5",
+    supportEmail: branding?.supportEmail ?? null,
+    businessName: params.businessName,
+    demoUrl: params.demoUrl,
+    adminUrl: `${env.DEMO_BASE_URL}/admin/login`,
+    adminEmail: params.adminEmail,
+    adminPassword: params.adminPassword,
+    expiresAt: params.expiresAt,
+    durationHours: env.DEMO_DURATION_HOURS,
   });
+  await enqueueEmail({ to: params.to, subject, html, text });
 }
 
 /**

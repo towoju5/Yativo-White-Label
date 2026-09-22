@@ -4,7 +4,7 @@ import type { MailAttachment } from "../lib/mailer.js";
 
 export const EMAIL_QUEUE_NAME = "email-notifications";
 
-export type EmailJobData = { to: string; subject: string; html: string; replyTo?: string; attachments?: MailAttachment[] };
+export type EmailJobData = { to: string; subject: string; html: string; text?: string; replyTo?: string; attachments?: MailAttachment[] };
 
 let queue: Queue<EmailJobData> | null = null;
 
