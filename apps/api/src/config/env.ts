@@ -55,7 +55,9 @@ const envSchema = z.object({
   // every setting here can be overridden at runtime from the admin UI (Settings → Integrations),
   // which is why they're all optional — an environment without either configured just no-ops
   // email sending (logged, not thrown) instead of breaking the flows that trigger it.
-  EMAIL_MODE: z.enum(["sendmail", "smtp"]).default("sendmail"),
+  // Left unset, this resolves to "smtp" when SMTP_HOST is set and "sendmail" otherwise (see
+  // `env` below), so setting just the SMTP_* vars is enough — no silent fallback to sendmail.
+  EMAIL_MODE: z.enum(["sendmail", "smtp"]).optional(),
   SENDMAIL_PATH: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().default(587),
@@ -99,5 +101,6 @@ export const env = {
   ...parsedEnv,
   STATEMENT_VERIFY_SECRET: parsedEnv.STATEMENT_VERIFY_SECRET ?? parsedEnv.CREDENTIAL_ENCRYPTION_KEY,
   DEMO_BASE_URL: parsedEnv.DEMO_BASE_URL ?? parsedEnv.APP_BASE_URL,
+  EMAIL_MODE: parsedEnv.EMAIL_MODE ?? (parsedEnv.SMTP_HOST ? "smtp" : "sendmail"),
 };
 export type Env = typeof env;

@@ -23,20 +23,28 @@ export function resetTransporter(): void {
   transporter = null;
 }
 
-/** Returns null (rather than throwing) when the selected mode isn't usable — only possible for "smtp" with no host set — so email sending degrades to a logged no-op instead of crashing whatever business flow triggered it. "sendmail" mode never returns null here since there's no config to validate up front; a missing/broken `sendmail` binary instead surfaces as a thrown error from t.sendMail(). */
+/**
+ * Picks the transport in priority order: SMTP when a host is configured (admin settings, else the
+ * SMTP_* env vars — see integrationRuntimeConfig.ts), otherwise the local sendmail binary as the
+ * fallback. Never returns null now that sendmail always backs up an unconfigured SMTP; a missing
+ * or broken sendmail binary surfaces as a thrown error from t.sendMail() (logged as email.failed).
+ */
 function getTransporter(): Transporter | null {
   if (transporter) return transporter;
-  if (smtpConfig.mode === "sendmail") {
-    transporter = nodemailer.createTransport({ sendmail: true, newline: "unix", path: smtpConfig.sendmailPath || "sendmail" });
+  if (smtpConfig.mode === "smtp" && smtpConfig.host) {
+    logger.info({ mode: "smtp", host: smtpConfig.host, port: smtpConfig.port, secure: smtpConfig.secure, user: smtpConfig.user, from: smtpConfig.fromAddress }, "email.transport");
+    transporter = nodemailer.createTransport({
+      host: smtpConfig.host,
+      port: smtpConfig.port,
+      secure: smtpConfig.secure,
+      auth: smtpConfig.user ? { user: smtpConfig.user, pass: smtpConfig.password } : undefined,
+    });
     return transporter;
   }
-  if (!smtpConfig.host) return null;
-  transporter = nodemailer.createTransport({
-    host: smtpConfig.host,
-    port: smtpConfig.port,
-    secure: smtpConfig.secure,
-    auth: smtpConfig.user ? { user: smtpConfig.user, pass: smtpConfig.password } : undefined,
-  });
+  const path = smtpConfig.sendmailPath || "sendmail";
+  const fallback = smtpConfig.mode === "smtp";
+  logger.info({ mode: "sendmail", path, from: smtpConfig.fromAddress, fallback }, fallback ? "email.transport (SMTP not configured, falling back to sendmail)" : "email.transport");
+  transporter = nodemailer.createTransport({ sendmail: true, newline: "unix", path });
   return transporter;
 }
 

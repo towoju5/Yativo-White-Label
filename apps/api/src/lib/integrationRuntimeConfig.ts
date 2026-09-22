@@ -48,17 +48,43 @@ export function applyIntegrationSettings(settings: IntegrationSettings): void {
   });
   yativoWebhookConfig.secret = settings.yativo.webhookSecret;
 
-  Object.assign(smtpConfig, {
-    mode: settings.smtp.mode,
-    sendmailPath: settings.smtp.sendmailPath || undefined,
-    host: settings.smtp.host || undefined,
-    port: settings.smtp.port,
-    secure: settings.smtp.secure,
-    user: settings.smtp.user || undefined,
-    password: settings.smtp.password || undefined,
-    fromAddress: settings.smtp.fromAddress,
-  });
+  Object.assign(smtpConfig, resolveEffectiveSmtp(settings.smtp));
   resetTransporter();
+}
+
+/**
+ * The admin's saved email settings win whenever they actually configure a transport: SMTP mode
+ * with a host, or sendmail mode with an explicit binary path. Otherwise (e.g. the Integrations
+ * form was saved for its Yativo fields with the email section left on its untouched default, or
+ * SMTP mode with the host blanked) the SMTP_* env vars are used instead, if they're set, rather
+ * than silently dropping to a sendmail binary that may not exist.
+ */
+function resolveEffectiveSmtp(saved: IntegrationSettings["smtp"]): typeof smtpConfig {
+  const adminConfigured = saved.mode === "smtp" ? Boolean(saved.host) : Boolean(saved.sendmailPath);
+  if (!adminConfigured && env.SMTP_HOST) {
+    return {
+      mode: "smtp",
+      sendmailPath: env.SENDMAIL_PATH,
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_SECURE,
+      user: env.SMTP_USER,
+      password: env.SMTP_PASSWORD,
+      // The env from-address is the one that matches the env SMTP account; the saved one may be
+      // the untouched "no-reply@example.com" default, which many relays reject as unauthorized.
+      fromAddress: env.EMAIL_FROM_ADDRESS,
+    };
+  }
+  return {
+    mode: saved.mode,
+    sendmailPath: saved.sendmailPath || undefined,
+    host: saved.host || undefined,
+    port: saved.port,
+    secure: saved.secure,
+    user: saved.user || undefined,
+    password: saved.password || undefined,
+    fromAddress: saved.fromAddress,
+  };
 }
 
 /** Called once at boot, after prismaPlugin is registered. Leaves env-sourced defaults untouched when no row has been saved yet. */
