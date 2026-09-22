@@ -1,0 +1,83 @@
+import type { DemoSession, PrismaClient } from "@prisma/client";
+import { env } from "../../config/env.js";
+import logger from "../../lib/logger.js";
+import { generateDemoToken, hashDemoToken } from "./demoToken.js";
+import { generateDemoDatabaseName, provisionDemoDatabase, getDemoPrismaClient } from "./demoDatabase.service.js";
+import { seedDemoDatabase } from "./demoSeed.js";
+import { AppError } from "../../lib/errors.js";
+
+export class DemoSessionInvalidError extends AppError {
+  constructor(message = "This demo link is invalid or has expired") {
+    super(message, 410, "DEMO_SESSION_INVALID");
+  }
+}
+
+/**
+ * Creates a new demo session: provisions an isolated database, runs migrations, seeds synthetic
+ * data, and returns the one-time full URL. Provisioning runs inline (awaited) rather than
+ * backgrounded — CREATE DATABASE + migrate deploy + seed typically completes in a couple of
+ * seconds for this schema, and a synchronous response means the admin never has to poll a status
+ * endpoint to get the link. On any failure, the DemoSession row is marked FAILED (never left
+ * dangling as ACTIVE) and the error is rethrown.
+ */
+export async function createDemoSession(
+  prisma: PrismaClient,
+  createdByStaffUserId: string,
+): Promise<{ session: DemoSession; url: string }> {
+  const token = generateDemoToken();
+  const tokenHash = hashDemoToken(token);
+  const databaseName = generateDemoDatabaseName();
+  const expiresAt = new Date(Date.now() + env.DEMO_DURATION_HOURS * 60 * 60 * 1000);
+
+  const session = await prisma.demoSession.create({
+    data: { tokenHash, databaseName, expiresAt, createdByStaffUserId, status: "ACTIVE" },
+  });
+
+  try {
+    await provisionDemoDatabase(databaseName);
+    const demoPrisma = getDemoPrismaClient(databaseName);
+    const { demoUserId } = await seedDemoDatabase(demoPrisma);
+    await prisma.demoSession.update({ where: { id: session.id }, data: { demoUserId } });
+    logger.info({ demoId: session.id, status: "ACTIVE" }, "demo.created");
+  } catch (err) {
+    await prisma.demoSession.update({
+      where: { id: session.id },
+      data: { status: "FAILED", errorMessage: err instanceof Error ? err.message : "Unknown provisioning error" },
+    });
+    logger.error({ demoId: session.id, err }, "demo.created.failed");
+    throw err;
+  }
+
+  // Never re-log or re-expose the raw token beyond this single response.
+  const url = `${env.DEMO_BASE_URL}/demo/${token}`;
+  return { session, url };
+}
+
+/**
+ * Resolves a raw demo token to its ACTIVE, unexpired DemoSession. Fails closed: any invalid,
+ * expired, destroyed, destroying, or failed session throws DemoSessionInvalidError rather than
+ * ever falling back to a default/production identity.
+ */
+export async function resolveDemoSessionByToken(prisma: PrismaClient, token: string): Promise<DemoSession> {
+  const tokenHash = hashDemoToken(token);
+  const session = await prisma.demoSession.findUnique({ where: { tokenHash } });
+  if (!session) {
+    logger.warn({ event: "demo.authentication", result: "not_found" }, "demo.authentication");
+    throw new DemoSessionInvalidError();
+  }
+  if (session.status !== "ACTIVE" || session.expiresAt.getTime() <= Date.now()) {
+    logger.warn({ demoId: session.id, status: session.status, event: "demo.authentication", result: "rejected" }, "demo.authentication");
+    throw new DemoSessionInvalidError();
+  }
+  await prisma.demoSession.update({ where: { id: session.id }, data: { lastAccessedAt: new Date() } });
+  logger.info({ demoId: session.id, event: "demo.accessed" }, "demo.accessed");
+  return session;
+}
+
+export async function getDemoSessionById(prisma: PrismaClient, id: string): Promise<DemoSession | null> {
+  return prisma.demoSession.findUnique({ where: { id } });
+}
+
+export async function listDemoSessions(prisma: PrismaClient): Promise<DemoSession[]> {
+  return prisma.demoSession.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
+}

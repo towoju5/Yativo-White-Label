@@ -7,6 +7,8 @@ import { RouteErrorBoundary } from "@/components/errors/RouteErrorBoundary";
 
 import StaticPageView from "@/pages/marketing/StaticPageView";
 import VerifyStatementPage from "@/pages/public/VerifyStatementPage";
+import DemoLoginPage from "@/pages/public/DemoLoginPage";
+import DemoExpiredPage from "@/pages/public/DemoExpiredPage";
 
 import PortalLoginPage from "@/pages/portal/auth/LoginPage";
 import ForgotPasswordPage from "@/pages/portal/auth/ForgotPasswordPage";
@@ -84,6 +86,8 @@ export function createRouter(adminLoginPath: string) {
     children: [
       { path: "/", element: <PortalLoginPage /> },
       { path: "/verify-statement/:token", element: <VerifyStatementPage /> },
+      { path: "/demo/:token", element: <DemoLoginPage /> },
+      { path: "/demo-expired", element: <DemoExpiredPage /> },
 
       { path: "/portal/login", element: <PortalLoginPage /> },
       { path: "/portal/signup", element: <PortalSignupPage /> },

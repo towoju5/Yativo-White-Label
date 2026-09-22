@@ -770,8 +770,44 @@ model StaffUser {
   refreshTokens RefreshToken[]
   apiKeys       ApiKey[]
   passkeys      StaffPasskey[]
+  demoSessions  DemoSession[]
 
   @@map("staff_users")
+}
+
+enum DemoSessionStatus {
+  ACTIVE
+  EXPIRED
+  DESTROYING
+  DESTROYED
+  FAILED
+}
+
+/// Metadata for a temporary, fully-isolated demo environment. Lives in the production database —
+/// this row describes a demo session, it is never itself demo data. The actual demo data lives in
+/// a separate, dynamically-provisioned Postgres database named by `databaseName` (see
+/// modules/demo/demoDatabase.service.ts). Only a SHA-256 hash of the one-time access token is
+/// stored here — the raw token is returned once at creation and never persisted or logged again.
+model DemoSession {
+  id                   String            @id @default(cuid())
+  uuid                 String            @unique @default(uuid())
+  tokenHash            String            @unique
+  /// Internally generated only — `demo_<32 hex chars>` — never accepted from a client request.
+  databaseName         String            @unique
+  status               DemoSessionStatus @default(ACTIVE)
+  createdAt            DateTime          @default(now())
+  expiresAt            DateTime
+  lastAccessedAt       DateTime?
+  destroyedAt          DateTime?
+  createdByStaffUserId String
+  createdByStaffUser   StaffUser         @relation(fields: [createdByStaffUserId], references: [id])
+  /// Id of the find-or-create demo user inside the isolated demo database — not a production FK.
+  demoUserId           String?
+  /// Populated when cleanup fails, so the cron/manual-revoke path can retry and observers can see why.
+  errorMessage         String?
+
+  @@index([status, expiresAt])
+  @@map("demo_sessions")
 }
 
 /// Encrypted, admin-managed integration configuration. The encryption root key stays outside
