@@ -7,7 +7,15 @@ import { portalApi, ApiError } from "@/lib/api-client";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { EndorsementsTable } from "@/components/endorsements/EndorsementsTable";
+
+const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
+  APPROVED: "success",
+  PENDING: "warning",
+  REJECTED: "destructive",
+  NOT_STARTED: "secondary",
+};
 
 export default function ProfilePage() {
   const { t } = useTranslation();
