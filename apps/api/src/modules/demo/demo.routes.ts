@@ -17,7 +17,7 @@ const demoSessionDto = z.object({
   expiresAt: z.string(),
   lastAccessedAt: z.string().nullable(),
   destroyedAt: z.string().nullable(),
-  createdByStaffUserId: z.string(),
+  createdByStaffUserId: z.string().nullable(),
   errorMessage: z.string().nullable(),
 });
 
@@ -28,7 +28,7 @@ function toDto(session: {
   expiresAt: Date;
   lastAccessedAt: Date | null;
   destroyedAt: Date | null;
-  createdByStaffUserId: string;
+  createdByStaffUserId: string | null;
   errorMessage: string | null;
 }) {
   return {
@@ -60,6 +60,43 @@ export async function demoRoutes(app: FastifyInstance) {
       await logAdminAction(app.prisma, request.staffUser!.sub, "demo_session.create", session.id, { expiresAt: session.expiresAt.toISOString() });
       // The raw URL/token is returned exactly once, here, to the requesting admin — never logged, never stored, never returned by any other endpoint again.
       return reply.send({ ...toDto(session), url });
+    },
+  );
+
+  // ── Public self-service landing page ──────────────────────────────────
+  // Gated independently of DEMO_ENABLED by DEMO_PUBLIC_SIGNUP_ENABLED: an operator can run the
+  // demo system for staff-only use (admin creates links, shares them manually) without exposing
+  // an unauthenticated "anyone can mint a demo" endpoint. Both routes below are still only
+  // registered at all when DEMO_ENABLED=true (see app.ts's registration gate for this whole
+  // plugin) — the extra flag only controls this one entry point within it.
+  server.get(
+    "/demo/config",
+    { schema: { response: { 200: z.object({ publicSignupEnabled: z.boolean() }) } } },
+    async (_request, reply) => {
+      return reply.send({ publicSignupEnabled: env.DEMO_PUBLIC_SIGNUP_ENABLED });
+    },
+  );
+
+  server.post(
+    "/demo/request",
+    {
+      config: { rateLimit: { max: 5, timeWindow: "1 minute" } },
+      schema: {
+        body: z.object({ businessName: z.string().trim().min(1).max(200), email: z.string().trim().email() }),
+        response: { 200: z.object({ ok: z.literal(true) }) },
+      },
+    },
+    async (request, reply) => {
+      if (!env.DEMO_PUBLIC_SIGNUP_ENABLED) {
+        throw new AppError("Self-service demo creation is not enabled", 404, "DEMO_PUBLIC_SIGNUP_DISABLED");
+      }
+      const { businessName, email } = request.body;
+      const { session } = await createDemoSession(app.prisma, null, { businessName, email });
+      logger.info({ demoId: session.id, source: "public_landing" }, "demo.created");
+      // Self-service demos are delivered by email only — the URL and admin credentials are never
+      // returned in this HTTP response (unlike the staff-created admin endpoint above, where the
+      // requesting admin IS the intended one-time recipient).
+      return reply.send({ ok: true });
     },
   );
 

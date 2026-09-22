@@ -12,28 +12,38 @@ import { bootstrapPlatformData } from "../../lib/bootstrapPlatformData.js";
  * (upsert + ensure*Account + postTransaction) since that's this project's existing seeding
  * convention.
  */
-export async function seedDemoDatabase(demoPrisma: PrismaClient): Promise<{ demoUserId: string; staffUserId: string }> {
+export async function seedDemoDatabase(
+  demoPrisma: PrismaClient,
+  requester?: { businessName?: string; email?: string },
+): Promise<{ demoUserId: string; staffUserId: string; adminEmail: string; adminPassword: string }> {
   await bootstrapPlatformData(demoPrisma);
 
-  const demoPassword = crypto.randomBytes(12).toString("base64url");
+  const adminEmail = "demo-admin@example.com";
+  const adminPassword = crypto.randomBytes(12).toString("base64url");
+  const customerPassword = crypto.randomBytes(12).toString("base64url");
 
   const staff = await demoPrisma.staffUser.upsert({
-    where: { email: "demo-admin@example.com" },
-    update: {},
-    create: { email: "demo-admin@example.com", passwordHash: await hashPassword(demoPassword), role: "OWNER" },
+    where: { email: adminEmail },
+    update: { passwordHash: await hashPassword(adminPassword) },
+    create: { email: adminEmail, passwordHash: await hashPassword(adminPassword), role: "OWNER" },
   });
 
   const settlement = await ensurePlatformAccount(demoPrisma, "YATIVO_SETTLEMENT", "USD");
   const feeRevenue = await ensurePlatformAccount(demoPrisma, "PLATFORM_FEE_REVENUE", "USD");
 
+  // The isolated demo database is fresh per session, so this hardcoded address never collides
+  // across demos — it's only ever a single upsert per database. The visitor's own business
+  // name/email (from the self-service form) personalize the seeded owner account when provided;
+  // staff-created demos (no requester) fall back to a generic placeholder.
   const customer = await demoPrisma.customer.upsert({
     where: { email: "demo-customer@example.com" },
     update: {},
     create: {
-      type: "INDIVIDUAL",
-      fullName: "Demo Customer",
+      type: requester?.businessName ? "BUSINESS" : "INDIVIDUAL",
+      fullName: requester?.businessName ? undefined : "Demo Customer",
+      businessName: requester?.businessName,
       email: "demo-customer@example.com",
-      passwordHash: await hashPassword(demoPassword),
+      passwordHash: await hashPassword(customerPassword),
       kycStatus: "APPROVED",
     },
   });
@@ -64,5 +74,5 @@ export async function seedDemoDatabase(demoPrisma: PrismaClient): Promise<{ demo
     ],
   });
 
-  return { demoUserId: customer.id, staffUserId: staff.id };
+  return { demoUserId: customer.id, staffUserId: staff.id, adminEmail, adminPassword };
 }

@@ -23,6 +23,16 @@ export default function PortalLoginPage() {
   const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp } = useCustomerAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { data: authConfig } = useQuery({ queryKey: ["portal", "auth-config"], queryFn: () => publicApi.get<PortalAuthConfig>("/portal/auth/config"), staleTime: Infinity });
+  // Silently no-ops (empty result, no error surfaced) when DEMO_ENABLED is off — /demo/config
+  // doesn't exist as a route at all in that case, so this 404s and React Query just leaves
+  // `demoConfig` undefined, which the render below treats the same as "disabled".
+  const { data: demoConfig } = useQuery({
+    queryKey: ["demo", "config"],
+    queryFn: () => publicApi.get<{ publicSignupEnabled: boolean }>("/demo/config"),
+    staleTime: Infinity,
+    retry: false,
+    throwOnError: false,
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
@@ -290,6 +300,14 @@ export default function PortalLoginPage() {
             </>
           )}
         </Card>
+        {demoConfig?.publicSignupEnabled && (
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            {t("login.wantADemo", "Want to try it first?")}{" "}
+            <Link to="/demo" className="font-medium text-primary hover:underline">
+              {t("login.generateDemo", "Generate a live demo")}
+            </Link>
+          </p>
+        )}
       </div>
     </AuthShell>
   );

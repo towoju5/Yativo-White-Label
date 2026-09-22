@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { fetchBranding, applyBrandingToDocument } from "@/theme/branding";
 import { applyPwaManifest, registerServiceWorker } from "@/theme/pwa";
-import { setStaffLoginPath } from "@/lib/api-client";
+import { setStaffLoginPath, publicApi } from "@/lib/api-client";
 import { TemplateProvider } from "@/templates/TemplateProvider";
 import { StaffAuthProvider } from "@/hooks/useStaffAuth";
 import { CustomerAuthProvider } from "@/hooks/useCustomerAuth";
@@ -24,6 +24,15 @@ function SplashScreen() {
 
 export default function App() {
   const { data: branding, isLoading } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding });
+  // 404s (empty result, no thrown error) when DEMO_ENABLED is off — that route doesn't exist at
+  // all in that case, so `demoConfig` just stays undefined and every check below treats it as
+  // "no demo landing" the same as an explicit false.
+  const { data: demoConfig } = useQuery({
+    queryKey: ["demo", "config"],
+    queryFn: () => publicApi.get<{ publicSignupEnabled: boolean }>("/demo/config"),
+    retry: false,
+    throwOnError: false,
+  });
   useRealtimeWalletBridge();
   useNavLabelOverrides();
 
@@ -42,7 +51,8 @@ export default function App() {
   // Rebuilt only if the configured path actually changes — createBrowserRouter must not be
   // re-invoked on every render, since it owns its own history instance.
   const adminLoginPath = branding?.adminLoginPath ?? "/admin/login";
-  const router = useMemo(() => createRouter(adminLoginPath), [adminLoginPath]);
+  const demoLandingActive = demoConfig?.publicSignupEnabled ?? false;
+  const router = useMemo(() => createRouter(adminLoginPath, demoLandingActive), [adminLoginPath, demoLandingActive]);
 
   if (isLoading) return <SplashScreen />;
 

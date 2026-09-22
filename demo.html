@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Vaultrail — Whitelabel payment infrastructure on Yativo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FFFFFF;
+            --bg-alt: #F7F8FA;
+            --bg-dark: #0B1120;
+            --panel: #0F172A;
+            --ink: #0B1120;
+            --ink-soft: #475069;
+            --ink-faint: #8A93A6;
+            --line: #E4E7EC;
+            --line-soft: #EEF0F3;
+            --primary: #2B3EE0;
+            --primary-dark: #1F2CA8;
+            --accent: #0EA5A0;
+            --white: #FFFFFF;
+            --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+            --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #FFFFFF;
+                --bg-alt: #F7F8FA;
+                --ink: #0B1120;
+                --ink-soft: #475069;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #FFFFFF;
+            --bg-alt: #F7F8FA;
+            --ink: #0B1120;
+            --ink-soft: #475069;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px);
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        img,
+        svg {
+            max-width: 100%;
+            display: block;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .wrap {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .overflow-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ---------- Nav ---------- */
+        header.nav {
+            position: sticky;
+            top: 0;
+            top: env(safe-area-inset-top, 0px);
+            z-index: 40;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 0;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: -0.01em;
+            text-decoration: none;
+            color: var(--ink);
+        }
+
+        .brand .mark {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: var(--primary);
+            display: inline-block;
+        }
+
+        nav.links {
+            display: flex;
+            gap: 32px;
+            font-size: 14.5px;
+            color: var(--ink-soft);
+        }
+
+        nav.links a {
+            text-decoration: none;
+            transition: color .15s ease;
+        }
+
+        nav.links a:hover,
+        nav.links a:focus-visible {
+            color: var(--ink);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-link {
+            font-size: 14.5px;
+            color: var(--ink-soft);
+            text-decoration: none;
+        }
+
+        .nav-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 7px;
+            background: var(--ink);
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background .15s ease;
+        }
+
+        .nav-cta:hover,
+        .nav-cta:focus-visible {
+            background: var(--primary);
+        }
+
+        /* ---------- Hero ---------- */
+        .hero {
+            padding: 72px 0 0;
+        }
+
+        .hero-top {
+            text-align: center;
+            max-width: 760px;
+            margin: 0 auto 56px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            font-size: 13px;
+            color: var(--ink-soft);
+            margin-bottom: 24px;
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        h1 {
+            font-size: clamp(34px, 4.6vw, 52px);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            font-weight: 700;
+            margin: 0 0 20px;
+            color: var(--ink);
+        }
+
+        h1 span {
+            color: var(--primary);
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            color: var(--ink-soft);
+            max-width: 56ch;
+            margin: 0 auto 34px;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            appearance: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            background: var(--primary);
+            color: var(--white);
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 15px;
+            padding: 13px 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background .15s ease, transform .1s ease;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus-visible {
+            background: var(--primary-dark);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: .55;
+            cursor: progress;
+        }
+
+        .btn-secondary {
+            appearance: none;
+            cursor: pointer;
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--ink);
+            border: 1px solid var(--line);
+            font-family: var(--font-sans);
+            font-weight: 500;
+            font-size: 15px;
+            padding: 12px 20px;
+            transition: border-color .15s ease, background .15s ease;
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:focus-visible {
+            border-color: var(--ink-faint);
+            background: var(--bg-alt);
+        }
+
+        .hero-note {
+            text-align: center;
+            font-size: 13.5px;
+            color: var(--ink-faint);
+            margin-bottom: 56px;
+        }
+
+        /* ---------- Product window (dashboard mock) ---------- */
+        .product-frame {
+            background: var(--bg-alt);
+            border-top: 1px solid var(--line);
+            padding: 0 0 90px;
+        }
+
+        .window {
+            margin-top: -1px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--white);
+            box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.18), 0 2px 10px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+        }
+
+        .window-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg-alt);
+        }
+
+        .window-bar .traffic {
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-bar .traffic span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #DADFE6;
+        }
+
+        .window-bar .path {
+            margin-left: 10px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: var(--ink-faint);
+        }
+
+        .window-body {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            min-height: 420px;
+        }
+
+        .win-sidebar {
+            border-right: 1px solid var(--line);
+            padding: 20px 14px;
+            background: var(--white);
+        }
+
+        .win-sidebar .org {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 6px 8px 18px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .win-sidebar .org .sq {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            background: var(--primary);
+        }
+
+        .win-nav {
+            display: grid;
+            gap: 2px;
+        }
+
+        .win-nav div {
+            padding: 9px 10px;
+            border-radius: 7px;
+            font-size: 13.5px;
+            color: var(--ink-soft);
+        }
+
+        .win-nav div.active {
+            background: var(--bg-alt);
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        .win-main {
+            padding: 26px 30px;
+        }
+
+        .win-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .win-head h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0 0 4px;
+        }
+
+        .win-head p {
+            font-size: 13.5px;
+            color: var(--ink-faint);
+            margin: 0;
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+
+        .stat-row div {
+            background: var(--white);
+            padding: 16px 18px;
+        }
+
+        .stat-row .label {
+            font-size: 12px;
+            color: var(--ink-faint);
+            margin-bottom: 6px;
+        }
+
+        .stat-row .value {
+            font-family: var(--font-mono);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .stat-row .value small {
+            font-family: var(--font-sans);
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 500;
+            margin-left: 4px;
+        }
+
+        .demo-panel {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .demo-panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--line);
+            background: var(--bg-alt);
+        }
+
+        .demo-panel-head span {
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+
+        .demo-panel-head .tag {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--ink-faint);
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            padding: 2px 7px;
+        }
+
+        .demo-console {
+            background: var(--panel);
+            color: #C9D1E0;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            line-height: 1.75;
+            padding: 18px;
+            min-height: 128px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .demo-console .muted {
+            color: #64708A;
+        }
+
+        .demo-console .k {
+            color: #7AA2FF;
+        }
+
+        .demo-console .v {
+            color: #4CD9C7;
+        }
+
+        .demo-console .cursor {
+            display: inline-block;
+            width: 7px;
+            height: 13px;
+            background: #C9D1E0;
+            vertical-align: -2px;
+            animation: blink 1s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .demo-panel-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            flex-wrap: wrap;
+        }
+
+        .demo-panel-foot .hint {
+            font-size: 12px;
+            color: var(--ink-faint);
+        }
+
+        .demo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .demo-actions button {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: var(--white);
+            color: var(--ink);
+            padding: 7px 13px;
+            cursor: pointer;
+            transition: background .15s ease, border-color .15s ease;
+        }
+
+        .demo-actions button:hover:not(:disabled) {
+            border-color: var(--ink-faint);
+            background: var(--bg-alt);
+        }
+
+        .demo-actions button:disabled {
+            opacity: .45;
+            cursor: default;
+        }
+
+        .demo-actions button.primary {
+            background: var(--ink);
+            color: var(--white);
+            border-color: var(--ink);
+        }
+
+        .demo-actions button.primary:hover:not(:disabled) {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* ---------- Logo strip ---------- */
+        .logostrip {
+            padding: 44px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .logostrip p {
+            text-align: center;
+            font-size: 13px;
+            color: var(--ink-faint);
+            margin: 0 0 22px;
+        }
+
+        .logo-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 44px;
+            flex-wrap: wrap;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--ink-faint);
+        }
+
+        /* ---------- Sections ---------- */
+        section.block {
+            padding: 90px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section-head {
+            max-width: 620px;
+            margin: 0 auto 52px;
+            text-align: center;
+        }
+
+        .section-tag {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+            margin: 0 0 14px;
+        }
+
+        h2 {
+            font-size: clamp(26px, 3.2vw, 34px);
+            line-height: 1.2;
+            letter-spacing: -0.015em;
+            font-weight: 700;
+            margin: 0 0 14px;
+            color: var(--ink);
+        }
+
+        .section-desc {
+            color: var(--ink-soft);
+            font-size: 16px;
+            margin: 0;
+        }
+
+        /* ---------- Rails grid ---------- */
+        .rails-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .rail-card {
+            background: var(--white);
+            padding: 28px 24px;
+        }
+
+        .rail-card .icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            background: var(--bg-alt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            color: var(--primary);
+        }
+
+        .rail-card h3 {
+            font-size: 16.5px;
+            font-weight: 600;
+            margin: 0 0 8px;
+        }
+
+        .rail-card p {
+            font-size: 14px;
+            color: var(--ink-soft);
+            margin: 0 0 16px;
+        }
+
+        .rail-card .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .rail-card .tags span {
+            font-size: 11.5px;
+            color: var(--ink-faint);
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            padding: 3px 7px;
+        }
+
+        /* ---------- Steps ---------- */
+        .steps-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+
+        .step {
+            position: relative;
+            padding-top: 28px;
+        }
+
+        .step::before {
+            content: attr(data-n);
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--primary);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step h3 {
+            font-size: 15.5px;
+            font-weight: 600;
+            margin: 16px 0 8px;
+        }
+
+        .step p {
+            font-size: 13.5px;
+            color: var(--ink-soft);
+            margin: 0;
+        }
+
+        /* ---------- API preview ---------- */
+        .api-grid {
+            display: grid;
+            grid-template-columns: 0.95fr 1.05fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .api-copy h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 14px;
+            letter-spacing: -0.01em;
+        }
+
+        .api-copy p {
+            color: var(--ink-soft);
+            font-size: 15.5px;
+            margin: 0 0 20px;
+            max-width: 44ch;
+        }
+
+        .api-copy ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 11px;
+        }
+
+        .api-copy li {
+            font-size: 14.5px;
+            color: var(--ink-soft);
+            padding-left: 22px;
+            position: relative;
+        }
+
+        .api-copy li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .terminal {
+            background: var(--panel);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .terminal-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #8894AC;
+            font-size: 12px;
+            font-family: var(--font-mono);
+        }
+
+        .terminal-head .traffic {
+            display: flex;
+            gap: 6px;
+            margin-right: 6px;
+        }
+
+        .terminal-head .traffic span {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .terminal pre {
+            margin: 0;
+            padding: 20px;
+            overflow-x: auto;
+            color: #B9C2D6;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.75;
+        }
+
+        .terminal .c1 {
+            color: #7AA2FF;
+        }
+
+        .terminal .c2 {
+            color: #4CD9C7;
+        }
+
+        .terminal .c3 {
+            color: #DCE3F0;
+        }
+
+        /* ---------- Coverage ---------- */
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .coverage-grid div strong {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .coverage-grid div span {
+            font-size: 13.5px;
+            color: var(--ink-soft);
+        }
+
+        /* ---------- Final CTA ---------- */
+        .cta-final {
+            border-bottom: none;
+        }
+
+        .cta-final-inner {
+            border-radius: 18px;
+            padding: 64px 48px;
+            text-align: center;
+            background: var(--ink);
+            color: var(--white);
+        }
+
+        .cta-final-inner h2 {
+            color: var(--white);
+            max-width: 22ch;
+            margin: 0 auto 14px;
+        }
+
+        .cta-final-inner p {
+            color: #B9C2D6;
+            max-width: 48ch;
+            margin: 0 auto 32px;
+        }
+
+        .cta-final-actions {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .cta-final .btn-secondary {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+        }
+
+        .cta-final .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.32);
+        }
+
+        /* ---------- Footer ---------- */
+        footer {
+            padding: 44px 0 calc(44px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .footer-brand {
+            max-width: 40ch;
+        }
+
+        .footer-brand .brand {
+            margin-bottom: 10px;
+        }
+
+        .footer-brand p {
+            font-size: 13px;
+            color: var(--ink-faint);
+            margin: 0;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 28px;
+            font-size: 13.5px;
+            color: var(--ink-soft);
+        }
+
+        .footer-links a {
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--ink);
+        }
+
+        @media (max-width: 980px) {
+            .window-body {
+                grid-template-columns: 1fr;
+            }
+
+            .win-sidebar {
+                display: none;
+            }
+
+            .rails-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .steps-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .api-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .coverage-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            nav.links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .wrap {
+                padding: 0 20px;
+            }
+
+            .stat-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .rails-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-row {
+                grid-template-columns: 1fr;
+            }
+
+            .coverage-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .cta-final-inner {
+                padding: 44px 24px;
+            }
+
+            .logo-row {
+                gap: 24px;
+            }
+        }
+
+        /* ---------- Modal ---------- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(11, 17, 32, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            padding-top: calc(24px + env(safe-area-inset-top, 0px));
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .18s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 30px 70px -20px rgba(11, 17, 32, 0.35);
+            padding: 28px 26px 26px;
+            transform: translateY(8px) scale(0.98);
+            transition: transform .18s ease;
+        }
+
+        .modal-overlay.open .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            gap: 12px;
+        }
+
+        .modal-head h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.01em;
+        }
+
+        .modal-close {
+            appearance: none;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: var(--ink-faint);
+            font-size: 18px;
+            line-height: 1;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus-visible {
+            color: var(--ink);
+            background: var(--bg-alt);
+        }
+
+        .modal p.modal-sub {
+            font-size: 13.5px;
+            color: var(--ink-soft);
+            margin: 0 0 22px;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .field input {
+            width: 100%;
+            font-family: var(--font-sans);
+            font-size: 14.5px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--white);
+            color: var(--ink);
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .field input:focus-visible,
+        .field input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(43, 62, 224, 0.12);
+        }
+
+        .field .err {
+            font-size: 12px;
+            color: #C0392B;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field.invalid input {
+            border-color: #C0392B;
+        }
+
+        .field.invalid .err {
+            display: block;
+        }
+
+        .modal-submit {
+            width: 100%;
+            margin-top: 6px;
+            appearance: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            background: var(--primary);
+            color: var(--white);
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 20px;
+        }
+
+        .modal-submit:hover,
+        .modal-submit:focus-visible {
+            background: var(--primary-dark);
+        }
+
+        .modal-submit:disabled {
+            opacity: .6;
+            cursor: progress;
+        }
+
+        .modal-fine {
+            font-size: 11.5px;
+            color: var(--ink-faint);
+            margin: 12px 0 0;
+            text-align: center;
+        }
+
+        .modal-success {
+            text-align: center;
+            padding: 6px 0 4px;
+        }
+
+        .modal-success .check {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(14, 165, 160, 0.12);
+            color: var(--accent);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .modal-success h3 {
+            font-size: 17px;
+            margin: 0 0 8px;
+        }
+
+        .modal-success p {
+            font-size: 13.5px;
+            color: var(--ink-soft);
+            margin: 0 0 20px;
+        }
+
+        .modal-success .btn-secondary {
+            width: 100%;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            html {
+                scroll-behavior: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="nav">
+        <div class="wrap nav-inner">
+            <a href="#top" class="brand"><span class="mark"></span>Vaultrail</a>
+            <nav class="links">
+                <a href="#rails">Products</a>
+                <a href="#how">How it works</a>
+                <a href="#api">API</a>
+                <a href="#coverage">Coverage</a>
+            </nav>
+            <div class="nav-right">
+                <a href="#api" class="nav-link">Docs</a>
+                <a href="#demo" class="nav-cta" id="navDemoBtn">Get sandbox access</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="top">
+        <section class="hero" id="demo">
+            <div class="wrap hero-top">
+                <span class="badge"><span class="dot"></span>Built on the Yativo payment network</span>
+                <h1>Launch a branded payments product on <span>infrastructure that already works</span></h1>
+                <p class="hero-sub">Vaultrail wraps Yativo's payout, deposit, crypto and virtual card rails in an API
+                    and dashboard you put your own name on — live in days instead of the year it takes to build a ledger
+                    from scratch.</p>
+                <div class="hero-actions">
+                    <button class="btn-primary" id="generateBtn">Generate a demo link</button>
+                    <button class="btn-secondary" id="viewDocsBtn">View API reference</button>
+                </div>
+                <p class="hero-note">No credit card. Sandbox credentials expire after 24 hours.</p>
+            </div>
+        </section>
+
+        <div class="product-frame">
+            <div class="wrap">
+                <div class="window">
+                    <div class="window-bar">
+                        <div class="traffic"><span></span><span></span><span></span></div>
+                        <div class="path">app.vaultrail.io/dashboard</div>
+                    </div>
+                    <div class="window-body">
+                        <div class="win-sidebar">
+                            <div class="org"><span class="sq"></span>Acme Financial</div>
+                            <div class="win-nav">
+                                <div class="active">Overview</div>
+                                <div>Payouts</div>
+                                <div>Deposits</div>
+                                <div>Crypto</div>
+                                <div>Cards</div>
+                                <div>Developers</div>
+                                <div>Settings</div>
+                            </div>
+                        </div>
+                        <div class="win-main">
+                            <div class="win-head">
+                                <div>
+                                    <h3>Sandbox overview</h3>
+                                    <p>Test balances across all four rails, refreshed nightly.</p>
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <div>
+                                    <div class="label">Payout volume</div>
+                                    <div class="value">$48,210<small>+12%</small></div>
+                                </div>
+                                <div>
+                                    <div class="label">Deposits</div>
+                                    <div class="value">$92,004<small>+4%</small></div>
+                                </div>
+                                <div>
+                                    <div class="label">Crypto settled</div>
+                                    <div class="value">$15,760<small>+31%</small></div>
+                                </div>
+                                <div>
+                                    <div class="label">Cards issued</div>
+                                    <div class="value">184<small>+9</small></div>
+                                </div>
+                            </div>
+                            <div class="demo-panel">
+                                <div class="demo-panel-head">
+                                    <span>Demo link generator</span>
+                                    <span class="tag">sandbox</span>
+                                </div>
+                                <div class="demo-console" id="console"><span class="muted">Press "Generate a demo link"
+                                        to provision a sandbox…</span><span class="cursor"></span></div>
+                                <div class="demo-panel-foot">
+                                    <span class="hint">Includes a scoped API key and a preview dashboard link.</span>
+                                    <div class="demo-actions">
+                                        <button id="copyBtn" disabled>Copy link</button>
+                                        <button id="openBtn" class="primary" disabled>Open dashboard</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="logostrip">
+            <div class="wrap">
+                <p>Powering payment products across Latin America</p>
+                <div class="logo-row">
+                    <span>Acme Financial</span>
+                    <span>Remesas Norte</span>
+                    <span>Fintra</span>
+                    <span>Cambio Directo</span>
+                    <span>Norvia Pay</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="block" id="rails">
+            <div class="wrap">
+                <div class="section-head">
+                    <p class="section-tag">Products</p>
+                    <h2>Four rails, one integration</h2>
+                    <p class="section-desc">Every rail is already wired into Yativo's provider network underneath —
+                        connect once, brand it as your own, and expose only what your customers need.</p>
+                </div>
+
+                <div class="rails-grid">
+                    <div class="rail-card">
+                        <div class="icon">↗</div>
+                        <h3>Payouts</h3>
+                        <p>Send to bank accounts, mobile wallets and cash pickup networks with one payout object
+                            regardless of destination rail.</p>
+                        <div class="tags"><span>Bank transfer</span><span>SPEI / STP</span><span>Bulk batches</span>
+                        </div>
+                    </div>
+                    <div class="rail-card">
+                        <div class="icon">↙</div>
+                        <h3>Deposits</h3>
+                        <p>Issue local virtual accounts and one-time deposit links per customer, so incoming funds
+                            reconcile automatically.</p>
+                        <div class="tags"><span>Virtual
+                                accounts</span><span>CLABE</span><span>Auto-reconciliation</span></div>
+                    </div>
+                    <div class="rail-card">
+                        <div class="icon">◎</div>
+                        <h3>Crypto</h3>
+                        <p>Accept and settle stablecoins and major assets, with the same compliance and ledger pipeline
+                            as fiat.</p>
+                        <div class="tags"><span>Stablecoins</span><span>Wallets</span><span>Fiat swap</span></div>
+                    </div>
+                    <div class="rail-card">
+                        <div class="icon">▭</div>
+                        <h3>Virtual cards</h3>
+                        <p>Issue virtual cards under your own program, funded straight from customer balances.</p>
+                        <div class="tags"><span>Instant issuance</span><span>Spend limits</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="block" id="how">
+            <div class="wrap">
+                <div class="section-head">
+                    <p class="section-tag">Process</p>
+                    <h2>From signup to live product</h2>
+                    <p class="section-desc">The sandbox mirrors production, so nothing changes on go-live.</p>
+                </div>
+                <div class="steps-row">
+                    <div class="step" data-n="1">
+                        <h3>Provision a sandbox</h3>
+                        <p>Generate a scoped demo key and preview dashboard — no sales call required.</p>
+                    </div>
+                    <div class="step" data-n="2">
+                        <h3>Apply your brand</h3>
+                        <p>Swap in your logo, domain, colors and copy across the dashboard and hosted pages.</p>
+                    </div>
+                    <div class="step" data-n="3">
+                        <h3>Connect a rail</h3>
+                        <p>Turn on payout, deposit, crypto or cards individually, each with its own test suite.</p>
+                    </div>
+                    <div class="step" data-n="4">
+                        <h3>Go live</h3>
+                        <p>Move to production keys once KYB clears. Limits follow your agreement.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="block" id="api">
+            <div class="wrap api-grid">
+                <div class="api-copy">
+                    <p class="section-tag" style="margin-bottom:10px;">API</p>
+                    <h3>One request, any rail</h3>
+                    <p>Every rail shares the same authentication, idempotency and webhook pattern, so a payout
+                        integration and a card issuance integration read like the same API.</p>
+                    <ul>
+                        <li>Idempotency keys on every write endpoint</li>
+                        <li>Webhooks for status changes across all four rails</li>
+                        <li>Sandbox and production share one API surface</li>
+                    </ul>
+                </div>
+                <div class="terminal overflow-scroll">
+                    <div class="terminal-head"><span class="traffic"><span></span><span></span><span></span></span>POST
+                        /v1/payouts</div>
+                    <pre><span class="c1">curl</span> -X POST https://api.vaultrail.io/v1/payouts \
+  -H <span class="c3">"Authorization: Bearer sandbox_key_••••••"</span> \
+  -H <span class="c3">"Content-Type: application/json"</span> \
+  -d <span class="c3">'{
+    "rail": "spei",
+    "amount": "1250.00",
+    "currency": "MXN",
+    "beneficiary": { "clabe": "032180000118359719" },
+    "reference": "invoice-8841"
+  }'</span>
+
+<span class="c2">200 OK</span>
+{
+  <span class="c2">"id"</span>: <span class="c3">"po_9k2mfq1x"</span>,
+  <span class="c2">"status"</span>: <span class="c3">"processing"</span>,
+  <span class="c2">"rail"</span>: <span class="c3">"spei"</span>,
+  <span class="c2">"eta"</span>: <span class="c3">"~2 min"</span>
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="block" id="coverage">
+            <div class="wrap">
+                <div class="section-head">
+                    <p class="section-tag">Coverage</p>
+                    <h2>Regional depth, not just a wrapper</h2>
+                    <p class="section-desc">The infrastructure underneath handles local detail — bank formats, KYB
+                        flows, settlement windows — so your product just calls an endpoint.</p>
+                </div>
+                <div class="coverage-grid">
+                    <div><strong>15+</strong><span>countries across Latin America</span></div>
+                    <div><strong>20+</strong><span>fiat currencies supported</span></div>
+                    <div><strong>10+</strong><span>local rails and crypto networks</span></div>
+                    <div><strong>24/7</strong><span>sandbox availability</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="block cta-final">
+            <div class="wrap">
+                <div class="cta-final-inner">
+                    <h2>Your product, our rails</h2>
+                    <p>Try the sandbox before you commit to it — a scoped key and preview dashboard take under a minute
+                        to provision.</p>
+                    <div class="cta-final-actions">
+                        <button class="btn-primary" id="ctaDemoBtn">Generate a demo link</button>
+                        <button class="btn-secondary" id="talkBtn">Talk to us about volume pricing</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap footer-grid">
+            <div class="footer-brand">
+                <a href="#top" class="brand"><span class="mark"></span>Vaultrail</a>
+                <p>Vaultrail is a whitelabel layer over the Yativo payment network. Sandbox credentials generated on
+                    this page are for evaluation only.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#rails">Products</a>
+                <a href="#api">API reference</a>
+                <a href="#how">How it works</a>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div id="modalRequest">
+                <div class="modal-head">
+                    <h3 id="modalTitle">Get sandbox access</h3>
+                    <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+                </div>
+                <p class="modal-sub">Tell us where to send your sandbox credentials. Access is provisioned instantly —
+                    the email is just so you don't lose it.</p>
+                <form id="demoForm" novalidate>
+                    <div class="field" id="fieldName">
+                        <label for="nameInput">Full name</label>
+                        <input type="text" id="nameInput" autocomplete="name" placeholder="Jordan Alvarez">
+                        <div class="err">Enter your name.</div>
+                    </div>
+                    <div class="field" id="fieldEmail">
+                        <label for="emailInput">Work email</label>
+                        <input type="email" id="emailInput" autocomplete="email" placeholder="jordan@company.com">
+                        <div class="err">Enter a valid email address.</div>
+                    </div>
+                    <div class="field" id="fieldCompany">
+                        <label for="companyInput">Company <span
+                                style="color:var(--ink-faint); font-weight:400;">(optional)</span></label>
+                        <input type="text" id="companyInput" autocomplete="organization" placeholder="Acme Financial">
+                    </div>
+                    <button type="submit" class="modal-submit" id="modalSubmit">Send me demo access</button>
+                    <p class="modal-fine">Sandbox data only — no card required, no spam.</p>
+                </form>
+            </div>
+            <div id="modalSuccess" class="modal-success" style="display:none;">
+                <div class="check">✓</div>
+                <h3>Demo access sent</h3>
+                <p id="modalSuccessCopy">Check your inbox for sandbox credentials and a link to the dashboard.</p>
+                <button class="btn-secondary" id="modalDone">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const consoleEl = document.getElementById('console');
+            const copyBtn = document.getElementById('copyBtn');
+            const openBtn = document.getElementById('openBtn');
+            const docsBtn = document.getElementById('viewDocsBtn');
+            const talkBtn = document.getElementById('talkBtn');
+
+            const overlay = document.getElementById('modalOverlay');
+            const modalClose = document.getElementById('modalClose');
+            const modalRequest = document.getElementById('modalRequest');
+            const modalSuccess = document.getElementById('modalSuccess');
+            const modalSuccessCopy = document.getElementById('modalSuccessCopy');
+            const modalDone = document.getElementById('modalDone');
+            const demoForm = document.getElementById('demoForm');
+            const modalSubmit = document.getElementById('modalSubmit');
+            const nameField = document.getElementById('fieldName');
+            const emailField = document.getElementById('fieldEmail');
+            const nameInput = document.getElementById('nameInput');
+            const emailInput = document.getElementById('emailInput');
+
+            const demoTriggers = [
+                document.getElementById('navDemoBtn'),
+                document.getElementById('generateBtn'),
+                document.getElementById('ctaDemoBtn')
+            ].filter(Boolean);
+
+            let demoUrl = '';
+            let running = false;
+            let lastFocused = null;
+
+            function rand(len) {
+                const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+                let out = '';
+                for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+                return out;
+            }
+
+            function openModal(e) {
+                if (e) e.preventDefault();
+                lastFocused = document.activeElement;
+                modalRequest.style.display = '';
+                modalSuccess.style.display = 'none';
+                overlay.classList.add('open');
+                overlay.setAttribute('aria-hidden', 'false');
+                setTimeout(() => nameInput.focus(), 50);
+                document.addEventListener('keydown', onKeydown);
+            }
+
+            function closeModal() {
+                overlay.classList.remove('open');
+                overlay.setAttribute('aria-hidden', 'true');
+                document.removeEventListener('keydown', onKeydown);
+                if (lastFocused) lastFocused.focus();
+            }
+
+            function onKeydown(e) {
+                if (e.key === 'Escape') closeModal();
+            }
+
+            demoTriggers.forEach(el => el.addEventListener('click', openModal));
+            modalClose.addEventListener('click', closeModal);
+            modalDone.addEventListener('click', closeModal);
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) closeModal();
+            });
+
+            function isValidEmail(v) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+            }
+
+            demoForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const name = nameInput.value.trim();
+                const email = emailInput.value.trim();
+
+                nameField.classList.toggle('invalid', name.length === 0);
+                emailField.classList.toggle('invalid', !isValidEmail(email));
+                if (name.length === 0 || !isValidEmail(email)) {
+                    (name.length === 0 ? nameInput : emailInput).focus();
+                    return;
+                }
+
+                modalSubmit.disabled = true;
+                modalSubmit.textContent = 'Provisioning…';
+
+                await provisionDemo();
+
+                modalSubmit.disabled = false;
+                modalSubmit.textContent = 'Send me demo access';
+                modalRequest.style.display = 'none';
+                modalSuccess.style.display = '';
+                modalSuccessCopy.textContent = 'We\u2019ve sent sandbox credentials and a dashboard link to ' + email + '.';
+                setTimeout(() => modalDone.focus(), 50);
+
+                document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            async function provisionDemo() {
+                if (running) return;
+                running = true;
+                copyBtn.disabled = true;
+                openBtn.disabled = true;
+
+                const sandboxId = 'sbx_' + rand(10);
+                const apiKey = 'sandbox_key_' + rand(6) + '••••••••';
+                const token = rand(12);
+                demoUrl = 'https://demo.vaultrail.io/sandbox/' + token;
+
+                consoleEl.innerHTML = '<div><span class="k">$</span> vaultrail sandbox provision --rails payout,deposit,crypto,cards</div><div class="muted">provisioning sandbox environment…</div>';
+                await new Promise(r => setTimeout(r, 550));
+
+                consoleEl.innerHTML =
+                    '<div><span class="k">$</span> vaultrail sandbox provision --rails payout,deposit,crypto,cards</div>' +
+                    '<div class="muted">provisioning sandbox environment…</div>' +
+                    '<div>sandbox_id&nbsp;&nbsp;<span class="v">' + sandboxId + '</span></div>' +
+                    '<div>api_key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">' + apiKey + '</span></div>' +
+                    '<div>demo_url&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">' + demoUrl + '</span></div>' +
+                    '<div class="muted">status: ready — sent to your email<span class="cursor"></span></div>';
+
+                copyBtn.disabled = false;
+                openBtn.disabled = false;
+                running = false;
+            }
+
+            copyBtn.addEventListener('click', async function () {
+                if (!demoUrl) return;
+                try {
+                    await navigator.clipboard.writeText(demoUrl);
+                    const original = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied';
+                    setTimeout(() => { copyBtn.textContent = original; }, 1400);
+                } catch (e) {
+                    const original = copyBtn.textContent;
+                    copyBtn.textContent = demoUrl;
+                    setTimeout(() => { copyBtn.textContent = original; }, 2200);
+                }
+            });
+
+            openBtn.addEventListener('click', function () {
+                const original = openBtn.textContent;
+                openBtn.textContent = 'Sandbox opens after signup';
+                setTimeout(() => { openBtn.textContent = original; }, 1800);
+            });
+
+            docsBtn.addEventListener('click', function () {
+                document.getElementById('api').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            talkBtn.addEventListener('click', function () {
+                talkBtn.textContent = "Thanks — we'll follow up by email";
+                talkBtn.disabled = true;
+            });
+        })();
+    </script>
+</body>
+
+</html>

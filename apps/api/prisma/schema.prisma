@@ -799,12 +799,18 @@ model DemoSession {
   expiresAt            DateTime
   lastAccessedAt       DateTime?
   destroyedAt          DateTime?
-  createdByStaffUserId String
-  createdByStaffUser   StaffUser         @relation(fields: [createdByStaffUserId], references: [id])
+  /// Null when the session was self-served by an anonymous visitor via the public demo landing
+  /// page (DEMO_PUBLIC_SIGNUP_ENABLED) rather than created by a staff member.
+  createdByStaffUserId String?
+  createdByStaffUser   StaffUser?        @relation(fields: [createdByStaffUserId], references: [id])
   /// Id of the find-or-create demo user inside the isolated demo database — not a production FK.
   demoUserId           String?
   /// Populated when cleanup fails, so the cron/manual-revoke path can retry and observers can see why.
   errorMessage         String?
+  /// Self-service request details (public landing page form) — recorded for audit/support even
+  /// though the credentials themselves are only ever delivered by email, never returned over HTTP.
+  requestedBusinessName String?
+  requestedByEmail      String?
 
   @@index([status, expiresAt])
   @@map("demo_sessions")

@@ -1,0 +1,920 @@
+/* Scoped marketing landing page styles — every selector is namespaced under .marketing-landing
+   so this intentionally light, fixed-palette design never leaks into the rest of the app (which
+   is dark-first and theme-driven). Brand color comes from the real --brand-primary/--brand-accent
+   custom properties (set at runtime from BrandingConfig, see theme/branding.ts) so this page
+   reflects the deployment's actual configured brand, not a hardcoded color. */
+
+.marketing-landing {
+  --ml-bg: #ffffff;
+  --ml-bg-alt: #f7f8fa;
+  --ml-panel: #0f172a;
+  --ml-ink: #0b1120;
+  --ml-ink-soft: #475069;
+  --ml-ink-faint: #8a93a6;
+  --ml-line: #e4e7ec;
+  --ml-primary: hsl(var(--brand-primary));
+  --ml-primary-foreground: hsl(var(--brand-primary-foreground));
+  --ml-accent: hsl(var(--brand-accent));
+  --ml-font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  background: var(--ml-bg);
+  color: var(--ml-ink);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.marketing-landing * {
+  box-sizing: border-box;
+}
+
+.marketing-landing img,
+.marketing-landing svg {
+  max-width: 100%;
+}
+
+.marketing-landing a {
+  color: inherit;
+}
+
+.ml-wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* ---------- Nav ---------- */
+.ml-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ml-line);
+}
+
+.ml-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  gap: 24px;
+}
+
+.ml-nav-links {
+  display: flex;
+  gap: 32px;
+  font-size: 14.5px;
+  color: var(--ml-ink-soft);
+}
+
+.ml-nav-links a {
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.ml-nav-links a:hover {
+  color: var(--ml-ink);
+}
+
+.marketing-landing .ml-nav-cta {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 7px;
+  background: var(--ml-ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.marketing-landing .ml-nav-cta:hover {
+  background: var(--ml-primary);
+}
+
+/* ---------- Hero ---------- */
+.ml-hero {
+  padding: 72px 0 0;
+}
+
+.ml-hero-top {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 56px;
+}
+
+.ml-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--ml-line);
+  font-size: 13px;
+  color: var(--ml-ink-soft);
+  margin-bottom: 24px;
+}
+
+.ml-badge .ml-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ml-accent);
+}
+
+.marketing-landing h1 {
+  font-size: clamp(34px, 4.6vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0 0 20px;
+  color: var(--ml-ink);
+  font-family: var(--font-heading, inherit);
+}
+
+.marketing-landing h1 span {
+  color: var(--ml-primary);
+}
+
+.ml-hero-sub {
+  font-size: 18px;
+  color: var(--ml-ink-soft);
+  max-width: 56ch;
+  margin: 0 auto 34px;
+}
+
+.ml-hero-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.marketing-landing .ml-btn-primary {
+  font-family: inherit;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  background: var(--ml-primary);
+  color: var(--ml-primary-foreground);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.marketing-landing .ml-btn-primary:hover {
+  filter: brightness(0.92);
+}
+
+.marketing-landing .ml-btn-primary:active {
+  transform: translateY(1px);
+}
+
+.marketing-landing .ml-btn-secondary {
+  font-family: inherit;
+  appearance: none;
+  cursor: pointer;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ml-ink);
+  border: 1px solid var(--ml-line);
+  font-weight: 500;
+  font-size: 15px;
+  padding: 12px 20px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.marketing-landing .ml-btn-secondary:hover {
+  border-color: var(--ml-ink-faint);
+  background: var(--ml-bg-alt);
+}
+
+.ml-hero-note {
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ml-ink-faint);
+  margin-bottom: 56px;
+}
+
+/* ---------- Product window (static illustration) ---------- */
+.ml-product-frame {
+  background: var(--ml-bg-alt);
+  border-top: 1px solid var(--ml-line);
+  padding: 0 0 90px;
+}
+
+.ml-window {
+  margin-top: -1px;
+  border: 1px solid var(--ml-line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.18), 0 2px 10px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.ml-window-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ml-line);
+  background: var(--ml-bg-alt);
+}
+
+.ml-window-bar .ml-traffic {
+  display: flex;
+  gap: 6px;
+}
+
+.ml-window-bar .ml-traffic span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #dadfe6;
+}
+
+.ml-window-bar .ml-path {
+  margin-left: 10px;
+  font-family: var(--ml-font-mono);
+  font-size: 12.5px;
+  color: var(--ml-ink-faint);
+}
+
+.ml-window-body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 380px;
+}
+
+.ml-win-sidebar {
+  border-right: 1px solid var(--ml-line);
+  padding: 20px 14px;
+  background: #fff;
+}
+
+.ml-win-sidebar .ml-org {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ml-ink);
+}
+
+.ml-win-sidebar .ml-sq {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--ml-primary);
+}
+
+.ml-win-nav {
+  display: grid;
+  gap: 2px;
+}
+
+.ml-win-nav div {
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 13.5px;
+  color: var(--ml-ink-soft);
+}
+
+.ml-win-nav div.active {
+  background: var(--ml-bg-alt);
+  color: var(--ml-ink);
+  font-weight: 500;
+}
+
+.ml-win-main {
+  padding: 26px 30px;
+}
+
+.ml-win-head {
+  margin-bottom: 22px;
+}
+
+.ml-win-head h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.ml-win-head p {
+  font-size: 13.5px;
+  color: var(--ml-ink-faint);
+  margin: 0;
+}
+
+.ml-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--ml-line);
+  border: 1px solid var(--ml-line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.ml-stat-row div {
+  background: #fff;
+  padding: 16px 18px;
+}
+
+.ml-stat-row .ml-label {
+  font-size: 12px;
+  color: var(--ml-ink-faint);
+  margin-bottom: 6px;
+}
+
+.ml-stat-row .ml-value {
+  font-family: var(--ml-font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ml-ink);
+}
+
+.ml-stat-row .ml-value small {
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ml-accent);
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.ml-sample-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ml-ink-faint);
+  border: 1px solid var(--ml-line);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+/* ---------- Sections ---------- */
+.ml-block {
+  padding: 90px 0;
+  border-bottom: 1px solid var(--ml-line);
+}
+
+.ml-section-head {
+  max-width: 620px;
+  margin: 0 auto 52px;
+  text-align: center;
+}
+
+.ml-section-tag {
+  font-size: 13px;
+  color: var(--ml-primary);
+  font-weight: 600;
+  margin: 0 0 14px;
+}
+
+.marketing-landing h2 {
+  font-size: clamp(26px, 3.2vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--ml-ink);
+  font-family: var(--font-heading, inherit);
+}
+
+.ml-section-desc {
+  color: var(--ml-ink-soft);
+  font-size: 16px;
+  margin: 0;
+}
+
+/* ---------- Feature grid ---------- */
+.ml-rails-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--ml-line);
+  border: 1px solid var(--ml-line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ml-rail-card {
+  background: #fff;
+  padding: 28px 24px;
+}
+
+.ml-rail-card .ml-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--ml-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  color: var(--ml-primary);
+}
+
+.ml-rail-card h3 {
+  font-size: 16.5px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.ml-rail-card p {
+  font-size: 14px;
+  color: var(--ml-ink-soft);
+  margin: 0 0 16px;
+}
+
+.ml-rail-card .ml-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ml-rail-card .ml-tags span {
+  font-size: 11.5px;
+  color: var(--ml-ink-faint);
+  border: 1px solid var(--ml-line);
+  border-radius: 5px;
+  padding: 3px 7px;
+}
+
+/* ---------- Steps ---------- */
+.ml-steps-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.ml-step {
+  position: relative;
+  padding-top: 28px;
+}
+
+.ml-step .ml-n {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: var(--ml-font-mono);
+  font-size: 12px;
+  color: var(--ml-primary);
+  border: 1px solid var(--ml-line);
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ml-step h3 {
+  font-size: 15.5px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+}
+
+.ml-step p {
+  font-size: 13.5px;
+  color: var(--ml-ink-soft);
+  margin: 0;
+}
+
+/* ---------- API preview ---------- */
+.ml-api-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.ml-api-copy h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+
+.ml-api-copy p {
+  color: var(--ml-ink-soft);
+  font-size: 15.5px;
+  margin: 0 0 20px;
+  max-width: 44ch;
+}
+
+.ml-api-copy ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 11px;
+}
+
+.ml-api-copy li {
+  font-size: 14.5px;
+  color: var(--ml-ink-soft);
+  padding-left: 22px;
+  position: relative;
+}
+
+.ml-api-copy li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--ml-accent);
+  font-weight: 700;
+}
+
+.ml-terminal {
+  background: var(--ml-panel);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ml-terminal-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8894ac;
+  font-size: 12px;
+  font-family: var(--ml-font-mono);
+}
+
+.ml-terminal-head .ml-traffic {
+  display: flex;
+  gap: 6px;
+  margin-right: 6px;
+}
+
+.ml-terminal-head .ml-traffic span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ml-terminal pre {
+  margin: 0;
+  padding: 20px;
+  overflow-x: auto;
+  color: #b9c2d6;
+  font-family: var(--ml-font-mono);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.ml-terminal .c1 {
+  color: #7aa2ff;
+}
+.ml-terminal .c2 {
+  color: #4cd9c7;
+}
+.ml-terminal .c3 {
+  color: #dce3f0;
+}
+
+/* ---------- Highlights ---------- */
+.ml-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.ml-highlight {
+  text-align: center;
+  padding: 20px;
+  border: 1px solid var(--ml-line);
+  border-radius: 12px;
+}
+
+.ml-highlight .ml-icon {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 12px;
+  border-radius: 9px;
+  background: var(--ml-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ml-primary);
+}
+
+.ml-highlight span {
+  font-size: 13.5px;
+  color: var(--ml-ink-soft);
+  font-weight: 500;
+}
+
+/* ---------- Final CTA ---------- */
+.ml-cta-final {
+  border-bottom: none;
+}
+
+.ml-cta-final-inner {
+  border-radius: 18px;
+  padding: 64px 48px;
+  text-align: center;
+  background: var(--ml-ink);
+  color: #fff;
+}
+
+.ml-cta-final-inner h2 {
+  color: #fff;
+  max-width: 22ch;
+  margin: 0 auto 14px;
+}
+
+.ml-cta-final-inner p {
+  color: #b9c2d6;
+  max-width: 48ch;
+  margin: 0 auto 32px;
+}
+
+.ml-cta-final-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ml-cta-final .ml-btn-secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.ml-cta-final .ml-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+/* ---------- Footer ---------- */
+.ml-footer {
+  padding: 44px 0 calc(44px + env(safe-area-inset-bottom, 0px));
+}
+
+.ml-footer-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.ml-footer-brand {
+  max-width: 40ch;
+}
+
+.ml-footer-brand p {
+  font-size: 13px;
+  color: var(--ml-ink-faint);
+  margin: 10px 0 0;
+}
+
+.ml-footer-links {
+  display: flex;
+  gap: 28px;
+  font-size: 13.5px;
+  color: var(--ml-ink-soft);
+}
+
+.ml-footer-links a {
+  text-decoration: none;
+}
+
+.ml-footer-links a:hover {
+  color: var(--ml-ink);
+}
+
+@media (max-width: 980px) {
+  .ml-window-body {
+    grid-template-columns: 1fr;
+  }
+  .ml-win-sidebar {
+    display: none;
+  }
+  .ml-rails-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ml-steps-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ml-api-grid {
+    grid-template-columns: 1fr;
+  }
+  .ml-highlights-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ml-nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .ml-wrap {
+    padding: 0 20px;
+  }
+  .ml-stat-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ml-rails-grid {
+    grid-template-columns: 1fr;
+  }
+  .ml-steps-row {
+    grid-template-columns: 1fr;
+  }
+  .ml-highlights-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ml-cta-final-inner {
+    padding: 44px 24px;
+  }
+}
+
+/* ---------- Demo request modal ---------- */
+/* Rendered as a normal child of .marketing-landing (not a portal) — position:fixed still covers
+   the full viewport regardless of DOM depth since nothing here creates a new containing block, so
+   nesting it keeps .ml-btn-secondary etc. working without duplicating their base styles. */
+.ml-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(11, 17, 32, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: inherit;
+}
+
+.ml-modal {
+  background: #fff;
+  color: #0b1120;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 30px 70px -20px rgba(11, 17, 32, 0.35);
+  padding: 28px 26px 26px;
+}
+
+.ml-modal * {
+  box-sizing: border-box;
+}
+
+.ml-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+
+.ml-modal-head h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.ml-modal-close {
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #8a93a6;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.ml-modal-close:hover {
+  color: #0b1120;
+  background: #f7f8fa;
+}
+
+.ml-modal-sub {
+  font-size: 13.5px;
+  color: #475069;
+  margin: 0 0 22px;
+}
+
+.ml-modal-field {
+  margin-bottom: 14px;
+}
+
+.ml-modal-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0b1120;
+  margin-bottom: 6px;
+}
+
+.ml-modal-field input {
+  width: 100%;
+  font-size: 14.5px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e4e7eb;
+  background: #fff;
+  color: #0b1120;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ml-modal-field input:focus-visible,
+.ml-modal-field input:focus {
+  outline: none;
+  border-color: hsl(var(--brand-primary));
+  box-shadow: 0 0 0 3px hsl(var(--brand-primary) / 0.15);
+}
+
+.ml-modal-error {
+  font-size: 13px;
+  color: #c0392b;
+  margin: 0 0 14px;
+}
+
+.ml-modal-submit {
+  width: 100%;
+  margin-top: 6px;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  background: hsl(var(--brand-primary));
+  color: hsl(var(--brand-primary-foreground));
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 20px;
+  font-family: inherit;
+  transition: filter 0.15s ease;
+}
+
+.ml-modal-submit:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.ml-modal-submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.ml-modal-fine {
+  font-size: 11.5px;
+  color: #8a93a6;
+  margin: 12px 0 0;
+  text-align: center;
+}
+
+.ml-modal-success {
+  text-align: center;
+  padding: 6px 0 4px;
+}
+
+.ml-modal-success .ml-check {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: hsl(var(--brand-accent) / 0.14);
+  color: hsl(var(--brand-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.ml-modal-success h3 {
+  font-size: 17px;
+  margin: 0 0 8px;
+}
+
+.ml-modal-success p {
+  font-size: 13.5px;
+  color: #475069;
+  margin: 0 0 20px;
+}
+
+.ml-modal-success .ml-btn-secondary {
+  width: 100%;
+  justify-content: center;
+}

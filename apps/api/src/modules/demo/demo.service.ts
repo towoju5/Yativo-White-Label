@@ -5,6 +5,7 @@ import { generateDemoToken, hashDemoToken } from "./demoToken.js";
 import { generateDemoDatabaseName, provisionDemoDatabase, getDemoPrismaClient } from "./demoDatabase.service.js";
 import { seedDemoDatabase } from "./demoSeed.js";
 import { AppError } from "../../lib/errors.js";
+import { enqueueEmail } from "../../jobs/emailQueue.js";
 
 export class DemoSessionInvalidError extends AppError {
   constructor(message = "This demo link is invalid or has expired") {
@@ -22,7 +23,8 @@ export class DemoSessionInvalidError extends AppError {
  */
 export async function createDemoSession(
   prisma: PrismaClient,
-  createdByStaffUserId: string,
+  createdByStaffUserId: string | null,
+  requester?: { businessName: string; email: string },
 ): Promise<{ session: DemoSession; url: string }> {
   const token = generateDemoToken();
   const tokenHash = hashDemoToken(token);
@@ -30,15 +32,29 @@ export async function createDemoSession(
   const expiresAt = new Date(Date.now() + env.DEMO_DURATION_HOURS * 60 * 60 * 1000);
 
   const session = await prisma.demoSession.create({
-    data: { tokenHash, databaseName, expiresAt, createdByStaffUserId, status: "ACTIVE" },
+    data: {
+      tokenHash,
+      databaseName,
+      expiresAt,
+      createdByStaffUserId,
+      requestedBusinessName: requester?.businessName,
+      requestedByEmail: requester?.email,
+      status: "ACTIVE",
+    },
   });
+
+  const url = `${env.DEMO_BASE_URL}/demo/${token}`;
 
   try {
     await provisionDemoDatabase(databaseName);
     const demoPrisma = getDemoPrismaClient(databaseName);
-    const { demoUserId } = await seedDemoDatabase(demoPrisma);
+    const { demoUserId, adminEmail, adminPassword } = await seedDemoDatabase(demoPrisma, requester);
     await prisma.demoSession.update({ where: { id: session.id }, data: { demoUserId } });
     logger.info({ demoId: session.id, status: "ACTIVE" }, "demo.created");
+
+    if (requester?.email) {
+      await sendDemoCredentialsEmail({ to: requester.email, businessName: requester.businessName, demoUrl: url, adminEmail, adminPassword, expiresAt });
+    }
   } catch (err) {
     await prisma.demoSession.update({
       where: { id: session.id },
@@ -48,9 +64,45 @@ export async function createDemoSession(
     throw err;
   }
 
-  // Never re-log or re-expose the raw token beyond this single response.
-  const url = `${env.DEMO_BASE_URL}/demo/${token}`;
+  // Never re-log or re-expose the raw token beyond this single response. When a requester email
+  // was provided, the caller (POST /demo/request) also doesn't return this in its HTTP response —
+  // email is the only channel the credentials travel over for the self-service flow.
   return { session, url };
+}
+
+/**
+ * Delivers the one-time demo link plus the seeded admin-panel credentials by email — the only
+ * place these ever leave the server for a self-service (public landing page) demo request.
+ * Fire-and-forget from the caller's perspective in the sense that a delivery failure here still
+ * throws (caught by createDemoSession's try/catch, which marks the session FAILED) rather than
+ * silently leaving a session ACTIVE with nobody able to reach it.
+ */
+async function sendDemoCredentialsEmail(params: {
+  to: string;
+  businessName: string;
+  demoUrl: string;
+  adminEmail: string;
+  adminPassword: string;
+  expiresAt: Date;
+}): Promise<void> {
+  const adminUrl = `${env.DEMO_BASE_URL}/admin/login`;
+  const hours = env.DEMO_DURATION_HOURS;
+  await enqueueEmail({
+    to: params.to,
+    subject: `Your demo environment for ${params.businessName} is ready`,
+    html: `
+      <p>Hi there,</p>
+      <p>Your live demo environment for <strong>${params.businessName}</strong> is ready and will stay active for ${hours} hours (until ${params.expiresAt.toUTCString()}).</p>
+      <p><strong>Customer portal</strong><br/>
+      <a href="${params.demoUrl}">${params.demoUrl}</a><br/>
+      One click, no password needed — this link signs you straight in.</p>
+      <p><strong>Admin panel</strong><br/>
+      <a href="${adminUrl}">${adminUrl}</a><br/>
+      Email: ${params.adminEmail}<br/>
+      Temporary password: ${params.adminPassword}</p>
+      <p>Everything in this environment — data, uploads, settings — is isolated to this demo and is automatically and permanently deleted when it expires.</p>
+    `,
+  });
 }
 
 /**

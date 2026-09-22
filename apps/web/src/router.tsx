@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import PortalLayout from "@/layouts/PortalLayout";
 import AdminLayout from "@/layouts/AdminLayout";
@@ -7,6 +7,8 @@ import { RouteErrorBoundary } from "@/components/errors/RouteErrorBoundary";
 
 import StaticPageView from "@/pages/marketing/StaticPageView";
 import VerifyStatementPage from "@/pages/public/VerifyStatementPage";
+import MarketingLandingPage from "@/pages/public/MarketingLandingPage";
+import DemoLandingPage from "@/pages/public/DemoLandingPage";
 import DemoLoginPage from "@/pages/public/DemoLoginPage";
 import DemoExpiredPage from "@/pages/public/DemoExpiredPage";
 
@@ -55,7 +57,6 @@ import WebhooksPage from "@/pages/admin/webhooks/WebhooksPage";
 import AuditLogPage from "@/pages/admin/auditLog/AuditLogPage";
 import ProfitPage from "@/pages/admin/profit/ProfitPage";
 import SupportTicketsPage from "@/pages/admin/support/SupportTicketsPage";
-import ReconciliationPage from "@/pages/admin/reconciliation/ReconciliationPage";
 import YativoBalancesPage from "@/pages/admin/wallets/YativoBalancesPage";
 import CryptoWalletsPage from "@/pages/admin/crypto/CryptoWalletsPage";
 import AdminVirtualAccountsPage from "@/pages/admin/virtualAccounts/VirtualAccountsPage";
@@ -77,19 +78,26 @@ import StorageSettingsPage from "@/pages/admin/settings/StorageSettingsPage";
 import EndorsementSettingsPage from "@/pages/admin/settings/EndorsementSettingsPage";
 import NavLabelsSettingsPage from "@/pages/admin/settings/NavLabelsSettingsPage";
 
-export function createRouter(adminLoginPath: string) {
+export function createRouter(adminLoginPath: string, demoLandingActive = false) {
+  // While the public demo landing page is active (DEMO_ENABLED + DEMO_PUBLIC_SIGNUP_ENABLED),
+  // this deployment's whole purpose is minting demo sessions for anonymous visitors — real staff
+  // and portal login are deliberately taken off the map (redirected to /demo) rather than just
+  // unlinked, so they're not reachable even by a visitor who guesses/remembers the URL. Demo
+  // sessions still authenticate through their own /demo/:token flow, which is untouched below.
+  const realLoginElement = <Navigate to="/demo" replace />;
   return createBrowserRouter([
   {
     // Pathless root wrapper — global catch-all for catastrophic failures (e.g. routing itself
     // breaking). Every other route sits underneath so nothing escapes without at least this tier.
     errorElement: <RouteErrorBoundary />,
     children: [
-      { path: "/", element: <PortalLoginPage /> },
+      { path: "/", element: demoLandingActive ? <MarketingLandingPage /> : <PortalLoginPage /> },
       { path: "/verify-statement/:token", element: <VerifyStatementPage /> },
+      { path: "/demo", element: <DemoLandingPage /> },
       { path: "/demo/:token", element: <DemoLoginPage /> },
       { path: "/demo-expired", element: <DemoExpiredPage /> },
 
-      { path: "/portal/login", element: <PortalLoginPage /> },
+      { path: "/portal/login", element: demoLandingActive ? realLoginElement : <PortalLoginPage /> },
       { path: "/portal/signup", element: <PortalSignupPage /> },
       { path: "/portal/verify-email", element: <VerifyEmailPage /> },
       { path: "/portal/forgot-password", element: <ForgotPasswordPage /> },
@@ -152,7 +160,7 @@ export function createRouter(adminLoginPath: string) {
         ],
       },
 
-      { path: adminLoginPath, element: <AdminLoginPage /> },
+      { path: adminLoginPath, element: demoLandingActive ? realLoginElement : <AdminLoginPage /> },
       { path: "/admin/accept-invite", element: <AdminAcceptInvitePage /> },
       {
         path: "/admin",
@@ -180,7 +188,6 @@ export function createRouter(adminLoginPath: string) {
               { path: "audit-log", element: <AuditLogPage /> },
               { path: "profit", element: <ProfitPage /> },
               { path: "support", element: <SupportTicketsPage /> },
-              { path: "reconciliation", element: <ReconciliationPage /> },
               { path: "wallets/yativo-balances", element: <YativoBalancesPage /> },
               { path: "crypto", element: <CryptoWalletsPage /> },
               { path: "virtual-accounts", element: <AdminVirtualAccountsPage /> },

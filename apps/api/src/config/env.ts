@@ -7,6 +7,18 @@ try {
   // No .env file (e.g. production, where env vars are injected by the platform) — ignore.
 }
 
+// z.coerce.boolean() is a trap for env vars: it coerces via JS's `Boolean(str)`, so the string
+// "false" (non-empty) comes out `true` — meaning an explicit `SOME_FLAG=false` in a .env file
+// would silently enable the flag it was meant to disable. Safety-critical flags here (DEMO_*)
+// rely on "false" actually meaning false, so every boolean env var uses this instead.
+const zEnvBoolean = (defaultValue: boolean) =>
+  z.preprocess((val) => {
+    if (typeof val !== "string") return val;
+    if (val === "true" || val === "1") return true;
+    if (val === "false" || val === "0" || val === "") return false;
+    return val;
+  }, z.boolean().default(defaultValue));
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(4000),
@@ -47,7 +59,7 @@ const envSchema = z.object({
   SENDMAIL_PATH: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().default(587),
-  SMTP_SECURE: z.coerce.boolean().default(false),
+  SMTP_SECURE: zEnvBoolean(false),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   EMAIL_FROM_ADDRESS: z.string().email().default("no-reply@example.com"),
@@ -67,13 +79,18 @@ const envSchema = z.object({
   // Temporary demo-environment system (see modules/demo/). Off by default — when false, demo
   // routes/middleware/cron must not even register (checked at registration time, not just
   // returning 404), so an unconfigured deployment is completely unaffected.
-  DEMO_ENABLED: z.coerce.boolean().default(false),
+  DEMO_ENABLED: zEnvBoolean(false),
   DEMO_DURATION_HOURS: z.coerce.number().positive().default(6),
   // Public base URL the one-time demo link is built from, e.g. https://demo.example.com. Falls
   // back to APP_BASE_URL below (parsedEnv not available yet here, resolved after parse).
   DEMO_BASE_URL: z.string().url().optional(),
   DEMO_DATABASE_PREFIX: z.string().min(1).default("demo_"),
   DEMO_STORAGE_PREFIX: z.string().min(1).default("demo/"),
+  // Public self-service demo landing page (GET /demo, "Generate a demo" button — see
+  // modules/demo/). Independent of DEMO_ENABLED being on: DEMO_ENABLED gates the whole demo
+  // system, this additionally gates whether a completely unauthenticated visitor can mint their
+  // own demo session (vs. staff-only creation via POST /admin/demo-sessions). Off by default.
+  DEMO_PUBLIC_SIGNUP_ENABLED: zEnvBoolean(false),
 });
 
 const parsedEnv = envSchema.parse(process.env);
