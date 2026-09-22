@@ -56,7 +56,7 @@ export async function sendMail(opts: {
     logger.warn({ to: opts.to, subject: opts.subject }, "SMTP isn't configured (SMTP_HOST unset) — email not sent");
     return false;
   }
-  await t.sendMail({
+  const info = await t.sendMail({
     from: smtpConfig.fromAddress,
     to: opts.to,
     subject: opts.subject,
@@ -65,6 +65,13 @@ export async function sendMail(opts: {
     replyTo: opts.replyTo,
     attachments: opts.attachments?.map((a) => ({ filename: a.filename, content: Buffer.from(a.contentBase64, "base64"), contentType: a.contentType })),
   });
+  // The receiving server's own acceptance (e.g. "250 2.0.0 OK ... - gsmtp") is the proof of
+  // delivery to grep for. An address in `rejected` means the server refused that recipient even
+  // though the send as a whole didn't throw.
+  logger.info(
+    { to: opts.to, subject: opts.subject, mode: smtpConfig.mode, messageId: info.messageId, accepted: info.accepted, rejected: info.rejected, response: info.response },
+    info.rejected?.length ? "email.rejected" : "email.sent",
+  );
   return true;
 }
 
