@@ -44,7 +44,6 @@ export async function paymentGatewaysRoutes(app: FastifyInstance) {
           methodName: m.methodName,
           country: m.country,
           currency: m.currency,
-          active: m.active,
           isEnabledForCustomers: !disabled.has(m.gatewayId),
         })),
       );
@@ -71,7 +70,6 @@ export async function paymentGatewaysRoutes(app: FastifyInstance) {
           methodName: m.methodName,
           country: m.country,
           currency: m.currency,
-          active: m.active,
           isEnabledForCustomers: !disabled.has(m.gatewayId),
         })),
       );

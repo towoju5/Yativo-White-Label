@@ -148,7 +148,7 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   // endorsement requirement or the customer's approval status can both change after the
   // beneficiary was created, so this is checked again here, right before any funds are put on
   // hold, same rationale as issueCard's endorsement check in cards.service.ts.
-  const gatewayEndorsement = (await yativoClient.fiat.paymentMethods.listActivePayoutMethods({ currency: input.currencyCode })).find(
+  const gatewayEndorsement = (await yativoClient.fiat.paymentMethods.listPayoutMethods({ currency: input.currencyCode })).find(
     (m) => m.gatewayId === String(gatewayId),
   )?.endorsement ?? null;
   await requireEndorsementApproved(prisma, customer, gatewayEndorsement, "This payout gateway");

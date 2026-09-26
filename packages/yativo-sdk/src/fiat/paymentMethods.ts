@@ -49,7 +49,6 @@ function toPayinMethod(data: z.infer<typeof payinMethodSchema>): FiatPayinMethod
 const payoutMethodSchema = z
   .object({
     id: z.union([z.string(), z.number()]),
-    active: z.boolean().optional(),
     method_name: z.string(),
     gateway: z.string().optional(),
     country: z.string().optional(),
@@ -68,10 +67,9 @@ const payoutMethodSchema = z
   })
   .passthrough();
 
-/** A payout rail for a given country/currency corridor — `gatewayId` is the id used as `gateway_id`/`method_id` in every later beneficiary/quote/payout step. */
+/** A payout rail for a given country/currency corridor — `gatewayId` is the id used as `gateway_id`/`method_id` in every later beneficiary/quote/payout step. Yativo only returns active rails here, so there's no `active` flag to filter on. */
 export type FiatPayoutMethod = {
   gatewayId: string;
-  active: boolean;
   methodName: string;
   gateway?: string;
   country?: string;
@@ -90,7 +88,6 @@ export type FiatPayoutMethod = {
 function toPayoutMethod(data: z.infer<typeof payoutMethodSchema>): FiatPayoutMethod {
   return {
     gatewayId: String(data.id),
-    active: data.active ?? false,
     methodName: data.method_name,
     gateway: data.gateway,
     country: data.country,
@@ -223,9 +220,7 @@ export function createPaymentMethodsResource(ctx: YativoContext) {
 
     /**
      * Payout rails available for a country/currency corridor. Both filters are optional on
-     * the API side, but the API also returns inactive rails — callers should filter on
-     * `active` themselves (this method does not filter, so admin tooling can still see the
-     * full list; use listActivePayoutMethods for the beneficiary-creation picker).
+     * the API side. Yativo only returns active rails, so there's nothing to filter on here.
      */
     async listPayoutMethods(input?: { country?: string; currency?: string }): Promise<FiatPayoutMethod[]> {
       const res = await ctx.request({
@@ -244,7 +239,6 @@ export function createPaymentMethodsResource(ctx: YativoContext) {
               // and this id round-trips through a `z.coerce.number()` route param
               // (GET /portal/beneficiaries/form/:gatewayId) on the way to getForm() below.
               id: "196",
-              active: true,
               method_name: "Mock Bank Transfer",
               gateway: "mock",
               country: input?.country ?? "MEX",
@@ -261,12 +255,6 @@ export function createPaymentMethodsResource(ctx: YativoContext) {
         },
       });
       return res.data.map(toPayoutMethod);
-    },
-
-    /** Convenience wrapper over listPayoutMethods that filters to `active === true` — the API returns inactive rails too. */
-    async listActivePayoutMethods(input?: { country?: string; currency?: string }): Promise<FiatPayoutMethod[]> {
-      const methods = await this.listPayoutMethods(input);
-      return methods.filter((m) => m.active);
     },
 
     /** Countries that have at least one payout method configured — a cheaper picker than filtering the full country list. */

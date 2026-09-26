@@ -17,6 +17,8 @@ export const smtpConfig = {
 };
 
 let transporter: Transporter | null = null;
+/** Which transport `transporter` actually is — differs from smtpConfig.mode when SMTP falls back to sendmail. */
+let activeMode: MailMode = smtpConfig.mode;
 
 /** Invalidates the cached transporter so the next sendMail() rebuilds it from the current smtpConfig. */
 export function resetTransporter(): void {
@@ -39,13 +41,20 @@ function getTransporter(): Transporter | null {
       secure: smtpConfig.secure,
       auth: smtpConfig.user ? { user: smtpConfig.user, pass: smtpConfig.password } : undefined,
     });
+    activeMode = "smtp";
     return transporter;
   }
   const path = smtpConfig.sendmailPath || "sendmail";
   const fallback = smtpConfig.mode === "smtp";
   logger.info({ mode: "sendmail", path, from: smtpConfig.fromAddress, fallback }, fallback ? "email.transport (SMTP not configured, falling back to sendmail)" : "email.transport");
   transporter = nodemailer.createTransport({ sendmail: true, newline: "unix", path });
+  activeMode = "sendmail";
   return transporter;
+}
+
+/** The transport the last send actually used ("sendmail" when SMTP fell back) — for error messages. */
+export function getActiveMailMode(): MailMode {
+  return activeMode;
 }
 
 export type MailAttachment = { filename: string; contentBase64: string; contentType: string };
@@ -77,7 +86,7 @@ export async function sendMail(opts: {
   // delivery to grep for. An address in `rejected` means the server refused that recipient even
   // though the send as a whole didn't throw.
   logger.info(
-    { to: opts.to, subject: opts.subject, mode: smtpConfig.mode, messageId: info.messageId, accepted: info.accepted, rejected: info.rejected, response: info.response },
+    { to: opts.to, subject: opts.subject, mode: activeMode, messageId: info.messageId, accepted: info.accepted, rejected: info.rejected, response: info.response },
     info.rejected?.length ? "email.rejected" : "email.sent",
   );
   return true;

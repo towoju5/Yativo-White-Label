@@ -133,7 +133,7 @@ export async function listPayoutCountries() {
  * rather than erroring the whole list, matching deposits.routes.ts's identical fallback.
  */
 export async function listPayoutMethods(prisma: PrismaClient, customer: Customer, country?: string, currency?: string) {
-  const methods = await yativoClient.fiat.paymentMethods.listActivePayoutMethods({ country, currency });
+  const methods = await yativoClient.fiat.paymentMethods.listPayoutMethods({ country, currency });
   const enabled = await filterEnabledGateways(prisma, "PAYOUT", methods);
 
   const resolveEligibility = customer.yativoCustomerId
@@ -185,7 +185,7 @@ export async function getBeneficiaryPayoutBaseCurrencies(beneficiary: { details:
   const country = typeof details.country === "string" ? details.country : undefined;
   if (!country) return [];
 
-  const methods = await yativoClient.fiat.paymentMethods.listActivePayoutMethods({ country });
+  const methods = await yativoClient.fiat.paymentMethods.listPayoutMethods({ country });
   const method = methods.find((m) => m.gatewayId === String(gatewayId));
   return method?.baseCurrencies ?? [];
 }

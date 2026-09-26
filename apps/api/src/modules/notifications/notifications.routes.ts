@@ -9,7 +9,7 @@ import {
   emailNotificationTypeSchema,
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
-import { sendMail, smtpConfig } from "../../lib/mailer.js";
+import { sendMail, getActiveMailMode } from "../../lib/mailer.js";
 import { AppError } from "../../lib/errors.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import {
@@ -116,7 +116,7 @@ export async function notificationsRoutes(app: FastifyInstance) {
         // to app.ts's generic catch-all, which would otherwise hide it behind an opaque "Internal
         // server error" with no way for an admin to tell what's actually wrong with their email settings.
         const detail = err instanceof Error ? err.message : String(err);
-        throw new AppError(`Couldn't send via ${smtpConfig.mode}: ${detail}`, 502, "EMAIL_SEND_FAILED");
+        throw new AppError(`Couldn't send via ${getActiveMailMode()}: ${detail}`, 502, "EMAIL_SEND_FAILED");
       }
       if (!sent) {
         throw new AppError("SMTP isn't configured yet — set a host under Settings → Integrations first.", 409, "EMAIL_NOT_CONFIGURED");

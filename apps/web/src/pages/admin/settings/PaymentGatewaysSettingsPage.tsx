@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -67,7 +66,6 @@ function GatewayTab({ kind }: { kind: PaymentGatewayKind }) {
             <TableRow>
               <TableHead>Method</TableHead>
               <TableHead>Currency</TableHead>
-              <TableHead>Yativo status</TableHead>
               <TableHead className="text-right">Enabled for customers</TableHead>
             </TableRow>
           </TableHeader>
@@ -76,9 +74,6 @@ function GatewayTab({ kind }: { kind: PaymentGatewayKind }) {
               <TableRow key={g.gatewayId}>
                 <TableCell className="font-medium">{g.methodName}</TableCell>
                 <TableCell className="text-muted-foreground">{g.currency ?? "—"}</TableCell>
-                <TableCell>
-                  <Badge variant={g.active ? "secondary" : "outline"}>{g.active ? "Active" : "Inactive on Yativo"}</Badge>
-                </TableCell>
                 <TableCell className="text-right">
                   <Switch
                     checked={g.isEnabledForCustomers}
@@ -90,7 +85,7 @@ function GatewayTab({ kind }: { kind: PaymentGatewayKind }) {
             ))}
             {gateways?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
+                <TableCell colSpan={3} className="text-center text-sm text-muted-foreground">
                   No payment rails for this country.
                 </TableCell>
               </TableRow>
@@ -108,8 +103,8 @@ export default function PaymentGatewaysSettingsPage() {
       <div>
         <h1 className="font-heading text-2xl font-semibold tracking-tight">Payment gateways</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Turn a rail off to hide it from customers regardless of whether Yativo reports it as active — this is this platform's own product
-          decision, not Yativo's.
+          Yativo only surfaces active rails here. Turn one off to hide it from customers — this is this platform's own product decision, not
+          Yativo's.
         </p>
       </div>
 
