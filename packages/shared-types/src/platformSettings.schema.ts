@@ -37,6 +37,9 @@ export const platformSettingsSchema = z.object({
   kycRequiredServices: z.array(kycRequiredServiceSchema),
   requireEmailVerification: z.boolean(),
   customerLoginMethod: customerLoginMethodSchema,
+  newLocationLoginCheck: z.boolean(),
+  /** DISABLE_NEW_LOCATION_LOGIN_CHECK is set in the API's env — the check is off whatever newLocationLoginCheck says. */
+  newLocationLoginCheckDisabledByEnv: z.boolean(),
   currencySyncFrequency: currencySyncFrequencySchema,
   lastCurrencySyncAt: z.string().nullable(),
   updatedAt: z.string(),
@@ -52,6 +55,11 @@ export const updateEmailVerificationSchema = z.object({
   requireEmailVerification: z.boolean(),
 });
 export type UpdateEmailVerificationInput = z.infer<typeof updateEmailVerificationSchema>;
+
+export const updateNewLocationLoginCheckSchema = z.object({
+  newLocationLoginCheck: z.boolean(),
+});
+export type UpdateNewLocationLoginCheckInput = z.infer<typeof updateNewLocationLoginCheckSchema>;
 
 export const updateCustomerLoginMethodSchema = z.object({
   customerLoginMethod: customerLoginMethodSchema,

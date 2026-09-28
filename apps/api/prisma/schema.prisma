@@ -114,6 +114,10 @@ model PlatformSettings {
   /// behavior for an existing deployment. MAGIC_LINK doesn't remove password login server-side
   /// (loginCustomer still works), it only changes which flow the login page presents.
   customerLoginMethod      CustomerLoginMethod   @default(PASSWORD)
+  // On by default — the emailed code challenge on a sign-in from a new country (staff and
+  // customers, see lib/loginLocationGuard.ts). DISABLE_NEW_LOCATION_LOGIN_CHECK=true in env
+  // overrides this to off regardless, as a lockout escape hatch when email isn't delivering.
+  newLocationLoginCheck    Boolean               @default(true)
   // Cadence for the automatic background currency sync — the manual "Sync from Yativo" admin
   // button is unaffected and always runs on demand regardless of this value.
   currencySyncFrequency    CurrencySyncFrequency @default(DAILY)

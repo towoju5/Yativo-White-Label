@@ -1,5 +1,6 @@
 import type { Currency, PlatformSettings, PrismaClient } from "@prisma/client";
-import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput, UpdateEmailVerificationInput, UpdateCustomerLoginMethodInput } from "@white-label/shared-types";
+import type { UpdatePlatformSettingsInput, UpdateKycRequirementsInput, UpdateEmailVerificationInput, UpdateCustomerLoginMethodInput, UpdateNewLocationLoginCheckInput } from "@white-label/shared-types";
+import { env } from "../../config/env.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 
@@ -23,6 +24,8 @@ function settingsToDto(s: PlatformSettings) {
     kycRequiredServices: s.kycRequiredServices,
     requireEmailVerification: s.requireEmailVerification,
     customerLoginMethod: s.customerLoginMethod,
+    newLocationLoginCheck: s.newLocationLoginCheck,
+    newLocationLoginCheckDisabledByEnv: env.DISABLE_NEW_LOCATION_LOGIN_CHECK,
     currencySyncFrequency: s.currencySyncFrequency,
     lastCurrencySyncAt: s.lastCurrencySyncAt ? s.lastCurrencySyncAt.toISOString() : null,
     updatedAt: s.updatedAt.toISOString(),
@@ -108,6 +111,11 @@ export async function updateKycRequirements(prisma: PrismaClient, input: UpdateK
 
 export async function updateEmailVerificationSetting(prisma: PrismaClient, input: UpdateEmailVerificationInput) {
   const settings = await prisma.platformSettings.update({ where: { id: 1 }, data: { requireEmailVerification: input.requireEmailVerification } });
+  return settingsToDto(settings);
+}
+
+export async function updateNewLocationLoginCheck(prisma: PrismaClient, input: UpdateNewLocationLoginCheckInput) {
+  const settings = await prisma.platformSettings.update({ where: { id: 1 }, data: { newLocationLoginCheck: input.newLocationLoginCheck } });
   return settingsToDto(settings);
 }
 

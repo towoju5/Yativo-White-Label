@@ -68,6 +68,11 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   EMAIL_FROM_ADDRESS: z.string().email().default("no-reply@example.com"),
 
+  // Lockout escape hatch: true turns off the emailed code on a sign-in from a new country (staff
+  // and customers) no matter what the admin toggle says — for when email isn't delivering and
+  // nobody can get into the dashboard to flip it there. Remove it again once you're back in.
+  DISABLE_NEW_LOCATION_LOGIN_CHECK: zEnvBoolean(false),
+
   // Local-disk asset storage (see lib/storage/local.provider.ts). Deliberately an env var, not an
   // admin-editable setting — a free-text filesystem path in the admin UI would let an admin write
   // uploads anywhere on disk. Defaults to a directory inside the API app if unset.

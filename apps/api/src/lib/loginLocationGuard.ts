@@ -1,11 +1,19 @@
 import type { PrismaClient } from "@prisma/client";
 import geoip from "geoip-lite";
+import { env } from "../config/env.js";
 
 export type LoginPrincipalKind = "customer" | "staff";
 
 function countryFor(ip?: string): string | null {
   if (!ip) return null;
   return geoip.lookup(ip)?.country ?? null;
+}
+
+/** The env override wins so it still works when the DB toggle can't be reached (locked out of the dashboard). A missing settings row keeps the check on. */
+async function isNewLocationLoginCheckEnabled(prisma: PrismaClient): Promise<boolean> {
+  if (env.DISABLE_NEW_LOCATION_LOGIN_CHECK) return false;
+  const settings = await prisma.platformSettings.findUnique({ where: { id: 1 }, select: { newLocationLoginCheck: true } });
+  return settings?.newLocationLoginCheck ?? true;
 }
 
 /**
@@ -18,6 +26,7 @@ function countryFor(ip?: string): string | null {
 export async function isNewLoginLocation(prisma: PrismaClient, principalType: LoginPrincipalKind, principalId: string, ip?: string): Promise<boolean> {
   const country = countryFor(ip);
   if (!country) return false;
+  if (!(await isNewLocationLoginCheckEnabled(prisma))) return false;
   const hasAnyKnownLocation = await prisma.knownLoginLocation.findFirst({ where: { principalType, principalId } });
   if (!hasAnyKnownLocation) return false;
   const seenThisCountry = await prisma.knownLoginLocation.findUnique({

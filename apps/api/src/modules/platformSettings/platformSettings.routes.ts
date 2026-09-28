@@ -8,6 +8,7 @@ import {
   updateKycRequirementsSchema,
   updateEmailVerificationSchema,
   updateCustomerLoginMethodSchema,
+  updateNewLocationLoginCheckSchema,
   portalAuthConfigSchema,
   adminCurrencySchema,
 } from "@white-label/shared-types";
@@ -21,9 +22,11 @@ import {
   updateKycRequirements,
   updateEmailVerificationSetting,
   updateCustomerLoginMethod,
+  updateNewLocationLoginCheck,
   getPortalAuthConfig,
   setCurrencyEnabled,
 } from "./platformSettings.service.js";
+import { logAdminAction } from "../../lib/adminAuditLog.js";
 
 export async function platformSettingsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -81,6 +84,19 @@ export async function platformSettingsRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const settings = await updateEmailVerificationSetting(app.prisma, request.body);
+      return reply.send(settings);
+    },
+  );
+
+  server.patch(
+    "/admin/settings/new-location-login-check",
+    {
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      schema: { body: updateNewLocationLoginCheckSchema, response: { 200: walletCurrencySettingsSchema.shape.settings } },
+    },
+    async (request, reply) => {
+      const settings = await updateNewLocationLoginCheck(app.prisma, request.body);
+      await logAdminAction(app.prisma, request.staffUser!.sub, "platform_settings.new_location_login_check", "platform_settings", { enabled: request.body.newLocationLoginCheck });
       return reply.send(settings);
     },
   );

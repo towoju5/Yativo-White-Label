@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { WalletCurrencySettings, CustomerLoginMethod } from "@white-label/shared-types";
-import { Users, MailCheck, KeyRound } from "lucide-react";
+import { Users, MailCheck, KeyRound, MapPin } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,12 @@ export default function VerificationSettingsPage() {
 
   const emailVerificationMutation = useMutation({
     mutationFn: (requireEmailVerification: boolean) => staffApi.patch("/admin/settings/email-verification", { requireEmailVerification }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "settings", "wallet-currencies"] }),
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't update", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const newLocationCheckMutation = useMutation({
+    mutationFn: (newLocationLoginCheck: boolean) => staffApi.patch("/admin/settings/new-location-login-check", { newLocationLoginCheck }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "settings", "wallet-currencies"] }),
     onError: (e) => toast({ variant: "destructive", title: "Couldn't update", description: e instanceof ApiError ? e.message : undefined }),
   });
@@ -60,6 +66,43 @@ export default function VerificationSettingsPage() {
                 disabled={emailVerificationMutation.isPending}
                 onCheckedChange={(checked) => emailVerificationMutation.mutate(checked)}
               />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">New-location sign-in check</CardTitle>
+          </div>
+          <CardDescription>
+            When someone signs in from a country their account hasn't used before, they must enter a code sent to their email. Applies to staff and customers.
+            Accounts with two-factor authentication get the authenticator prompt instead.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <Skeleton className="h-10" />
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-1">
+                <div>
+                  <p className="text-sm font-medium">Email a code on sign-ins from a new country</p>
+                  <p className="text-xs text-muted-foreground">Turn off only if email isn't delivering reliably. Without it, a stolen password alone is enough to sign in.</p>
+                </div>
+                <Switch
+                  checked={data?.settings.newLocationLoginCheck ?? true}
+                  disabled={newLocationCheckMutation.isPending || data?.settings.newLocationLoginCheckDisabledByEnv}
+                  onCheckedChange={(checked) => newLocationCheckMutation.mutate(checked)}
+                />
+              </div>
+              {data?.settings.newLocationLoginCheckDisabledByEnv && (
+                <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+                  Currently off for everyone because <code>DISABLE_NEW_LOCATION_LOGIN_CHECK=true</code> is set on the server. Remove it and restart the API to use this setting again.
+                </p>
+              )}
             </div>
           )}
         </CardContent>
