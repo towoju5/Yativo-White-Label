@@ -61,6 +61,26 @@ export function useKycDraft() {
   });
 }
 
+export type StoredKycSubmission = {
+  type: "INDIVIDUAL" | "BUSINESS";
+  submittedAt: string;
+  payload: Record<string, unknown>;
+  files: { fieldPath: string; filename: string; mimetype: string; base64: string }[];
+};
+
+/** Full decrypted copy of the customer's last submitted KYC (sensitive fields and binary files
+ * included) — see kyc.routes.ts's GET /portal/kyc/submission. Only fetched by the "Update KYC"
+ * wizard; null when nothing was stored (e.g. submitted before the encrypted copy existed). */
+export function useKycSubmission(enabled: boolean) {
+  return useQuery({
+    queryKey: ["portal", "kyc", "submission"],
+    queryFn: () => portalApi.get<StoredKycSubmission | null>("/portal/kyc/submission"),
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+  });
+}
+
 export type KycDraftFileMeta = { fieldPath: string; filename: string; mimetype: string; size: number };
 
 /** Metadata for any document/photo the customer already selected mid-wizard — see kyc.routes.ts's

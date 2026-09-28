@@ -35,6 +35,8 @@ const envSchema = z.object({
   PORTAL_JWT_REFRESH_SECRET: z.string().min(16),
   /** Root key for credentials stored encrypted in PostgreSQL. Never expose this in the admin UI. */
   CREDENTIAL_ENCRYPTION_KEY: z.string().regex(/^[a-f0-9]{64}$/i, "CREDENTIAL_ENCRYPTION_KEY must be 64 hex characters"),
+  /** Dedicated key for the encrypted-at-rest copy of each customer's full KYC/KYB submission (see lib/kycEncryption.ts) — separate from CREDENTIAL_ENCRYPTION_KEY so either can be rotated alone. */
+  KYC_ENCRYPTION_KEY: z.string().regex(/^[a-f0-9]{64}$/i, "KYC_ENCRYPTION_KEY must be 64 hex characters"),
   PORTAL_JWT_ACCESS_TTL: z.string().default("15m"),
   PORTAL_JWT_REFRESH_TTL: z.string().default("30d"),
 

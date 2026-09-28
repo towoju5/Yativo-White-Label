@@ -349,6 +349,7 @@ if [ ! -f apps/api/.env ]; then
   PORTAL_JWT_REFRESH_SECRET="$(gen_secret)"
   YATIVO_WEBHOOK_SECRET="$(gen_secret)"
   CREDENTIAL_ENCRYPTION_KEY="$(gen_secret)" # encrypts provider credentials at rest — see apps/api/src/lib/credentialEncryption.ts
+  KYC_ENCRYPTION_KEY="$(gen_secret)" # encrypts stored KYC/KYB submissions at rest — see apps/api/src/lib/kycEncryption.ts
   DB_PASSWORD="$(grep '^POSTGRES_PASSWORD=' "$REPO_ROOT/.env" | cut -d= -f2-)" # generated above, shared with docker-compose.yml
   REDIS_PASSWORD="$(grep '^REDIS_PASSWORD=' "$REPO_ROOT/.env" | cut -d= -f2-)"
 
@@ -382,6 +383,7 @@ WEB_APP_URL=https://${WEB_DOMAIN}
 LOG_LEVEL=info
 
 CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
+KYC_ENCRYPTION_KEY=${KYC_ENCRYPTION_KEY}
 EOF
   chmod 600 apps/api/.env
 
@@ -403,6 +405,11 @@ else
     log "apps/api/.env predates CREDENTIAL_ENCRYPTION_KEY — appending a fresh one (existing secrets untouched)…"
     echo "CREDENTIAL_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> apps/api/.env
     ok "CREDENTIAL_ENCRYPTION_KEY added."
+  fi
+  if ! grep -q '^KYC_ENCRYPTION_KEY=' apps/api/.env; then
+    log "apps/api/.env predates KYC_ENCRYPTION_KEY — appending a fresh one (existing secrets untouched)…"
+    echo "KYC_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> apps/api/.env
+    ok "KYC_ENCRYPTION_KEY added."
   fi
   # Sanity check: an existing apps/api/.env whose DATABASE_URL password doesn't match the
   # Postgres container's actual password (root .env) fails every query at runtime with an

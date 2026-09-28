@@ -84,3 +84,9 @@ export function buildKycFormData(values: unknown, files: Map<string, File>): For
   for (const [path, file] of files) formData.append(path, file, file.name);
   return formData;
 }
+
+/** Rebuilds a browser File from one of GET /portal/kyc/submission's stored binary file entries. */
+export function base64ToFile(f: { filename: string; mimetype: string; base64: string }): File {
+  const bytes = Uint8Array.from(atob(f.base64), (c) => c.charCodeAt(0));
+  return new File([bytes], f.filename, { type: f.mimetype });
+}

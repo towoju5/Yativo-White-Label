@@ -218,41 +218,118 @@ function objectToFormData(obj: Record<string, unknown>): FormData {
   return formData;
 }
 
+function individualKycFields(yativoCustomerId: string, input: SubmitIndividualKycInput): Record<string, unknown> {
+  return {
+    customer_id: yativoCustomerId,
+    first_name: input.firstName,
+    middle_name: input.middleName,
+    last_name: input.lastName,
+    email: input.email,
+    calling_code: input.callingCode,
+    phone: input.phone,
+    birth_date: input.birthDate,
+    nationality: input.nationality,
+    gender: input.gender,
+    taxId: input.taxId,
+    current_employer: input.currentEmployer,
+    immigration_status: input.immigrationStatus,
+    selfie_image: input.selfieImage,
+    bvn: input.bvn,
+    nin: input.nin,
+    residential_address: { ...addressBody(input.residentialAddress), proof_of_address_file: input.residentialAddress.proofOfAddressFile },
+    identifying_information: individualIdDocsBody(input.identifyingInformation),
+    employment_status: input.employmentStatus,
+    most_recent_occupation_code: input.mostRecentOccupationCode,
+    expected_monthly_payments_usd: input.expectedMonthlyPaymentsUsd,
+    source_of_funds: input.sourceOfFunds,
+    account_purpose: input.accountPurpose,
+    account_purpose_other: input.accountPurposeOther,
+    acting_as_intermediary: input.actingAsIntermediary,
+    uploaded_documents: input.uploadedDocuments.map((d) => ({ type: d.type, file: d.file })),
+    usd_virtual_account: input.usdVirtualAccount,
+    eur_virtual_account: input.eurVirtualAccount,
+    eurde_virtual_account: input.eurdeVirtualAccount,
+    gbp_virtual_account: input.gbpVirtualAccount,
+  };
+}
+
+function businessKycFields(yativoCustomerId: string, input: SubmitBusinessKycInput): Record<string, unknown> {
+  return {
+    customer_id: yativoCustomerId,
+    business_legal_name: input.businessLegalName,
+    business_trade_name: input.businessTradeName,
+    business_description: input.businessDescription,
+    email: input.email,
+    business_type: input.businessType,
+    registration_number: input.registrationNumber,
+    incorporation_date: input.incorporationDate,
+    incorporation_country: input.incorporationCountry,
+    tax_id: input.taxId,
+    phone_calling_code: input.phoneCallingCode,
+    phone_number: input.phoneNumber,
+    business_industry: input.businessIndustry,
+    primary_website: input.primaryWebsite,
+    is_dao: input.isDao,
+    statement_descriptor: input.statementDescriptor,
+    registered_address: addressBody(input.registeredAddress),
+    physical_address: {
+      ...addressBody(input.physicalAddress),
+      proof_of_address_file: input.physicalAddress.proofOfAddressFile,
+    },
+    associated_persons: input.associatedPersons.map((p) => ({
+      first_name: p.firstName,
+      last_name: p.lastName,
+      birth_date: p.birthDate,
+      nationality: p.nationality,
+      email: p.email,
+      ownership_percentage: p.ownershipPercentage,
+      residential_address: addressBody(p.residentialAddress),
+      identifying_information: businessIdDocsBody(p.identifyingInformation),
+      phone: p.phone,
+      title: p.title,
+      relationship_established_at: p.relationshipEstablishedAt,
+      has_ownership: p.hasOwnership,
+      has_control: p.hasControl,
+      is_signer: p.isSigner,
+      is_director: p.isDirector,
+    })),
+    account_purpose: input.accountPurpose,
+    account_purpose_other: input.accountPurposeOther,
+    source_of_funds: input.sourceOfFunds,
+    high_risk_activities: input.highRiskActivities,
+    high_risk_activities_explanation: input.highRiskActivitiesExplanation,
+    conducts_money_services: input.conductsMoneyServices,
+    conducts_money_services_description: input.conductsMoneyServicesDescription,
+    compliance_screening_explanation: input.complianceScreeningExplanation,
+    estimated_annual_revenue_usd: input.estimatedAnnualRevenueUsd,
+    expected_monthly_payments_usd: input.expectedMonthlyPaymentsUsd,
+    operates_in_prohibited_countries: input.operatesInProhibitedCountries,
+    ownership_threshold: input.ownershipThreshold,
+    has_material_intermediary_ownership: input.hasMaterialIntermediaryOwnership,
+    pep_status: input.pepStatus,
+    third_party_msb_payments: input.thirdPartyMsbPayments,
+    regulated_activity: {},
+    documents: input.documents,
+    usd_virtual_account: input.usdVirtualAccount,
+    eur_virtual_account: input.eurVirtualAccount,
+    eurde_virtual_account: input.eurdeVirtualAccount,
+    gbp_virtual_account: input.gbpVirtualAccount,
+  };
+}
+
+/**
+ * Yativo's partial-update endpoints are Laravel `PATCH` routes, but PHP never parses a
+ * multipart/form-data body on anything other than POST — so the update is sent as POST with
+ * Laravel's `_method=PATCH` form-method spoofing, the framework's own convention for this.
+ */
+function updateFormData(fields: Record<string, unknown>): FormData {
+  return objectToFormData({ _method: "PATCH", ...fields });
+}
+
 export function createKycResource(ctx: YativoContext) {
   return {
     async submitIndividual(yativoCustomerId: string, input: SubmitIndividualKycInput): Promise<FiatKycSubmissionResult> {
-      const body = objectToFormData({
-        customer_id: yativoCustomerId,
-        first_name: input.firstName,
-        middle_name: input.middleName,
-        last_name: input.lastName,
-        email: input.email,
-        calling_code: input.callingCode,
-        phone: input.phone,
-        birth_date: input.birthDate,
-        nationality: input.nationality,
-        gender: input.gender,
-        taxId: input.taxId,
-        current_employer: input.currentEmployer,
-        immigration_status: input.immigrationStatus,
-        selfie_image: input.selfieImage,
-        bvn: input.bvn,
-        nin: input.nin,
-        residential_address: { ...addressBody(input.residentialAddress), proof_of_address_file: input.residentialAddress.proofOfAddressFile },
-        identifying_information: individualIdDocsBody(input.identifyingInformation),
-        employment_status: input.employmentStatus,
-        most_recent_occupation_code: input.mostRecentOccupationCode,
-        expected_monthly_payments_usd: input.expectedMonthlyPaymentsUsd,
-        source_of_funds: input.sourceOfFunds,
-        account_purpose: input.accountPurpose,
-        account_purpose_other: input.accountPurposeOther,
-        acting_as_intermediary: input.actingAsIntermediary,
-        uploaded_documents: input.uploadedDocuments.map((d) => ({ type: d.type, file: d.file })),
-        usd_virtual_account: input.usdVirtualAccount,
-        eur_virtual_account: input.eurVirtualAccount,
-        eurde_virtual_account: input.eurdeVirtualAccount,
-        gbp_virtual_account: input.gbpVirtualAccount,
-      });
+      const body = objectToFormData(individualKycFields(yativoCustomerId, input));
 
       const res = await ctx.request({
         baseUrl: ctx.config.kycBaseUrl,
@@ -269,67 +346,7 @@ export function createKycResource(ctx: YativoContext) {
     },
 
     async submitBusiness(yativoCustomerId: string, input: SubmitBusinessKycInput): Promise<FiatKycSubmissionResult> {
-      const body = objectToFormData({
-        customer_id: yativoCustomerId,
-        business_legal_name: input.businessLegalName,
-        business_trade_name: input.businessTradeName,
-        business_description: input.businessDescription,
-        email: input.email,
-        business_type: input.businessType,
-        registration_number: input.registrationNumber,
-        incorporation_date: input.incorporationDate,
-        incorporation_country: input.incorporationCountry,
-        tax_id: input.taxId,
-        phone_calling_code: input.phoneCallingCode,
-        phone_number: input.phoneNumber,
-        business_industry: input.businessIndustry,
-        primary_website: input.primaryWebsite,
-        is_dao: input.isDao,
-        statement_descriptor: input.statementDescriptor,
-        registered_address: addressBody(input.registeredAddress),
-        physical_address: {
-          ...addressBody(input.physicalAddress),
-          proof_of_address_file: input.physicalAddress.proofOfAddressFile,
-        },
-        associated_persons: input.associatedPersons.map((p) => ({
-          first_name: p.firstName,
-          last_name: p.lastName,
-          birth_date: p.birthDate,
-          nationality: p.nationality,
-          email: p.email,
-          ownership_percentage: p.ownershipPercentage,
-          residential_address: addressBody(p.residentialAddress),
-          identifying_information: businessIdDocsBody(p.identifyingInformation),
-          phone: p.phone,
-          title: p.title,
-          relationship_established_at: p.relationshipEstablishedAt,
-          has_ownership: p.hasOwnership,
-          has_control: p.hasControl,
-          is_signer: p.isSigner,
-          is_director: p.isDirector,
-        })),
-        account_purpose: input.accountPurpose,
-        account_purpose_other: input.accountPurposeOther,
-        source_of_funds: input.sourceOfFunds,
-        high_risk_activities: input.highRiskActivities,
-        high_risk_activities_explanation: input.highRiskActivitiesExplanation,
-        conducts_money_services: input.conductsMoneyServices,
-        conducts_money_services_description: input.conductsMoneyServicesDescription,
-        compliance_screening_explanation: input.complianceScreeningExplanation,
-        estimated_annual_revenue_usd: input.estimatedAnnualRevenueUsd,
-        expected_monthly_payments_usd: input.expectedMonthlyPaymentsUsd,
-        operates_in_prohibited_countries: input.operatesInProhibitedCountries,
-        ownership_threshold: input.ownershipThreshold,
-        has_material_intermediary_ownership: input.hasMaterialIntermediaryOwnership,
-        pep_status: input.pepStatus,
-        third_party_msb_payments: input.thirdPartyMsbPayments,
-        regulated_activity: {},
-        documents: input.documents,
-        usd_virtual_account: input.usdVirtualAccount,
-        eur_virtual_account: input.eurVirtualAccount,
-        eurde_virtual_account: input.eurdeVirtualAccount,
-        gbp_virtual_account: input.gbpVirtualAccount,
-      });
+      const body = objectToFormData(businessKycFields(yativoCustomerId, input));
 
       const res = await ctx.request({
         baseUrl: ctx.config.kycBaseUrl,
@@ -337,6 +354,32 @@ export function createKycResource(ctx: YativoContext) {
         method: "POST",
         headers: { "Idempotency-Key": `kyc:business:${yativoCustomerId}` },
         body,
+        schema: submitResponseSchema,
+        mockData: { success: true, message: "mock", data: { id: "kyb-mock-001", status: "submitted" } },
+      });
+      return { submissionId: res.data?.id !== undefined ? String(res.data.id) : null, status: res.data?.status ?? "submitted" };
+    },
+
+    /** Partial update of an already-submitted individual KYC (guide §5.5) — stricter address validation than submit (§2.10). */
+    async updateIndividual(yativoCustomerId: string, input: SubmitIndividualKycInput): Promise<FiatKycSubmissionResult> {
+      const res = await ctx.request({
+        baseUrl: ctx.config.kycBaseUrl,
+        path: `/api/individual-kyc/${encodeURIComponent(yativoCustomerId)}`,
+        method: "POST",
+        body: updateFormData(individualKycFields(yativoCustomerId, input)),
+        schema: submitResponseSchema,
+        mockData: { success: true, message: "mock", data: { id: "kyc-mock-001", status: "submitted" } },
+      });
+      return { submissionId: res.data?.id !== undefined ? String(res.data.id) : null, status: res.data?.status ?? "submitted" };
+    },
+
+    /** Partial update of an already-submitted business KYB (guide §6.13). */
+    async updateBusiness(yativoCustomerId: string, input: SubmitBusinessKycInput): Promise<FiatKycSubmissionResult> {
+      const res = await ctx.request({
+        baseUrl: ctx.config.kycBaseUrl,
+        path: `/api/business-kyc/${encodeURIComponent(yativoCustomerId)}`,
+        method: "POST",
+        body: updateFormData(businessKycFields(yativoCustomerId, input)),
         schema: submitResponseSchema,
         mockData: { success: true, message: "mock", data: { id: "kyb-mock-001", status: "submitted" } },
       });

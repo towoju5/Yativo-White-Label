@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { CustomerEndorsement } from "@white-label/shared-types";
-import { BadgeCheck, ShieldCheck } from "lucide-react";
+import { BadgeCheck, PencilLine, ShieldCheck } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,8 @@ export default function ProfilePage() {
 
   const status = kycQuery.data?.kycStatus ?? user?.kycStatus ?? "NOT_STARTED";
   const canStart = status === "NOT_STARTED" || status === "REJECTED";
+  // Anything already submitted can be corrected in place (PATCH) — see KycWizardPage's ?mode=update.
+  const canUpdate = status !== "NOT_STARTED";
 
   const endorsementsQuery = useQuery({
     queryKey: ["portal", "kyc", "endorsements"],
@@ -69,27 +71,33 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {status !== "APPROVED" && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              <CardTitle className="text-base">{t("profile.identityVerificationTitle", "Identity verification")}</CardTitle>
-              <Badge variant={STATUS_VARIANT[status] ?? "secondary"} className="ml-auto">
-                {status.replace("_", " ")}
-              </Badge>
-            </div>
-            <CardDescription>{STATUS_COPY[status] ?? STATUS_COPY.NOT_STARTED}</CardDescription>
-          </CardHeader>
-          {canStart && (
-            <CardContent>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">{t("profile.identityVerificationTitle", "Identity verification")}</CardTitle>
+            <Badge variant={STATUS_VARIANT[status] ?? "secondary"} className="ml-auto">
+              {status.replace("_", " ")}
+            </Badge>
+          </div>
+          <CardDescription>{STATUS_COPY[status] ?? STATUS_COPY.NOT_STARTED}</CardDescription>
+        </CardHeader>
+        {(canStart || canUpdate) && (
+          <CardContent className="flex flex-wrap gap-2">
+            {canStart && (
               <Button onClick={() => navigate("/portal/verify")}>
                 {status === "REJECTED" ? t("profile.restartVerification", "Restart verification") : t("profile.startVerification", "Start verification")}
               </Button>
-            </CardContent>
-          )}
-        </Card>
-      )}
+            )}
+            {canUpdate && (
+              <Button variant={canStart ? "outline" : "default"} onClick={() => navigate("/portal/verify?mode=update")}>
+                <PencilLine className="mr-1.5 h-4 w-4" />
+                {t("profile.updateKyc", "Update KYC information")}
+              </Button>
+            )}
+          </CardContent>
+        )}
+      </Card>
 
       <Card>
         <CardHeader>

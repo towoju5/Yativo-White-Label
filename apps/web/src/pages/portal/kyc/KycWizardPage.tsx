@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { KycCountry } from "@white-label/shared-types";
-import { CheckCircle2, Clock, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Clock, PencilLine, ShieldCheck } from "lucide-react";
 import { portalApi } from "@/lib/api-client";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ export default function KycWizardPage() {
   const { t } = useTranslation();
   const { user } = useCustomerAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const countriesQuery = useQuery({
     queryKey: ["portal", "kyc", "ref", "countries"],
@@ -24,8 +25,11 @@ export default function KycWizardPage() {
   });
 
   const status = kycQuery.data?.kycStatus ?? user?.kycStatus;
+  // ?mode=update — correcting an already-submitted KYC (PATCH) rather than a first submission.
+  // Only meaningful once something has been submitted; otherwise it falls through to the normal wizard.
+  const isUpdate = searchParams.get("mode") === "update" && !!status && status !== "NOT_STARTED";
 
-  if (status === "PENDING" || status === "APPROVED") {
+  if (!isUpdate && (status === "PENDING" || status === "APPROVED")) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-elevated">
@@ -48,9 +52,13 @@ export default function KycWizardPage() {
                   "We've received your details and are reviewing them. We'll notify you once a decision is made.",
                 )}
           </p>
-          <Button className="mt-6" onClick={() => navigate("/portal")}>
-            {t("kycWizard.backToDashboard", "Back to dashboard")}
-          </Button>
+          <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => navigate("/portal/verify?mode=update")}>
+              <PencilLine className="mr-1.5 h-4 w-4" />
+              {t("kycWizard.updateKyc", "Update KYC information")}
+            </Button>
+            <Button onClick={() => navigate("/portal")}>{t("kycWizard.backToDashboard", "Back to dashboard")}</Button>
+          </div>
         </div>
       </div>
     );
@@ -65,9 +73,10 @@ export default function KycWizardPage() {
   }
 
   const countries = countriesQuery.data ?? [];
+  const mode = isUpdate ? "update" : "submit";
   return user.type === "BUSINESS" ? (
-    <BusinessKycWizard countries={countries} countriesLoading={countriesQuery.isLoading} />
+    <BusinessKycWizard countries={countries} countriesLoading={countriesQuery.isLoading} mode={mode} />
   ) : (
-    <IndividualKycWizard countries={countries} countriesLoading={countriesQuery.isLoading} />
+    <IndividualKycWizard countries={countries} countriesLoading={countriesQuery.isLoading} mode={mode} />
   );
 }

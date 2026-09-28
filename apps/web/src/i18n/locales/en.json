@@ -352,14 +352,16 @@
   "kycBusiness": {
     "actions": {
       "continue": "Continue",
-      "submit": "Submit for review"
+      "submit": "Submit for review",
+      "update": "Submit update"
     },
     "common": {
       "select": "Select"
     },
     "header": {
       "subtitle": "Business KYB — details on the company and its owners.",
-      "title": "Verify your business"
+      "title": "Verify your business",
+      "updateTitle": "Update your verification details"
     },
     "steps": {
       "accountInfo": {
@@ -475,6 +477,10 @@
       "submitted": {
         "description": "We'll review your business details shortly.",
         "title": "Verification submitted"
+      },
+      "updated": {
+        "title": "Verification details updated",
+        "description": "Your changes have been sent for review."
       }
     }
   },
@@ -488,7 +494,8 @@
   "kycIndividual": {
     "actions": {
       "continue": "Continue",
-      "submit": "Submit for review"
+      "submit": "Submit for review",
+      "update": "Submit update"
     },
     "common": {
       "emptyValue": "—",
@@ -496,7 +503,8 @@
     },
     "header": {
       "subtitle": "A few details so we can confirm who you are.",
-      "title": "Verify your identity"
+      "title": "Verify your identity",
+      "updateTitle": "Update your verification details"
     },
     "steps": {
       "address": {
@@ -574,6 +582,10 @@
       "submitted": {
         "description": "We'll review your details shortly.",
         "title": "Verification submitted"
+      },
+      "updated": {
+        "title": "Verification details updated",
+        "description": "Your changes have been sent for review."
       }
     }
   },
@@ -626,7 +638,8 @@
     "pendingDescription": "We've received your details and are reviewing them. We'll notify you once a decision is made.",
     "pendingHeading": "Verification pending",
     "verifiedDescription": "Your identity has been verified. You have full access to sending, cards, and virtual accounts.",
-    "verifiedHeading": "You're verified"
+    "verifiedHeading": "You're verified",
+    "updateKyc": "Update KYC information"
   },
   "landing": {
     "atlas": {
@@ -877,7 +890,8 @@
     "statusPending": "We've received your details and are reviewing them — we'll notify you once it's decided.",
     "statusRejected": "Your last submission wasn't approved — start a new one below.",
     "subheading": "Manage your identity details",
-    "typeLabel": "Type"
+    "typeLabel": "Type",
+    "updateKyc": "Update KYC information"
   },
   "pwa": {
     "banner": {

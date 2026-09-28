@@ -36,8 +36,8 @@ import {
   ApiErrorSummary,
   fileToBase64,
 } from "./kycShared";
-import { humanize, buildKycFormData, mergeKycDraft } from "./kycUtils";
-import { useFileRegistry, useKycBusinessIndustries, useKycLabelMap, useKycDraft, useKycDraftAutosave, useKycDraftFiles } from "./kycHooks";
+import { humanize, buildKycFormData, mergeKycDraft, base64ToFile } from "./kycUtils";
+import { useFileRegistry, useKycBusinessIndustries, useKycLabelMap, useKycDraft, useKycDraftAutosave, useKycDraftFiles, useKycSubmission } from "./kycHooks";
 
 function emptyAssociatedPerson(): KycAssociatedPerson {
   return {
@@ -94,7 +94,17 @@ const BUSINESS_DEFAULT_VALUES = {
   gbpVirtualAccount: false,
 };
 
-export default function BusinessKycWizard({ countries, countriesLoading }: { countries: KycCountry[]; countriesLoading?: boolean }) {
+export default function BusinessKycWizard({
+  countries,
+  countriesLoading,
+  mode = "submit",
+}: {
+  countries: KycCountry[];
+  countriesLoading?: boolean;
+  /** "update" = correcting an already-submitted KYC: pre-fills from the encrypted stored copy and sends a PATCH instead of a fresh submission. */
+  mode?: "submit" | "update";
+}) {
+  const isUpdate = mode === "update";
   const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -128,14 +138,21 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
   const draftQuery = useKycDraft();
   const draftApplied = useRef(false);
   const [draftReady, setDraftReady] = useState(false);
+  // In update mode the full encrypted copy of the last submission (sensitive fields and files
+  // included) takes precedence; the plaintext draft is only the fallback when none was stored.
+  const submissionQuery = useKycSubmission(isUpdate);
   useEffect(() => {
-    if (draftApplied.current || !draftQuery.data) return;
+    if (draftApplied.current || !draftQuery.data || (isUpdate && submissionQuery.isLoading)) return;
     draftApplied.current = true;
-    if (draftQuery.data.type === "BUSINESS" && draftQuery.data.draft) {
+    const submission = isUpdate && submissionQuery.data?.type === "BUSINESS" ? submissionQuery.data : null;
+    if (submission) {
+      form.reset(mergeKycDraft(BUSINESS_DEFAULT_VALUES, submission.payload) as unknown as BusinessKycSubmissionInput);
+      for (const f of submission.files) files.set(f.fieldPath, base64ToFile(f));
+    } else if (draftQuery.data.type === "BUSINESS" && draftQuery.data.draft) {
       form.reset(mergeKycDraft(BUSINESS_DEFAULT_VALUES, draftQuery.data.draft) as unknown as BusinessKycSubmissionInput);
     }
     setDraftReady(true);
-  }, [draftQuery.data, form]);
+  }, [draftQuery.data, submissionQuery.data, submissionQuery.isLoading, isUpdate, form, files]);
 
   // Autosaves the in-progress form as the customer edits it — see useKycDraftAutosave's doc
   // comment. Gated on `draftReady` so this can never fire before the prefill above has actually
@@ -170,13 +187,24 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
   });
 
   const submitMutation = useMutation({
-    mutationFn: (input: BusinessKycSubmissionInput) => portalApi.post("/portal/kyc/business", buildKycFormData(input, files)),
+    mutationFn: (input: BusinessKycSubmissionInput) =>
+      isUpdate
+        ? portalApi.patch("/portal/kyc/business", buildKycFormData(input, files))
+        : portalApi.post("/portal/kyc/business", buildKycFormData(input, files)),
     onSuccess: () => {
-      toast({
-        title: t("kycBusiness.toast.submitted.title", "Verification submitted"),
-        description: t("kycBusiness.toast.submitted.description", "We'll review your business details shortly."),
-      });
+      toast(
+        isUpdate
+          ? {
+              title: t("kycBusiness.toast.updated.title", "Verification details updated"),
+              description: t("kycBusiness.toast.updated.description", "Your changes have been sent for review."),
+            }
+          : {
+              title: t("kycBusiness.toast.submitted.title", "Verification submitted"),
+              description: t("kycBusiness.toast.submitted.description", "We'll review your business details shortly."),
+            },
+      );
       queryClient.invalidateQueries({ queryKey: ["portal", "kyc"] });
+      queryClient.removeQueries({ queryKey: ["portal", "kyc", "submission"] });
       navigate("/portal/profile");
     },
     onError: (e) =>
@@ -255,13 +283,13 @@ export default function BusinessKycWizard({ countries, countriesLoading }: { cou
   return (
     <FileRegistryProvider registry={files}>
     <WizardShell
-      title={t("kycBusiness.header.title", "Verify your business")}
+      title={isUpdate ? t("kycBusiness.header.updateTitle", "Update your verification details") : t("kycBusiness.header.title", "Verify your business")}
       subtitle={t("kycBusiness.header.subtitle", "Business KYB — details on the company and its owners.")}
       steps={STEPS}
       current={step}
       onBack={goBack}
       onNext={goNext}
-      nextLabel={step === STEPS.length - 1 ? t("kycBusiness.actions.submit", "Submit for review") : t("kycBusiness.actions.continue", "Continue")}
+      nextLabel={step === STEPS.length - 1 ? (isUpdate ? t("kycBusiness.actions.update", "Submit update") : t("kycBusiness.actions.submit", "Submit for review")) : t("kycBusiness.actions.continue", "Continue")}
       isSubmitting={submitMutation.isPending}
       onBeforeContinueOnDevice={() => portalApi.put("/portal/kyc/draft", form.getValues())}
     >

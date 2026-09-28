@@ -30,8 +30,8 @@ import {
   ApiErrorSummary,
   fileToBase64,
 } from "./kycShared";
-import { humanize, buildKycFormData, mergeKycDraft } from "./kycUtils";
-import { useFileRegistry, useKycOccupations, useKycLabelMap, useKycDraft, useKycDraftAutosave, useKycDraftFiles } from "./kycHooks";
+import { humanize, buildKycFormData, mergeKycDraft, base64ToFile } from "./kycUtils";
+import { useFileRegistry, useKycOccupations, useKycLabelMap, useKycDraft, useKycDraftAutosave, useKycDraftFiles, useKycSubmission } from "./kycHooks";
 
 const INDIVIDUAL_DEFAULT_VALUES = {
   callingCode: "+1",
@@ -48,7 +48,17 @@ const INDIVIDUAL_DEFAULT_VALUES = {
   gbpVirtualAccount: false,
 };
 
-export default function IndividualKycWizard({ countries, countriesLoading }: { countries: KycCountry[]; countriesLoading?: boolean }) {
+export default function IndividualKycWizard({
+  countries,
+  countriesLoading,
+  mode = "submit",
+}: {
+  countries: KycCountry[];
+  countriesLoading?: boolean;
+  /** "update" = correcting an already-submitted KYC: pre-fills from the encrypted stored copy and sends a PATCH instead of a fresh submission. */
+  mode?: "submit" | "update";
+}) {
+  const isUpdate = mode === "update";
   const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -80,14 +90,21 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
   const draftQuery = useKycDraft();
   const draftApplied = useRef(false);
   const [draftReady, setDraftReady] = useState(false);
+  // In update mode the full encrypted copy of the last submission (sensitive fields and files
+  // included) takes precedence; the plaintext draft is only the fallback when none was stored.
+  const submissionQuery = useKycSubmission(isUpdate);
   useEffect(() => {
-    if (draftApplied.current || !draftQuery.data) return;
+    if (draftApplied.current || !draftQuery.data || (isUpdate && submissionQuery.isLoading)) return;
     draftApplied.current = true;
-    if (draftQuery.data.type === "INDIVIDUAL" && draftQuery.data.draft) {
+    const submission = isUpdate && submissionQuery.data?.type === "INDIVIDUAL" ? submissionQuery.data : null;
+    if (submission) {
+      form.reset(mergeKycDraft(INDIVIDUAL_DEFAULT_VALUES, submission.payload) as unknown as IndividualKycSubmissionInput);
+      for (const f of submission.files) files.set(f.fieldPath, base64ToFile(f));
+    } else if (draftQuery.data.type === "INDIVIDUAL" && draftQuery.data.draft) {
       form.reset(mergeKycDraft(INDIVIDUAL_DEFAULT_VALUES, draftQuery.data.draft) as unknown as IndividualKycSubmissionInput);
     }
     setDraftReady(true);
-  }, [draftQuery.data, form]);
+  }, [draftQuery.data, submissionQuery.data, submissionQuery.isLoading, isUpdate, form, files]);
 
   // Autosaves the in-progress form as the customer edits it — see useKycDraftAutosave's doc
   // comment. Gated on `draftReady` so this can never fire before the prefill above has actually
@@ -124,13 +141,24 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
   }, [draftReady, draftFilesQuery.data, form, files]);
 
   const submitMutation = useMutation({
-    mutationFn: (input: IndividualKycSubmissionInput) => portalApi.post("/portal/kyc/individual", buildKycFormData(input, files)),
+    mutationFn: (input: IndividualKycSubmissionInput) =>
+      isUpdate
+        ? portalApi.patch("/portal/kyc/individual", buildKycFormData(input, files))
+        : portalApi.post("/portal/kyc/individual", buildKycFormData(input, files)),
     onSuccess: () => {
-      toast({
-        title: t("kycIndividual.toast.submitted.title", "Verification submitted"),
-        description: t("kycIndividual.toast.submitted.description", "We'll review your details shortly."),
-      });
+      toast(
+        isUpdate
+          ? {
+              title: t("kycIndividual.toast.updated.title", "Verification details updated"),
+              description: t("kycIndividual.toast.updated.description", "Your changes have been sent for review."),
+            }
+          : {
+              title: t("kycIndividual.toast.submitted.title", "Verification submitted"),
+              description: t("kycIndividual.toast.submitted.description", "We'll review your details shortly."),
+            },
+      );
       queryClient.invalidateQueries({ queryKey: ["portal", "kyc"] });
+      queryClient.removeQueries({ queryKey: ["portal", "kyc", "submission"] });
       navigate("/portal/profile");
     },
     onError: (e) =>
@@ -179,13 +207,13 @@ export default function IndividualKycWizard({ countries, countriesLoading }: { c
   return (
     <FileRegistryProvider registry={files}>
     <WizardShell
-      title={t("kycIndividual.header.title", "Verify your identity")}
+      title={isUpdate ? t("kycIndividual.header.updateTitle", "Update your verification details") : t("kycIndividual.header.title", "Verify your identity")}
       subtitle={t("kycIndividual.header.subtitle", "A few details so we can confirm who you are.")}
       steps={STEPS}
       current={step}
       onBack={goBack}
       onNext={goNext}
-      nextLabel={step === STEPS.length - 1 ? t("kycIndividual.actions.submit", "Submit for review") : t("kycIndividual.actions.continue", "Continue")}
+      nextLabel={step === STEPS.length - 1 ? (isUpdate ? t("kycIndividual.actions.update", "Submit update") : t("kycIndividual.actions.submit", "Submit for review")) : t("kycIndividual.actions.continue", "Continue")}
       isSubmitting={submitMutation.isPending}
       onBeforeContinueOnDevice={() => portalApi.put("/portal/kyc/draft", form.getValues())}
     >

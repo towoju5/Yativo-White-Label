@@ -29,10 +29,18 @@ import { getPlatformSettings } from "../platformSettings/platformSettings.servic
 import { sendOpsAlert } from "../notifications/channels/opsAlert.js";
 import logger from "../../lib/logger.js";
 import { buildIndividualKycDraft, buildBusinessKycDraft } from "./kycDraft.js";
+import { saveEncryptedKycSubmission, loadLatestKycSubmission } from "./kycSubmissionVault.js";
 
 const kycDraftResponseSchema = z.object({
   type: z.enum(["INDIVIDUAL", "BUSINESS"]),
   draft: z.record(z.unknown()).nullable(),
+});
+
+const kycSubmissionResponseSchema = z.object({
+  type: z.enum(["INDIVIDUAL", "BUSINESS"]),
+  submittedAt: z.string(),
+  payload: z.record(z.unknown()),
+  files: z.array(z.object({ fieldPath: z.string(), filename: z.string(), mimetype: z.string(), base64: z.string() })),
 });
 
 const KYC_DRAFT_FILE_EXTENSIONS = new Set(FILE_ACCEPT.split(",").map((e) => e.replace(".", "").toLowerCase()));
@@ -335,6 +343,9 @@ export async function kycRoutes(app: FastifyInstance) {
       // No longer needed once actually submitted — the real submission just went to Yativo with
       // its own file bytes (injectFiles above), so these draft-only copies are just dead weight.
       await app.prisma.kycDraftFile.deleteMany({ where: { customerId: customer.id } }).catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to clean up KYC draft files"));
+      await saveEncryptedKycSubmission(app.prisma, customer.id, "INDIVIDUAL", "SUBMIT", parsed.data, files).catch((err) =>
+        logger.error({ err, customerId: customer.id }, "Failed to store encrypted KYC submission copy"),
+      );
       await sendOpsAlert(`🪪 Individual KYC submitted for review — customer ${updated.id} (${updated.email}).`);
       const settings = await getPlatformSettings(app.prisma);
       return reply.send({
@@ -388,6 +399,9 @@ export async function kycRoutes(app: FastifyInstance) {
       // No longer needed once actually submitted — the real submission just went to Yativo with
       // its own file bytes (injectFiles above), so these draft-only copies are just dead weight.
       await app.prisma.kycDraftFile.deleteMany({ where: { customerId: customer.id } }).catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to clean up KYC draft files"));
+      await saveEncryptedKycSubmission(app.prisma, customer.id, "BUSINESS", "SUBMIT", parsed.data, files).catch((err) =>
+        logger.error({ err, customerId: customer.id }, "Failed to store encrypted KYC submission copy"),
+      );
       await sendOpsAlert(`🪪 Business KYB submitted for review — customer ${updated.id} (${updated.email}).`);
       const settings = await getPlatformSettings(app.prisma);
       return reply.send({
@@ -398,4 +412,119 @@ export async function kycRoutes(app: FastifyInstance) {
       });
     },
   );
+
+  // --- Update (after an initial submission) ---
+
+  // Full decrypted copy of the customer's newest stored submission (see kycSubmissionVault.ts) —
+  // pre-fills the "Update KYC" wizard, including the sensitive fields and document files the
+  // plaintext /portal/kyc/draft never holds. Only ever served to the owning customer's own session.
+  server.get(
+    "/portal/kyc/submission",
+    { preHandler: requireCustomerAuth, schema: { response: { 200: kycSubmissionResponseSchema.nullable() } } },
+    async (request, reply) => {
+      const stored = await loadLatestKycSubmission(app.prisma, request.customer!.sub).catch((err) => {
+        logger.error({ err, customerId: request.customer!.sub }, "Failed to decrypt stored KYC submission");
+        return null;
+      });
+      if (!stored) return reply.send(null);
+      return reply.send({ type: stored.type, submittedAt: stored.createdAt.toISOString(), payload: stored.payload, files: stored.files });
+    },
+  );
+
+  server.patch(
+    "/portal/kyc/individual",
+    { preHandler: requireCustomerAuth, schema: { response: { 200: kycStatusResponseSchema } } },
+    async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      if (customer.type !== "INDIVIDUAL") {
+        throw new AppError("This account is registered as a business — use business verification instead.", 400, "WRONG_CUSTOMER_TYPE");
+      }
+      const yativoCustomerId = assertCanUpdateKyc(customer);
+
+      const { payload, files } = await parseMultipartKycRequest(request);
+      const parsed = individualKycSubmissionSchema.safeParse(payload);
+      if (!parsed.success) {
+        throw new AppError(parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "), 400, "VALIDATION_ERROR");
+      }
+      const body = injectFiles<typeof parsed.data, SubmitIndividualKycInput>(parsed.data, files);
+
+      await yativoClient.fiat.kyc.updateIndividual(yativoCustomerId, body);
+
+      const updated = await app.prisma.customer.update({
+        where: { id: customer.id },
+        data: {
+          fullName: `${body.firstName} ${body.lastName}`,
+          kycDraft: buildIndividualKycDraft(parsed.data),
+          ...(customer.kycStatus === "REJECTED" ? { kycStatus: "PENDING" as const, kycSubmittedAt: new Date() } : {}),
+        },
+      });
+      await saveEncryptedKycSubmission(app.prisma, customer.id, "INDIVIDUAL", "UPDATE", parsed.data, files).catch((err) =>
+        logger.error({ err, customerId: customer.id }, "Failed to store encrypted KYC update copy"),
+      );
+      await app.prisma.kycDraftFile.deleteMany({ where: { customerId: customer.id } }).catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to clean up KYC draft files"));
+      await sendOpsAlert(`🪪 Individual KYC updated — customer ${updated.id} (${updated.email}).`);
+      const settings = await getPlatformSettings(app.prisma);
+      return reply.send({
+        kycStatus: updated.kycStatus,
+        kycSubmissionId: updated.kycSubmissionId,
+        kycSubmittedAt: updated.kycSubmittedAt?.toISOString() ?? null,
+        requiredServices: settings.kycRequiredServices,
+      });
+    },
+  );
+
+  server.patch(
+    "/portal/kyc/business",
+    { preHandler: requireCustomerAuth, schema: { response: { 200: kycStatusResponseSchema } } },
+    async (request, reply) => {
+      const customer = await app.prisma.customer.findUniqueOrThrow({ where: { id: request.customer!.sub } });
+      if (customer.type !== "BUSINESS") {
+        throw new AppError("This account is registered as an individual — use individual verification instead.", 400, "WRONG_CUSTOMER_TYPE");
+      }
+      const yativoCustomerId = assertCanUpdateKyc(customer);
+
+      const { payload, files } = await parseMultipartKycRequest(request);
+      const parsed = businessKycSubmissionSchema.safeParse(payload);
+      if (!parsed.success) {
+        throw new AppError(parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "), 400, "VALIDATION_ERROR");
+      }
+      const body = injectFiles<typeof parsed.data, SubmitBusinessKycInput>(parsed.data, files);
+
+      await yativoClient.fiat.kyc.updateBusiness(yativoCustomerId, body);
+
+      const updated = await app.prisma.customer.update({
+        where: { id: customer.id },
+        data: {
+          businessName: body.businessLegalName,
+          kycDraft: buildBusinessKycDraft(parsed.data),
+          ...(customer.kycStatus === "REJECTED" ? { kycStatus: "PENDING" as const, kycSubmittedAt: new Date() } : {}),
+        },
+      });
+      await saveEncryptedKycSubmission(app.prisma, customer.id, "BUSINESS", "UPDATE", parsed.data, files).catch((err) =>
+        logger.error({ err, customerId: customer.id }, "Failed to store encrypted KYB update copy"),
+      );
+      await app.prisma.kycDraftFile.deleteMany({ where: { customerId: customer.id } }).catch((err) => logger.warn({ err, customerId: customer.id }, "Failed to clean up KYC draft files"));
+      await sendOpsAlert(`🪪 Business KYB updated — customer ${updated.id} (${updated.email}).`);
+      const settings = await getPlatformSettings(app.prisma);
+      return reply.send({
+        kycStatus: updated.kycStatus,
+        kycSubmissionId: updated.kycSubmissionId,
+        kycSubmittedAt: updated.kycSubmittedAt?.toISOString() ?? null,
+        requiredServices: settings.kycRequiredServices,
+      });
+    },
+  );
+}
+
+/**
+ * An update is a PATCH against the KYC record Yativo already holds for this customer — so there
+ * must have been an initial submission first. Status is otherwise left alone (Yativo's webhooks
+ * drive APPROVED/REJECTED); only a REJECTED customer is moved back to PENDING on update, since
+ * correcting a rejection is exactly what re-queues it for review.
+ */
+function assertCanUpdateKyc(customer: { kycStatus: string; yativoCustomerId: string | null }): string {
+  if (customer.kycStatus === "NOT_STARTED" || !customer.yativoCustomerId) {
+    throw new AppError("You haven't submitted verification yet — complete it first before updating.", 409, "KYC_NOT_SUBMITTED");
+  }
+  return customer.yativoCustomerId;
 }

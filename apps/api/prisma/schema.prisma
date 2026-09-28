@@ -450,6 +450,7 @@ model Customer {
   auditLogs          CustomerAuditLog[]
   limits             CustomerLimits[]
   kycDraftFiles      KycDraftFile[]
+  kycSubmissions     EncryptedKycSubmission[]
 
   @@map("customers")
 }
@@ -476,6 +477,27 @@ model KycDraftFile {
 
   @@unique([customerId, fieldPath])
   @@map("kyc_draft_files")
+}
+
+/// Encrypted-at-rest copy of every full KYC/KYB payload a customer successfully sent to Yativo —
+/// initial submission or later update — including ID numbers, tax IDs and document files, which
+/// Customer.kycDraft deliberately never holds. The newest row pre-fills the "Update KYC" wizard.
+/// AES-256-GCM under KYC_ENCRYPTION_KEY (see lib/kycEncryption.ts); never returned to anyone but
+/// the owning customer's own session. Kept as its own table so these multi-MB rows never ride
+/// along on the many plain `customer.findUnique` calls.
+model EncryptedKycSubmission {
+  id         String       @id @default(cuid())
+  customerId String
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type       CustomerType
+  /// SUBMIT for the initial POST, UPDATE for a later partial-update PATCH.
+  action     String
+  /// iv (12 bytes) || auth tag (16 bytes) || ciphertext of the JSON-serialized submission.
+  ciphertext Bytes
+  createdAt  DateTime     @default(now())
+
+  @@index([customerId, createdAt])
+  @@map("encrypted_kyc_submissions")
 }
 
 /// Customer-facing security activity log (login, password change, 2FA toggle, new beneficiary,
