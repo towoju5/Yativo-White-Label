@@ -23,18 +23,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { WalletStatementTable } from "@/components/wallet/WalletStatementTable";
 import { EndorsementsTable } from "@/components/endorsements/EndorsementsTable";
+import { EndorsementProgressBadge } from "@/components/endorsements/EndorsementProgressBadge";
 import { PricingRuleDialog, SERVICE_LABELS, FEE_TYPE_LABELS, PRICING_MODE_LABELS, formatFeeSummary } from "@/pages/admin/settings/PricingSettingsPage";
 
 interface CustomerDetailResponse extends Customer {
   wallets?: WalletBalance[];
 }
-
-const KYC_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  APPROVED: "success",
-  PENDING: "warning",
-  REJECTED: "destructive",
-  NOT_STARTED: "secondary",
-};
 
 export default function CustomerDetailPage() {
   const { customerId } = useParams<{ customerId: string }>();
@@ -202,7 +196,7 @@ export default function CustomerDetailPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">{customer.fullName ?? customer.businessName ?? customer.email}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{customer.email}</p>
           <div className="mt-2 flex gap-2">
-            <Badge variant={KYC_VARIANT[customer.kycStatus] ?? "secondary"}>KYC: {customer.kycStatus.replace("_", " ")}</Badge>
+            <EndorsementProgressBadge customer={customer} prefix="KYC: " />
             <Badge variant={customer.status === "ACTIVE" ? "success" : "destructive"}>{customer.status}</Badge>
             <Badge variant="outline">{customer.type}</Badge>
           </div>

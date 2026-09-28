@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EndorsementProgressBadge } from "@/components/endorsements/EndorsementProgressBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const PAGE_SIZE = 20;
@@ -61,13 +62,6 @@ function ImportFromYativoButton() {
     </div>
   );
 }
-
-const KYC_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  APPROVED: "success",
-  PENDING: "warning",
-  REJECTED: "destructive",
-  NOT_STARTED: "secondary",
-};
 
 export default function CustomersPage() {
   const navigate = useNavigate();
@@ -197,7 +191,7 @@ export default function CustomersPage() {
                   <TableCell className="text-muted-foreground">{c.email}</TableCell>
                   <TableCell>{c.type}</TableCell>
                   <TableCell>
-                    <Badge variant={KYC_VARIANT[c.kycStatus] ?? "secondary"}>{c.kycStatus.replace("_", " ")}</Badge>
+                    <EndorsementProgressBadge customer={c} />
                   </TableCell>
                   <TableCell>
                     <Badge variant={c.status === "ACTIVE" ? "success" : "destructive"}>{c.status}</Badge>

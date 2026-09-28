@@ -410,6 +410,12 @@ else
     log "apps/api/.env predates KYC_ENCRYPTION_KEY — appending a fresh one (existing secrets untouched)…"
     echo "KYC_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> apps/api/.env
     ok "KYC_ENCRYPTION_KEY added."
+  elif ! grep -qiE '^KYC_ENCRYPTION_KEY=[a-f0-9]{64}[[:space:]]*$' apps/api/.env; then
+    # Present but not 64 hex chars (empty, or the .env.example placeholder) — the API refuses to
+    # boot with it, so nothing can have been encrypted under it yet: safe to replace.
+    warn "apps/api/.env has an invalid KYC_ENCRYPTION_KEY — replacing it with a fresh one…"
+    sed -i "s/^KYC_ENCRYPTION_KEY=.*/KYC_ENCRYPTION_KEY=$(openssl rand -hex 32)/" apps/api/.env
+    ok "KYC_ENCRYPTION_KEY replaced."
   fi
   # Sanity check: an existing apps/api/.env whose DATABASE_URL password doesn't match the
   # Postgres container's actual password (root .env) fails every query at runtime with an
