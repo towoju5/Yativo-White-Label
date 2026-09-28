@@ -83,8 +83,15 @@ function resolveEffectiveSmtp(saved: IntegrationSettings["smtp"]): typeof smtpCo
     secure: saved.secure,
     user: saved.user || undefined,
     password: saved.password || undefined,
-    fromAddress: saved.fromAddress,
+    // A blank or untouched "no-reply@example.com" from-address becomes the sendmail envelope
+    // sender (-f), which fails SPF/DKIM and gets rejected by Gmail — use the env one instead.
+    fromAddress: isPlaceholderFrom(saved.fromAddress) ? env.EMAIL_FROM_ADDRESS : saved.fromAddress,
   };
+}
+
+function isPlaceholderFrom(address: string | undefined): boolean {
+  const value = address?.trim().toLowerCase() ?? "";
+  return !value || value.endsWith("@example.com");
 }
 
 /** Called once at boot, after prismaPlugin is registered. Leaves env-sourced defaults untouched when no row has been saved yet. */
