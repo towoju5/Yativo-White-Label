@@ -5,6 +5,7 @@ import { requirePermission, requireStaffAuth } from "../../middleware/requireSta
 import { decryptCredential, encryptCredential } from "../../lib/credentialEncryption.js";
 import { applyIntegrationSettings, syncWebhookSecretIfRotated, type IntegrationSettings } from "../../lib/integrationRuntimeConfig.js";
 import { env } from "../../config/env.js";
+import { isDemoRequest } from "../demo/demoContext.js";
 
 const SETTINGS_KEY = "platform-integrations";
 
@@ -114,7 +115,10 @@ export async function platformIntegrationsRoutes(app: FastifyInstance) {
         }),
         db.adminAuditLog.create({ data: { actorId: request.staffUser!.sub, action: "platform_integrations.updated", target: SETTINGS_KEY } }),
       ]);
-      applyIntegrationSettings(next as IntegrationSettings);
+      // The save above went to the demo's own database (app.prisma resolves per-request), but
+      // applyIntegrationSettings mutates the process-wide mailer and Yativo client — applying a
+      // demo's settings would swap every real email and API call over to them until restart.
+      if (!isDemoRequest()) applyIntegrationSettings(next as IntegrationSettings);
       return reply.send(safe(next));
     },
   );
