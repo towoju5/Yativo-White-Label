@@ -113,6 +113,28 @@ export function createPayoutsResource(ctx: YativoContext) {
       return toPayoutResult(res.data);
     },
 
+    /**
+     * One page of GET /payout/get, newest first. The response shape isn't documented, so records
+     * are returned untouched and the list is found wherever it sits in the envelope (`data`, or
+     * `data.data`/`data.payouts`/`data.items` for a paginated wrapper). `hasMore` is false once a
+     * page comes back short or empty.
+     */
+    async list(page = 1, perPage = 100): Promise<{ records: Record<string, unknown>[]; hasMore: boolean }> {
+      const res = await ctx.request({
+        baseUrl: ctx.config.fiatBaseUrl,
+        path: "/payout/get",
+        method: "GET",
+        query: { page, per_page: perPage },
+        schema: z.object({ data: z.unknown() }).passthrough(),
+        mockData: { status: "success", status_code: 200, message: "mock", data: [] },
+      });
+      const data = res.data as unknown;
+      const candidates = [data, ...(data && typeof data === "object" && !Array.isArray(data) ? ["data", "payouts", "items"].map((k) => (data as Record<string, unknown>)[k]) : [])];
+      const list = candidates.find((c): c is unknown[] => Array.isArray(c)) ?? [];
+      const records = list.filter((r): r is Record<string, unknown> => !!r && typeof r === "object");
+      return { records, hasMore: records.length >= perPage };
+    },
+
     /** Live status for a submitted payout — poll until it leaves "pending". */
     async getStatus(yativoPayoutId: string): Promise<FiatPayoutResult> {
       const res = await ctx.request({

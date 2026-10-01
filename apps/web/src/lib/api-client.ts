@@ -107,6 +107,21 @@ async function doRefresh(audience: Exclude<AuthAudience, "none">): Promise<strin
   return promise;
 }
 
+const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
+
+/**
+ * The text a toast/error banner shows for a failed request. The API is meant to always send a
+ * readable `message`, but a raw object, a JSON blob or an "[object Object]" must never reach a
+ * customer — fall back to a generic line instead.
+ */
+function readableErrorMessage(payload: unknown): string {
+  const message = payload && typeof payload === "object" && "message" in payload ? (payload as { message: unknown }).message : undefined;
+  if (typeof message !== "string") return GENERIC_ERROR_MESSAGE;
+  const text = message.trim();
+  if (!text || /^[[{]/.test(text) || /\[object Object\]|\{\s*"/.test(text)) return GENERIC_ERROR_MESSAGE;
+  return text;
+}
+
 export interface ApiFetchOptions {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
@@ -176,11 +191,7 @@ export async function apiFetch<T = unknown>(path: string, options: ApiFetchOptio
   }
 
   if (!res.ok) {
-    const message =
-      payload && typeof payload === "object" && "message" in payload
-        ? String((payload as { message: unknown }).message)
-        : res.statusText || "Request failed";
-    throw new ApiError(message, res.status, payload);
+    throw new ApiError(readableErrorMessage(payload), res.status, payload);
   }
 
   return payload as T;

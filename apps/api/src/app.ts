@@ -120,6 +120,7 @@ export async function buildApp() {
   await loadStorageSettingsFromDb(app.prisma);
   await loadNotificationChannelSettingsFromDb(app.prisma);
 
+  let lastProviderAuthAlertAt = 0;
   app.setErrorHandler((error: FastifyError | AppError | YativoApiError, _request, reply) => {
     if (error instanceof AppError) {
       return reply.code(error.statusCode).send({ ...error.extra, message: error.message, code: error.code });
@@ -129,11 +130,21 @@ export async function buildApp() {
       // reaches the browser console otherwise.
       app.log.error({ method: error.method, path: error.path, upstreamStatus: error.upstreamStatus, upstreamBody: error.upstreamBody }, error.message);
       if (error.upstreamStatus === 401 || error.upstreamStatus === 403) {
-        // Not something the customer did wrong — this API key/route combination isn't authorized
-        // on Yativo's side yet (see todo.md §0's auth note).
-        return reply
-          .code(503)
-          .send({ message: "card", code: "PROVIDER_AUTH_ERROR" });
+        // Not something the customer did wrong — Yativo refused this platform's own credentials
+        // (revoked/rotated API key, a route the key isn't scoped for, or a server IP missing from
+        // Yativo's whitelist). Nothing the customer can fix, so they get a plain "unavailable" and
+        // the team gets an alert with the real reason.
+        // Every customer request fails the same way while this lasts — one alert per 10 minutes is enough.
+        if (Date.now() - lastProviderAuthAlertAt > 10 * 60_000) {
+          lastProviderAuthAlertAt = Date.now();
+          void sendOpsAlert(
+            `🚨 Yativo refused the platform's credentials (${error.upstreamStatus}) — ${error.method} ${error.path}. Check the Yativo API key/secret in Settings → Integrations and the server IP whitelist. Upstream: ${parseYativoErrorMessage(error.upstreamBody) ?? error.upstreamBody.slice(0, 300)}`,
+          );
+        }
+        return reply.code(503).send({
+          message: "This service is temporarily unavailable. Please try again shortly or contact support.",
+          code: "PROVIDER_AUTH_ERROR",
+        });
       }
       // Every other 4xx is (usually) something the customer can fix — bad payment_data, a
       // stale/mismatched quote, a gateway that needs a customer_id, etc. Surface Yativo's own

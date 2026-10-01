@@ -93,34 +93,94 @@ export const yativoPaginatedEnvelope = <T extends z.ZodType>(itemSchema: T) =>
 export function parseYativoErrorMessage(rawBody: string): string | undefined {
   try {
     const parsed: unknown = JSON.parse(rawBody);
-    if (parsed === null || typeof parsed !== "object") return undefined;
+    if (parsed === null || typeof parsed !== "object") return readableProviderMessage(rawBody);
     const top = parsed as Record<string, unknown>;
     const data = top.data;
     if (data !== null && typeof data === "object") {
       const d = data as Record<string, unknown>;
-      if (typeof d.error === "string") return d.error;
+      // `data.error` is usually a string, but has also turned up as a nested object, a
+      // stringified JSON blob, or a forwarded gateway error — all handled by readableProviderMessage.
+      const fromError = readableProviderMessage(d.error);
+      if (fromError) return fromError;
       // Only trust a nested `data.message` when it's paired with an explicit failure flag —
       // otherwise this key could just as easily be an unrelated field on a genuine data payload.
-      if (d.status === false && typeof d.message === "string") return d.message;
+      if (d.status === false) {
+        const fromMessage = readableProviderMessage(d.message);
+        if (fromMessage) return fromMessage;
+      }
 
       // Laravel validator shape: every value is an array of message strings.
       const validatorMessages = Object.values(d)
         .filter((v): v is string[] => Array.isArray(v) && v.every((entry) => typeof entry === "string"))
         .flat();
-      if (validatorMessages.length > 0) return validatorMessages.join(" ");
+      if (validatorMessages.length > 0) return readableProviderMessage(validatorMessages);
     }
-    // Unenveloped failure shape (e.g. cards/activate): a bare top-level `error` string.
-    if (typeof top.error === "string") return top.error;
+    // Unenveloped failure shape (e.g. cards/activate): a bare top-level `error`.
+    const fromTopError = readableProviderMessage(top.error);
+    if (fromTopError) return fromTopError;
     // Top-level Laravel validator shape used by the KYC/KYB submit endpoints:
     // `{ success, message: "Validation error.", validation_errors: { field: ["msg", ...] } }`.
     // The top-level `message` alone is a generic "Validation error." — the useful part is here.
     const validationMessages = flattenValidationErrors(top.validation_errors);
-    if (validationMessages.length > 0) return validationMessages.join(" ");
-    const message = top.message;
-    return typeof message === "string" ? message : undefined;
+    if (validationMessages.length > 0) return readableProviderMessage(validationMessages);
+    return readableProviderMessage(top.message);
   } catch {
-    return undefined;
+    // Not JSON at all — a plain-text body is still fine to show if it reads like a sentence.
+    return readableProviderMessage(rawBody);
   }
+}
+
+/** Fields that carry a human-readable reason, most specific first, when an error arrives as an object. */
+const MESSAGE_KEYS = ["message", "error", "error_description", "detail", "reason", "msg", "description", "errors", "validation_errors", "data"];
+/** Anything matching these is a technical dump (stack trace, SQL, upstream URL), never something to show a customer. */
+const TECHNICAL_TEXT = /SQLSTATE|Exception|Stack trace|Traceback|\bat \S+\.(php|js|ts|py):\d+|https?:\/\/|\{\s*"|\[object Object\]/i;
+// Guzzle-style forwarded gateway error: "Client error: `POST https://...` resulted in a `400 Bad Request` response:\n{...}".
+const FORWARDED_ERROR = /resulted in a `[^`]*` response:\s*([\s\S]*)$/;
+const MAX_MESSAGE_LENGTH = 300;
+
+/**
+ * Best-effort conversion of whatever Yativo put in an error field into one sentence a customer can
+ * read — or undefined, so the caller falls back to its own generic message. Yativo sometimes passes
+ * through an upstream gateway's raw error: a nested object, a stringified JSON blob, or a
+ * Guzzle-wrapped response with the gateway URL in it. Those are unwrapped to the reason inside;
+ * anything still technical after that is dropped rather than shown.
+ */
+export function readableProviderMessage(value: unknown, depth = 0): string | undefined {
+  if (depth > 4 || value === null || value === undefined) return undefined;
+
+  if (typeof value === "string") {
+    const text = value.trim();
+    if (!text) return undefined;
+    const forwarded = text.match(FORWARDED_ERROR);
+    if (forwarded) return readableProviderMessage(forwarded[1], depth + 1);
+    if (text.startsWith("{") || text.startsWith("[")) {
+      try {
+        return readableProviderMessage(JSON.parse(text), depth + 1);
+      } catch {
+        return undefined;
+      }
+    }
+    if (TECHNICAL_TEXT.test(text) || text.length > MAX_MESSAGE_LENGTH) return undefined;
+    return text;
+  }
+
+  if (Array.isArray(value)) {
+    const parts = value.map((v) => readableProviderMessage(v, depth + 1)).filter((v): v is string => !!v);
+    const joined = [...new Set(parts)].join(" ");
+    return joined && joined.length <= MAX_MESSAGE_LENGTH ? joined : parts[0];
+  }
+
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    for (const key of MESSAGE_KEYS) {
+      const found = readableProviderMessage(obj[key], depth + 1);
+      if (found) return found;
+    }
+    // A bare validator map ({ field: ["msg"] }) under an unexpected key.
+    const nested = Object.values(obj).filter((v) => Array.isArray(v));
+    if (nested.length > 0) return readableProviderMessage(nested.flat(), depth + 1);
+  }
+  return undefined;
 }
 
 function flattenValidationErrors(value: unknown): string[] {
