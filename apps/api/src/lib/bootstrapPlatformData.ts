@@ -67,6 +67,7 @@ export async function bootstrapPlatformData(prisma: PrismaClient): Promise<void>
     "BUSINESS_SPEND_CARD_PIN_UPDATE",
     "BUSINESS_SPEND_CARD_LIMITS_UPDATE",
     "INTERNAL_TRANSFER",
+    "CURRENCY_SWAP",
   ];
   for (const service of pricingServices) {
     // Business Spend Card withdrawals aren't free by accident (per the provider's own guide, this

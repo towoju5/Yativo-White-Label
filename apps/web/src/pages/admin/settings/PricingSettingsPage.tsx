@@ -40,6 +40,7 @@ export const SERVICE_LABELS: Record<PricingService, string> = {
   BUSINESS_SPEND_CARD_PIN_UPDATE: "Business Card — PIN update",
   BUSINESS_SPEND_CARD_LIMITS_UPDATE: "Business Card — limits update",
   INTERNAL_TRANSFER: "Internal transfer (customer to customer)",
+  CURRENCY_SWAP: "Currency swap (charged in the source currency)",
 };
 
 // Only PAYIN carries a fee number reported by Yativo itself (quoted at deposit-initiation time) —

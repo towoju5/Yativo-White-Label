@@ -876,7 +876,8 @@
     "transfer": "Transfer",
     "virtualAccounts": "Virtual accounts",
     "wallets": "Wallets",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "Swap"
   },
   "notFound": {
     "message": "Nothing dey here."

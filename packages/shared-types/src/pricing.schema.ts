@@ -18,6 +18,7 @@ export const PRICING_SERVICES = [
   "BUSINESS_SPEND_CARD_PIN_UPDATE",
   "BUSINESS_SPEND_CARD_LIMITS_UPDATE",
   "INTERNAL_TRANSFER",
+  "CURRENCY_SWAP",
 ] as const;
 export const pricingServiceSchema = z.enum(PRICING_SERVICES);
 export type PricingService = z.infer<typeof pricingServiceSchema>;

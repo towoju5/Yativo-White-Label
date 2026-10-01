@@ -1,21 +1,24 @@
 import type { ReactNode } from "react";
-import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, UserCog, Settings, History, FileText, LifeBuoy, ArrowRightLeft } from "lucide-react";
+import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, UserCog, Settings, History, FileText, LifeBuoy, ArrowRightLeft, Repeat } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { usePortalMenus } from "@/hooks/usePortalMenus";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { AtlasTopbar, type NavItem } from "./Topbar";
 
 export function AtlasPortalShell({ children }: { children: ReactNode }) {
   const { user, logout } = useCustomerAuth();
+  const { isPathEnabled } = usePortalMenus();
   const { t } = useTranslation();
   const name = user?.fullName ?? user?.businessName ?? user?.email ?? t("nav.account", "Account");
   const canManageTeam = user?.type === "BUSINESS" && (user.principalType !== "member" || (user.permissions?.includes("team.manage") ?? false));
 
-  const items: NavItem[] = [
+  const allItems: NavItem[] = [
     { to: "/portal", label: t("nav.atlas.home", "Home"), icon: LayoutDashboard, end: true },
     { to: "/portal/wallets", label: t("nav.wallets", "Wallets"), icon: Wallet },
     { to: "/portal/send", label: t("nav.atlas.send", "Send"), icon: Send },
     { to: "/portal/transfer", label: t("nav.transfer", "Transfer"), icon: ArrowRightLeft },
+    { to: "/portal/swap", label: t("nav.swap", "Swap"), icon: Repeat },
     { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
     { to: "/portal/crypto", label: t("nav.cryptoWallets", "Crypto wallets"), icon: Coins },
     { to: "/portal/virtual-accounts", label: t("nav.virtualAccounts", "Virtual accounts"), icon: Landmark },
@@ -30,6 +33,9 @@ export function AtlasPortalShell({ children }: { children: ReactNode }) {
     ...(canManageTeam ? [{ to: "/portal/team", label: t("nav.team", "Team"), icon: UserCog }] : []),
     { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
   ];
+
+  // Menus an admin switched off in Settings → Customer menu.
+  const items = allItems.filter((i) => isPathEnabled(i.to));
 
   return (
     <div className="min-h-screen bg-background">

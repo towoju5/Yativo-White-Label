@@ -876,7 +876,8 @@
     "transfer": "转账",
     "virtualAccounts": "虚拟账户",
     "wallets": "钱包",
-    "whiteLabel": "白标平台"
+    "whiteLabel": "白标平台",
+    "swap": "兑换"
   },
   "notFound": {
     "message": "这里空空如也。"

@@ -1,18 +1,20 @@
 import type { ReactNode } from "react";
-import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, UserCog, Settings, History, FileText, LifeBuoy, ArrowRightLeft } from "lucide-react";
+import { LayoutDashboard, Wallet, Send, ArrowDownToLine, Coins, Landmark, Users, CreditCard, UserCheck, UserCog, Settings, History, FileText, LifeBuoy, ArrowRightLeft, Repeat } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { usePortalMenus } from "@/hooks/usePortalMenus";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { NovaSidebar, type NavSection } from "./Sidebar";
 import { NovaTopbar } from "./Topbar";
 
 export function NovaPortalShell({ children }: { children: ReactNode }) {
   const { user, logout } = useCustomerAuth();
+  const { isPathEnabled } = usePortalMenus();
   const { t } = useTranslation();
   const name = user?.fullName ?? user?.businessName ?? user?.email ?? t("nav.account", "Account");
   const canManageTeam = user?.type === "BUSINESS" && (user.principalType !== "member" || (user.permissions?.includes("team.manage") ?? false));
 
-  const sections: NavSection[] = [
+  const allSections: NavSection[] = [
     {
       heading: t("nav.section.account", "Account"),
       items: [
@@ -20,6 +22,7 @@ export function NovaPortalShell({ children }: { children: ReactNode }) {
         { to: "/portal/wallets", label: t("nav.wallets", "Wallets"), icon: Wallet },
         { to: "/portal/send", label: t("nav.sendMoney", "Withdraw"), icon: Send },
         { to: "/portal/transfer", label: t("nav.transfer", "Transfer"), icon: ArrowRightLeft },
+        { to: "/portal/swap", label: t("nav.swap", "Swap"), icon: Repeat },
         { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
         { to: "/portal/crypto", label: t("nav.cryptoWallets", "Crypto wallets"), icon: Coins },
         { to: "/portal/virtual-accounts", label: t("nav.virtualAccounts", "Virtual accounts"), icon: Landmark },
@@ -41,6 +44,9 @@ export function NovaPortalShell({ children }: { children: ReactNode }) {
       ],
     },
   ];
+
+  // Menus an admin switched off in Settings → Customer menu.
+  const sections = allSections.map((s) => ({ ...s, items: s.items.filter((i) => isPathEnabled(i.to)) })).filter((s) => s.items.length > 0);
 
   return (
     <div className="flex min-h-screen bg-background">

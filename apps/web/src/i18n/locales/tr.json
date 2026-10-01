@@ -876,7 +876,8 @@
     "transfer": "Transfer",
     "virtualAccounts": "Sanal hesaplar",
     "wallets": "Cüzdanlar",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "Döviz Çevir"
   },
   "notFound": {
     "message": "Burada görülecek bir şey yok."

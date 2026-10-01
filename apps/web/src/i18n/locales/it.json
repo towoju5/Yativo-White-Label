@@ -876,7 +876,8 @@
     "transfer": "Trasferisci",
     "virtualAccounts": "Conti virtuali",
     "wallets": "Wallet",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "Scambia"
   },
   "notFound": {
     "message": "Nessun contenuto disponibile qui."

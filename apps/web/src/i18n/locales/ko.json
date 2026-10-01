@@ -876,7 +876,8 @@
     "transfer": "송금",
     "virtualAccounts": "가상계좌",
     "wallets": "지갑",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "환전"
   },
   "notFound": {
     "message": "표시할 내용이 없습니다."

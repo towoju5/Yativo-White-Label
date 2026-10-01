@@ -876,7 +876,8 @@
     "transfer": "Overmaken",
     "virtualAccounts": "Virtuele rekeningen",
     "wallets": "Wallets",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "Wisselen"
   },
   "notFound": {
     "message": "Niets te zien hier."

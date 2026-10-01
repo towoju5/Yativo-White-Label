@@ -46,8 +46,11 @@ function toListItem(tx: TxWithEntries, status: FriendlyTransactionStatus) {
   };
 }
 
-function toCustomerListItem(tx: TxWithEntries, customerId: string, status: FriendlyTransactionStatus) {
-  const customerEntry = tx.entries.find((e) => e.account.customerId === customerId) ?? null;
+function toCustomerListItem(tx: TxWithEntries, customerId: string, status: FriendlyTransactionStatus, currencyCode?: string) {
+  // A swap touches two of the customer's own wallets — when the list is scoped to one currency
+  // (a wallet's own history), show that wallet's leg rather than whichever entry comes first.
+  const ownEntries = tx.entries.filter((e) => e.account.customerId === customerId);
+  const customerEntry = (currencyCode ? ownEntries.find((e) => e.currencyCode === currencyCode) : undefined) ?? ownEntries[0] ?? null;
 
   return {
     id: tx.id,
@@ -136,7 +139,7 @@ export async function listTransactionsForCustomer(
   ]);
 
   const statuses = await batchFriendlyStatuses(prisma, transactions);
-  return { items: transactions.map((tx) => toCustomerListItem(tx, customerId, statuses.get(tx.id)!)), total, page, pageSize };
+  return { items: transactions.map((tx) => toCustomerListItem(tx, customerId, statuses.get(tx.id)!, filters.currencyCode)), total, page, pageSize };
 }
 
 export async function listLedgerTransactions(

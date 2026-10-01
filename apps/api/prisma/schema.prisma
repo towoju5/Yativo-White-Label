@@ -97,6 +97,17 @@ model NavLabelOverride {
   @@map("nav_label_overrides")
 }
 
+/// An admin's explicit on/off for one customer-portal menu item (Settings → Customer menu). Sparse:
+/// a key with no row keeps its shipped default — see PORTAL_MENUS in shared-types, where every item
+/// defaults on except "swap".
+model PortalMenuSetting {
+  key       String   @id
+  enabled   Boolean
+  updatedAt DateTime @updatedAt
+
+  @@map("portal_menu_settings")
+}
+
 /// Singleton (id is always 1) — admin-controlled policy for which wallet currencies customers can hold, and which actions require KYC approval first.
 model PlatformSettings {
   id                       Int                   @id @default(1)
@@ -467,6 +478,7 @@ model Customer {
   kycSubmissions     EncryptedKycSubmission[]
   transfersSent      InternalTransfer[]       @relation("TransfersSent")
   transfersReceived  InternalTransfer[]       @relation("TransfersReceived")
+  currencySwaps      CurrencySwap[]
 
   @@index([deletedAt])
   @@map("customers")
@@ -1258,6 +1270,7 @@ enum PricingServiceType {
   BUSINESS_SPEND_CARD_PIN_UPDATE
   BUSINESS_SPEND_CARD_LIMITS_UPDATE
   INTERNAL_TRANSFER
+  CURRENCY_SWAP
 }
 
 enum FeeType {
@@ -1364,4 +1377,28 @@ model InternalTransfer {
   @@index([senderCustomerId, createdAt])
   @@index([recipientCustomerId, createdAt])
   @@map("internal_transfers")
+}
+
+/// A customer converting their own balance from one wallet currency to another. Ledger-only (no
+/// Yativo call): one POSTED SWAP transaction debits the source wallet amount+fee and credits the
+/// target wallet, with PLATFORM_RESERVE as the FX counter-account in both currencies.
+model CurrencySwap {
+  id               String   @id
+  customerId       String
+  customer         Customer @relation(fields: [customerId], references: [id])
+  fromCurrencyCode String   @db.Char(3)
+  toCurrencyCode   String   @db.Char(3)
+  /// Converted amount, before the fee.
+  fromAmountMinor  BigInt
+  feeMinor         BigInt   @default(0)
+  toAmountMinor    BigInt
+  /// 1 fromCurrency = rate toCurrency, as quoted to the customer (decimal string).
+  rate             String
+  /// When Yativo last refreshed the market rate this was priced from.
+  rateUpdatedAt    DateTime
+  transactionId    String   @unique
+  createdAt        DateTime @default(now())
+
+  @@index([customerId, createdAt])
+  @@map("currency_swaps")
 }

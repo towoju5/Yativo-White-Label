@@ -32,6 +32,7 @@ export const KNOWN_NAV_LABEL_KEYS = [
   "nav.settings",
   "nav.statements",
   "nav.support",
+  "nav.swap",
   "nav.team",
   "nav.transactions",
   "nav.transfer",

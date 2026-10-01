@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import type { CustomerTransactionListItem, WalletBalance } from "@white-label/shared-types";
 import { formatMinorAmount, LEDGER_TRANSACTION_TYPES, FRIENDLY_TRANSACTION_STATUSES } from "@white-label/shared-types";
 
-// SWAP and ADJUSTMENT are internal/platform-side ledger mechanics, not something a customer
-// filters their own activity by — hidden from this picker even though the admin transactions
-// page still shows every type for reconciliation.
-const CUSTOMER_FILTERABLE_TYPES = LEDGER_TRANSACTION_TYPES.filter((t) => t !== "SWAP" && t !== "ADJUSTMENT");
+// ADJUSTMENT is an internal/platform-side ledger mechanic, not something a customer filters their
+// own activity by — hidden from this picker even though the admin transactions page still shows
+// every type for reconciliation. SWAP stays: customers convert their own balances from Swap.
+const CUSTOMER_FILTERABLE_TYPES = LEDGER_TRANSACTION_TYPES.filter((t) => t !== "ADJUSTMENT");
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { portalApi } from "@/lib/api-client";

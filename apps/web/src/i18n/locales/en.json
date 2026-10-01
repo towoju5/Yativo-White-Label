@@ -872,7 +872,8 @@
     "virtualAccounts": "Virtual accounts",
     "wallets": "Wallets",
     "whiteLabel": "White Label",
-    "transfer": "Transfer"
+    "transfer": "Transfer",
+    "swap": "Swap"
   },
   "notFound": {
     "message": "Nothing to see here."
@@ -1430,5 +1431,58 @@
     "login": "Log in to pay",
     "signup": "Create an account",
     "recipientId": "Recipient ID {{id}}"
+  },
+  "swap": {
+    "available": "Available: {{amount}}",
+    "back": "Back",
+    "confirm": "Confirm swap",
+    "convert": "Convert",
+    "done": {
+      "again": "Swap again",
+      "fee": "Fee {{fee}}",
+      "from": "converted from {{amount}}",
+      "reference": "Ref {{id}}",
+      "viewWallets": "View wallets"
+    },
+    "fee": "Fee",
+    "flip": "Swap direction",
+    "flipUnavailable": "You don't hold a balance in this currency yet",
+    "free": "Free",
+    "fromWallet": "From wallet",
+    "getQuote": "Review swap",
+    "indicativeRate": "1 {{from}} ≈ {{rate}} {{to}}",
+    "insufficient": "Insufficient balance",
+    "insufficientWithFee": "Your balance doesn't cover the amount plus the fee.",
+    "max": "Max",
+    "nothingToSwap": "There's nothing to swap yet — you need a funded wallet and at least one other currency on offer.",
+    "quoteExpired": "This rate has expired — refresh to get the current rate.",
+    "quoteValid": "Rate held for {{seconds}}s",
+    "rate": "Rate",
+    "ratesUnavailable": "Exchange rates are temporarily unavailable.",
+    "ratesUpdated": "updated {{time}}",
+    "receive": "You receive",
+    "recent": {
+      "empty": "No swaps yet.",
+      "subtitle": "Conversions between your wallets",
+      "title": "Recent swaps"
+    },
+    "refreshQuote": "Refresh rate",
+    "retry": "Try again",
+    "select": "Select",
+    "subtitle": "Convert money between your wallets at the live exchange rate.",
+    "title": "Swap balance",
+    "toCurrency": "To currency",
+    "toast": {
+      "quoteFailed": "Couldn't get a quote",
+      "swapFailed": "Swap failed"
+    },
+    "totalDebit": "Total debited",
+    "youConvert": "You convert",
+    "youReceive": "You receive (estimate)"
+  },
+  "portalMenu": {
+    "backHome": "Back to dashboard",
+    "unavailableBody": "This feature isn't available on your account right now.",
+    "unavailableTitle": "Not available"
   }
 }

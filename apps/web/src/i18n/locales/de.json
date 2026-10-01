@@ -876,7 +876,8 @@
     "transfer": "Überweisen",
     "virtualAccounts": "Virtuelle Konten",
     "wallets": "Wallets",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "Tauschen"
   },
   "notFound": {
     "message": "Hier gibt es nichts zu sehen."

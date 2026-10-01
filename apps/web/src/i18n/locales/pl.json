@@ -876,7 +876,8 @@
     "transfer": "Przelew",
     "virtualAccounts": "Konta wirtualne",
     "wallets": "Portfele",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "Wymiana"
   },
   "notFound": {
     "message": "Nic tu nie ma."

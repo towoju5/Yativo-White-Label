@@ -8,6 +8,7 @@ export * from "./fiat/virtualAccounts.js";
 export * from "./fiat/swaps.js";
 export * from "./fiat/paymentMethods.js";
 export * from "./fiat/currencies.js";
+export * from "./fiat/exchangeRates.js";
 export * from "./fiat/payouts.js";
 export * from "./fiat/quotes.js";
 export * from "./fiat/cards.js";

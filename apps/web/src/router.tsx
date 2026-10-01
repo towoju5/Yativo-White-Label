@@ -32,6 +32,7 @@ import StatementsPage from "@/pages/portal/statements/StatementsPage";
 import SupportPage from "@/pages/portal/support/SupportPage";
 import SendMoneyPage from "@/pages/portal/send/SendMoneyPage";
 import TransferPage from "@/pages/portal/transfer/TransferPage";
+import SwapPage from "@/pages/portal/swap/SwapPage";
 import DepositPage from "@/pages/portal/deposit/DepositPage";
 import PortalCryptoWalletsPage from "@/pages/portal/crypto/CryptoWalletsPage";
 import VirtualAccountsPage from "@/pages/portal/virtualAccounts/VirtualAccountsPage";
@@ -152,6 +153,7 @@ export function createRouter(adminLoginPath: string, demoLandingActive = false) 
               { path: "support", element: <SupportPage /> },
               { path: "send", element: <SendMoneyPage /> },
               { path: "transfer", element: <TransferPage /> },
+              { path: "swap", element: <SwapPage /> },
               { path: "deposit", element: <DepositPage /> },
               { path: "crypto", element: <PortalCryptoWalletsPage /> },
               { path: "virtual-accounts", element: <VirtualAccountsPage /> },

@@ -33,7 +33,7 @@ import {
 import { portalApi, ApiError } from "@/lib/api-client";
 import { fetchBranding } from "@/theme/branding";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, majorToMinorString } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,15 +45,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { QrScanner } from "@/components/transfer/QrScanner";
 
 type Step = "find" | "amount" | "review" | "done";
-
-/** "12.5" + 2 decimals → "1250" without float rounding; null when not a valid positive amount. */
-function majorToMinorString(value: string, decimals: number): string | null {
-  const m = value.trim().match(/^(\d+)(?:\.(\d*))?$/);
-  if (!m) return null;
-  const frac = (m[2] ?? "").slice(0, decimals).padEnd(decimals, "0");
-  const minor = (m[1] + frac).replace(/^0+(?=\d)/, "");
-  return minor === "0" || /^0+$/.test(minor) ? null : minor;
-}
 
 /** "AB12CD34EF" → "AB12 CD34 EF" for readability. */
 function groupId(id: string) {

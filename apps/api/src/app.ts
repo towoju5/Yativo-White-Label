@@ -47,6 +47,8 @@ import { locationsRoutes } from "./modules/locations/locations.routes.js";
 import { platformSettingsRoutes } from "./modules/platformSettings/platformSettings.routes.js";
 import { endorsementSettingsRoutes } from "./modules/endorsementSettings/endorsementSettings.routes.js";
 import { navLabelsRoutes } from "./modules/navLabels/navLabels.routes.js";
+import { portalMenusRoutes } from "./modules/portalMenus/portalMenus.routes.js";
+import { portalSwapsRoutes } from "./modules/swaps/swaps.routes.js";
 import { paymentGatewaysRoutes } from "./modules/paymentGateways/paymentGateways.routes.js";
 import { pricingRoutes } from "./modules/pricing/pricing.routes.js";
 import { twoFactorRoutes } from "./modules/twoFactor/twoFactor.routes.js";
@@ -191,6 +193,7 @@ export async function buildApp() {
   await app.register(portalPayoutsRoutes);
   await app.register(portalTransfersRoutes);
   await app.register(adminTransfersRoutes);
+  await app.register(portalSwapsRoutes);
   await app.register(adminPayoutsRoutes);
   await app.register(depositsRoutes);
   await app.register(virtualAccountsRoutes);
@@ -208,6 +211,7 @@ export async function buildApp() {
   await app.register(platformSettingsRoutes);
   await app.register(endorsementSettingsRoutes);
   await app.register(navLabelsRoutes);
+  await app.register(portalMenusRoutes);
   await app.register(paymentGatewaysRoutes);
   await app.register(pricingRoutes);
   await app.register(twoFactorRoutes);

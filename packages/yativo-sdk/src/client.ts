@@ -18,6 +18,7 @@ import { createDepositsResource } from "./fiat/deposits.js";
 import { createLocationsResource } from "./fiat/locations.js";
 import { createKycReferenceResource } from "./fiat/kycReference.js";
 import { createCurrenciesResource } from "./fiat/currencies.js";
+import { createExchangeRatesResource } from "./fiat/exchangeRates.js";
 import { createBusinessWebhooksResource } from "./fiat/businessWebhooks.js";
 
 import { createCryptoWalletsResource } from "./crypto/wallets.js";
@@ -257,6 +258,7 @@ export interface YativoClient {
     locations: ReturnType<typeof createLocationsResource>;
     kycReference: ReturnType<typeof createKycReferenceResource>;
     currencies: ReturnType<typeof createCurrenciesResource>;
+    exchangeRates: ReturnType<typeof createExchangeRatesResource>;
   };
   crypto: {
     wallets: ReturnType<typeof createCryptoWalletsResource>;
@@ -292,6 +294,7 @@ export function createYativoClient(config: YativoConfig): YativoClient {
       locations: createLocationsResource(ctx),
       kycReference: createKycReferenceResource(ctx),
       currencies: createCurrenciesResource(ctx),
+      exchangeRates: createExchangeRatesResource(ctx),
     },
     crypto: {
       wallets: createCryptoWalletsResource(ctx),

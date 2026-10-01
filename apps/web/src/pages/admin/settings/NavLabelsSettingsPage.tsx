@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { NavLabelOverride, NavLabelOverridesResponse } from "@white-label/shared-types";
+import type { NavLabelOverride, NavLabelOverridesResponse, PortalMenu, PortalMenusResponse } from "@white-label/shared-types";
 import { Pencil, RotateCcw } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -41,8 +43,10 @@ const NAV_LABEL_DEFAULTS: Record<string, string> = {
   "nav.settings": "Settings",
   "nav.statements": "Statements",
   "nav.support": "Support",
+  "nav.swap": "Swap",
   "nav.team": "Team",
   "nav.transactions": "Transactions",
+  "nav.transfer": "Transfer",
   "nav.virtualAccounts": "Virtual accounts",
   "nav.wallets": "Wallets",
 };
@@ -175,6 +179,48 @@ function NavKeyRow({ navKey, override, canEdit }: { navKey: string; override: Na
   );
 }
 
+function MenuVisibilityRow({ menu, canEdit }: { menu: PortalMenu; canEdit: boolean }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const toggleMutation = useMutation({
+    mutationFn: (enabled: boolean) => staffApi.put<PortalMenu>(`/admin/portal-menus/${menu.key}`, { enabled }),
+    onSuccess: (updated) => {
+      toast({ title: `${updated.label} ${updated.enabled ? "shown to" : "hidden from"} customers` });
+      queryClient.setQueryData<PortalMenusResponse>(["admin", "portal-menus"], (prev) =>
+        prev ? { menus: prev.menus.map((m) => (m.key === updated.key ? updated : m)) } : prev,
+      );
+      // The admin's own browser may also have the portal open — don't leave its nav stale.
+      queryClient.invalidateQueries({ queryKey: ["portal-menus"] });
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't update menu", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  return (
+    <TableRow>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2">
+          {menu.label}
+          {!menu.defaultEnabled && <Badge variant="outline">Off by default</Badge>}
+        </div>
+      </TableCell>
+      <TableCell>
+        <code className="rounded bg-muted px-1 py-0.5 text-xs">{menu.path}</code>
+      </TableCell>
+      <TableCell className="text-muted-foreground">{menu.enabled ? "Visible" : "Hidden"}</TableCell>
+      <TableCell className="text-right">
+        <Switch
+          checked={menu.enabled}
+          onCheckedChange={(enabled) => toggleMutation.mutate(enabled)}
+          disabled={!canEdit || toggleMutation.isPending}
+          aria-label={`${menu.enabled ? "Hide" : "Show"} ${menu.label}`}
+          title={canEdit ? undefined : "Only owners and admins can change the customer menu"}
+        />
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export default function NavLabelsSettingsPage() {
   const { user } = useStaffAuth();
   const canEdit = user?.role === "OWNER" || user?.role === "ADMIN";
@@ -183,8 +229,12 @@ export default function NavLabelsSettingsPage() {
     queryKey: ["admin", "nav-labels"],
     queryFn: () => staffApi.get<NavLabelOverridesResponse>("/nav-labels"),
   });
+  const menusQuery = useQuery({
+    queryKey: ["admin", "portal-menus"],
+    queryFn: () => staffApi.get<PortalMenusResponse>("/portal-menus"),
+  });
 
-  if (isLoading || !data) {
+  if (isLoading || !data || menusQuery.isLoading || !menusQuery.data) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
@@ -200,13 +250,39 @@ export default function NavLabelsSettingsPage() {
       <div>
         <h1 className="font-heading text-2xl font-semibold tracking-tight">Customer menu</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Rename any item in the customer portal's navigation menu, with its own label per language. Applies across every layout template.
+          Choose which items appear in the customer portal's navigation menu, and rename any of them with its own label per language. Applies across every layout template.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Menu items</CardTitle>
+          <CardTitle className="text-base">Menu visibility</CardTitle>
+          <CardDescription>
+            A hidden item disappears from the customer menu and its page can't be opened. Dashboard, Profile and Settings are always shown.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Menu item</TableHead>
+                <TableHead>Page</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Show</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {menusQuery.data.menus.map((menu) => (
+                <MenuVisibilityRow key={menu.key} menu={menu} canEdit={canEdit} />
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Menu labels</CardTitle>
           <CardDescription>Renaming an item here changes what customers see everywhere it appears in the portal.</CardDescription>
         </CardHeader>
         <CardContent className="p-0">

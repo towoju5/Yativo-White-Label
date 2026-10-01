@@ -2,12 +2,14 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Home, ArrowDownToLine, ArrowRightLeft, ArrowUpFromLine, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePortalMenus } from "@/hooks/usePortalMenus";
 
 /** Bottom tab bar shown on mobile viewports, mirroring the primary shortcuts native banking
  * apps surface below the fold. Sits alongside each template's existing top bar / hamburger menu,
  * which still carries the full navigation list. */
 export function MobileBottomNav() {
   const { t } = useTranslation();
+  const { isPathEnabled } = usePortalMenus();
 
   const items = [
     { to: "/portal", label: t("nav.home", "Home"), icon: Home, end: true },
@@ -15,11 +17,12 @@ export function MobileBottomNav() {
     { to: "/portal/send", label: t("nav.payout", "Payout"), icon: ArrowUpFromLine },
     { to: "/portal/transfer", label: t("nav.transfer", "Transfer"), icon: ArrowRightLeft },
     { to: "/portal/cards", label: t("nav.cards", "Virtual Cards"), icon: CreditCard },
-  ];
+  ].filter((item) => isPathEnabled(item.to)); // the grid's column count follows whatever's left
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg lg:hidden"
+      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+      className="fixed inset-x-0 bottom-0 z-40 grid border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg lg:hidden"
       aria-label={t("nav.portal", "Portal")}
     >
       {items.map((item) => (

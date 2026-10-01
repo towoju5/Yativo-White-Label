@@ -876,7 +876,8 @@
     "transfer": "送金",
     "virtualAccounts": "バーチャルアカウント",
     "wallets": "ウォレット",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "swap": "両替"
   },
   "notFound": {
     "message": "お探しのページは見つかりませんでした。"

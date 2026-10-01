@@ -34,3 +34,5 @@ export * from "./security.schema.js";
 export * from "./profit.schema.js";
 export * from "./navLabels.schema.js";
 export * from "./transfer.schema.js";
+export * from "./portalMenus.schema.js";
+export * from "./swap.schema.js";

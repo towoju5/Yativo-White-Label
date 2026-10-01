@@ -4,6 +4,7 @@ import { LiveChatWidget } from "@/components/LiveChatWidget";
 import { EmailVerificationBanner } from "@/components/kyc/EmailVerificationBanner";
 import { InstallAppBanner } from "@/components/pwa/InstallAppBanner";
 import { DemoExpiryBanner } from "@/components/demo/DemoExpiryBanner";
+import { PortalMenuGate } from "@/components/PortalMenuGate";
 
 export default function PortalLayout() {
   const T = useTemplate();
@@ -13,7 +14,9 @@ export default function PortalLayout() {
       <EmailVerificationBanner />
       <InstallAppBanner />
       <LiveChatWidget />
-      <Outlet />
+      <PortalMenuGate>
+        <Outlet />
+      </PortalMenuGate>
     </T.PortalShell>
   );
 }
