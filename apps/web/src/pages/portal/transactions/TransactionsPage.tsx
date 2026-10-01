@@ -56,6 +56,13 @@ export default function PortalTransactionsPage() {
     queryFn: () => portalApi.get<WalletBalance[]>("/portal/wallets"),
   });
 
+  const decimalsOf = (code: string | null | undefined) => wallets?.find((w) => w.currencyCode === code)?.decimals ?? 2;
+  /** A swap's received leg, shown beneath what was spent. */
+  const counterOf = (tx: CustomerTransactionListItem) =>
+    tx.counterAmountMinor && tx.counterCurrencyCode && tx.counterDirection
+      ? { amountMinor: tx.counterAmountMinor, currencyCode: tx.counterCurrencyCode, direction: tx.counterDirection, decimals: decimalsOf(tx.counterCurrencyCode) }
+      : null;
+
   const { data, isLoading } = useQuery({
     queryKey: ["portal", "transactions", { type, status, currencyCode, dateFrom, dateTo, search, page }],
     queryFn: () =>
@@ -235,10 +242,16 @@ export default function PortalTransactionsPage() {
                       {tx.amountMinor !== null && tx.amountMinor !== undefined ? (
                         <>
                           {tx.direction === "CREDIT" ? "+" : tx.direction === "DEBIT" ? "-" : ""}
-                          {formatMinorAmount(tx.amountMinor, 2)} {tx.currencyCode ?? ""}
+                          {formatMinorAmount(tx.amountMinor, decimalsOf(tx.currencyCode))} {tx.currencyCode ?? ""}
                         </>
                       ) : (
                         "—"
+                      )}
+                      {counterOf(tx) && (
+                        <div className={cn("text-xs", counterOf(tx)!.direction === "CREDIT" ? "text-success" : "text-muted-foreground")}>
+                          → {counterOf(tx)!.direction === "CREDIT" ? "+" : "-"}
+                          {formatMinorAmount(counterOf(tx)!.amountMinor, counterOf(tx)!.decimals)} {counterOf(tx)!.currencyCode}
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
@@ -257,7 +270,9 @@ export default function PortalTransactionsPage() {
                 status={tx.status}
                 direction={tx.direction}
                 amountMinor={tx.amountMinor}
+                decimals={decimalsOf(tx.currencyCode)}
                 currencyCode={tx.currencyCode ?? ""}
+                counter={counterOf(tx)}
                 onClick={() => setSelectedTransactionId(tx.id)}
               />
             ))}

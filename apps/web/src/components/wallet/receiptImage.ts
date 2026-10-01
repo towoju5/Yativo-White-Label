@@ -18,6 +18,18 @@ export type ReceiptRow = [string, string];
  */
 export function feeDetailRows(data: TransactionDetail): ReceiptRow[] {
   const rows: ReceiptRow[] = [];
+  if (data.swap) {
+    const s = data.swap;
+    const from = (minor: string) => `${formatMinorAmount(minor, s.fromDecimals)} ${s.fromCurrency}`;
+    rows.push(["Converted", from(s.fromAmountMinor)]);
+    if (Number(s.feeMinor) > 0) {
+      rows.push(["Fee", from(s.feeMinor)]);
+      rows.push(["Total debited", from(s.totalDebitMinor)]);
+    }
+    rows.push(["Exchange rate", `1 ${s.fromCurrency} = ${s.rate} ${s.toCurrency}`]);
+    rows.push(["Received", `${formatMinorAmount(s.toAmountMinor, s.toDecimals)} ${s.toCurrency}`]);
+    return rows;
+  }
   if (data.deposit) {
     const d = data.deposit;
     if (Number(d.totalFeeMinor) > 0) {

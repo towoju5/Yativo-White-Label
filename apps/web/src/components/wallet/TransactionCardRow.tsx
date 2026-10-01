@@ -19,13 +19,27 @@ interface TransactionCardRowProps {
   amountMinor?: string | null;
   decimals?: number;
   currencyCode?: string;
+  /** A swap's other leg, shown under the main amount — e.g. "→ +90.03 EUR" beneath "-100.50 USD". */
+  counter?: { amountMinor: string; currencyCode: string; direction: string; decimals: number } | null;
   balanceMinor?: string;
   onClick?: () => void;
 }
 
 /** Mobile stand-in for a transaction/statement `<Table>` row — the same columns re-flowed into a
  * card so a 5-6 column table doesn't force horizontal scrolling on a phone-width screen. */
-export function TransactionCardRow({ date, description, type, status, direction, amountMinor, decimals = 2, currencyCode, balanceMinor, onClick }: TransactionCardRowProps) {
+export function TransactionCardRow({
+  date,
+  description,
+  type,
+  status,
+  direction,
+  amountMinor,
+  decimals = 2,
+  currencyCode,
+  counter,
+  balanceMinor,
+  onClick,
+}: TransactionCardRowProps) {
   return (
     <div
       className={cn("flex w-full max-w-full items-start justify-between gap-3 overflow-hidden border-b border-border px-4 py-3 last:border-0", onClick && "cursor-pointer active:bg-muted/40")}
@@ -56,6 +70,12 @@ export function TransactionCardRow({ date, description, type, status, direction,
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">—</p>
+        )}
+        {counter && (
+          <p className={cn("truncate font-mono text-xs", counter.direction === "CREDIT" ? "text-success" : "text-muted-foreground")}>
+            → {counter.direction === "CREDIT" ? "+" : "-"}
+            {formatMinorAmount(counter.amountMinor, counter.decimals)} {counter.currencyCode}
+          </p>
         )}
         {balanceMinor !== undefined && <p className="mt-0.5 truncate text-xs text-muted-foreground">Bal {formatMinorAmount(balanceMinor, decimals)}</p>}
       </div>

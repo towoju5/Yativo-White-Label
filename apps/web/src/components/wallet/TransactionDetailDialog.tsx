@@ -128,9 +128,11 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
     }
   };
 
-  const primaryEntry = data?.entries[0];
+  // A swap touches two of the customer's wallets — headline what was spent, with what was received beneath it.
+  const swap = data?.swap ?? null;
+  const primaryEntry = swap ? { direction: "DEBIT", amountMinor: swap.totalDebitMinor, currencyCode: swap.fromCurrency } : data?.entries[0];
   const amountLabel = primaryEntry
-    ? `${primaryEntry.direction === "CREDIT" ? "+" : "-"}${formatMinorAmount(primaryEntry.amountMinor, 2)} ${primaryEntry.currencyCode}`
+    ? `${primaryEntry.direction === "CREDIT" ? "+" : "-"}${formatMinorAmount(primaryEntry.amountMinor, swap ? swap.fromDecimals : 2)} ${primaryEntry.currencyCode}`
     : "";
   // Crypto deposits aren't LedgerTransactions at all, so this dialog never even renders for them —
   // no crypto-specific guard is needed here, only the DEPOSIT/PAYOUT scoping "Report an issue" is for.
@@ -153,6 +155,11 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className={`font-heading text-2xl font-semibold ${primaryEntry?.direction === "CREDIT" ? "text-success" : ""}`}>{amountLabel}</p>
+                {swap && (
+                  <p className="font-mono text-base font-medium text-success">
+                    → +{formatMinorAmount(swap.toAmountMinor, swap.toDecimals)} {swap.toCurrency}
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground">{data.description ?? humanizeType(data.type)}</p>
               </div>
               <Badge variant={TRANSACTION_STATUS_VARIANT[data.status]}>{TRANSACTION_STATUS_LABEL[data.status]}</Badge>
