@@ -28,7 +28,6 @@ import { transactionsRoutes } from "./modules/transactions/transactions.routes.j
 import { beneficiariesRoutes } from "./modules/beneficiaries/beneficiaries.routes.js";
 import { quotesRoutes } from "./modules/quotes/quotes.routes.js";
 import { portalPayoutsRoutes } from "./modules/payouts/payouts.routes.js";
-import { portalTransfersRoutes } from "./modules/transfers/transfers.routes.js";
 import { adminPayoutsRoutes } from "./modules/payouts/adminPayouts.routes.js";
 import { depositsRoutes } from "./modules/deposits/deposits.routes.js";
 import { virtualAccountsRoutes } from "./modules/virtualAccounts/virtualAccounts.routes.js";
@@ -129,7 +128,7 @@ export async function buildApp() {
         // on Yativo's side yet (see todo.md §0's auth note).
         return reply
           .code(503)
-          .send({ message: "This feature isn't available yet — please contact support.", code: "PROVIDER_AUTH_ERROR" });
+          .send({ message: "card", code: "PROVIDER_AUTH_ERROR" });
       }
       // Every other 4xx is (usually) something the customer can fix — bad payment_data, a
       // stale/mismatched quote, a gateway that needs a customer_id, etc. Surface Yativo's own
@@ -187,7 +186,6 @@ export async function buildApp() {
   await app.register(beneficiariesRoutes);
   await app.register(quotesRoutes);
   await app.register(portalPayoutsRoutes);
-  await app.register(portalTransfersRoutes);
   await app.register(adminPayoutsRoutes);
   await app.register(depositsRoutes);
   await app.register(virtualAccountsRoutes);
