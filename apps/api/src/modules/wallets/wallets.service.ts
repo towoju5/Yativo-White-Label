@@ -181,6 +181,7 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
   if (!tx) throw new NotFoundError("Transaction");
 
   const status = await deriveFriendlyStatus(prisma, tx, isSubmittedToExternalSystem(tx));
+  const swap = tx.type === "SWAP" ? await customerSwapDetail(prisma, customerId, tx.id) : null;
 
   return {
     id: tx.id,
@@ -220,6 +221,26 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
           localAmount: tx.deposit.localAmount,
         }
       : null,
+    swap,
+  };
+}
+
+/** Both legs of a customer's own swap, as quoted — null for a SWAP that isn't one (e.g. a legacy provider-side swap webhook). */
+async function customerSwapDetail(prisma: PrismaClient, customerId: string, transactionId: string) {
+  const swap = await prisma.currencySwap.findFirst({ where: { transactionId, customerId } });
+  if (!swap) return null;
+  const currencies = await prisma.currency.findMany({ where: { code: { in: [swap.fromCurrencyCode, swap.toCurrencyCode] } }, select: { code: true, decimals: true } });
+  const decimalsOf = (code: string) => currencies.find((c) => c.code === code)?.decimals ?? 2;
+  return {
+    fromCurrency: swap.fromCurrencyCode,
+    fromDecimals: decimalsOf(swap.fromCurrencyCode),
+    toCurrency: swap.toCurrencyCode,
+    toDecimals: decimalsOf(swap.toCurrencyCode),
+    fromAmountMinor: swap.fromAmountMinor.toString(),
+    feeMinor: swap.feeMinor.toString(),
+    totalDebitMinor: (swap.fromAmountMinor + swap.feeMinor).toString(),
+    toAmountMinor: swap.toAmountMinor.toString(),
+    rate: swap.rate,
   };
 }
 

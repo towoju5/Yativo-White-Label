@@ -50,7 +50,14 @@ function toCustomerListItem(tx: TxWithEntries, customerId: string, status: Frien
   // A swap touches two of the customer's own wallets — when the list is scoped to one currency
   // (a wallet's own history), show that wallet's leg rather than whichever entry comes first.
   const ownEntries = tx.entries.filter((e) => e.account.customerId === customerId);
-  const customerEntry = (currencyCode ? ownEntries.find((e) => e.currencyCode === currencyCode) : undefined) ?? ownEntries[0] ?? null;
+  // Unscoped, a swap leads with what the customer spent (its DEBIT leg) and carries what they
+  // received as the counter leg, so the history row reads "-100.50 USD → +90.03 EUR".
+  const customerEntry =
+    (currencyCode ? ownEntries.find((e) => e.currencyCode === currencyCode) : undefined) ??
+    (tx.type === "SWAP" ? ownEntries.find((e) => e.direction === "DEBIT") : undefined) ??
+    ownEntries[0] ??
+    null;
+  const counterEntry = tx.type === "SWAP" && customerEntry ? (ownEntries.find((e) => e.currencyCode !== customerEntry.currencyCode) ?? null) : null;
 
   return {
     id: tx.id,
@@ -68,6 +75,9 @@ function toCustomerListItem(tx: TxWithEntries, customerId: string, status: Frien
     amountMinor: customerEntry ? customerEntry.amountMinor.toString() : null,
     currencyCode: customerEntry ? customerEntry.currencyCode : null,
     direction: customerEntry ? customerEntry.direction : null,
+    counterAmountMinor: counterEntry ? counterEntry.amountMinor.toString() : null,
+    counterCurrencyCode: counterEntry ? counterEntry.currencyCode : null,
+    counterDirection: counterEntry ? counterEntry.direction : null,
   };
 }
 

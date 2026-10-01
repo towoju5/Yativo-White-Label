@@ -63,6 +63,10 @@ export const customerTransactionListItemSchema = ledgerTransactionSchema.extend(
   amountMinor: minorAmountSchema.nullable(),
   currencyCode: currencyCodeSchema.nullable(),
   direction: z.enum(ENTRY_DIRECTIONS).nullable(),
+  /** A swap's other leg in the customer's own wallets (e.g. the EUR received when the row shows the USD spent) — null for every other transaction. */
+  counterAmountMinor: minorAmountSchema.nullable().optional(),
+  counterCurrencyCode: currencyCodeSchema.nullable().optional(),
+  counterDirection: z.enum(ENTRY_DIRECTIONS).nullable().optional(),
   status: z.enum(FRIENDLY_TRANSACTION_STATUSES),
 });
 export type CustomerTransactionListItem = z.infer<typeof customerTransactionListItemSchema>;
@@ -145,6 +149,23 @@ export const transactionDetailDepositSchema = z.object({
 export type TransactionDetailDeposit = z.infer<typeof transactionDetailDepositSchema>;
 
 /** Full detail for one transaction — the customer-facing "view details / print receipt" view, for any transaction type (deposit, payout, fee, card top-up, adjustment, ...). */
+/** Present on a customer's own currency swap — both legs, as they were quoted. */
+export const transactionDetailSwapSchema = z.object({
+  fromCurrency: z.string(),
+  fromDecimals: z.number().int(),
+  toCurrency: z.string(),
+  toDecimals: z.number().int(),
+  /** The amount converted, before the fee. */
+  fromAmountMinor: minorAmountSchema,
+  feeMinor: minorAmountSchema,
+  /** fromAmountMinor + feeMinor — what left the source wallet. */
+  totalDebitMinor: minorAmountSchema,
+  toAmountMinor: minorAmountSchema,
+  /** 1 fromCurrency = rate toCurrency, as the customer got it. */
+  rate: z.string(),
+});
+export type TransactionDetailSwap = z.infer<typeof transactionDetailSwapSchema>;
+
 export const transactionDetailSchema = z.object({
   id: z.string(),
   type: z.enum(LEDGER_TRANSACTION_TYPES),
@@ -158,6 +179,8 @@ export const transactionDetailSchema = z.object({
   payout: transactionDetailPayoutSchema.nullable(),
   /** Present only when type === "DEPOSIT" and this deposit went through the native gateway flow (not every deposit source populates this). */
   deposit: transactionDetailDepositSchema.nullable(),
+  /** Present only when type === "SWAP" and it's a customer-initiated swap. */
+  swap: transactionDetailSwapSchema.nullable().optional(),
 });
 export type TransactionDetail = z.infer<typeof transactionDetailSchema>;
 

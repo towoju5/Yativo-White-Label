@@ -174,7 +174,8 @@ export async function createSwap(prisma: PrismaClient, redis: Redis, customerId:
     status: "POSTED",
     idempotencyKey,
     externalSource: "MANUAL",
-    description: `Swap ${quote.fromCurrency} → ${quote.toCurrency} @ ${quote.rate}`,
+    // The rate isn't repeated here — the transaction detail shows it alongside both legs.
+    description: `Swap ${quote.fromCurrency} → ${quote.toCurrency}`,
     metadata: {
       swapId,
       fromCurrency: quote.fromCurrency,
