@@ -642,12 +642,11 @@
     "takePhoto": "Take photo"
   },
   "kycWizard": {
-    "backToDashboard": "Back to dashboard",
-    "pendingDescription": "We've received your details and are reviewing them. We'll notify you once a decision is made.",
-    "pendingHeading": "Verification pending",
-    "verifiedDescription": "Your identity has been verified. You have full access to sending, cards, and virtual accounts.",
-    "verifiedHeading": "You're verified",
-    "updateKyc": "Update KYC information"
+    "updateKyc": "Update KYC information",
+    "submittedHeading": "Details submitted",
+    "submittedDescription": "Each service is approved separately. {{approved}} of {{total}} approved so far — see Profile & KYC for details.",
+    "submittedDescriptionNoCount": "Each service is approved separately — see Profile & KYC for each one's status.",
+    "viewEndorsements": "View endorsements"
   },
   "landing": {
     "atlas": {
@@ -894,13 +893,13 @@
     "identityVerificationTitle": "Identity verification",
     "restartVerification": "Restart verification",
     "startVerification": "Start verification",
-    "statusApproved": "You're verified. Full access to sending, cards, and virtual accounts.",
     "statusNotStarted": "Required before you can send money, hold a virtual account, or get a card.",
-    "statusPending": "We've received your details and are reviewing them — we'll notify you once it's decided.",
     "statusRejected": "Your last submission wasn't approved — start a new one below.",
     "subheading": "Manage your identity details",
     "typeLabel": "Type",
-    "updateKyc": "Update KYC information"
+    "updateKyc": "Update KYC information",
+    "statusSubmittedSummary": "{{approved}} of {{total}} services approved. Each service is approved separately — see Endorsements below.",
+    "statusSubmitted": "Your details are submitted. Each service is approved separately — see Endorsements below."
   },
   "pwa": {
     "banner": {
@@ -1403,9 +1402,13 @@
       "linkLabel": "Payment link",
       "copyLink": "Copy link",
       "shareTitle": "Send me money",
-      "share": "Share",
       "alsoFindable": "People can also find you by your email or your phone number ending {{hint}}.",
-      "alsoFindableEmail": "People can also find you by your email address."
+      "alsoFindableEmail": "People can also find you by your email address.",
+      "shareImageFailed": "Couldn't create the QR image",
+      "shareQr": "Share QR code",
+      "downloadQr": "Download QR code",
+      "shareLink": "Share link",
+      "linkHint": "Anyone can scan this with their phone camera — they'll be asked to log in or sign up, then taken straight to paying you."
     },
     "recent": {
       "title": "Recent transfers",
@@ -1414,5 +1417,18 @@
       "sent": "Sent",
       "received": "Received"
     }
+  },
+  "endorsements": {
+    "notSubmitted": "Not submitted",
+    "unavailable": "Couldn't load endorsements",
+    "progressTitle": "{{approved}} of {{total}} endorsements approved"
+  },
+  "payLink": {
+    "tagline": "Send money in seconds",
+    "title": "You've been sent a payment link",
+    "description": "Log in or create a free account to send money to this person. You'll come straight back to the payment.",
+    "login": "Log in to pay",
+    "signup": "Create an account",
+    "recipientId": "Recipient ID {{id}}"
   }
 }

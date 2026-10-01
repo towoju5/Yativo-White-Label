@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import NotFoundPage from "@/pages/NotFoundPage";
+import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 
 function FullScreenSpinner() {
   return (
@@ -19,7 +20,12 @@ export function RequireCustomerAuth({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   if (isLoading) return <FullScreenSpinner />;
-  if (!isAuthenticated) return <Navigate to="/portal/login" replace state={{ from: location.pathname }} />;
+  if (!isAuthenticated) {
+    // Full path incl. query (e.g. /portal/transfer?to=ID), remembered across signup / email
+    // verification too — see lib/postAuthRedirect.ts.
+    setPostAuthRedirect(location.pathname + location.search);
+    return <Navigate to="/portal/login" replace />;
+  }
   // An imported account that signed in via magic link but hasn't chosen its own password yet —
   // every other portal page is blocked until this is done, same as an unauthenticated redirect.
   if (user?.requiresPasswordSetup && location.pathname !== SETUP_PASSWORD_PATH) {

@@ -647,11 +647,10 @@
     "takePhoto": "Tirar fotografia"
   },
   "kycWizard": {
-    "backToDashboard": "Voltar ao painel",
-    "pendingDescription": "Recebemos os seus detalhes e estamos a analisá-los. Iremos notificá-lo assim que houver uma decisão.",
-    "pendingHeading": "Verificação pendente",
-    "verifiedDescription": "A sua identidade foi verificada. Tem acesso total ao envio de dinheiro, cartões e contas virtuais.",
-    "verifiedHeading": "Está verificado"
+    "submittedHeading": "Dados enviados",
+    "submittedDescription": "Cada serviço é aprovado separadamente. {{approved}} de {{total}} aprovados até agora — veja Perfil e KYC para detalhes.",
+    "submittedDescriptionNoCount": "Cada serviço é aprovado separadamente — veja Perfil e KYC para o status de cada um.",
+    "viewEndorsements": "Ver aprovações"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Verificação de identidade",
     "restartVerification": "Reiniciar verificação",
     "startVerification": "Iniciar verificação",
-    "statusApproved": "Está verificado. Acesso total ao envio de dinheiro, cartões e contas virtuais.",
     "statusNotStarted": "Necessário antes de poder enviar dinheiro, ter uma conta virtual ou obter um cartão.",
-    "statusPending": "Recebemos os seus detalhes e estamos a analisá-los — iremos notificá-lo assim que houver uma decisão.",
     "statusRejected": "A sua última submissão não foi aprovada — inicie uma nova abaixo.",
     "subheading": "Faça a gestão dos seus dados de identidade",
-    "typeLabel": "Tipo"
+    "typeLabel": "Tipo",
+    "statusSubmittedSummary": "{{approved}} de {{total}} serviços aprovados. Cada serviço é aprovado separadamente — veja as aprovações abaixo.",
+    "statusSubmitted": "Seus dados foram enviados. Cada serviço é aprovado separadamente — veja as aprovações abaixo."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "ID do cliente",
       "linkLabel": "Link de pagamento",
       "scanToPay": "Leia para me enviar dinheiro",
-      "share": "Compartilhar",
       "shareTitle": "Me envie dinheiro",
-      "yourId": "Seu ID de cliente"
+      "yourId": "Seu ID de cliente",
+      "shareImageFailed": "Não foi possível criar a imagem do QR",
+      "shareQr": "Compartilhar QR code",
+      "downloadQr": "Baixar QR code",
+      "shareLink": "Compartilhar link",
+      "linkHint": "Qualquer pessoa pode ler com a câmera do celular — ela precisará entrar ou se cadastrar e será levada direto para pagar você."
     },
     "recent": {
       "empty": "Nenhuma transferência ainda.",
@@ -1400,5 +1403,18 @@
     "title": "Carteiras",
     "walletAdded": "Carteira adicionada",
     "walletLabel": "Carteira"
+  },
+  "endorsements": {
+    "notSubmitted": "Não enviado",
+    "unavailable": "Não foi possível carregar as aprovações",
+    "progressTitle": "{{approved}} de {{total}} aprovações concedidas"
+  },
+  "payLink": {
+    "tagline": "Envie dinheiro em segundos",
+    "title": "Você recebeu um link de pagamento",
+    "description": "Entre ou crie uma conta gratuita para enviar dinheiro a esta pessoa. Você voltará direto para o pagamento.",
+    "login": "Entrar para pagar",
+    "signup": "Criar uma conta",
+    "recipientId": "ID do destinatário {{id}}"
   }
 }

@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ApiError, publicApi } from "@/lib/api-client";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { takePostAuthRedirect } from "@/lib/postAuthRedirect";
 
 export default function PortalSignupPage() {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ export default function PortalSignupPage() {
   const type = watch("type");
   const countryCode = watch("countryCode");
 
-  if (!authLoading && isAuthenticated) return <Navigate to="/portal" replace />;
+  if (!authLoading && isAuthenticated) return <Navigate to={takePostAuthRedirect()} replace />;
 
   const onSubmit = async (values: CreateCustomerInput) => {
     setError(null);
@@ -56,7 +57,7 @@ export default function PortalSignupPage() {
       if ("pendingVerification" in result) {
         setPendingVerification(true);
       } else {
-        navigate("/portal", { replace: true });
+        navigate(takePostAuthRedirect(), { replace: true });
       }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("signup.genericError", "Unable to create your account."));

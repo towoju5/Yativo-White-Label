@@ -647,11 +647,10 @@
     "takePhoto": "Zrób zdjęcie"
   },
   "kycWizard": {
-    "backToDashboard": "Powrót do panelu",
-    "pendingDescription": "Otrzymaliśmy Twoje dane i weryfikujemy je. Powiadomimy Cię, gdy zapadnie decyzja.",
-    "pendingHeading": "Weryfikacja w toku",
-    "verifiedDescription": "Twoja tożsamość została zweryfikowana. Masz pełny dostęp do wysyłania, kart i kont wirtualnych.",
-    "verifiedHeading": "Tożsamość zweryfikowana"
+    "submittedHeading": "Dane przesłane",
+    "submittedDescription": "Każda usługa jest zatwierdzana osobno. Dotąd zatwierdzono {{approved}} z {{total}} — szczegóły w Profil i KYC.",
+    "submittedDescriptionNoCount": "Każda usługa jest zatwierdzana osobno — status każdej znajdziesz w Profil i KYC.",
+    "viewEndorsements": "Zobacz zatwierdzenia"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Weryfikacja tożsamości",
     "restartVerification": "Rozpocznij weryfikację ponownie",
     "startVerification": "Rozpocznij weryfikację",
-    "statusApproved": "Twoja tożsamość została zweryfikowana. Masz pełny dostęp do wysyłania, kart i kont wirtualnych.",
     "statusNotStarted": "Wymagane, zanim będziesz mógł wysyłać pieniądze, posiadać konto wirtualne lub otrzymać kartę.",
-    "statusPending": "Otrzymaliśmy Twoje dane i weryfikujemy je — powiadomimy Cię, gdy zapadnie decyzja.",
     "statusRejected": "Twoje ostatnie zgłoszenie nie zostało zatwierdzone — rozpocznij nowe poniżej.",
     "subheading": "Zarządzaj danymi swojej tożsamości",
-    "typeLabel": "Typ"
+    "typeLabel": "Typ",
+    "statusSubmittedSummary": "Zatwierdzono {{approved}} z {{total}} usług. Każda usługa jest zatwierdzana osobno — szczegóły w sekcji Zatwierdzenia poniżej.",
+    "statusSubmitted": "Twoje dane zostały przesłane. Każda usługa jest zatwierdzana osobno — szczegóły w sekcji Zatwierdzenia poniżej."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "ID klienta",
       "linkLabel": "Link do płatności",
       "scanToPay": "Zeskanuj, aby wysłać mi pieniądze",
-      "share": "Udostępnij",
       "shareTitle": "Wyślij mi pieniądze",
-      "yourId": "Twoje ID klienta"
+      "yourId": "Twoje ID klienta",
+      "shareImageFailed": "Nie udało się utworzyć obrazu QR",
+      "shareQr": "Udostępnij kod QR",
+      "downloadQr": "Pobierz kod QR",
+      "shareLink": "Udostępnij link",
+      "linkHint": "Każdy może go zeskanować aparatem w telefonie — po zalogowaniu lub rejestracji przejdzie od razu do płatności dla Ciebie."
     },
     "recent": {
       "empty": "Brak przelewów.",
@@ -1400,5 +1403,18 @@
     "title": "Portfele",
     "walletAdded": "Portfel dodany",
     "walletLabel": "Portfel"
+  },
+  "endorsements": {
+    "notSubmitted": "Nie przesłano",
+    "unavailable": "Nie udało się wczytać zatwierdzeń",
+    "progressTitle": "Zatwierdzono {{approved}} z {{total}}"
+  },
+  "payLink": {
+    "tagline": "Wysyłaj pieniądze w kilka sekund",
+    "title": "Otrzymałeś link do płatności",
+    "description": "Zaloguj się lub załóż bezpłatne konto, aby wysłać pieniądze tej osobie. Wrócisz prosto do płatności.",
+    "login": "Zaloguj się, aby zapłacić",
+    "signup": "Załóż konto",
+    "recipientId": "ID odbiorcy {{id}}"
   }
 }

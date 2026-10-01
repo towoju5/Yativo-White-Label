@@ -647,11 +647,10 @@
     "takePhoto": "Snap picture"
   },
   "kycWizard": {
-    "backToDashboard": "Go back dashboard",
-    "pendingDescription": "We don receive your details, we dey check am. We go notify you once we don decide.",
-    "pendingHeading": "Verification dey pending",
-    "verifiedDescription": "We don verify who you be. You fit now send money, use card, and get virtual account.",
-    "verifiedHeading": "We don verify you"
+    "submittedHeading": "Details don submit",
+    "submittedDescription": "Dem dey approve each service separate. {{approved}} of {{total}} don approve so far — check Profile & KYC for details.",
+    "submittedDescriptionNoCount": "Dem dey approve each service separate — check Profile & KYC to see each one status.",
+    "viewEndorsements": "See endorsements"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Identity verification",
     "restartVerification": "Start verification again",
     "startVerification": "Start verification",
-    "statusApproved": "We don verify you. You get full access to send money, use cards, and virtual accounts.",
     "statusNotStarted": "We need am before you fit send money, hold virtual account, or get card.",
-    "statusPending": "We don receive your details, we dey check am — we go notify you once we don decide.",
     "statusRejected": "We no approve your last submission — start new one below.",
     "subheading": "Manage how your identity details be",
-    "typeLabel": "Kind"
+    "typeLabel": "Kind",
+    "statusSubmittedSummary": "{{approved}} of {{total}} services don approve. Dem dey approve each service separate — check Endorsements for down.",
+    "statusSubmitted": "Dem don receive your details. Dem dey approve each service separate — check Endorsements for down."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "Customer ID",
       "linkLabel": "Payment link",
       "scanToPay": "Scan am to send me money",
-      "share": "Share",
       "shareTitle": "Send me money",
-      "yourId": "Your customer ID"
+      "yourId": "Your customer ID",
+      "shareImageFailed": "We no fit make the QR picture",
+      "shareQr": "Share QR code",
+      "downloadQr": "Download QR code",
+      "shareLink": "Share link",
+      "linkHint": "Anybody fit scan am with phone camera — dem go login or sign up, then go straight to pay you."
     },
     "recent": {
       "empty": "No transfer yet.",
@@ -1400,5 +1403,18 @@
     "title": "Wallets",
     "walletAdded": "We don add wallet",
     "walletLabel": "Wallet"
+  },
+  "endorsements": {
+    "notSubmitted": "You never submit",
+    "unavailable": "We no fit load endorsements",
+    "progressTitle": "{{approved}} of {{total}} endorsements don approve"
+  },
+  "payLink": {
+    "tagline": "Send money sharp-sharp",
+    "title": "Dem don send you payment link",
+    "description": "Login or open free account make you fit send money give this person. You go come back straight to the payment.",
+    "login": "Login make you pay",
+    "signup": "Open account",
+    "recipientId": "Recipient ID {{id}}"
   }
 }

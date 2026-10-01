@@ -647,11 +647,10 @@
     "takePhoto": "Foto aufnehmen"
   },
   "kycWizard": {
-    "backToDashboard": "Zurück zum Dashboard",
-    "pendingDescription": "Wir haben Ihre Angaben erhalten und prüfen sie. Wir benachrichtigen Sie, sobald eine Entscheidung getroffen wurde.",
-    "pendingHeading": "Verifizierung ausstehend",
-    "verifiedDescription": "Ihre Identität wurde verifiziert. Sie haben vollen Zugriff auf Senden, Karten und virtuelle Konten.",
-    "verifiedHeading": "Sie sind verifiziert"
+    "submittedHeading": "Angaben übermittelt",
+    "submittedDescription": "Jeder Dienst wird einzeln freigegeben. Bisher {{approved}} von {{total}} freigegeben – Details unter Profil & KYC.",
+    "submittedDescriptionNoCount": "Jeder Dienst wird einzeln freigegeben – den Status findest du unter Profil & KYC.",
+    "viewEndorsements": "Freigaben ansehen"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Identitätsverifizierung",
     "restartVerification": "Verifizierung neu starten",
     "startVerification": "Verifizierung starten",
-    "statusApproved": "Sie sind verifiziert. Voller Zugriff auf Senden, Karten und virtuelle Konten.",
     "statusNotStarted": "Erforderlich, bevor Sie Geld senden, ein virtuelles Konto führen oder eine Karte erhalten können.",
-    "statusPending": "Wir haben Ihre Angaben erhalten und prüfen sie — wir benachrichtigen Sie, sobald entschieden wurde.",
     "statusRejected": "Ihre letzte Einreichung wurde nicht genehmigt — starten Sie unten eine neue.",
     "subheading": "Verwalten Sie Ihre Identitätsdaten",
-    "typeLabel": "Typ"
+    "typeLabel": "Typ",
+    "statusSubmittedSummary": "{{approved}} von {{total}} Diensten freigegeben. Jeder Dienst wird einzeln freigegeben – siehe Freigaben unten.",
+    "statusSubmitted": "Deine Angaben wurden übermittelt. Jeder Dienst wird einzeln freigegeben – siehe Freigaben unten."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "Kunden-ID",
       "linkLabel": "Zahlungslink",
       "scanToPay": "Scannen, um mir Geld zu senden",
-      "share": "Teilen",
       "shareTitle": "Sende mir Geld",
-      "yourId": "Deine Kunden-ID"
+      "yourId": "Deine Kunden-ID",
+      "shareImageFailed": "QR-Bild konnte nicht erstellt werden",
+      "shareQr": "QR-Code teilen",
+      "downloadQr": "QR-Code herunterladen",
+      "shareLink": "Link teilen",
+      "linkHint": "Jeder kann ihn mit der Handykamera scannen – nach Anmeldung oder Registrierung geht es direkt zur Zahlung an dich."
     },
     "recent": {
       "empty": "Noch keine Überweisungen.",
@@ -1400,5 +1403,18 @@
     "title": "Wallets",
     "walletAdded": "Wallet hinzugefügt",
     "walletLabel": "Wallet"
+  },
+  "endorsements": {
+    "notSubmitted": "Nicht eingereicht",
+    "unavailable": "Freigaben konnten nicht geladen werden",
+    "progressTitle": "{{approved}} von {{total}} Freigaben erteilt"
+  },
+  "payLink": {
+    "tagline": "Geld in Sekunden senden",
+    "title": "Du hast einen Zahlungslink erhalten",
+    "description": "Melde dich an oder erstelle ein kostenloses Konto, um dieser Person Geld zu senden. Danach geht es direkt zurück zur Zahlung.",
+    "login": "Anmelden und bezahlen",
+    "signup": "Konto erstellen",
+    "recipientId": "Empfänger-ID {{id}}"
   }
 }

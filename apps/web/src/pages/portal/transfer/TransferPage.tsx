@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import {
   formatCurrencyAmount,
   type Transfer,
@@ -20,7 +20,9 @@ import {
   AtSign,
   CheckCircle2,
   Copy,
+  Download,
   Hash,
+  Link2,
   Loader2,
   Phone,
   QrCode,
@@ -29,6 +31,7 @@ import {
   Share2,
 } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
+import { fetchBranding } from "@/theme/branding";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -473,14 +476,54 @@ function SendFlow({ deepLinkId }: { deepLinkId: string | null }) {
   );
 }
 
+/**
+ * Renders the shareable "pay me" card as a PNG: product name, the customer's display name, the QR
+ * itself (drawn from the hidden high-res QRCodeCanvas) and their customer ID — so the image still
+ * makes sense on its own when forwarded over WhatsApp/email, not just as a bare QR.
+ */
+function renderQrCard(qr: HTMLCanvasElement, opts: { productName: string; displayName: string; caption: string; idLabel: string; id: string }): Promise<Blob | null> {
+  const W = 720;
+  const QR = 560;
+  const H = 1000;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return Promise.resolve(null);
+  const font = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#6b7280";
+  ctx.font = `600 26px ${font}`;
+  ctx.fillText(opts.productName, W / 2, 70);
+  ctx.fillStyle = "#111827";
+  ctx.font = `700 40px ${font}`;
+  ctx.fillText(opts.displayName, W / 2, 140);
+  ctx.fillStyle = "#4b5563";
+  ctx.font = `400 26px ${font}`;
+  ctx.fillText(opts.caption, W / 2, 185);
+  ctx.drawImage(qr, (W - QR) / 2, 225, QR, QR);
+  ctx.fillStyle = "#6b7280";
+  ctx.font = `600 20px ${font}`;
+  ctx.fillText(opts.idLabel.toUpperCase(), W / 2, 850);
+  ctx.fillStyle = "#111827";
+  ctx.font = `700 40px ui-monospace, SFMono-Regular, Menlo, monospace`;
+  ctx.fillText(groupId(opts.id), W / 2, 905);
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
+
 function ReceivePanel() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const qrCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [sharingImage, setSharingImage] = useState(false);
   const profileQuery = useQuery({ queryKey: ["portal", "transfers", "profile"], queryFn: () => portalApi.get<TransferProfile>("/portal/transfers/profile") });
+  const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const profile = profileQuery.data;
-  // A link, not just the bare id: scanned with a phone's own camera app it opens straight into the
-  // send flow here, and the in-app scanner extracts the id from it either way.
-  const link = useMemo(() => (profile ? `${window.location.origin}/portal/transfer?to=${profile.publicId}` : ""), [profile]);
+  // A payment link, not a bare id: scanned with a phone's own camera it opens /pay/:id (log in or
+  // sign up, then straight into the send flow); the in-app scanner reads the id out of it directly.
+  const link = useMemo(() => (profile ? `${window.location.origin}/pay/${profile.publicId}` : ""), [profile]);
 
   const copy = async (text: string, label: string) => {
     try {
@@ -488,6 +531,37 @@ function ReceivePanel() {
       toast({ title: t("transfer.toast.copied", "{{label}} copied", { label }) });
     } catch {
       toast({ variant: "destructive", title: t("transfer.toast.copyFailed", "Couldn't copy") });
+    }
+  };
+
+  /** Shares the QR card image where the browser can share files (most phones); otherwise downloads it. */
+  const shareQrImage = async (mode: "share" | "download") => {
+    if (!profile || !qrCanvasRef.current) return;
+    setSharingImage(true);
+    try {
+      const blob = await renderQrCard(qrCanvasRef.current, {
+        productName: branding?.productName ?? "",
+        displayName: profile.displayName,
+        caption: t("transfer.receive.scanToPay", "Scan to send me money"),
+        idLabel: t("transfer.receive.yourId", "Your customer ID"),
+        id: profile.publicId,
+      });
+      if (!blob) throw new Error("render failed");
+      const file = new File([blob], `pay-${profile.publicId}.png`, { type: "image/png" });
+      if (mode === "share" && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: t("transfer.receive.shareTitle", "Send me money"), text: link }).catch(() => undefined);
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = file.name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      toast({ variant: "destructive", title: t("transfer.receive.shareImageFailed", "Couldn't create the QR image") });
+    } finally {
+      setSharingImage(false);
     }
   };
 
@@ -503,6 +577,8 @@ function ReceivePanel() {
         <div className="rounded-2xl border border-border bg-white p-4 shadow-soft">
           <QRCodeSVG value={link} size={208} level="M" marginSize={0} />
         </div>
+        {/* High-res source for the shared/downloaded image — never shown. */}
+        <QRCodeCanvas ref={qrCanvasRef} value={link} size={560} level="M" marginSize={2} className="hidden" aria-hidden />
         <div className="w-full max-w-xs space-y-1">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("transfer.receive.yourId", "Your customer ID")}</p>
           <div className="flex items-center justify-center gap-2">
@@ -511,6 +587,20 @@ function ReceivePanel() {
               <Copy className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+        <div className="grid w-full max-w-xs grid-cols-[1fr_auto] gap-2">
+          <Button onClick={() => shareQrImage("share")} loading={sharingImage}>
+            {!sharingImage && <Share2 className="h-4 w-4" />} {t("transfer.receive.shareQr", "Share QR code")}
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={t("transfer.receive.downloadQr", "Download QR code")}
+            onClick={() => shareQrImage("download")}
+            disabled={sharingImage}
+          >
+            <Download className="h-4 w-4" />
+          </Button>
         </div>
         <div className="flex w-full max-w-xs gap-2">
           <Button variant="outline" className="flex-1" onClick={() => copy(link, t("transfer.receive.linkLabel", "Payment link"))}>
@@ -522,10 +612,13 @@ function ReceivePanel() {
               className="flex-1"
               onClick={() => navigator.share({ title: t("transfer.receive.shareTitle", "Send me money"), url: link }).catch(() => undefined)}
             >
-              <Share2 className="h-4 w-4" /> {t("transfer.receive.share", "Share")}
+              <Link2 className="h-4 w-4" /> {t("transfer.receive.shareLink", "Share link")}
             </Button>
           )}
         </div>
+        <p className="max-w-xs text-xs text-muted-foreground">
+          {t("transfer.receive.linkHint", "Anyone can scan this with their phone camera — they'll be asked to log in or sign up, then taken straight to paying you.")}
+        </p>
         <p className="max-w-xs text-xs text-muted-foreground">
           {profile.phoneHint
             ? t("transfer.receive.alsoFindable", "People can also find you by your email or your phone number ending {{hint}}.", { hint: profile.phoneHint.replace("•••• ", "") })

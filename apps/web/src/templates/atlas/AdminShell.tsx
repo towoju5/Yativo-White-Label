@@ -42,7 +42,8 @@ const items: NavItem[] = [
   { to: "/admin/payouts", label: "Payouts", icon: Send },
   { to: "/admin/profit", label: "Platform profit", icon: TrendingUp },
   { to: "/admin/cards", label: "Virtual Cards", icon: CreditCard },
-  { to: "/admin/business-spend-cards", label: "Business Cards", icon: CreditCard },
+  // Business Cards hidden for now — Yativo's updated flow differs; page/API code kept intact for re-enabling.
+  // { to: "/admin/business-spend-cards", label: "Business Cards", icon: CreditCard },
   { to: "/admin/crypto", label: "Crypto wallets", icon: Coins },
   { to: "/admin/virtual-accounts", label: "Virtual accounts", icon: Landmark },
   { to: "/admin/team", label: "Team", icon: UserPlus },

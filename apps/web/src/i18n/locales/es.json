@@ -647,11 +647,10 @@
     "takePhoto": "Tomar foto"
   },
   "kycWizard": {
-    "backToDashboard": "Volver al panel",
-    "pendingDescription": "Hemos recibido tus datos y los estamos revisando. Te avisaremos en cuanto se tome una decisión.",
-    "pendingHeading": "Verificación pendiente",
-    "verifiedDescription": "Tu identidad ha sido verificada. Tienes acceso completo a envíos, tarjetas y cuentas virtuales.",
-    "verifiedHeading": "Estás verificado"
+    "submittedHeading": "Datos enviados",
+    "submittedDescription": "Cada servicio se aprueba por separado. {{approved}} de {{total}} aprobados hasta ahora; consulta Perfil y KYC para más detalles.",
+    "submittedDescriptionNoCount": "Cada servicio se aprueba por separado; consulta Perfil y KYC para ver el estado de cada uno.",
+    "viewEndorsements": "Ver avales"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Verificación de identidad",
     "restartVerification": "Reiniciar verificación",
     "startVerification": "Iniciar verificación",
-    "statusApproved": "Estás verificado. Acceso completo a envíos, tarjetas y cuentas virtuales.",
     "statusNotStarted": "Requerido antes de poder enviar dinero, tener una cuenta virtual u obtener una tarjeta.",
-    "statusPending": "Hemos recibido tus datos y los estamos revisando — te avisaremos en cuanto se decida.",
     "statusRejected": "Tu último envío no fue aprobado — inicia uno nuevo abajo.",
     "subheading": "Gestiona los datos de tu identidad",
-    "typeLabel": "Tipo"
+    "typeLabel": "Tipo",
+    "statusSubmittedSummary": "{{approved}} de {{total}} servicios aprobados. Cada servicio se aprueba por separado: consulta los avales más abajo.",
+    "statusSubmitted": "Tus datos fueron enviados. Cada servicio se aprueba por separado: consulta los avales más abajo."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "ID de cliente",
       "linkLabel": "Enlace de pago",
       "scanToPay": "Escanea para enviarme dinero",
-      "share": "Compartir",
       "shareTitle": "Envíame dinero",
-      "yourId": "Tu ID de cliente"
+      "yourId": "Tu ID de cliente",
+      "shareImageFailed": "No se pudo crear la imagen del QR",
+      "shareQr": "Compartir código QR",
+      "downloadQr": "Descargar código QR",
+      "shareLink": "Compartir enlace",
+      "linkHint": "Cualquiera puede escanearlo con la cámara del teléfono: se le pedirá iniciar sesión o registrarse y luego irá directo a pagarte."
     },
     "recent": {
       "empty": "Aún no hay transferencias.",
@@ -1400,5 +1403,18 @@
     "title": "Billeteras",
     "walletAdded": "Billetera añadida",
     "walletLabel": "Billetera"
+  },
+  "endorsements": {
+    "notSubmitted": "No enviado",
+    "unavailable": "No se pudieron cargar los avales",
+    "progressTitle": "{{approved}} de {{total}} avales aprobados"
+  },
+  "payLink": {
+    "tagline": "Envía dinero en segundos",
+    "title": "Te enviaron un enlace de pago",
+    "description": "Inicia sesión o crea una cuenta gratuita para enviar dinero a esta persona. Volverás directamente al pago.",
+    "login": "Inicia sesión para pagar",
+    "signup": "Crear una cuenta",
+    "recipientId": "ID del destinatario {{id}}"
   }
 }

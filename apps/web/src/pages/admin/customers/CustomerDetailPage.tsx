@@ -196,7 +196,7 @@ export default function CustomerDetailPage() {
           <h1 className="font-heading text-2xl font-semibold tracking-tight">{customer.fullName ?? customer.businessName ?? customer.email}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{customer.email}</p>
           <div className="mt-2 flex gap-2">
-            <EndorsementProgressBadge customer={customer} prefix="KYC: " />
+            <EndorsementProgressBadge customer={customer} prefix="Endorsements: " />
             <Badge variant={customer.status === "ACTIVE" ? "success" : "destructive"}>{customer.status}</Badge>
             <Badge variant="outline">{customer.type}</Badge>
           </div>

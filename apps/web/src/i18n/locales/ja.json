@@ -647,11 +647,10 @@
     "takePhoto": "写真を撮る"
   },
   "kycWizard": {
-    "backToDashboard": "ダッシュボードに戻る",
-    "pendingDescription": "ご提出いただいた情報を確認しております。審査が完了次第ご連絡いたします。",
-    "pendingHeading": "本人確認 審査中",
-    "verifiedDescription": "本人確認が完了しました。送金、カード、バーチャルアカウントのすべての機能をご利用いただけます。",
-    "verifiedHeading": "本人確認が完了しました"
+    "submittedHeading": "情報を送信しました",
+    "submittedDescription": "サービスごとに個別に承認されます。現在 {{total}} 件中 {{approved}} 件承認済みです。詳細は「プロフィールとKYC」をご確認ください。",
+    "submittedDescriptionNoCount": "サービスごとに個別に承認されます。各状況は「プロフィールとKYC」でご確認ください。",
+    "viewEndorsements": "承認状況を見る"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "本人確認",
     "restartVerification": "本人確認をやり直す",
     "startVerification": "本人確認を開始",
-    "statusApproved": "本人確認が完了しました。送金、カード、バーチャルアカウントのすべての機能をご利用いただけます。",
     "statusNotStarted": "送金、バーチャルアカウントの保有、カードの発行には本人確認が必要です。",
-    "statusPending": "ご提出いただいた情報を確認しております — 審査が完了次第ご連絡いたします。",
     "statusRejected": "前回のご提出は承認されませんでした — 以下から新たに提出してください。",
     "subheading": "本人確認情報を管理する",
-    "typeLabel": "種類"
+    "typeLabel": "種類",
+    "statusSubmittedSummary": "{{total}} 件中 {{approved}} 件のサービスが承認済みです。サービスごとに個別に承認されます。下の「承認」をご確認ください。",
+    "statusSubmitted": "情報は送信済みです。サービスごとに個別に承認されます。下の「承認」をご確認ください。"
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "顧客ID",
       "linkLabel": "支払いリンク",
       "scanToPay": "スキャンして私に送金",
-      "share": "共有",
       "shareTitle": "送金をお願いします",
-      "yourId": "あなたの顧客ID"
+      "yourId": "あなたの顧客ID",
+      "shareImageFailed": "QR画像を作成できませんでした",
+      "shareQr": "QRコードを共有",
+      "downloadQr": "QRコードをダウンロード",
+      "shareLink": "リンクを共有",
+      "linkHint": "スマートフォンのカメラで誰でもスキャンできます。ログインまたは登録後、そのままあなたへの支払いに進みます。"
     },
     "recent": {
       "empty": "まだ送金はありません。",
@@ -1400,5 +1403,18 @@
     "title": "ウォレット",
     "walletAdded": "ウォレットを追加しました",
     "walletLabel": "ウォレット"
+  },
+  "endorsements": {
+    "notSubmitted": "未提出",
+    "unavailable": "承認状況を読み込めませんでした",
+    "progressTitle": "{{total}} 件中 {{approved}} 件承認済み"
+  },
+  "payLink": {
+    "tagline": "数秒で送金",
+    "title": "支払いリンクが届きました",
+    "description": "この方に送金するには、ログインするか無料アカウントを作成してください。完了後、そのまま支払い画面に戻ります。",
+    "login": "ログインして支払う",
+    "signup": "アカウントを作成",
+    "recipientId": "受取人ID {{id}}"
   }
 }

@@ -647,11 +647,10 @@
     "takePhoto": "Fotoğraf çek"
   },
   "kycWizard": {
-    "backToDashboard": "Panele dön",
-    "pendingDescription": "Bilgilerinizi aldık ve inceliyoruz. Bir karar verildiğinde sizi bilgilendireceğiz.",
-    "pendingHeading": "Doğrulama beklemede",
-    "verifiedDescription": "Kimliğiniz doğrulandı. Para gönderme, kartlar ve sanal hesaplara tam erişiminiz var.",
-    "verifiedHeading": "Doğrulandınız"
+    "submittedHeading": "Bilgiler gönderildi",
+    "submittedDescription": "Her hizmet ayrı onaylanır. Şu ana kadar {{total}} hizmetten {{approved}} tanesi onaylandı — ayrıntılar için Profil ve KYC'ye bakın.",
+    "submittedDescriptionNoCount": "Her hizmet ayrı onaylanır — her birinin durumu için Profil ve KYC'ye bakın.",
+    "viewEndorsements": "Onayları görüntüle"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Kimlik doğrulama",
     "restartVerification": "Doğrulamayı yeniden başlat",
     "startVerification": "Doğrulamayı başlat",
-    "statusApproved": "Doğrulandınız. Para gönderme, kartlar ve sanal hesaplara tam erişiminiz var.",
     "statusNotStarted": "Para gönderebilmeniz, sanal hesap tutabilmeniz veya kart alabilmeniz için gereklidir.",
-    "statusPending": "Bilgilerinizi aldık ve inceliyoruz — karar verildiğinde sizi bilgilendireceğiz.",
     "statusRejected": "Son başvurunuz onaylanmadı — aşağıdan yeni bir başvuru başlatın.",
     "subheading": "Kimlik bilgilerinizi yönetin",
-    "typeLabel": "Tür"
+    "typeLabel": "Tür",
+    "statusSubmittedSummary": "{{total}} hizmetten {{approved}} tanesi onaylandı. Her hizmet ayrı onaylanır — aşağıdaki Onaylar bölümüne bakın.",
+    "statusSubmitted": "Bilgileriniz gönderildi. Her hizmet ayrı onaylanır — aşağıdaki Onaylar bölümüne bakın."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "Müşteri kimliği",
       "linkLabel": "Ödeme bağlantısı",
       "scanToPay": "Bana para göndermek için tarayın",
-      "share": "Paylaş",
       "shareTitle": "Bana para gönder",
-      "yourId": "Müşteri kimliğiniz"
+      "yourId": "Müşteri kimliğiniz",
+      "shareImageFailed": "QR görseli oluşturulamadı",
+      "shareQr": "QR kodunu paylaş",
+      "downloadQr": "QR kodunu indir",
+      "shareLink": "Bağlantıyı paylaş",
+      "linkHint": "Herkes telefon kamerasıyla tarayabilir — giriş yapması veya kaydolması istenir, ardından doğrudan size ödeme ekranına gider."
     },
     "recent": {
       "empty": "Henüz transfer yok.",
@@ -1400,5 +1403,18 @@
     "title": "Cüzdanlar",
     "walletAdded": "Cüzdan eklendi",
     "walletLabel": "Cüzdan"
+  },
+  "endorsements": {
+    "notSubmitted": "Gönderilmedi",
+    "unavailable": "Onaylar yüklenemedi",
+    "progressTitle": "{{total}} onaydan {{approved}} tanesi verildi"
+  },
+  "payLink": {
+    "tagline": "Saniyeler içinde para gönderin",
+    "title": "Size bir ödeme bağlantısı gönderildi",
+    "description": "Bu kişiye para göndermek için giriş yapın veya ücretsiz hesap oluşturun. Ardından doğrudan ödemeye döneceksiniz.",
+    "login": "Ödemek için giriş yap",
+    "signup": "Hesap oluştur",
+    "recipientId": "Alıcı kimliği {{id}}"
   }
 }

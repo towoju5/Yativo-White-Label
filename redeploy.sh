@@ -68,6 +68,12 @@ log "Applying pending database migrations…"
 (cd apps/api && npx prisma migrate deploy && npx prisma generate)
 ok "Database schema up to date"
 
+log "Checking the web app's API URL…"
+# Vite bakes VITE_API_BASE_URL into the bundle at build time; without it the frontend silently
+# points every visitor at localhost. Creates apps/web/.env.production from this instance's Nginx
+# config if it's missing — never overwrites an existing value.
+./scripts/ensure-web-env.sh
+
 log "Building all packages (shared-types, yativo-sdk, api, web)…"
 pnpm build
 ok "Build finished"

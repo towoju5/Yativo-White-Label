@@ -29,12 +29,13 @@ function toRecipientDto(c: Party) {
   return { publicId: c.publicId, displayName: displayNameOf(c), type: c.type };
 }
 
-/** Normalises a typed/scanned id: accepts a bare id ("ab12 cd34 ef"), or a scanned receive-QR link (".../portal/transfer?to=AB12CD34EF"). */
+/** Normalises a typed/scanned id: accepts a bare id ("ab12 cd34 ef"), a scanned receive-QR payment link (".../pay/AB12CD34EF"), or the older ".../portal/transfer?to=AB12CD34EF" form. */
 export function normalizePublicId(raw: string): string {
   const value = raw.trim();
   try {
     const url = new URL(value);
-    const to = url.searchParams.get("to");
+    const fromPath = url.pathname.match(/\/pay\/([^/]+)\/?$/)?.[1];
+    const to = fromPath ? decodeURIComponent(fromPath) : url.searchParams.get("to");
     if (to) return to.replace(/[\s-]/g, "").toUpperCase();
   } catch {
     // not a URL — a plain id

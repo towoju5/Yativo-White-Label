@@ -11,6 +11,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError, portalApi } from "@/lib/api-client";
+import { takePostAuthRedirect } from "@/lib/postAuthRedirect";
 
 /**
  * Reached only for an account imported from Yativo that signed in via magic link and hasn't
@@ -43,7 +44,7 @@ export default function SetupPasswordPage() {
     try {
       await portalApi.post("/portal/auth/setup-password", { newPassword });
       await refreshUser();
-      navigate("/portal", { replace: true });
+      navigate(takePostAuthRedirect(), { replace: true });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("setupPassword.genericError", "Couldn't set your password."));
     } finally {

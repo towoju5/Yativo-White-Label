@@ -647,11 +647,10 @@
     "takePhoto": "Foto maken"
   },
   "kycWizard": {
-    "backToDashboard": "Terug naar dashboard",
-    "pendingDescription": "We hebben uw gegevens ontvangen en beoordelen ze. We laten het u weten zodra er een beslissing is genomen.",
-    "pendingHeading": "Verificatie in behandeling",
-    "verifiedDescription": "Uw identiteit is geverifieerd. U heeft volledige toegang tot geld versturen, kaarten en virtuele rekeningen.",
-    "verifiedHeading": "U bent geverifieerd"
+    "submittedHeading": "Gegevens ingediend",
+    "submittedDescription": "Elke dienst wordt apart goedgekeurd. Tot nu toe {{approved}} van {{total}} goedgekeurd — zie Profiel & KYC voor details.",
+    "submittedDescriptionNoCount": "Elke dienst wordt apart goedgekeurd — zie Profiel & KYC voor de status van elke dienst.",
+    "viewEndorsements": "Goedkeuringen bekijken"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Identiteitsverificatie",
     "restartVerification": "Verificatie opnieuw starten",
     "startVerification": "Verificatie starten",
-    "statusApproved": "U bent geverifieerd. Volledige toegang tot geld versturen, kaarten en virtuele rekeningen.",
     "statusNotStarted": "Vereist voordat u geld kunt versturen, een virtuele rekening kunt aanhouden of een kaart kunt aanvragen.",
-    "statusPending": "We hebben uw gegevens ontvangen en beoordelen ze — we laten het u weten zodra er een beslissing is genomen.",
     "statusRejected": "Uw laatste aanvraag is niet goedgekeurd — start hieronder een nieuwe.",
     "subheading": "Beheer uw identiteitsgegevens",
-    "typeLabel": "Type"
+    "typeLabel": "Type",
+    "statusSubmittedSummary": "{{approved}} van {{total}} diensten goedgekeurd. Elke dienst wordt apart goedgekeurd — zie Goedkeuringen hieronder.",
+    "statusSubmitted": "Je gegevens zijn ingediend. Elke dienst wordt apart goedgekeurd — zie Goedkeuringen hieronder."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "Klant-ID",
       "linkLabel": "Betaallink",
       "scanToPay": "Scan om mij geld te sturen",
-      "share": "Delen",
       "shareTitle": "Stuur mij geld",
-      "yourId": "Jouw klant-ID"
+      "yourId": "Jouw klant-ID",
+      "shareImageFailed": "Kan de QR-afbeelding niet maken",
+      "shareQr": "QR-code delen",
+      "downloadQr": "QR-code downloaden",
+      "shareLink": "Link delen",
+      "linkHint": "Iedereen kan deze scannen met de camera van zijn telefoon — na inloggen of aanmelden gaat hij direct naar de betaling aan jou."
     },
     "recent": {
       "empty": "Nog geen overboekingen.",
@@ -1400,5 +1403,18 @@
     "title": "Wallets",
     "walletAdded": "Wallet toegevoegd",
     "walletLabel": "Wallet"
+  },
+  "endorsements": {
+    "notSubmitted": "Niet ingediend",
+    "unavailable": "Goedkeuringen konden niet worden geladen",
+    "progressTitle": "{{approved}} van {{total}} goedkeuringen verleend"
+  },
+  "payLink": {
+    "tagline": "Stuur geld in enkele seconden",
+    "title": "Je hebt een betaallink ontvangen",
+    "description": "Log in of maak een gratis account aan om deze persoon geld te sturen. Daarna ga je direct terug naar de betaling.",
+    "login": "Inloggen om te betalen",
+    "signup": "Account aanmaken",
+    "recipientId": "Ontvanger-ID {{id}}"
   }
 }

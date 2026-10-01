@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError, publicApi } from "@/lib/api-client";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { takePostAuthRedirect } from "@/lib/postAuthRedirect";
 
 export default function PortalLoginPage() {
   const { t } = useTranslation();
@@ -34,7 +35,6 @@ export default function PortalLoginPage() {
     throwOnError: false,
   });
   const navigate = useNavigate();
-  const location = useLocation();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [passkeySubmitting, setPasskeySubmitting] = useState(false);
@@ -60,8 +60,7 @@ export default function PortalLoginPage() {
   } = useForm<PortalLoginInput>({ resolver: zodResolver(portalLoginSchema) });
 
   if (!authLoading && isAuthenticated) {
-    const from = (location.state as { from?: string })?.from ?? "/portal";
-    return <Navigate to={from} replace />;
+    return <Navigate to={takePostAuthRedirect()} replace />;
   }
 
   const onSubmit = async (values: PortalLoginInput) => {
@@ -81,7 +80,7 @@ export default function PortalLoginPage() {
         setChallengeToken(result.challengeToken);
         return;
       }
-      navigate("/portal", { replace: true });
+      navigate(takePostAuthRedirect(), { replace: true });
     } catch (e) {
       if (e instanceof ApiError && e.body && typeof e.body === "object" && (e.body as { code?: string }).code === "EMAIL_NOT_VERIFIED") {
         setNeedsEmailVerification(true);
@@ -109,7 +108,7 @@ export default function PortalLoginPage() {
     setPasskeySubmitting(true);
     try {
       await loginWithPasskey();
-      navigate("/portal", { replace: true });
+      navigate(takePostAuthRedirect(), { replace: true });
     } catch (e) {
       // A cancelled/timed-out browser prompt throws a plain DOMException, not an ApiError.
       setError(e instanceof ApiError ? e.message : t("login.passkeyError", "Couldn't sign in with that passkey."));
@@ -128,7 +127,7 @@ export default function PortalLoginPage() {
       } else {
         await verifyTwoFactor(challengeToken, code);
       }
-      navigate("/portal", { replace: true });
+      navigate(takePostAuthRedirect(), { replace: true });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("login.invalidCodeError", "Invalid code. Please try again."));
     } finally {

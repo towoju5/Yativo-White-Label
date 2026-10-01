@@ -32,8 +32,9 @@ export function NovaPortalShell({ children }: { children: ReactNode }) {
       items: [
         { to: "/portal/beneficiaries", label: t("nav.beneficiaries", "Beneficiaries"), icon: Users },
         { to: "/portal/cards", label: t("nav.cards", "Virtual Cards"), icon: CreditCard },
-        { to: "/portal/business-spend-cards", label: t("nav.businessSpendCards", "Business Cards"), icon: CreditCard },
-        { to: "/portal/profile", label: t("nav.profileKyc", "Profile & KYC"), icon: UserCheck, showDot: user?.kycStatus !== "APPROVED" },
+        // Business Cards hidden for now — Yativo's updated flow differs; page/API code kept intact for re-enabling.
+        // { to: "/portal/business-spend-cards", label: t("nav.businessSpendCards", "Business Cards"), icon: CreditCard },
+        { to: "/portal/profile", label: t("nav.profileKyc", "Profile & KYC"), icon: UserCheck, showDot: user?.kycStatus === "NOT_STARTED" || user?.kycStatus === "REJECTED" },
         { to: "/portal/support", label: t("nav.support", "Support"), icon: LifeBuoy },
         ...(canManageTeam ? [{ to: "/portal/team", label: t("nav.team", "Team"), icon: UserCog }] : []),
         { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },

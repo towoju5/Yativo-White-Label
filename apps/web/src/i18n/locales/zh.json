@@ -647,11 +647,10 @@
     "takePhoto": "拍照"
   },
   "kycWizard": {
-    "backToDashboard": "返回仪表盘",
-    "pendingDescription": "我们已收到您的信息，正在审核中。审核结果确定后将通知您。",
-    "pendingHeading": "认证审核中",
-    "verifiedDescription": "您的身份已通过验证。您现在可以使用转账、卡片和虚拟账户的全部功能。",
-    "verifiedHeading": "认证已通过"
+    "submittedHeading": "资料已提交",
+    "submittedDescription": "每项服务单独审核。目前已通过 {{approved}}/{{total}} 项——详见“资料与 KYC”。",
+    "submittedDescriptionNoCount": "每项服务单独审核——请在“资料与 KYC”中查看各项状态。",
+    "viewEndorsements": "查看认证"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "身份验证",
     "restartVerification": "重新开始验证",
     "startVerification": "开始验证",
-    "statusApproved": "您已通过身份验证，可使用转账、卡片与虚拟账户的全部功能。",
     "statusNotStarted": "在转账、开通虚拟账户或申请卡片之前，需先完成身份验证。",
-    "statusPending": "我们已收到您的信息，正在审核中——审核结果确定后将通知您。",
     "statusRejected": "您上一次提交的认证未获通过——请在下方重新提交。",
     "subheading": "管理您的身份信息",
-    "typeLabel": "类型"
+    "typeLabel": "类型",
+    "statusSubmittedSummary": "已通过 {{approved}}/{{total}} 项服务。每项服务单独审核——详见下方“认证”。",
+    "statusSubmitted": "你的资料已提交。每项服务单独审核——详见下方“认证”。"
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "客户 ID",
       "linkLabel": "收款链接",
       "scanToPay": "扫码向我转账",
-      "share": "分享",
       "shareTitle": "给我转账",
-      "yourId": "你的客户 ID"
+      "yourId": "你的客户 ID",
+      "shareImageFailed": "无法生成二维码图片",
+      "shareQr": "分享二维码",
+      "downloadQr": "下载二维码",
+      "shareLink": "分享链接",
+      "linkHint": "任何人都可以用手机相机扫描——登录或注册后即可直接向你付款。"
     },
     "recent": {
       "empty": "暂无转账记录。",
@@ -1400,5 +1403,18 @@
     "title": "钱包",
     "walletAdded": "钱包已添加",
     "walletLabel": "钱包"
+  },
+  "endorsements": {
+    "notSubmitted": "未提交",
+    "unavailable": "无法加载认证状态",
+    "progressTitle": "已通过 {{approved}}/{{total}} 项认证"
+  },
+  "payLink": {
+    "tagline": "几秒钟完成转账",
+    "title": "你收到了一个付款链接",
+    "description": "登录或免费注册账户即可向此人转账，完成后将直接返回付款页面。",
+    "login": "登录并付款",
+    "signup": "创建账户",
+    "recipientId": "收款人 ID {{id}}"
   }
 }

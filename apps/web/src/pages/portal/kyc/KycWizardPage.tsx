@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import type { KycCountry } from "@white-label/shared-types";
+import type { CustomerEndorsement, KycCountry } from "@white-label/shared-types";
 import { CheckCircle2, Clock, PencilLine, ShieldCheck } from "lucide-react";
 import { portalApi } from "@/lib/api-client";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { Button } from "@/components/ui/button";
+import { countEndorsements } from "@/components/endorsements/EndorsementProgressBadge";
 import IndividualKycWizard from "./IndividualKycWizard";
 import BusinessKycWizard from "./BusinessKycWizard";
 
@@ -25,39 +26,37 @@ export default function KycWizardPage() {
   });
 
   const status = kycQuery.data?.kycStatus ?? user?.kycStatus;
+  const endorsementsQuery = useQuery({
+    queryKey: ["portal", "kyc", "endorsements"],
+    queryFn: () => portalApi.get<CustomerEndorsement[]>("/portal/kyc/endorsements"),
+    enabled: status === "PENDING" || status === "APPROVED",
+    retry: false,
+  });
   // ?mode=update — correcting an already-submitted KYC (PATCH) rather than a first submission.
   // Only meaningful once something has been submitted; otherwise it falls through to the normal wizard.
   const isUpdate = searchParams.get("mode") === "update" && !!status && status !== "NOT_STARTED";
 
   if (!isUpdate && (status === "PENDING" || status === "APPROVED")) {
+    // Submitted. There's no platform-level approval to report — each service is approved
+    // separately via its endorsement, so this shows that count rather than "verified"/"pending".
+    const counts = endorsementsQuery.data ? countEndorsements(endorsementsQuery.data) : null;
+    const allApproved = !!counts && counts.total > 0 && counts.approved === counts.total;
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-elevated">
-          {status === "APPROVED" ? (
-            <CheckCircle2 className="mx-auto mb-4 h-10 w-10 text-success" />
-          ) : (
-            <Clock className="mx-auto mb-4 h-10 w-10 text-warning" />
-          )}
-          <h1 className="font-heading text-xl font-semibold">
-            {status === "APPROVED" ? t("kycWizard.verifiedHeading", "You're verified") : t("kycWizard.pendingHeading", "Verification pending")}
-          </h1>
+          {allApproved ? <CheckCircle2 className="mx-auto mb-4 h-10 w-10 text-success" /> : <Clock className="mx-auto mb-4 h-10 w-10 text-warning" />}
+          <h1 className="font-heading text-xl font-semibold">{t("kycWizard.submittedHeading", "Details submitted")}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {status === "APPROVED"
-              ? t(
-                  "kycWizard.verifiedDescription",
-                  "Your identity has been verified. You have full access to sending, cards, and virtual accounts.",
-                )
-              : t(
-                  "kycWizard.pendingDescription",
-                  "We've received your details and are reviewing them. We'll notify you once a decision is made.",
-                )}
+            {counts
+              ? t("kycWizard.submittedDescription", "Each service is approved separately. {{approved}} of {{total}} approved so far — see Profile & KYC for details.", counts)
+              : t("kycWizard.submittedDescriptionNoCount", "Each service is approved separately — see Profile & KYC for each one's status.")}
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
             <Button variant="outline" onClick={() => navigate("/portal/verify?mode=update")}>
               <PencilLine className="mr-1.5 h-4 w-4" />
               {t("kycWizard.updateKyc", "Update KYC information")}
             </Button>
-            <Button onClick={() => navigate("/portal")}>{t("kycWizard.backToDashboard", "Back to dashboard")}</Button>
+            <Button onClick={() => navigate("/portal/profile")}>{t("kycWizard.viewEndorsements", "View endorsements")}</Button>
           </div>
         </div>
       </div>

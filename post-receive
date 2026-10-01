@@ -66,11 +66,17 @@ while read -r _oldrev newrev refname; do
 
   cd "$WORK_TREE"
 
-  if [ ! -f apps/api/.env ] || [ ! -f apps/web/.env.production ]; then
-    echo "!!  apps/api/.env or apps/web/.env.production is missing."
+  if [ ! -f apps/api/.env ]; then
+    echo "!!  apps/api/.env is missing."
     echo "!!  This looks like a first-ever deploy to this box — run deploy.sh once"
-    echo "!!  first (it generates these with fresh secrets) or copy them over"
+    echo "!!  first (it generates it with fresh secrets) or copy it over"
     echo "!!  manually, then push again."
+    continue
+  fi
+
+  # Derived from this instance's Nginx config when missing — see scripts/ensure-web-env.sh.
+  if ! ./scripts/ensure-web-env.sh; then
+    echo "!!  Couldn't determine the web app's API URL — fix the message above, then push again."
     continue
   fi
 

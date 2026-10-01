@@ -647,11 +647,10 @@
     "takePhoto": "사진 촬영"
   },
   "kycWizard": {
-    "backToDashboard": "대시보드로 돌아가기",
-    "pendingDescription": "제출하신 정보를 받았으며 검토 중입니다. 결정이 나면 알려드리겠습니다.",
-    "pendingHeading": "인증 심사 중",
-    "verifiedDescription": "신원 인증이 완료되었습니다. 송금, 카드, 가상계좌 기능을 모두 이용하실 수 있습니다.",
-    "verifiedHeading": "인증이 완료되었습니다"
+    "submittedHeading": "정보 제출 완료",
+    "submittedDescription": "서비스마다 따로 승인됩니다. 지금까지 {{total}}개 중 {{approved}}개 승인 — 자세한 내용은 프로필 및 KYC에서 확인하세요.",
+    "submittedDescriptionNoCount": "서비스마다 따로 승인됩니다 — 각 상태는 프로필 및 KYC에서 확인하세요.",
+    "viewEndorsements": "승인 현황 보기"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "신원 인증",
     "restartVerification": "인증 다시 시작",
     "startVerification": "인증 시작",
-    "statusApproved": "인증이 완료되었습니다. 송금, 카드, 가상계좌 기능을 모두 이용하실 수 있습니다.",
     "statusNotStarted": "송금, 가상계좌 개설 또는 카드 발급 전에 필요합니다.",
-    "statusPending": "제출하신 정보를 받았으며 검토 중입니다 — 결정이 나면 알려드리겠습니다.",
     "statusRejected": "지난 제출 내용이 승인되지 않았습니다 — 아래에서 새로 시작해 주세요.",
     "subheading": "신원 정보를 관리하세요",
-    "typeLabel": "유형"
+    "typeLabel": "유형",
+    "statusSubmittedSummary": "{{total}}개 서비스 중 {{approved}}개가 승인되었습니다. 서비스마다 따로 승인됩니다 — 아래 승인 항목을 확인하세요.",
+    "statusSubmitted": "정보가 제출되었습니다. 서비스마다 따로 승인됩니다 — 아래 승인 항목을 확인하세요."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "고객 ID",
       "linkLabel": "결제 링크",
       "scanToPay": "스캔해서 나에게 송금하기",
-      "share": "공유",
       "shareTitle": "나에게 송금해 주세요",
-      "yourId": "내 고객 ID"
+      "yourId": "내 고객 ID",
+      "shareImageFailed": "QR 이미지를 만들지 못했습니다",
+      "shareQr": "QR 코드 공유",
+      "downloadQr": "QR 코드 다운로드",
+      "shareLink": "링크 공유",
+      "linkHint": "누구나 휴대폰 카메라로 스캔할 수 있습니다 — 로그인 또는 가입 후 바로 나에게 결제하는 화면으로 이동합니다."
     },
     "recent": {
       "empty": "아직 송금 내역이 없습니다.",
@@ -1400,5 +1403,18 @@
     "title": "지갑",
     "walletAdded": "지갑이 추가되었습니다",
     "walletLabel": "지갑"
+  },
+  "endorsements": {
+    "notSubmitted": "미제출",
+    "unavailable": "승인 정보를 불러오지 못했습니다",
+    "progressTitle": "{{total}}개 중 {{approved}}개 승인됨"
+  },
+  "payLink": {
+    "tagline": "몇 초 만에 송금하세요",
+    "title": "결제 링크를 받았습니다",
+    "description": "이 사람에게 송금하려면 로그인하거나 무료 계정을 만드세요. 완료되면 바로 결제 화면으로 돌아갑니다.",
+    "login": "로그인하고 결제하기",
+    "signup": "계정 만들기",
+    "recipientId": "받는 사람 ID {{id}}"
   }
 }

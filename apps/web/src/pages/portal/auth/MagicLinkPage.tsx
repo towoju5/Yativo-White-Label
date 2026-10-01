@@ -9,6 +9,7 @@ import { AuthShell } from "@/components/auth/AuthShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError } from "@/lib/api-client";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { takePostAuthRedirect } from "@/lib/postAuthRedirect";
 
 /** Reached from the magic-link sign-in email — redeems the token into a real session (see POST /portal/auth/magic-link/verify) and drops the customer straight into the portal. */
 export default function MagicLinkPage() {
@@ -30,7 +31,7 @@ export default function MagicLinkPage() {
     (async () => {
       try {
         const requiresPasswordSetup = await verifyMagicLink(token);
-        navigate(requiresPasswordSetup ? "/portal/setup-password" : "/portal", { replace: true });
+        navigate(requiresPasswordSetup ? "/portal/setup-password" : takePostAuthRedirect(), { replace: true });
       } catch (e) {
         setStatus("error");
         setError(e instanceof ApiError ? e.message : t("magicLink.genericError", "Couldn't sign you in with this link."));

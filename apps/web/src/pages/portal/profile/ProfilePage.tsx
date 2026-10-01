@@ -7,27 +7,13 @@ import { portalApi, ApiError } from "@/lib/api-client";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { EndorsementsTable } from "@/components/endorsements/EndorsementsTable";
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-  APPROVED: "success",
-  PENDING: "warning",
-  REJECTED: "destructive",
-  NOT_STARTED: "secondary",
-};
+import { EndorsementCountBadge, countEndorsements } from "@/components/endorsements/EndorsementProgressBadge";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
   const { user } = useCustomerAuth();
   const navigate = useNavigate();
-
-  const STATUS_COPY: Record<string, string> = {
-    NOT_STARTED: t("profile.statusNotStarted", "Required before you can send money, hold a virtual account, or get a card."),
-    PENDING: t("profile.statusPending", "We've received your details and are reviewing them — we'll notify you once it's decided."),
-    APPROVED: t("profile.statusApproved", "You're verified. Full access to sending, cards, and virtual accounts."),
-    REJECTED: t("profile.statusRejected", "Your last submission wasn't approved — start a new one below."),
-  };
 
   const kycQuery = useQuery({
     queryKey: ["portal", "kyc"],
@@ -47,6 +33,21 @@ export default function ProfilePage() {
     // network blip against this endpoint's live upstream call to Yativo.
     retry: (failureCount, error) => !(error instanceof ApiError && error.status === 409) && failureCount < 2,
   });
+  // 409 = not registered on Yativo yet, i.e. nothing submitted — nothing to count.
+  const notRegistered = endorsementsQuery.error instanceof ApiError && endorsementsQuery.error.status === 409;
+  const notSubmitted = status === "NOT_STARTED" || notRegistered;
+  const counts = endorsementsQuery.data ? countEndorsements(endorsementsQuery.data) : null;
+
+  // kycStatus only says whether details were submitted — there's no platform-level approval. What
+  // the customer can actually use is decided per service by their endorsements.
+  const description =
+    status === "NOT_STARTED"
+      ? t("profile.statusNotStarted", "Required before you can send money, hold a virtual account, or get a card.")
+      : status === "REJECTED"
+        ? t("profile.statusRejected", "Your last submission wasn't approved — start a new one below.")
+        : counts
+          ? t("profile.statusSubmittedSummary", "{{approved}} of {{total}} services approved. Each service is approved separately — see Endorsements below.", counts)
+          : t("profile.statusSubmitted", "Your details are submitted. Each service is approved separately — see Endorsements below.");
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -76,11 +77,14 @@ export default function ProfilePage() {
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-primary" />
             <CardTitle className="text-base">{t("profile.identityVerificationTitle", "Identity verification")}</CardTitle>
-            <Badge variant={STATUS_VARIANT[status] ?? "secondary"} className="ml-auto">
-              {status.replace("_", " ")}
-            </Badge>
+            <EndorsementCountBadge
+              endorsements={endorsementsQuery.data}
+              isLoading={endorsementsQuery.isLoading}
+              notSubmitted={notSubmitted}
+              className="ml-auto"
+            />
           </div>
-          <CardDescription>{STATUS_COPY[status] ?? STATUS_COPY.NOT_STARTED}</CardDescription>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
         {(canStart || canUpdate) && (
           <CardContent className="flex flex-wrap gap-2">

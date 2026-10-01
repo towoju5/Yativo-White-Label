@@ -647,11 +647,10 @@
     "takePhoto": "Scatta foto"
   },
   "kycWizard": {
-    "backToDashboard": "Torna alla dashboard",
-    "pendingDescription": "Abbiamo ricevuto i tuoi dati e li stiamo esaminando. Ti avviseremo non appena verrà presa una decisione.",
-    "pendingHeading": "Verifica in corso",
-    "verifiedDescription": "La tua identità è stata verificata. Hai accesso completo a invii di denaro, carte e conti virtuali.",
-    "verifiedHeading": "Sei verificato"
+    "submittedHeading": "Dati inviati",
+    "submittedDescription": "Ogni servizio viene approvato separatamente. {{approved}} su {{total}} approvati finora: vedi Profilo e KYC per i dettagli.",
+    "submittedDescriptionNoCount": "Ogni servizio viene approvato separatamente: vedi Profilo e KYC per lo stato di ciascuno.",
+    "viewEndorsements": "Vedi approvazioni"
   },
   "landing": {
     "atlas": {
@@ -898,12 +897,12 @@
     "identityVerificationTitle": "Verifica dell'identità",
     "restartVerification": "Riavvia la verifica",
     "startVerification": "Avvia la verifica",
-    "statusApproved": "Sei verificato. Accesso completo a invii di denaro, carte e conti virtuali.",
     "statusNotStarted": "Richiesta prima di poter inviare denaro, detenere un conto virtuale o ottenere una carta.",
-    "statusPending": "Abbiamo ricevuto i tuoi dati e li stiamo esaminando — ti avviseremo non appena verrà presa una decisione.",
     "statusRejected": "Il tuo ultimo invio non è stato approvato — avviane uno nuovo qui sotto.",
     "subheading": "Gestisci i dati della tua identità",
-    "typeLabel": "Tipo"
+    "typeLabel": "Tipo",
+    "statusSubmittedSummary": "{{approved}} servizi su {{total}} approvati. Ogni servizio viene approvato separatamente: vedi le approvazioni qui sotto.",
+    "statusSubmitted": "I tuoi dati sono stati inviati. Ogni servizio viene approvato separatamente: vedi le approvazioni qui sotto."
   },
   "pwa": {
     "banner": {
@@ -1292,9 +1291,13 @@
       "idLabel": "ID cliente",
       "linkLabel": "Link di pagamento",
       "scanToPay": "Scansiona per inviarmi denaro",
-      "share": "Condividi",
       "shareTitle": "Inviami denaro",
-      "yourId": "Il tuo ID cliente"
+      "yourId": "Il tuo ID cliente",
+      "shareImageFailed": "Impossibile creare l'immagine del QR",
+      "shareQr": "Condividi codice QR",
+      "downloadQr": "Scarica codice QR",
+      "shareLink": "Condividi link",
+      "linkHint": "Chiunque può scansionarlo con la fotocamera del telefono: dovrà accedere o registrarsi e verrà portato direttamente al pagamento."
     },
     "recent": {
       "empty": "Ancora nessun trasferimento.",
@@ -1400,5 +1403,18 @@
     "title": "Wallet",
     "walletAdded": "Wallet aggiunto",
     "walletLabel": "Wallet"
+  },
+  "endorsements": {
+    "notSubmitted": "Non inviato",
+    "unavailable": "Impossibile caricare le approvazioni",
+    "progressTitle": "{{approved}} approvazioni su {{total}} concesse"
+  },
+  "payLink": {
+    "tagline": "Invia denaro in pochi secondi",
+    "title": "Hai ricevuto un link di pagamento",
+    "description": "Accedi o crea un account gratuito per inviare denaro a questa persona. Tornerai direttamente al pagamento.",
+    "login": "Accedi per pagare",
+    "signup": "Crea un account",
+    "recipientId": "ID destinatario {{id}}"
   }
 }
