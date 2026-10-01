@@ -13,17 +13,28 @@ function startOfMonth(now: Date): Date {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
-/** Sum of this customer's payouts in `currencyCode` since `since`, excluding reversed ones — pending payouts already count (the money's committed the moment the hold is posted, not just once Yativo confirms it). */
+/**
+ * Sum of this customer's outgoing money in `currencyCode` since `since`: payouts (excluding
+ * reversed ones — pending payouts already count, the money's committed the moment the hold is
+ * posted) plus internal transfers sent to other customers, which settle instantly. Both draw on
+ * the same limit, otherwise a limit could be bypassed by hopping funds through a second account.
+ */
 async function sumPayoutsSince(prisma: PrismaClient, customerId: string, currencyCode: string, since: Date): Promise<bigint> {
-  const payouts = await prisma.payout.findMany({
-    where: { customerId, currencyCode, createdAt: { gte: since }, transaction: { status: { not: "REVERSED" } } },
-    select: { amountMinor: true },
-  });
-  return payouts.reduce((sum, p) => sum + p.amountMinor, 0n);
+  const [payouts, transfers] = await Promise.all([
+    prisma.payout.aggregate({
+      where: { customerId, currencyCode, createdAt: { gte: since }, transaction: { status: { not: "REVERSED" } } },
+      _sum: { amountMinor: true },
+    }),
+    prisma.internalTransfer.aggregate({
+      where: { senderCustomerId: customerId, currencyCode, createdAt: { gte: since } },
+      _sum: { amountMinor: true },
+    }),
+  ]);
+  return (payouts._sum.amountMinor ?? 0n) + (transfers._sum.amountMinor ?? 0n);
 }
 
 /**
- * Throws if `amountMinor` would push this customer over their daily or monthly payout limit for
+ * Throws if `amountMinor` would push this customer over their daily or monthly sending limit (payouts + internal transfers) for
  * `currencyCode`. A customer's own CustomerLimits row (if any) overrides the platform default for
  * that currency; a currency with neither has no limit at all — this is opt-in, not a default cap
  * every deployment suddenly gets.
@@ -46,7 +57,7 @@ export async function checkPayoutLimit(prisma: PrismaClient, customerId: string,
   if (dailyLimit !== null && dailySum + amountMinor > dailyLimit) {
     const remaining = dailyLimit > dailySum ? dailyLimit - dailySum : 0n;
     throw new AppError(
-      `This payout would exceed your daily limit for ${currencyCode}. ${await formatMinorAmount(prisma, currencyCode, remaining)} ${currencyCode} remaining today.`,
+      `This would exceed your daily sending limit for ${currencyCode}. ${await formatMinorAmount(prisma, currencyCode, remaining)} ${currencyCode} remaining today.`,
       409,
       "DAILY_LIMIT_EXCEEDED",
     );
@@ -54,7 +65,7 @@ export async function checkPayoutLimit(prisma: PrismaClient, customerId: string,
   if (monthlyLimit !== null && monthlySum + amountMinor > monthlyLimit) {
     const remaining = monthlyLimit > monthlySum ? monthlyLimit - monthlySum : 0n;
     throw new AppError(
-      `This payout would exceed your monthly limit for ${currencyCode}. ${await formatMinorAmount(prisma, currencyCode, remaining)} ${currencyCode} remaining this month.`,
+      `This would exceed your monthly sending limit for ${currencyCode}. ${await formatMinorAmount(prisma, currencyCode, remaining)} ${currencyCode} remaining this month.`,
       409,
       "MONTHLY_LIMIT_EXCEEDED",
     );

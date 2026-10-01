@@ -47,7 +47,7 @@ export function PrimeTopbar({ sections, productName, userLabel, userSubLabel, on
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-border bg-background px-4 sm:px-6">
       <div className="flex items-center gap-3">
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="rounded-md p-1.5 hover:bg-muted lg:hidden">
+          <SheetTrigger className="rounded-md p-1.5 hover:bg-muted lg:hidden" aria-label={t("topbar.openMenu", "Open menu")} title={t("topbar.openMenu", "Open menu")}>
             <Menu className="h-5 w-5" />
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">

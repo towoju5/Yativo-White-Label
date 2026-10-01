@@ -44,7 +44,7 @@ export function MeridianTopbar({ sections, productName, onLogout }: TopbarProps)
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="rounded-lg p-2 hover:bg-muted">
+          <SheetTrigger className="rounded-lg p-2 hover:bg-muted" aria-label={t("topbar.openMenu", "Open menu")} title={t("topbar.openMenu", "Open menu")}>
             <Menu className="h-5 w-5" />
           </SheetTrigger>
           <SheetContent side="left" className="w-72 space-y-4 overflow-y-auto p-4">

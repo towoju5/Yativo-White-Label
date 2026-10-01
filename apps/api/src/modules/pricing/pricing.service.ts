@@ -81,7 +81,8 @@ async function resolveEffectiveRule(prisma: PrismaClient, service: PricingServic
 
 /**
  * The fee to actually charge for one transaction. `upstreamFeeMinor` is whatever Yativo itself
- * reported as its own cost for this transaction (0 when it reports none — most services don't).
+ * reported as its own cost for this transaction — omitted (undefined) for services where Yativo
+ * reports none at all, which is most of them.
  *
  * - STANDALONE (the default): the platform's own fee is charged, with any PERCENTAGE/COMBINED
  *   portion computed against the total transaction amount (`amountMinor`). upstreamFeeMinor is
@@ -89,16 +90,20 @@ async function resolveEffectiveRule(prisma: PrismaClient, service: PricingServic
  * - MARKUP: the platform's own fee is added on top of Yativo's fee, with any PERCENTAGE/COMBINED
  *   portion computed against Yativo's fee itself (`upstreamFeeMinor`), not the total amount —
  *   e.g. a 10% MARKUP fee on a $2 Yativo fee charges $0.20 on top, regardless of the deposit size.
+ *   When the caller has no upstream fee to report (`upstreamFeeMinor` omitted), MARKUP falls back
+ *   to STANDALONE — matching what Settings → Pricing tells the admin ("both modes behave the
+ *   same"). Previously this computed the percentage against 0n, so e.g. a 2% MARKUP rule on
+ *   CARD_CREATE silently charged nothing.
  */
 export async function getEffectiveFee(
   prisma: PrismaClient,
   service: PricingServiceType,
   customerId: string,
   amountMinor: bigint,
-  upstreamFeeMinor: bigint = 0n,
+  upstreamFeeMinor?: bigint,
 ): Promise<bigint> {
   const rule = await resolveEffectiveRule(prisma, service, customerId);
-  if (rule.pricingMode === "MARKUP") {
+  if (rule.pricingMode === "MARKUP" && upstreamFeeMinor !== undefined) {
     return upstreamFeeMinor + computeOwnFee(rule, upstreamFeeMinor);
   }
   return computeOwnFee(rule, amountMinor);

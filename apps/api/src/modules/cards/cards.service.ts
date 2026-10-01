@@ -13,6 +13,7 @@ import { getEffectiveFee } from "../pricing/pricing.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
 import { majorToMinor } from "../../lib/money.js";
+import type { EntryLine } from "../ledger/types.js";
 import logger from "../../lib/logger.js";
 
 const CARD_CURRENCY = "USD";
@@ -84,15 +85,20 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
   const suspense = await ensurePlatformAccount(prisma, "SUSPENSE_PENDING", CARD_CURRENCY);
 
   const cardId = randomUUID();
+  // Funding + the platform's creation fee are held together as one total — same pattern as
+  // createPortalPayout — so the fee can never end up uncovered (or silently skipped) once the
+  // card has already been issued on Yativo's side.
+  const totalMinor = amountMinor + feeMinor;
   const pendingTx = await postTransaction(prisma, {
     type: "CARD_TOPUP",
     status: "PENDING",
     idempotencyKey: `card-fund:${cardId}`,
     externalSource: "MANUAL",
     description: `Initial funding for new virtual card`,
+    metadata: { cardId, amountMinor: amountMinor.toString(), feeMinor: feeMinor.toString() },
     lines: [
-      { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
-      { accountId: suspense.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
+      { accountId: walletAccount.id, direction: "DEBIT", amountMinor: totalMinor, currencyCode: CARD_CURRENCY },
+      { accountId: suspense.id, direction: "CREDIT", amountMinor: totalMinor, currencyCode: CARD_CURRENCY },
     ],
     enforceNonNegativeOn: [walletAccount.id],
   });
@@ -109,27 +115,13 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
   await settlePendingTransaction(
     prisma,
     pendingTx.id,
-    [
-      { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
-      { accountId: settlement.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
-    ],
-    { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Virtual card funding settled` },
-  );
-
-  if (feeMinor > 0n) {
-    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", CARD_CURRENCY);
-    await postTransaction(prisma, {
-      type: "FEE",
-      status: "POSTED",
-      idempotencyKey: `fee:card-create:${cardId}`,
+    await splitSettlementLines(prisma, walletAccount.id, settlement.id, amountMinor, feeMinor),
+    {
+      type: "CARD_TOPUP",
       externalSource: "SYSTEM",
-      description: `Virtual card creation fee for ${cardId}`,
-      lines: [
-        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
-        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
-      ],
-    });
-  }
+      description: feeMinor > 0n ? `Virtual card funding + creation fee settled` : `Virtual card funding settled`,
+    },
+  );
 
   // Best-effort: last4 is purely a display nicety, so a failure here shouldn't fail card creation
   // — the card was already successfully issued and funded on Yativo's side at this point.
@@ -161,6 +153,25 @@ export async function issueCard(prisma: PrismaClient, customerId: string, amount
   });
   await sendNotificationEmail(prisma, "CARD_ISSUED", customerId, { last4: card.last4 });
   return cardToDto(card);
+}
+
+/** Releases a funding hold of amount+fee: the amount goes to Yativo settlement, the fee to platform revenue — one balanced posting. */
+async function splitSettlementLines(prisma: PrismaClient, walletAccountId: string, settlementAccountId: string, amountMinor: bigint, feeMinor: bigint) {
+  const lines: EntryLine[] = [
+    { accountId: walletAccountId, direction: "DEBIT", amountMinor: amountMinor + feeMinor, currencyCode: CARD_CURRENCY },
+    { accountId: settlementAccountId, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
+  ];
+  if (feeMinor > 0n) {
+    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", CARD_CURRENCY);
+    lines.push({ accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY });
+  }
+  return lines;
+}
+
+/** Preview of the platform fee for issuing (CARD_CREATE) or topping up (CARD_FUND) a card — same computation issueCard/topupCard charge. */
+export async function quoteCardFee(prisma: PrismaClient, customerId: string, action: "create" | "fund", amountMinor: bigint) {
+  const feeMinor = await getEffectiveFee(prisma, action === "create" ? "CARD_CREATE" : "CARD_FUND", customerId, amountMinor);
+  return { amountMinor: amountMinor.toString(), feeMinor: feeMinor.toString(), totalMinor: (amountMinor + feeMinor).toString(), currencyCode: CARD_CURRENCY };
 }
 
 async function findOwnedCard(prisma: PrismaClient, cardId: string, scopeCustomerId?: string): Promise<Card> {
@@ -236,15 +247,17 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
   const suspense = await ensurePlatformAccount(prisma, "SUSPENSE_PENDING", CARD_CURRENCY);
 
   const topupId = randomUUID();
+  const totalMinor = amountMinor + feeMinor;
   const pendingTx = await postTransaction(prisma, {
     type: "CARD_TOPUP",
     status: "PENDING",
     idempotencyKey: `card-topup:${topupId}`,
     externalSource: "MANUAL",
     description: `Top-up for virtual card ${card.id}`,
+    metadata: { cardId: card.id, amountMinor: amountMinor.toString(), feeMinor: feeMinor.toString() },
     lines: [
-      { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
-      { accountId: suspense.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
+      { accountId: walletAccount.id, direction: "DEBIT", amountMinor: totalMinor, currencyCode: CARD_CURRENCY },
+      { accountId: suspense.id, direction: "CREDIT", amountMinor: totalMinor, currencyCode: CARD_CURRENCY },
     ],
     enforceNonNegativeOn: [walletAccount.id],
   });
@@ -259,27 +272,13 @@ export async function topupCard(prisma: PrismaClient, cardId: string, amountMino
   await settlePendingTransaction(
     prisma,
     pendingTx.id,
-    [
-      { accountId: walletAccount.id, direction: "DEBIT", amountMinor, currencyCode: CARD_CURRENCY },
-      { accountId: settlement.id, direction: "CREDIT", amountMinor, currencyCode: CARD_CURRENCY },
-    ],
-    { type: "CARD_TOPUP", externalSource: "SYSTEM", description: `Virtual card top-up settled` },
-  );
-
-  if (feeMinor > 0n) {
-    const feeRevenue = await ensurePlatformAccount(prisma, "PLATFORM_FEE_REVENUE", CARD_CURRENCY);
-    await postTransaction(prisma, {
-      type: "FEE",
-      status: "POSTED",
-      idempotencyKey: `fee:card-topup:${topupId}`,
+    await splitSettlementLines(prisma, walletAccount.id, settlement.id, amountMinor, feeMinor),
+    {
+      type: "CARD_TOPUP",
       externalSource: "SYSTEM",
-      description: `Virtual card top-up fee for ${card.id}`,
-      lines: [
-        { accountId: walletAccount.id, direction: "DEBIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
-        { accountId: feeRevenue.id, direction: "CREDIT", amountMinor: feeMinor, currencyCode: CARD_CURRENCY },
-      ],
-    });
-  }
+      description: feeMinor > 0n ? `Virtual card top-up + fee settled` : `Virtual card top-up settled`,
+    },
+  );
 
   return cardToDto(card);
 }
@@ -313,7 +312,7 @@ export async function withdrawFromCard(prisma: PrismaClient, cardId: string, amo
 
   const upstreamFeeMinor = (() => {
     const parsed = parseYativoFeeString(result.feeAmount);
-    return parsed !== undefined ? majorToMinor(parsed, currency.decimals) : 0n;
+    return parsed !== undefined ? majorToMinor(parsed, currency.decimals) : undefined;
   })();
   const feeMinor = await getEffectiveFee(prisma, "CARD_WITHDRAW", card.customerId, amountMinor, upstreamFeeMinor);
   if (feeMinor > 0n) {

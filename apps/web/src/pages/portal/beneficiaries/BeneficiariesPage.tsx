@@ -463,6 +463,7 @@ export default function BeneficiariesPage() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label={t("beneficiaries.remove", "Remove beneficiary")}
                         onClick={(e) => {
                           e.stopPropagation();
                           setRemoving(b);
@@ -494,6 +495,7 @@ export default function BeneficiariesPage() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={t("beneficiaries.remove", "Remove beneficiary")}
                   className="shrink-0"
                   onClick={(e) => {
                     e.stopPropagation();

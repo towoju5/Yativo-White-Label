@@ -33,7 +33,7 @@ export function NovaTopbar({ sections, productName, right }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card/60 px-4 backdrop-blur-xl lg:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className="rounded-md p-2 hover:bg-muted">
+        <SheetTrigger className="rounded-md p-2 hover:bg-muted" aria-label={t("topbar.openMenu", "Open menu")} title={t("topbar.openMenu", "Open menu")}>
           <Menu className="h-5 w-5" />
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0">

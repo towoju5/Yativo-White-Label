@@ -368,7 +368,7 @@ function NativeDepositCard() {
                             <Copy className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="icon" asChild>
-                            <a href={result.depositUrl} target="_blank" rel="noreferrer" aria-label={t("deposit.dialog.openLinkAriaLabel", "Open link")}>
+                            <a href={result.depositUrl} target="_blank" rel="noreferrer" aria-label={t("deposit.dialog.openLinkAriaLabel", "Open link")} title={t("deposit.dialog.openLinkAriaLabel", "Open link")}>
                               <ExternalLink className="h-3.5 w-3.5" />
                             </a>
                           </Button>

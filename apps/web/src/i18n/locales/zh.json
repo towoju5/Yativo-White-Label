@@ -110,27 +110,34 @@
     "addedThisMonth": "本月充值",
     "airlinePayments": "航空公司付款",
     "balance": "余额 {{amount}}",
+    "balanceUnavailable": "余额不可用",
     "billingAddress": "账单地址",
     "cancel": "取消",
+    "cardBalance": "卡内余额",
     "cardEndingIn": "尾号为 {{last4}} 的卡片",
     "cardNumberLabel": "卡号",
     "cardholder": "持卡人",
     "confirmTerminate": "再次点击以确认——此操作无法撤销",
     "copyNumber": "复制卡号",
+    "creationFee": "开卡费",
     "cvv": "安全码 {{cvv}}",
     "emptyState": "暂无卡片。申请一张即可开始消费。",
     "exp": "有效期 {{expiry}}",
     "feeAmount": "手续费 {{amount}}",
     "freezeCard": "冻结卡片",
+    "hideDetails": "隐藏卡片信息",
     "hidesAutomatically": "自动隐藏",
+    "initialFunding": "初始充值",
     "initialFundingHelp": "最低 3 美元。将从您的美元钱包中扣除，同时收取开卡费和充值费。",
     "initialFundingLabel": "初始充值金额（美元）",
     "manage": "管理 →",
     "noTransactions": "暂无交易记录。",
     "program": "卡片项目",
+    "refreshBalance": "刷新余额",
     "requestCard": "申请卡片",
     "requestDialogTitle": "申请一张虚拟卡",
     "requesting": "申请中…",
+    "revealDetails": "显示卡号和 CVV",
     "spentThisMonth": "本月支出",
     "subtitle": "与您美元钱包关联的 Visa 虚拟卡",
     "terminateCard": "注销卡片",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "扣除手续费后，净额将存入您的钱包。"
     },
     "topUp": "充值",
+    "totalDebit": "从钱包扣除的总额",
     "transactionFallback": "交易",
     "transactions": "交易记录",
     "unfreezeCard": "解冻卡片",
@@ -244,6 +252,23 @@
       "recentActivity": "近期活动",
       "status": "状态",
       "wallets": "钱包"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "公司名称",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "关闭",
+      "cta": "给我发送演示",
+      "description": "生成一个包含示例数据的在线演示环境。我们会通过邮件发送链接——该环境完全隔离，并会在 6 小时后自动过期。",
+      "done": "完成",
+      "emailLabel": "工作邮箱",
+      "error": "暂时无法启动演示，请重试。",
+      "generating": "正在准备演示…",
+      "modalFine": "仅限沙盒数据——无需银行卡。",
+      "sentDescription": "我们已将演示链接和管理后台登录凭据发送至 {{email}}，稍后即可使用。",
+      "sentTitle": "请查收邮件",
+      "title": "试用平台"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "支持",
     "team": "团队",
     "transactions": "交易",
+    "transfer": "转账",
     "virtualAccounts": "虚拟账户",
     "wallets": "钱包",
     "whiteLabel": "白标平台"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "查看个人资料"
     },
+    "openMenu": "打开菜单",
     "prime": {
       "notifications": "通知",
       "switchToDarkMode": "切换到深色模式",
@@ -1221,6 +1248,90 @@
     "title": "交易记录",
     "to": "至",
     "type": "类型"
+  },
+  "transfer": {
+    "amount": "金额",
+    "available": "可用：{{amount}}",
+    "back": "返回",
+    "change": "更改",
+    "completeVerification": "完成验证",
+    "confirmSend": "转账 {{amount}}",
+    "continue": "继续",
+    "done": {
+      "fee": "手续费 {{fee}}",
+      "reference": "参考号 {{id}}",
+      "sendAnother": "再转一笔",
+      "sentTo": "已转给 {{name}}",
+      "viewHistory": "查看记录"
+    },
+    "fee": "手续费",
+    "find": "查找",
+    "findingRecipient": "正在查找收款人…",
+    "free": "免费",
+    "fromWallet": "付款钱包",
+    "instantNotice": "转账即时到账且无法撤回，请确认收款人无误。",
+    "insufficient": "余额不足",
+    "kycRequired": "完成身份验证后即可使用转账功能。",
+    "method": {
+      "email": "邮箱",
+      "emailHelp": "对方注册时使用的邮箱地址。",
+      "findBy": "按{{method}}查找",
+      "id": "客户 ID",
+      "idHelp": "对方“收款”页面上显示的 ID。",
+      "phone": "手机",
+      "phoneHelp": "对方手机号码的至少后 8 位。",
+      "qr": "扫码",
+      "qrTitle": "扫描收款人的二维码"
+    },
+    "note": "备注",
+    "notePlaceholder": "用途是什么？",
+    "optional": "可选",
+    "receive": {
+      "alsoFindable": "他人也可以通过你的邮箱或尾号为 {{hint}} 的手机号找到你。",
+      "alsoFindableEmail": "他人也可以通过你的邮箱地址找到你。",
+      "copyId": "复制客户 ID",
+      "copyLink": "复制链接",
+      "idLabel": "客户 ID",
+      "linkLabel": "收款链接",
+      "scanToPay": "扫码向我转账",
+      "share": "分享",
+      "shareTitle": "给我转账",
+      "yourId": "你的客户 ID"
+    },
+    "recent": {
+      "empty": "暂无转账记录。",
+      "received": "已收到",
+      "sent": "已转出",
+      "subtitle": "你转出和收到的款项",
+      "title": "最近转账"
+    },
+    "recentRecipients": "最近",
+    "scan": {
+      "hint": "将相机对准收款人的收款二维码。",
+      "imageUnreadable": "无法读取该图片。",
+      "noCamera": "相机不可用。请允许访问相机，或上传二维码照片。",
+      "noCodeInImage": "该图片中未找到二维码。",
+      "upload": "上传二维码图片"
+    },
+    "selectWallet": "选择",
+    "sendTo": "转给 {{name}}",
+    "subtitle": "即时向其他客户转账，或分享你的收款码来收款。",
+    "tabs": {
+      "receive": "收款",
+      "send": "转出"
+    },
+    "theyReceive": "对方收到",
+    "title": "转账",
+    "toast": {
+      "copied": "已复制{{label}}",
+      "copyFailed": "复制失败",
+      "lookupFailed": "找不到收款人",
+      "notFound": "未找到该客户",
+      "notFoundHelp": "请检查信息后重试。",
+      "sendFailed": "转账失败"
+    },
+    "total": "合计",
+    "totalDebit": "扣款总额"
   },
   "verifyEmail": {
     "backToLogin": "返回登录",

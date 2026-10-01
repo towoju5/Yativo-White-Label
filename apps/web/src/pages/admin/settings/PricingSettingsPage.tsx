@@ -10,7 +10,7 @@ import {
   type PricingMode,
   type UpdatePricingDefaultInput,
 } from "@white-label/shared-types";
-import { DollarSign, Info, Pencil } from "lucide-react";
+import { AlertTriangle, DollarSign, Info, Pencil } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ export const SERVICE_LABELS: Record<PricingService, string> = {
   BUSINESS_SPEND_CARD_SUSPEND: "Business Card — suspend",
   BUSINESS_SPEND_CARD_PIN_UPDATE: "Business Card — PIN update",
   BUSINESS_SPEND_CARD_LIMITS_UPDATE: "Business Card — limits update",
+  INTERNAL_TRANSFER: "Internal transfer (customer to customer)",
 };
 
 // Only PAYIN carries a fee number reported by Yativo itself (quoted at deposit-initiation time) —
@@ -46,6 +47,9 @@ export const SERVICE_LABELS: Record<PricingService, string> = {
 // payout.updated payload has no fee field at all), "markup" has nothing to add on top of, so it
 // behaves identically to standalone.
 const SERVICES_WITH_UPSTREAM_FEE: PricingService[] = ["PAYIN"];
+
+/** Yativo charges a fee for these but never reports it back — the admin has to mirror it here. */
+const UNREPORTED_UPSTREAM_FEE_SERVICES: PricingService[] = ["CARD_CREATE", "CARD_FUND"];
 
 export const FEE_TYPE_LABELS: Record<FeeType, string> = {
   FIXED: "Fixed",
@@ -137,6 +141,28 @@ export default function PricingSettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {(() => {
+        // Yativo charges the platform its own creation/top-up fees on virtual cards but exposes no
+        // endpoint that reports them — so unless they're set here, the platform silently absorbs them.
+        const unpriced = (data ?? []).filter(
+          (r) => UNREPORTED_UPSTREAM_FEE_SERVICES.includes(r.service) && r.fixedAmountMinor === "0" && r.percentageBps === 0,
+        );
+        if (unpriced.length === 0) return null;
+        return (
+          <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+            <div>
+              <p className="font-medium">Virtual card fees aren't configured</p>
+              <p className="mt-0.5 text-muted-foreground">
+                Yativo doesn't expose its virtual-card fees through the API, so they can't be passed through automatically. Until you set{" "}
+                {unpriced.map((r) => SERVICE_LABELS[r.service]).join(", ")} below, customers are charged nothing for these and the platform absorbs
+                Yativo's fee.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       <Card>
         <CardHeader>

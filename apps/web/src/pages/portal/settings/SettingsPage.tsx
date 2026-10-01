@@ -250,7 +250,7 @@ function PasskeysCard() {
                   className="text-muted-foreground hover:text-destructive"
                   onClick={() => deleteMutation.mutate(p.id)}
                   disabled={deleteMutation.isPending}
-                  aria-label={t("settings.passkeys.remove", "Remove {{name}}", { name: p.name })}
+                  aria-label={t("settings.passkeys.remove", "Remove {{name}}", { name: p.name })} title={t("settings.passkeys.remove", "Remove {{name}}", { name: p.name })}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

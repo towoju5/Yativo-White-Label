@@ -163,7 +163,15 @@
     "virtualUsd": "Virtual · USD",
     "visaVirtualCardUsd": "Visa virtual card · USD",
     "withdraw": "Withdraw",
-    "withdrawFeeNote": "A fee is deducted from withdrawals before the net amount reaches your wallet."
+    "withdrawFeeNote": "A fee is deducted from withdrawals before the net amount reaches your wallet.",
+    "initialFunding": "Initial funding",
+    "creationFee": "Card creation fee",
+    "totalDebit": "Total debited from wallet",
+    "cardBalance": "Card balance",
+    "balanceUnavailable": "Balance unavailable",
+    "refreshBalance": "Refresh balance",
+    "hideDetails": "Hide card details",
+    "revealDetails": "Reveal card number & CVV"
   },
   "common": {
     "app": "the app",
@@ -864,7 +872,8 @@
     "transactions": "Transactions",
     "virtualAccounts": "Virtual accounts",
     "wallets": "Wallets",
-    "whiteLabel": "White Label"
+    "whiteLabel": "White Label",
+    "transfer": "Transfer"
   },
   "notFound": {
     "message": "Nothing to see here."
@@ -1214,7 +1223,8 @@
       "switchToLightMode": "Switch to light mode"
     },
     "switchToDarkMode": "Switch to dark mode",
-    "switchToLightMode": "Switch to light mode"
+    "switchToLightMode": "Switch to light mode",
+    "openMenu": "Open menu"
   },
   "transactions": {
     "allCurrencies": "All currencies",
@@ -1305,5 +1315,106 @@
     "title": "Wallets",
     "walletAdded": "Wallet added",
     "walletLabel": "Wallet"
+  },
+  "demo": {
+    "landing": {
+      "error": "Couldn't start a demo right now. Please try again.",
+      "sentTitle": "Check your inbox",
+      "sentDescription": "We've emailed your demo link and admin panel credentials to {{email}}. They'll be ready in a moment.",
+      "done": "Done",
+      "title": "Try the platform",
+      "close": "Close",
+      "description": "Generate a live demo environment with sample data. We'll email you the link — it's fully isolated and expires automatically after 6 hours.",
+      "businessNameLabel": "Business name",
+      "businessNamePlaceholder": "Acme Inc.",
+      "emailLabel": "Work email",
+      "generating": "Setting up your demo…",
+      "cta": "Email me a demo",
+      "modalFine": "Sandbox data only — no card required."
+    }
+  },
+  "transfer": {
+    "scan": {
+      "noCodeInImage": "No QR code found in that image.",
+      "imageUnreadable": "Couldn't read that image.",
+      "noCamera": "Camera unavailable. Allow camera access, or upload a photo of the QR code instead.",
+      "hint": "Point your camera at the recipient's Receive QR code.",
+      "upload": "Upload QR image"
+    },
+    "title": "Transfer",
+    "subtitle": "Send money instantly to another customer, or share your code to get paid.",
+    "kycRequired": "Transfers are available once your identity is verified.",
+    "completeVerification": "Complete verification",
+    "tabs": {
+      "send": "Send",
+      "receive": "Receive"
+    },
+    "method": {
+      "email": "Email",
+      "emailHelp": "The email address they signed up with.",
+      "phone": "Phone",
+      "phoneHelp": "At least the last 8 digits of their phone number.",
+      "id": "Customer ID",
+      "idHelp": "The ID shown on their Receive tab.",
+      "qr": "Scan QR",
+      "qrTitle": "Scan the recipient's QR code",
+      "findBy": "Find by {{method}}"
+    },
+    "toast": {
+      "notFound": "No customer found",
+      "lookupFailed": "Couldn't find recipient",
+      "notFoundHelp": "Check the details and try again.",
+      "sendFailed": "Transfer failed",
+      "copied": "{{label}} copied",
+      "copyFailed": "Couldn't copy"
+    },
+    "done": {
+      "sentTo": "sent to {{name}}",
+      "fee": "Fee {{fee}}",
+      "reference": "Ref {{id}}",
+      "viewHistory": "View history",
+      "sendAnother": "Send another"
+    },
+    "findingRecipient": "Finding recipient…",
+    "find": "Find",
+    "recentRecipients": "Recent",
+    "sendTo": "Send to {{name}}",
+    "change": "Change",
+    "fromWallet": "From wallet",
+    "selectWallet": "Select",
+    "amount": "Amount",
+    "available": "Available: {{amount}}",
+    "insufficient": "Insufficient balance",
+    "note": "Note",
+    "optional": "optional",
+    "notePlaceholder": "What's it for?",
+    "fee": "Fee",
+    "free": "Free",
+    "totalDebit": "Total debited",
+    "continue": "Continue",
+    "theyReceive": "They receive",
+    "total": "Total",
+    "instantNotice": "Transfers arrive instantly and can't be reversed. Make sure this is the right person.",
+    "back": "Back",
+    "confirmSend": "Send {{amount}}",
+    "receive": {
+      "scanToPay": "Scan to send me money",
+      "yourId": "Your customer ID",
+      "copyId": "Copy customer ID",
+      "idLabel": "Customer ID",
+      "linkLabel": "Payment link",
+      "copyLink": "Copy link",
+      "shareTitle": "Send me money",
+      "share": "Share",
+      "alsoFindable": "People can also find you by your email or your phone number ending {{hint}}.",
+      "alsoFindableEmail": "People can also find you by your email address."
+    },
+    "recent": {
+      "title": "Recent transfers",
+      "subtitle": "Money you've sent and received",
+      "empty": "No transfers yet.",
+      "sent": "Sent",
+      "received": "Received"
+    }
   }
 }

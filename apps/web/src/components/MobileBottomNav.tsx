@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Home, ArrowDownToLine, Settings, ArrowUpFromLine, CreditCard } from "lucide-react";
+import { Home, ArrowDownToLine, ArrowRightLeft, ArrowUpFromLine, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Bottom tab bar shown on mobile viewports, mirroring the primary shortcuts native banking
@@ -13,8 +13,8 @@ export function MobileBottomNav() {
     { to: "/portal", label: t("nav.home", "Home"), icon: Home, end: true },
     { to: "/portal/deposit", label: t("nav.deposit", "Deposit"), icon: ArrowDownToLine },
     { to: "/portal/send", label: t("nav.payout", "Payout"), icon: ArrowUpFromLine },
+    { to: "/portal/transfer", label: t("nav.transfer", "Transfer"), icon: ArrowRightLeft },
     { to: "/portal/cards", label: t("nav.cards", "Virtual Cards"), icon: CreditCard },
-    { to: "/portal/settings", label: t("nav.settings", "Settings"), icon: Settings },
   ];
 
   return (

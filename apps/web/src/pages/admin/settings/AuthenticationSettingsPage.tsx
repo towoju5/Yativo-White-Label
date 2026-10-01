@@ -480,7 +480,7 @@ function PasskeysSection() {
                 className="text-muted-foreground hover:text-destructive"
                 onClick={() => deleteMutation.mutate(p.id)}
                 disabled={deleteMutation.isPending}
-                aria-label={`Remove ${p.name}`}
+                aria-label={`Remove ${p.name}`} title={`Remove ${p.name}`}
               >
                 <Trash2 className="h-4 w-4" />
               </button>

@@ -110,27 +110,34 @@
     "addedThisMonth": "Bu ay eklenen",
     "airlinePayments": "Havayolu ödemeleri",
     "balance": "Bakiye {{amount}}",
+    "balanceUnavailable": "Bakiye kullanılamıyor",
     "billingAddress": "Fatura adresi",
     "cancel": "Vazgeç",
+    "cardBalance": "Kart bakiyesi",
     "cardEndingIn": "Sonu {{last4}} ile biten kart",
     "cardNumberLabel": "Kart numarası",
     "cardholder": "Kart sahibi",
     "confirmTerminate": "Onaylamak için tekrar tıklayın — bu işlem geri alınamaz",
     "copyNumber": "Numarayı kopyala",
+    "creationFee": "Kart oluşturma ücreti",
     "cvv": "CVV {{cvv}}",
     "emptyState": "Henüz kart yok. Harcamaya başlamak için bir kart talep edin.",
     "exp": "SKT {{expiry}}",
     "feeAmount": "Ücret {{amount}}",
     "freezeCard": "Kartı dondur",
+    "hideDetails": "Kart bilgilerini gizle",
     "hidesAutomatically": "Otomatik olarak gizlenir",
+    "initialFunding": "İlk bakiye yükleme",
     "initialFundingHelp": "En az 3 ABD doları. USD cüzdanınızdan oluşturma ücreti ve yükleme ücretiyle birlikte tahsil edilir.",
     "initialFundingLabel": "Başlangıç bakiyesi (USD)",
     "manage": "Yönet →",
     "noTransactions": "Henüz işlem yok.",
     "program": "Program",
+    "refreshBalance": "Bakiyeyi yenile",
     "requestCard": "Kart talep et",
     "requestDialogTitle": "Sanal kart talep edin",
     "requesting": "Talep ediliyor…",
+    "revealDetails": "Kart numarasını ve CVV'yi göster",
     "spentThisMonth": "Bu ay harcanan",
     "subtitle": "USD cüzdanınıza bağlı Visa sanal kartları",
     "terminateCard": "Kartı iptal et",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "Net tutar cüzdanınıza geri yansımadan önce bir ücret düşülür."
     },
     "topUp": "Bakiye yükle",
+    "totalDebit": "Cüzdandan çekilen toplam",
     "transactionFallback": "İşlem",
     "transactions": "İşlemler",
     "unfreezeCard": "Kartın dondurulmasını kaldır",
@@ -244,6 +252,23 @@
       "recentActivity": "Son işlemler",
       "status": "Durum",
       "wallets": "Cüzdanlar"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "Şirket adı",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "Kapat",
+      "cta": "Bana demo gönder",
+      "description": "Örnek verilerle canlı bir demo ortamı oluşturun. Bağlantıyı e-postayla göndereceğiz; ortam tamamen yalıtılmıştır ve 6 saat sonra otomatik olarak sona erer.",
+      "done": "Tamam",
+      "emailLabel": "İş e-postası",
+      "error": "Şu anda demo başlatılamadı. Lütfen tekrar deneyin.",
+      "generating": "Demonuz hazırlanıyor…",
+      "modalFine": "Yalnızca test verileri — kart gerekmez.",
+      "sentDescription": "Demo bağlantınızı ve yönetim paneli giriş bilgilerinizi {{email}} adresine gönderdik. Birazdan hazır olacaklar.",
+      "sentTitle": "Gelen kutunuzu kontrol edin",
+      "title": "Platformu deneyin"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "Destek",
     "team": "Ekip",
     "transactions": "İşlemler",
+    "transfer": "Transfer",
     "virtualAccounts": "Sanal hesaplar",
     "wallets": "Cüzdanlar",
     "whiteLabel": "White Label"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "Profili görüntüle"
     },
+    "openMenu": "Menüyü aç",
     "prime": {
       "notifications": "Bildirimler",
       "switchToDarkMode": "Koyu moda geç",
@@ -1221,6 +1248,90 @@
     "title": "İşlem geçmişi",
     "to": "Bitiş",
     "type": "Tür"
+  },
+  "transfer": {
+    "amount": "Tutar",
+    "available": "Kullanılabilir: {{amount}}",
+    "back": "Geri",
+    "change": "Değiştir",
+    "completeVerification": "Doğrulamayı tamamla",
+    "confirmSend": "{{amount}} gönder",
+    "continue": "Devam",
+    "done": {
+      "fee": "Ücret {{fee}}",
+      "reference": "Ref. {{id}}",
+      "sendAnother": "Yeni gönderim",
+      "sentTo": "{{name}} kişisine gönderildi",
+      "viewHistory": "Geçmişi görüntüle"
+    },
+    "fee": "Ücret",
+    "find": "Bul",
+    "findingRecipient": "Alıcı aranıyor…",
+    "free": "Ücretsiz",
+    "fromWallet": "Gönderen cüzdan",
+    "instantNotice": "Transferler anında ulaşır ve geri alınamaz. Doğru kişi olduğundan emin olun.",
+    "insufficient": "Yetersiz bakiye",
+    "kycRequired": "Kimliğiniz doğrulandıktan sonra transfer yapabilirsiniz.",
+    "method": {
+      "email": "E-posta",
+      "emailHelp": "Kaydolurken kullandığı e-posta adresi.",
+      "findBy": "{{method}} ile bul",
+      "id": "Müşteri kimliği",
+      "idHelp": "Al sekmesinde gösterilen kimlik.",
+      "phone": "Telefon",
+      "phoneHelp": "Telefon numarasının en az son 8 hanesi.",
+      "qr": "QR tara",
+      "qrTitle": "Alıcının QR kodunu tarayın"
+    },
+    "note": "Not",
+    "notePlaceholder": "Ne için?",
+    "optional": "isteğe bağlı",
+    "receive": {
+      "alsoFindable": "Sizi e-postanızla veya {{hint}} ile biten telefon numaranızla da bulabilirler.",
+      "alsoFindableEmail": "Sizi e-posta adresinizle de bulabilirler.",
+      "copyId": "Müşteri kimliğini kopyala",
+      "copyLink": "Bağlantıyı kopyala",
+      "idLabel": "Müşteri kimliği",
+      "linkLabel": "Ödeme bağlantısı",
+      "scanToPay": "Bana para göndermek için tarayın",
+      "share": "Paylaş",
+      "shareTitle": "Bana para gönder",
+      "yourId": "Müşteri kimliğiniz"
+    },
+    "recent": {
+      "empty": "Henüz transfer yok.",
+      "received": "Alındı",
+      "sent": "Gönderildi",
+      "subtitle": "Gönderdiğiniz ve aldığınız para",
+      "title": "Son transferler"
+    },
+    "recentRecipients": "Son kişiler",
+    "scan": {
+      "hint": "Kameranızı alıcının Al sekmesindeki QR koda tutun.",
+      "imageUnreadable": "Bu görsel okunamadı.",
+      "noCamera": "Kamera kullanılamıyor. Kamera erişimine izin verin veya QR kodun fotoğrafını yükleyin.",
+      "noCodeInImage": "Bu görselde QR kod bulunamadı.",
+      "upload": "QR görseli yükle"
+    },
+    "selectWallet": "Seçin",
+    "sendTo": "{{name}} kişisine gönder",
+    "subtitle": "Başka bir müşteriye anında para gönderin veya ödeme almak için kodunuzu paylaşın.",
+    "tabs": {
+      "receive": "Al",
+      "send": "Gönder"
+    },
+    "theyReceive": "Alıcıya geçecek",
+    "title": "Transfer",
+    "toast": {
+      "copied": "{{label}} kopyalandı",
+      "copyFailed": "Kopyalanamadı",
+      "lookupFailed": "Alıcı bulunamadı",
+      "notFound": "Müşteri bulunamadı",
+      "notFoundHelp": "Bilgileri kontrol edip tekrar deneyin.",
+      "sendFailed": "Transfer başarısız"
+    },
+    "total": "Toplam",
+    "totalDebit": "Çekilecek toplam"
   },
   "verifyEmail": {
     "backToLogin": "Girişe dön",

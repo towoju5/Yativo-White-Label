@@ -40,6 +40,9 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
+    // Icon-only buttons carry their meaning in aria-label — mirror it into a native `title` so
+    // hovering shows what the button does too. An explicit `title` always wins.
+    if (props.title === undefined && typeof props["aria-label"] === "string") props = { ...props, title: props["aria-label"] };
     // Slot (asChild) clones its single child via React.Children.only — passing it more than one
     // child (e.g. a loading-spinner element alongside the real children) throws at render time,
     // so the spinner can only ever be injected on a real <button>, never through asChild.

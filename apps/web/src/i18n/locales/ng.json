@@ -110,27 +110,34 @@
     "addedThisMonth": "Money wey we add this month",
     "airlinePayments": "Airline payments",
     "balance": "Balance {{amount}}",
+    "balanceUnavailable": "Balance no dey show now",
     "billingAddress": "Address wey we go bill",
     "cancel": "Forget am",
+    "cardBalance": "Card balance",
     "cardEndingIn": "Card wey end in {{last4}}",
     "cardNumberLabel": "Card number",
     "cardholder": "Wey card belong to",
     "confirmTerminate": "Click again make e confirm — you no fit undo am",
     "copyNumber": "Copy the number",
+    "creationFee": "Card creation fee",
     "cvv": "CVV {{cvv}}",
     "emptyState": "You never get any card yet. Request one make you fit start spend.",
     "exp": "E go expire {{expiry}}",
     "feeAmount": "Charge {{amount}}",
     "freezeCard": "Freeze the card",
+    "hideDetails": "Hide card details",
     "hidesAutomatically": "E go hide by itself",
+    "initialFunding": "First money wey you put",
     "initialFundingHelp": "Minimum $3. We go deduct am from your USD wallet plus creation fee and top-up fee.",
     "initialFundingLabel": "First money wey you put inside (USD)",
     "manage": "Manage am →",
     "noTransactions": "No transaction dey yet.",
     "program": "Program",
+    "refreshBalance": "Refresh balance",
     "requestCard": "Ask for card",
     "requestDialogTitle": "Request virtual card",
     "requesting": "We dey request am…",
+    "revealDetails": "Show card number & CVV",
     "spentThisMonth": "Money wey you spend this month",
     "subtitle": "Visa virtual cards wey link to your USD wallet",
     "terminateCard": "Close card",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "We go deduct fee before the net amount reach your wallet."
     },
     "topUp": "Add money",
+    "totalDebit": "Total wey commot from wallet",
     "transactionFallback": "Transaction",
     "transactions": "Transactions",
     "unfreezeCard": "Unfreeze the card",
@@ -244,6 +252,23 @@
       "recentActivity": "Wetin don happen recently",
       "status": "Status",
       "wallets": "Wallets"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "Business name",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "Close",
+      "cta": "Email me demo",
+      "description": "Make live demo with sample data. We go email you the link — e dey separate from everything and e go expire by itself after 6 hours.",
+      "done": "Done",
+      "emailLabel": "Work email",
+      "error": "We no fit start demo now. Abeg try again.",
+      "generating": "We dey set up your demo…",
+      "modalFine": "Na only test data — you no need card.",
+      "sentDescription": "We don send your demo link and admin panel login to {{email}}. E go ready small time.",
+      "sentTitle": "Check your inbox",
+      "title": "Try the platform"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "Support",
     "team": "Team",
     "transactions": "Transactions",
+    "transfer": "Transfer",
     "virtualAccounts": "Virtual accounts",
     "wallets": "Wallets",
     "whiteLabel": "White Label"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "Check profile"
     },
+    "openMenu": "Open menu",
     "prime": {
       "notifications": "Notifications",
       "switchToDarkMode": "Change to dark mode",
@@ -1221,6 +1248,90 @@
     "title": "Transaction history",
     "to": "To",
     "type": "Type"
+  },
+  "transfer": {
+    "amount": "Amount",
+    "available": "Wetin dey: {{amount}}",
+    "back": "Back",
+    "change": "Change",
+    "completeVerification": "Finish verification",
+    "confirmSend": "Send {{amount}}",
+    "continue": "Continue",
+    "done": {
+      "fee": "Fee {{fee}}",
+      "reference": "Ref {{id}}",
+      "sendAnother": "Send another one",
+      "sentTo": "don send to {{name}}",
+      "viewHistory": "See history"
+    },
+    "fee": "Fee",
+    "find": "Find",
+    "findingRecipient": "We dey find the person…",
+    "free": "Free",
+    "fromWallet": "From wallet",
+    "instantNotice": "Transfer dey land sharp-sharp and you no fit reverse am. Make sure na the correct person.",
+    "insufficient": "Money no reach",
+    "kycRequired": "You fit transfer once dem don verify who you be.",
+    "method": {
+      "email": "Email",
+      "emailHelp": "The email wey dem use sign up.",
+      "findBy": "Find by {{method}}",
+      "id": "Customer ID",
+      "idHelp": "The ID wey show for dem Receive tab.",
+      "phone": "Phone",
+      "phoneHelp": "At least the last 8 numbers for dem phone number.",
+      "qr": "Scan QR",
+      "qrTitle": "Scan the person QR code"
+    },
+    "note": "Note",
+    "notePlaceholder": "Wetin e be for?",
+    "optional": "no be must",
+    "receive": {
+      "alsoFindable": "People fit also find you with your email or your phone number wey end with {{hint}}.",
+      "alsoFindableEmail": "People fit also find you with your email address.",
+      "copyId": "Copy customer ID",
+      "copyLink": "Copy link",
+      "idLabel": "Customer ID",
+      "linkLabel": "Payment link",
+      "scanToPay": "Scan am to send me money",
+      "share": "Share",
+      "shareTitle": "Send me money",
+      "yourId": "Your customer ID"
+    },
+    "recent": {
+      "empty": "No transfer yet.",
+      "received": "Received",
+      "sent": "Sent",
+      "subtitle": "Money wey you don send and receive",
+      "title": "Recent transfers"
+    },
+    "recentRecipients": "Recent",
+    "scan": {
+      "hint": "Point your camera for the person Receive QR code.",
+      "imageUnreadable": "We no fit read that picture.",
+      "noCamera": "Camera no dey work. Allow camera access, or upload picture of the QR code.",
+      "noCodeInImage": "No QR code dey that picture.",
+      "upload": "Upload QR picture"
+    },
+    "selectWallet": "Choose",
+    "sendTo": "Send to {{name}}",
+    "subtitle": "Send money sharp-sharp to another customer, or share your code make dem pay you.",
+    "tabs": {
+      "receive": "Receive",
+      "send": "Send"
+    },
+    "theyReceive": "Dem go receive",
+    "title": "Transfer",
+    "toast": {
+      "copied": "{{label}} don copy",
+      "copyFailed": "We no fit copy am",
+      "lookupFailed": "We no fit find the person",
+      "notFound": "We no see any customer",
+      "notFoundHelp": "Check the details and try again.",
+      "sendFailed": "Transfer no go"
+    },
+    "total": "Total",
+    "totalDebit": "Total wey go commot"
   },
   "verifyEmail": {
     "backToLogin": "Go back to sign in",

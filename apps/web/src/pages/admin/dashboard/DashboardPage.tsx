@@ -51,7 +51,7 @@ function ConfigRemindersBanner({
           <button
             onClick={() => setDismissed((prev) => new Set(prev).add(r.key))}
             className="shrink-0 text-muted-foreground hover:text-foreground"
-            aria-label="Dismiss"
+            aria-label="Dismiss" title="Dismiss"
           >
             <X className="h-4 w-4" />
           </button>

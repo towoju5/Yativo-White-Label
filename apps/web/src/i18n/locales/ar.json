@@ -110,27 +110,34 @@
     "addedThisMonth": "أُضيف هذا الشهر",
     "airlinePayments": "مدفوعات شركات الطيران",
     "balance": "الرصيد {{amount}}",
+    "balanceUnavailable": "الرصيد غير متاح",
     "billingAddress": "عنوان الفوترة",
     "cancel": "إلغاء",
+    "cardBalance": "رصيد البطاقة",
     "cardEndingIn": "البطاقة المنتهية بـ {{last4}}",
     "cardNumberLabel": "رقم البطاقة",
     "cardholder": "حامل البطاقة",
     "confirmTerminate": "اضغط مرة أخرى للتأكيد — لا يمكن التراجع عن هذا الإجراء",
     "copyNumber": "نسخ الرقم",
+    "creationFee": "رسوم إنشاء البطاقة",
     "cvv": "رمز التحقق CVV {{cvv}}",
     "emptyState": "لا توجد بطاقات بعد. اطلب بطاقة لبدء الإنفاق.",
     "exp": "تاريخ الانتهاء {{expiry}}",
     "feeAmount": "الرسوم {{amount}}",
     "freezeCard": "تجميد البطاقة",
+    "hideDetails": "إخفاء بيانات البطاقة",
     "hidesAutomatically": "يُخفى تلقائيًا",
+    "initialFunding": "التمويل الأولي",
     "initialFundingHelp": "الحد الأدنى 3 دولارات. يُخصم من محفظة الدولار الأمريكي الخاصة بك مع رسوم الإصدار ورسوم الشحن.",
     "initialFundingLabel": "التمويل الأولي (بالدولار الأمريكي)",
     "manage": "إدارة ←",
     "noTransactions": "لا توجد معاملات بعد.",
     "program": "البرنامج",
+    "refreshBalance": "تحديث الرصيد",
     "requestCard": "طلب بطاقة",
     "requestDialogTitle": "طلب بطاقة افتراضية",
     "requesting": "جارٍ الطلب…",
+    "revealDetails": "إظهار رقم البطاقة ورمز CVV",
     "spentThisMonth": "المُنفق هذا الشهر",
     "subtitle": "بطاقات فيزا الافتراضية المرتبطة بمحفظة الدولار الأمريكي الخاصة بك",
     "terminateCard": "إنهاء البطاقة",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "تُخصم رسوم قبل إعادة المبلغ الصافي إلى محفظتك."
     },
     "topUp": "شحن الرصيد",
+    "totalDebit": "إجمالي المبلغ المخصوم من المحفظة",
     "transactionFallback": "معاملة",
     "transactions": "المعاملات",
     "unfreezeCard": "إلغاء تجميد البطاقة",
@@ -244,6 +252,23 @@
       "recentActivity": "النشاط الأخير",
       "status": "الحالة",
       "wallets": "المحافظ"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "اسم الشركة",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "إغلاق",
+      "cta": "أرسل لي عرضًا تجريبيًا",
+      "description": "أنشئ بيئة عرض تجريبي مباشرة ببيانات نموذجية. سنرسل إليك الرابط عبر البريد الإلكتروني — البيئة معزولة بالكامل وتنتهي صلاحيتها تلقائيًا بعد 6 ساعات.",
+      "done": "تم",
+      "emailLabel": "البريد الإلكتروني للعمل",
+      "error": "تعذّر بدء العرض التجريبي الآن. يُرجى المحاولة مرة أخرى.",
+      "generating": "جارٍ تجهيز العرض التجريبي…",
+      "modalFine": "بيانات تجريبية فقط — لا حاجة إلى بطاقة.",
+      "sentDescription": "أرسلنا رابط العرض التجريبي وبيانات الدخول إلى لوحة الإدارة إلى {{email}}. ستكون جاهزة خلال لحظات.",
+      "sentTitle": "تحقّق من بريدك الوارد",
+      "title": "جرّب المنصة"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "الدعم",
     "team": "الفريق",
     "transactions": "المعاملات",
+    "transfer": "تحويل",
     "virtualAccounts": "الحسابات الافتراضية",
     "wallets": "المحافظ",
     "whiteLabel": "White Label"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "عرض الملف الشخصي"
     },
+    "openMenu": "فتح القائمة",
     "prime": {
       "notifications": "الإشعارات",
       "switchToDarkMode": "التبديل إلى الوضع الداكن",
@@ -1221,6 +1248,90 @@
     "title": "سجل المعاملات",
     "to": "إلى",
     "type": "النوع"
+  },
+  "transfer": {
+    "amount": "المبلغ",
+    "available": "المتاح: {{amount}}",
+    "back": "رجوع",
+    "change": "تغيير",
+    "completeVerification": "إكمال التحقق",
+    "confirmSend": "إرسال {{amount}}",
+    "continue": "متابعة",
+    "done": {
+      "fee": "الرسوم {{fee}}",
+      "reference": "المرجع {{id}}",
+      "sendAnother": "إرسال تحويل آخر",
+      "sentTo": "أُرسلت إلى {{name}}",
+      "viewHistory": "عرض السجل"
+    },
+    "fee": "الرسوم",
+    "find": "بحث",
+    "findingRecipient": "جارٍ البحث عن المستلم…",
+    "free": "مجانًا",
+    "fromWallet": "من المحفظة",
+    "instantNotice": "تصل التحويلات فورًا ولا يمكن التراجع عنها. تأكّد من أنه الشخص الصحيح.",
+    "insufficient": "الرصيد غير كافٍ",
+    "kycRequired": "تتوفر التحويلات بعد التحقق من هويتك.",
+    "method": {
+      "email": "البريد الإلكتروني",
+      "emailHelp": "عنوان البريد الإلكتروني الذي سجّل به.",
+      "findBy": "البحث حسب {{method}}",
+      "id": "مُعرّف العميل",
+      "idHelp": "المُعرّف الظاهر في تبويب الاستلام لديه.",
+      "phone": "الهاتف",
+      "phoneHelp": "آخر 8 أرقام على الأقل من رقم هاتفه.",
+      "qr": "مسح رمز QR",
+      "qrTitle": "امسح رمز QR الخاص بالمستلم"
+    },
+    "note": "ملاحظة",
+    "notePlaceholder": "ما الغرض منه؟",
+    "optional": "اختياري",
+    "receive": {
+      "alsoFindable": "يمكن للآخرين أيضًا العثور عليك عبر بريدك الإلكتروني أو رقم هاتفك المنتهي بـ {{hint}}.",
+      "alsoFindableEmail": "يمكن للآخرين أيضًا العثور عليك عبر عنوان بريدك الإلكتروني.",
+      "copyId": "نسخ مُعرّف العميل",
+      "copyLink": "نسخ الرابط",
+      "idLabel": "مُعرّف العميل",
+      "linkLabel": "رابط الدفع",
+      "scanToPay": "امسح الرمز لترسل لي المال",
+      "share": "مشاركة",
+      "shareTitle": "أرسل لي المال",
+      "yourId": "مُعرّف العميل الخاص بك"
+    },
+    "recent": {
+      "empty": "لا توجد تحويلات بعد.",
+      "received": "مُستلَمة",
+      "sent": "مُرسَلة",
+      "subtitle": "الأموال التي أرسلتها واستلمتها",
+      "title": "التحويلات الأخيرة"
+    },
+    "recentRecipients": "الأخيرة",
+    "scan": {
+      "hint": "وجّه الكاميرا إلى رمز QR الخاص بالاستلام لدى المستلم.",
+      "imageUnreadable": "تعذّرت قراءة هذه الصورة.",
+      "noCamera": "الكاميرا غير متاحة. اسمح بالوصول إلى الكاميرا أو ارفع صورة لرمز QR بدلاً من ذلك.",
+      "noCodeInImage": "لم يُعثر على رمز QR في هذه الصورة.",
+      "upload": "رفع صورة QR"
+    },
+    "selectWallet": "اختر",
+    "sendTo": "إرسال إلى {{name}}",
+    "subtitle": "أرسل الأموال فورًا إلى عميل آخر، أو شارك رمزك لتستلم المدفوعات.",
+    "tabs": {
+      "receive": "استلام",
+      "send": "إرسال"
+    },
+    "theyReceive": "يستلم المستلم",
+    "title": "تحويل",
+    "toast": {
+      "copied": "تم نسخ {{label}}",
+      "copyFailed": "تعذّر النسخ",
+      "lookupFailed": "تعذّر العثور على المستلم",
+      "notFound": "لم يُعثر على أي عميل",
+      "notFoundHelp": "تحقّق من البيانات وحاول مرة أخرى.",
+      "sendFailed": "فشل التحويل"
+    },
+    "total": "الإجمالي",
+    "totalDebit": "إجمالي المبلغ المخصوم"
   },
   "verifyEmail": {
     "backToLogin": "العودة لتسجيل الدخول",

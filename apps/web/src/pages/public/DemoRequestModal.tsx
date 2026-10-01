@@ -84,7 +84,7 @@ export function DemoRequestModal({ open, onClose }: { open: boolean; onClose: ()
           <>
             <div className="ml-modal-head">
               <h3 id="demoModalTitle">{t("demo.landing.title", "Try the platform")}</h3>
-              <button type="button" className="ml-modal-close" aria-label={t("demo.landing.close", "Close")} onClick={onClose}>
+              <button type="button" className="ml-modal-close" aria-label={t("demo.landing.close", "Close")} title={t("demo.landing.close", "Close")} onClick={onClose}>
                 <X className="h-4 w-4" />
               </button>
             </div>

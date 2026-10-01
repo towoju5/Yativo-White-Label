@@ -25,6 +25,7 @@ const TRANSACTION_SUMMARY_TYPES: EmailNotificationType[] = [
   "PAYOUT_FAILED",
   "SWAP_COMPLETED",
   "CARD_TRANSACTION",
+  "TRANSFER_SENT",
 ];
 
 // Same allowlist StaticPage uses for admin-authored HTML (see pages.service.ts), plus `style` —
@@ -278,6 +279,24 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
       intro: "Your payout couldn't be completed and the funds have been returned to your wallet.",
       detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "danger" },
       extra: "<strong>Reason:</strong> {{reason}}",
+    }),
+  },
+  TRANSFER_SENT: {
+    subject: "You sent {{amount}} {{currency}} to {{counterpartyName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "📤",
+      heading: "Transfer Sent",
+      intro: "Your transfer to {{counterpartyName}} was successful.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}" },
+    }),
+  },
+  TRANSFER_RECEIVED: {
+    subject: "You received {{amount}} {{currency}} from {{counterpartyName}}",
+    bodyHtml: buildEmailTemplate({
+      icon: "📥",
+      heading: "Money Received",
+      intro: "{{counterpartyName}} sent you money. It's already in your wallet.",
+      detail: { label: "Amount", value: "{{amount}} {{currency}}", tone: "success" },
     }),
   },
   CARD_ISSUED: {

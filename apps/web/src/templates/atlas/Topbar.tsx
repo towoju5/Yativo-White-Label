@@ -113,7 +113,7 @@ export function AtlasTopbar({ items, userLabel, userSubLabel, onLogout, showNoti
           </DropdownMenu>
 
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger className="rounded-full p-2 hover:bg-muted md:hidden">
+            <SheetTrigger className="rounded-full p-2 hover:bg-muted md:hidden" aria-label={t("topbar.openMenu", "Open menu")} title={t("topbar.openMenu", "Open menu")}>
               <Menu className="h-5 w-5" />
             </SheetTrigger>
             <SheetContent side="right" className="w-72">

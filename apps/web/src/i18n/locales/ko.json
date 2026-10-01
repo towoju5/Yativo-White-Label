@@ -110,27 +110,34 @@
     "addedThisMonth": "이번 달 충전액",
     "airlinePayments": "항공사 결제",
     "balance": "잔액 {{amount}}",
+    "balanceUnavailable": "잔액을 불러올 수 없음",
     "billingAddress": "청구지 주소",
     "cancel": "취소",
+    "cardBalance": "카드 잔액",
     "cardEndingIn": "끝자리 {{last4}} 카드",
     "cardNumberLabel": "카드 번호",
     "cardholder": "카드 소유자",
     "confirmTerminate": "다시 클릭하여 확인하세요 — 이 작업은 되돌릴 수 없습니다",
     "copyNumber": "번호 복사",
+    "creationFee": "카드 발급 수수료",
     "cvv": "CVV {{cvv}}",
     "emptyState": "아직 카드가 없습니다. 카드를 신청하여 결제를 시작하세요.",
     "exp": "유효기간 {{expiry}}",
     "feeAmount": "수수료 {{amount}}",
     "freezeCard": "카드 정지",
+    "hideDetails": "카드 정보 숨기기",
     "hidesAutomatically": "자동으로 숨겨집니다",
+    "initialFunding": "초기 충전 금액",
     "initialFundingHelp": "최소 $3. USD 지갑에서 생성 수수료 및 충전 수수료와 함께 차감됩니다.",
     "initialFundingLabel": "초기 충전 금액 (USD)",
     "manage": "관리 →",
     "noTransactions": "아직 거래 내역이 없습니다.",
     "program": "프로그램",
+    "refreshBalance": "잔액 새로고침",
     "requestCard": "카드 신청",
     "requestDialogTitle": "가상 카드 신청",
     "requesting": "신청 중…",
+    "revealDetails": "카드 번호 및 CVV 보기",
     "spentThisMonth": "이번 달 사용액",
     "subtitle": "USD 지갑과 연동된 Visa 가상 카드",
     "terminateCard": "카드 해지",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "순 금액이 지갑에 입금되기 전에 수수료가 차감됩니다."
     },
     "topUp": "충전",
+    "totalDebit": "지갑에서 차감되는 총액",
     "transactionFallback": "거래",
     "transactions": "거래 내역",
     "unfreezeCard": "정지 해제",
@@ -244,6 +252,23 @@
       "recentActivity": "최근 활동",
       "status": "상태",
       "wallets": "지갑"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "회사명",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "닫기",
+      "cta": "데모 이메일로 받기",
+      "description": "샘플 데이터가 포함된 라이브 데모 환경을 만들어 보세요. 링크는 이메일로 보내 드리며, 완전히 분리된 환경으로 6시간 후 자동으로 만료됩니다.",
+      "done": "완료",
+      "emailLabel": "업무용 이메일",
+      "error": "지금은 데모를 시작할 수 없습니다. 다시 시도해 주세요.",
+      "generating": "데모를 준비하고 있습니다…",
+      "modalFine": "테스트 데이터 전용 — 카드가 필요 없습니다.",
+      "sentDescription": "데모 링크와 관리자 패널 로그인 정보를 {{email}}(으)로 보냈습니다. 곧 사용할 수 있습니다.",
+      "sentTitle": "받은편지함을 확인하세요",
+      "title": "플랫폼 체험하기"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "지원",
     "team": "팀",
     "transactions": "거래 내역",
+    "transfer": "송금",
     "virtualAccounts": "가상계좌",
     "wallets": "지갑",
     "whiteLabel": "White Label"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "프로필 보기"
     },
+    "openMenu": "메뉴 열기",
     "prime": {
       "notifications": "알림",
       "switchToDarkMode": "다크 모드로 전환",
@@ -1221,6 +1248,90 @@
     "title": "거래 내역",
     "to": "종료일",
     "type": "유형"
+  },
+  "transfer": {
+    "amount": "금액",
+    "available": "사용 가능: {{amount}}",
+    "back": "뒤로",
+    "change": "변경",
+    "completeVerification": "인증 완료하기",
+    "confirmSend": "{{amount}} 보내기",
+    "continue": "계속",
+    "done": {
+      "fee": "수수료 {{fee}}",
+      "reference": "참조번호 {{id}}",
+      "sendAnother": "다시 송금하기",
+      "sentTo": "{{name}}님에게 송금함",
+      "viewHistory": "내역 보기"
+    },
+    "fee": "수수료",
+    "find": "찾기",
+    "findingRecipient": "받는 사람을 찾는 중…",
+    "free": "무료",
+    "fromWallet": "출금 지갑",
+    "instantNotice": "송금은 즉시 도착하며 취소할 수 없습니다. 받는 사람이 맞는지 확인하세요.",
+    "insufficient": "잔액 부족",
+    "kycRequired": "본인 인증이 완료되면 송금을 이용할 수 있습니다.",
+    "method": {
+      "email": "이메일",
+      "emailHelp": "상대방이 가입할 때 사용한 이메일 주소입니다.",
+      "findBy": "{{method}}(으)로 찾기",
+      "id": "고객 ID",
+      "idHelp": "상대방의 받기 탭에 표시된 ID입니다.",
+      "phone": "전화번호",
+      "phoneHelp": "상대방 전화번호의 마지막 8자리 이상.",
+      "qr": "QR 스캔",
+      "qrTitle": "받는 사람의 QR 코드를 스캔하세요"
+    },
+    "note": "메모",
+    "notePlaceholder": "무엇을 위한 송금인가요?",
+    "optional": "선택 사항",
+    "receive": {
+      "alsoFindable": "이메일 또는 끝자리가 {{hint}}인 전화번호로도 나를 찾을 수 있습니다.",
+      "alsoFindableEmail": "이메일 주소로도 나를 찾을 수 있습니다.",
+      "copyId": "고객 ID 복사",
+      "copyLink": "링크 복사",
+      "idLabel": "고객 ID",
+      "linkLabel": "결제 링크",
+      "scanToPay": "스캔해서 나에게 송금하기",
+      "share": "공유",
+      "shareTitle": "나에게 송금해 주세요",
+      "yourId": "내 고객 ID"
+    },
+    "recent": {
+      "empty": "아직 송금 내역이 없습니다.",
+      "received": "받음",
+      "sent": "보냄",
+      "subtitle": "보내고 받은 금액",
+      "title": "최근 송금"
+    },
+    "recentRecipients": "최근",
+    "scan": {
+      "hint": "받는 사람의 받기 QR 코드에 카메라를 맞춰 주세요.",
+      "imageUnreadable": "이미지를 읽을 수 없습니다.",
+      "noCamera": "카메라를 사용할 수 없습니다. 카메라 접근을 허용하거나 QR 코드 사진을 업로드하세요.",
+      "noCodeInImage": "이 이미지에서 QR 코드를 찾을 수 없습니다.",
+      "upload": "QR 이미지 업로드"
+    },
+    "selectWallet": "선택",
+    "sendTo": "{{name}}님에게 보내기",
+    "subtitle": "다른 고객에게 즉시 송금하거나 내 코드를 공유해 돈을 받아 보세요.",
+    "tabs": {
+      "receive": "받기",
+      "send": "보내기"
+    },
+    "theyReceive": "받는 금액",
+    "title": "송금",
+    "toast": {
+      "copied": "{{label}} 복사됨",
+      "copyFailed": "복사하지 못했습니다",
+      "lookupFailed": "받는 사람을 찾을 수 없습니다",
+      "notFound": "고객을 찾을 수 없습니다",
+      "notFoundHelp": "정보를 확인하고 다시 시도해 주세요.",
+      "sendFailed": "송금 실패"
+    },
+    "total": "합계",
+    "totalDebit": "차감 총액"
   },
   "verifyEmail": {
     "backToLogin": "로그인으로 돌아가기",

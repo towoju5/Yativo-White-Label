@@ -110,27 +110,34 @@
     "addedThisMonth": "今月の入金額",
     "airlinePayments": "航空会社への支払い",
     "balance": "残高 {{amount}}",
+    "balanceUnavailable": "残高を取得できません",
     "billingAddress": "請求先住所",
     "cancel": "キャンセル",
+    "cardBalance": "カード残高",
     "cardEndingIn": "下4桁が{{last4}}のカード",
     "cardNumberLabel": "カード番号",
     "cardholder": "カード名義人",
     "confirmTerminate": "もう一度クリックして確定してください — この操作は取り消せません",
     "copyNumber": "番号をコピー",
+    "creationFee": "カード発行手数料",
     "cvv": "CVV {{cvv}}",
     "emptyState": "カードはまだありません。発行を申請して利用を開始しましょう。",
     "exp": "有効期限 {{expiry}}",
     "feeAmount": "手数料 {{amount}}",
     "freezeCard": "カードを凍結",
+    "hideDetails": "カード情報を隠す",
     "hidesAutomatically": "自動的に非表示になります",
+    "initialFunding": "初回チャージ額",
     "initialFundingHelp": "最低3ドルです。作成手数料およびチャージ手数料とともにUSDウォレットから引き落とされます。",
     "initialFundingLabel": "初回入金額（USD）",
     "manage": "管理 →",
     "noTransactions": "取引履歴はまだありません。",
     "program": "プログラム",
+    "refreshBalance": "残高を更新",
     "requestCard": "カードを申請",
     "requestDialogTitle": "バーチャルカードを申請",
     "requesting": "申請中…",
+    "revealDetails": "カード番号とCVVを表示",
     "spentThisMonth": "今月の利用額",
     "subtitle": "USDウォレットに紐づいたVisaバーチャルカード",
     "terminateCard": "カードを解約",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "手数料が差し引かれた後、差額がウォレットに反映されます。"
     },
     "topUp": "チャージ",
+    "totalDebit": "ウォレットからの引き落とし合計",
     "transactionFallback": "取引",
     "transactions": "取引履歴",
     "unfreezeCard": "凍結を解除",
@@ -244,6 +252,23 @@
       "recentActivity": "最近のアクティビティ",
       "status": "ステータス",
       "wallets": "ウォレット"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "会社名",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "閉じる",
+      "cta": "デモをメールで受け取る",
+      "description": "サンプルデータ入りのライブデモ環境を作成します。リンクはメールでお送りします。環境は完全に分離されており、6時間後に自動的に失効します。",
+      "done": "完了",
+      "emailLabel": "勤務先メールアドレス",
+      "error": "現在デモを開始できません。もう一度お試しください。",
+      "generating": "デモを準備しています…",
+      "modalFine": "テストデータのみ — カードは不要です。",
+      "sentDescription": "デモのリンクと管理パネルのログイン情報を {{email}} に送信しました。まもなくご利用いただけます。",
+      "sentTitle": "受信トレイをご確認ください",
+      "title": "プラットフォームを試す"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "サポート",
     "team": "チーム",
     "transactions": "取引履歴",
+    "transfer": "送金",
     "virtualAccounts": "バーチャルアカウント",
     "wallets": "ウォレット",
     "whiteLabel": "White Label"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "プロフィールを表示"
     },
+    "openMenu": "メニューを開く",
     "prime": {
       "notifications": "通知",
       "switchToDarkMode": "ダークモードに切り替え",
@@ -1221,6 +1248,90 @@
     "title": "取引履歴",
     "to": "終了",
     "type": "種類"
+  },
+  "transfer": {
+    "amount": "金額",
+    "available": "利用可能額: {{amount}}",
+    "back": "戻る",
+    "change": "変更",
+    "completeVerification": "本人確認を完了する",
+    "confirmSend": "{{amount}} を送金",
+    "continue": "続ける",
+    "done": {
+      "fee": "手数料 {{fee}}",
+      "reference": "参照番号 {{id}}",
+      "sendAnother": "続けて送金",
+      "sentTo": "{{name}} さんに送金しました",
+      "viewHistory": "履歴を見る"
+    },
+    "fee": "手数料",
+    "find": "検索",
+    "findingRecipient": "受取人を検索しています…",
+    "free": "無料",
+    "fromWallet": "送金元ウォレット",
+    "instantNotice": "送金は即時に反映され、取り消すことはできません。相手に間違いがないかご確認ください。",
+    "insufficient": "残高不足",
+    "kycRequired": "本人確認が完了すると送金をご利用いただけます。",
+    "method": {
+      "email": "メール",
+      "emailHelp": "相手が登録したメールアドレス。",
+      "findBy": "{{method}}で検索",
+      "id": "顧客ID",
+      "idHelp": "相手の「受け取る」タブに表示されているID。",
+      "phone": "電話番号",
+      "phoneHelp": "相手の電話番号の下8桁以上。",
+      "qr": "QRをスキャン",
+      "qrTitle": "受取人のQRコードをスキャン"
+    },
+    "note": "メモ",
+    "notePlaceholder": "何のための送金ですか？",
+    "optional": "任意",
+    "receive": {
+      "alsoFindable": "メールアドレスまたは末尾が {{hint}} の電話番号でも、あなたを見つけてもらえます。",
+      "alsoFindableEmail": "メールアドレスでも、あなたを見つけてもらえます。",
+      "copyId": "顧客IDをコピー",
+      "copyLink": "リンクをコピー",
+      "idLabel": "顧客ID",
+      "linkLabel": "支払いリンク",
+      "scanToPay": "スキャンして私に送金",
+      "share": "共有",
+      "shareTitle": "送金をお願いします",
+      "yourId": "あなたの顧客ID"
+    },
+    "recent": {
+      "empty": "まだ送金はありません。",
+      "received": "受け取り済み",
+      "sent": "送金済み",
+      "subtitle": "送金・受け取り履歴",
+      "title": "最近の送金"
+    },
+    "recentRecipients": "最近の送金先",
+    "scan": {
+      "hint": "受取人の「受け取る」QRコードにカメラを向けてください。",
+      "imageUnreadable": "この画像を読み取れませんでした。",
+      "noCamera": "カメラを使用できません。カメラへのアクセスを許可するか、QRコードの写真をアップロードしてください。",
+      "noCodeInImage": "この画像にQRコードが見つかりません。",
+      "upload": "QR画像をアップロード"
+    },
+    "selectWallet": "選択",
+    "sendTo": "{{name}} さんに送金",
+    "subtitle": "他のお客様に即時送金したり、コードを共有して支払いを受け取ったりできます。",
+    "tabs": {
+      "receive": "受け取る",
+      "send": "送る"
+    },
+    "theyReceive": "受取額",
+    "title": "送金",
+    "toast": {
+      "copied": "{{label}}をコピーしました",
+      "copyFailed": "コピーできませんでした",
+      "lookupFailed": "受取人が見つかりません",
+      "notFound": "該当するお客様が見つかりません",
+      "notFoundHelp": "内容を確認して、もう一度お試しください。",
+      "sendFailed": "送金に失敗しました"
+    },
+    "total": "合計",
+    "totalDebit": "引き落とし合計"
   },
   "verifyEmail": {
     "backToLogin": "サインインに戻る",

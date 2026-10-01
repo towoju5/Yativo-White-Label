@@ -51,6 +51,10 @@ export type IssueCardInput = z.infer<typeof issueCardSchema>;
 export const portalIssueCardSchema = z.object({ amountMinor: minorAmountSchema });
 export type PortalIssueCardInput = z.infer<typeof portalIssueCardSchema>;
 
+export const cardFeeQuoteQuerySchema = z.object({ action: z.enum(["create", "fund"]), amountMinor: minorAmountSchema });
+export const cardFeeQuoteSchema = z.object({ amountMinor: minorAmountSchema, feeMinor: minorAmountSchema, totalMinor: minorAmountSchema, currencyCode: z.string() });
+export type CardFeeQuote = z.infer<typeof cardFeeQuoteSchema>;
+
 export const cardAmountSchema = z.object({ amountMinor: minorAmountSchema });
 export type CardAmountInput = z.infer<typeof cardAmountSchema>;
 

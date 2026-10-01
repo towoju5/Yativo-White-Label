@@ -338,7 +338,7 @@ export function FileField({
               </>
             )}
           </span>
-          <button type="button" onClick={clear} className="shrink-0 text-muted-foreground hover:text-destructive">
+          <button type="button" onClick={clear} className="shrink-0 text-muted-foreground hover:text-destructive" aria-label="Remove file" title="Remove file">
             <X className="h-4 w-4" />
           </button>
         </div>

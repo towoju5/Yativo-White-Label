@@ -138,7 +138,7 @@ export function TransactionDetailDialog({ transactionId, onClose }: { transactio
 
   return (
     <Dialog open={!!transactionId} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="scrollbar-hidden sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Transaction details</DialogTitle>
         </DialogHeader>

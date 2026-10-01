@@ -2,6 +2,8 @@ import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import {
+  cardFeeQuoteQuerySchema,
+  cardFeeQuoteSchema,
   cardSchema,
   cardDetailSchema,
   portalIssueCardSchema,
@@ -26,6 +28,7 @@ import {
   listCardTransactions,
   listPortalCards,
   getCardDetail,
+  quoteCardFee,
 } from "./cards.service.js";
 
 export async function portalCardsRoutes(app: FastifyInstance) {
@@ -47,6 +50,16 @@ export async function portalCardsRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const card = await issueCard(app.prisma, resolveEffectiveCustomerId(request.customer!), BigInt(request.body.amountMinor));
       return reply.send(card);
+    },
+  );
+
+  // Registered before /portal/cards/:id so "fee-quote" isn't captured as a card id.
+  server.get(
+    "/portal/cards/fee-quote",
+    { preHandler: [requireCustomerAuth, requirePortalPermission("cards.manage")], schema: { querystring: cardFeeQuoteQuerySchema, response: { 200: cardFeeQuoteSchema } } },
+    async (request, reply) => {
+      const quote = await quoteCardFee(app.prisma, resolveEffectiveCustomerId(request.customer!), request.query.action, BigInt(request.query.amountMinor));
+      return reply.send(quote);
     },
   );
 

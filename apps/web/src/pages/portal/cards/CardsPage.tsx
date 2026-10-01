@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { CardDto, CardDetailDto, CardReveal, CardTransaction } from "@white-label/shared-types";
+import type { CardDto, CardDetailDto, CardFeeQuote, CardReveal, CardTransaction } from "@white-label/shared-types";
 import {
   CreditCard,
   Eye,
@@ -19,6 +19,8 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Receipt,
+  RefreshCw,
+  Wallet,
 } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
@@ -79,11 +81,20 @@ export default function PortalCardsPage() {
     queryFn: () => portalApi.get<CardDto[]>("/portal/cards"),
   });
 
+  const amountMinor = Math.round(Number(amount) * 100);
+  const feeQuoteQuery = useQuery({
+    queryKey: ["portal", "cards", "fee-quote", "create", amountMinor],
+    queryFn: () => portalApi.get<CardFeeQuote>(`/portal/cards/fee-quote?action=create&amountMinor=${amountMinor}`),
+    enabled: issueOpen && Number.isFinite(amountMinor) && amountMinor > 0,
+  });
+  const feeQuote = feeQuoteQuery.data;
+
   const issueMutation = useMutation({
     mutationFn: () => portalApi.post<CardDto>("/portal/cards", { amountMinor: Math.round(Number(amount) * 100).toString() }),
     onSuccess: () => {
       toast({ title: t("cards.toast.cardIssued", "Virtual card issued") });
       queryClient.invalidateQueries({ queryKey: ["portal", "cards"] });
+      queryClient.invalidateQueries({ queryKey: ["portal", "wallets"] });
       setIssueOpen(false);
     },
     onError: (e) => toast({ variant: "destructive", title: t("cards.toast.issueCardError", "Couldn't issue virtual card"), description: e instanceof ApiError ? e.message : undefined }),
@@ -115,6 +126,23 @@ export default function PortalCardsPage() {
               <Input id="amount" type="number" min="3" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
               <p className="text-xs text-muted-foreground">{t("cards.initialFundingHelp", "Minimum $3. Debited from your USD wallet along with a creation fee and top-up fee.")}</p>
             </div>
+            {feeQuote && (
+              <div className="space-y-1.5 rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("cards.initialFunding", "Initial funding")}</span>
+                  <span className="font-mono">{formatUsd(String(Number(feeQuote.amountMinor) / 100))}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("cards.creationFee", "Card creation fee")}</span>
+                  <span className="font-mono">{formatUsd(String(Number(feeQuote.feeMinor) / 100))}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between font-medium">
+                  <span>{t("cards.totalDebit", "Total debited from wallet")}</span>
+                  <span className="font-mono">{formatUsd(String(Number(feeQuote.totalMinor) / 100))}</span>
+                </div>
+              </div>
+            )}
             <DialogFooter>
               <Button onClick={() => issueMutation.mutate()} disabled={issueMutation.isPending}>
                 {issueMutation.isPending ? t("cards.requesting", "Requesting…") : t("cards.requestCard", "Request virtual card")}
@@ -280,7 +308,32 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                 <span className="font-mono text-xs uppercase text-muted-foreground">{card.network}</span>
                 <Badge variant={STATUS_VARIANT[card.status] ?? "secondary"}>{card.status}</Badge>
               </div>
-              <div className="mt-6 flex items-center justify-between gap-3">
+              <div className="mt-5">
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Wallet className="h-3.5 w-3.5" /> {t("cards.cardBalance", "Card balance")}
+                </p>
+                <div className="mt-1 flex items-center gap-2">
+                  {detailQuery.isLoading ? (
+                    <Skeleton className="h-8 w-32" />
+                  ) : detailQuery.isError ? (
+                    <span className="text-sm text-destructive">{t("cards.balanceUnavailable", "Balance unavailable")}</span>
+                  ) : (
+                    <span className="font-heading text-3xl font-semibold tracking-tight">{detail?.balance != null ? formatUsd(detail.balance) : "—"}</span>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    title={t("cards.refreshBalance", "Refresh balance")}
+                    aria-label={t("cards.refreshBalance", "Refresh balance")}
+                    onClick={() => detailQuery.refetch()}
+                    disabled={detailQuery.isFetching}
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${detailQuery.isFetching ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between gap-3">
                 <p className="font-mono text-lg tracking-widest">
                   {revealed?.cardNumber
                     ? revealed.cardNumber.replace(/(.{4})/g, "$1 ").trim()
@@ -292,6 +345,8 @@ function CardDetailSheet({ card, onClose }: { card: CardDto | null; onClose: () 
                     size="sm"
                     onClick={() => (revealed ? setRevealed(null) : revealMutation.mutate())}
                     disabled={revealMutation.isPending}
+                    title={revealed ? t("cards.hideDetails", "Hide card details") : t("cards.revealDetails", "Reveal card number & CVV")}
+                    aria-label={revealed ? t("cards.hideDetails", "Hide card details") : t("cards.revealDetails", "Reveal card number & CVV")}
                   >
                     {revealMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

@@ -110,27 +110,34 @@
     "addedThisMonth": "Toegevoegd deze maand",
     "airlinePayments": "Betalingen bij luchtvaartmaatschappijen",
     "balance": "Saldo {{amount}}",
+    "balanceUnavailable": "Saldo niet beschikbaar",
     "billingAddress": "Factuuradres",
     "cancel": "Annuleren",
+    "cardBalance": "Kaartsaldo",
     "cardEndingIn": "Kaart eindigend op {{last4}}",
     "cardNumberLabel": "Kaartnummer",
     "cardholder": "Kaarthouder",
     "confirmTerminate": "Klik nogmaals om te bevestigen — dit kan niet ongedaan worden gemaakt",
     "copyNumber": "Nummer kopiëren",
+    "creationFee": "Kosten voor het aanmaken van de kaart",
     "cvv": "CVV {{cvv}}",
     "emptyState": "Nog geen kaarten. Vraag er een aan om te beginnen met uitgeven.",
     "exp": "Verloopt {{expiry}}",
     "feeAmount": "Kosten {{amount}}",
     "freezeCard": "Kaart blokkeren",
+    "hideDetails": "Kaartgegevens verbergen",
     "hidesAutomatically": "Verbergt automatisch",
+    "initialFunding": "Beginsaldo",
     "initialFundingHelp": "Minimaal $3. Wordt samen met de aanmaakkosten en oplaadkosten van uw USD-wallet afgeschreven.",
     "initialFundingLabel": "Initieel saldo (USD)",
     "manage": "Beheren →",
     "noTransactions": "Nog geen transacties.",
     "program": "Programma",
+    "refreshBalance": "Saldo vernieuwen",
     "requestCard": "Kaart aanvragen",
     "requestDialogTitle": "Een virtuele kaart aanvragen",
     "requesting": "Aanvragen…",
+    "revealDetails": "Kaartnummer en CVV tonen",
     "spentThisMonth": "Uitgegeven deze maand",
     "subtitle": "Virtuele Visa-kaarten gekoppeld aan uw USD-wallet",
     "terminateCard": "Kaart beëindigen",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "Er worden kosten ingehouden voordat het nettobedrag terug in uw wallet komt."
     },
     "topUp": "Opwaarderen",
+    "totalDebit": "Totaal afgeschreven van wallet",
     "transactionFallback": "Transactie",
     "transactions": "Transacties",
     "unfreezeCard": "Blokkering opheffen",
@@ -244,6 +252,23 @@
       "recentActivity": "Recente activiteit",
       "status": "Status",
       "wallets": "Wallets"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "Bedrijfsnaam",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "Sluiten",
+      "cta": "Mail mij een demo",
+      "description": "Maak een live demo-omgeving met voorbeeldgegevens. We mailen je de link — de omgeving is volledig afgeschermd en verloopt automatisch na 6 uur.",
+      "done": "Klaar",
+      "emailLabel": "Zakelijk e-mailadres",
+      "error": "Kan nu geen demo starten. Probeer het opnieuw.",
+      "generating": "Je demo wordt ingericht…",
+      "modalFine": "Alleen testgegevens — geen kaart nodig.",
+      "sentDescription": "We hebben je demolink en de inloggegevens voor het beheerpaneel naar {{email}} gestuurd. Ze zijn zo klaar.",
+      "sentTitle": "Bekijk je inbox",
+      "title": "Probeer het platform"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "Ondersteuning",
     "team": "Team",
     "transactions": "Transacties",
+    "transfer": "Overmaken",
     "virtualAccounts": "Virtuele rekeningen",
     "wallets": "Wallets",
     "whiteLabel": "White Label"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "Profiel bekijken"
     },
+    "openMenu": "Menu openen",
     "prime": {
       "notifications": "Meldingen",
       "switchToDarkMode": "Overschakelen naar donkere modus",
@@ -1221,6 +1248,90 @@
     "title": "Transactiegeschiedenis",
     "to": "Tot",
     "type": "Type"
+  },
+  "transfer": {
+    "amount": "Bedrag",
+    "available": "Beschikbaar: {{amount}}",
+    "back": "Terug",
+    "change": "Wijzigen",
+    "completeVerification": "Verificatie voltooien",
+    "confirmSend": "{{amount}} versturen",
+    "continue": "Doorgaan",
+    "done": {
+      "fee": "Kosten {{fee}}",
+      "reference": "Ref. {{id}}",
+      "sendAnother": "Nog een versturen",
+      "sentTo": "verstuurd naar {{name}}",
+      "viewHistory": "Geschiedenis bekijken"
+    },
+    "fee": "Kosten",
+    "find": "Zoeken",
+    "findingRecipient": "Ontvanger zoeken…",
+    "free": "Gratis",
+    "fromWallet": "Van wallet",
+    "instantNotice": "Overboekingen komen direct aan en kunnen niet worden teruggedraaid. Controleer of het de juiste persoon is.",
+    "insufficient": "Onvoldoende saldo",
+    "kycRequired": "Overboekingen zijn beschikbaar zodra je identiteit is geverifieerd.",
+    "method": {
+      "email": "E-mail",
+      "emailHelp": "Het e-mailadres waarmee diegene zich heeft aangemeld.",
+      "findBy": "Zoeken op {{method}}",
+      "id": "Klant-ID",
+      "idHelp": "De ID op het tabblad Ontvangen van diegene.",
+      "phone": "Telefoon",
+      "phoneHelp": "Minimaal de laatste 8 cijfers van het telefoonnummer.",
+      "qr": "QR scannen",
+      "qrTitle": "Scan de QR-code van de ontvanger"
+    },
+    "note": "Notitie",
+    "notePlaceholder": "Waar is het voor?",
+    "optional": "optioneel",
+    "receive": {
+      "alsoFindable": "Anderen kunnen je ook vinden via je e-mailadres of je telefoonnummer eindigend op {{hint}}.",
+      "alsoFindableEmail": "Anderen kunnen je ook vinden via je e-mailadres.",
+      "copyId": "Klant-ID kopiëren",
+      "copyLink": "Link kopiëren",
+      "idLabel": "Klant-ID",
+      "linkLabel": "Betaallink",
+      "scanToPay": "Scan om mij geld te sturen",
+      "share": "Delen",
+      "shareTitle": "Stuur mij geld",
+      "yourId": "Jouw klant-ID"
+    },
+    "recent": {
+      "empty": "Nog geen overboekingen.",
+      "received": "Ontvangen",
+      "sent": "Verstuurd",
+      "subtitle": "Geld dat je hebt verstuurd en ontvangen",
+      "title": "Recente overboekingen"
+    },
+    "recentRecipients": "Recent",
+    "scan": {
+      "hint": "Richt je camera op de ontvangst-QR-code van de ontvanger.",
+      "imageUnreadable": "Kan die afbeelding niet lezen.",
+      "noCamera": "Camera niet beschikbaar. Geef toegang tot de camera of upload een foto van de QR-code.",
+      "noCodeInImage": "Geen QR-code gevonden in die afbeelding.",
+      "upload": "QR-afbeelding uploaden"
+    },
+    "selectWallet": "Kies",
+    "sendTo": "Versturen naar {{name}}",
+    "subtitle": "Stuur direct geld naar een andere klant of deel je code om betaald te worden.",
+    "tabs": {
+      "receive": "Ontvangen",
+      "send": "Versturen"
+    },
+    "theyReceive": "Ontvanger krijgt",
+    "title": "Overmaken",
+    "toast": {
+      "copied": "{{label}} gekopieerd",
+      "copyFailed": "Kopiëren mislukt",
+      "lookupFailed": "Ontvanger niet gevonden",
+      "notFound": "Geen klant gevonden",
+      "notFoundHelp": "Controleer de gegevens en probeer het opnieuw.",
+      "sendFailed": "Overboeking mislukt"
+    },
+    "total": "Totaal",
+    "totalDebit": "Totaal afgeschreven"
   },
   "verifyEmail": {
     "backToLogin": "Terug naar inloggen",

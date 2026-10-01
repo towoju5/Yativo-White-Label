@@ -110,27 +110,34 @@
     "addedThisMonth": "Diesen Monat hinzugefügt",
     "airlinePayments": "Fluggesellschaftszahlungen",
     "balance": "Saldo {{amount}}",
+    "balanceUnavailable": "Guthaben nicht verfügbar",
     "billingAddress": "Rechnungsadresse",
     "cancel": "Abbrechen",
+    "cardBalance": "Kartenguthaben",
     "cardEndingIn": "Karte endet auf {{last4}}",
     "cardNumberLabel": "Kartennummer",
     "cardholder": "Karteninhaber",
     "confirmTerminate": "Erneut klicken zum Bestätigen — dies kann nicht rückgängig gemacht werden",
     "copyNumber": "Nummer kopieren",
+    "creationFee": "Gebühr für die Kartenerstellung",
     "cvv": "CVV {{cvv}}",
     "emptyState": "Noch keine Karten. Beantragen Sie eine, um mit dem Ausgeben zu beginnen.",
     "exp": "Gültig bis {{expiry}}",
     "feeAmount": "Gebühr {{amount}}",
     "freezeCard": "Karte sperren",
+    "hideDetails": "Kartendaten ausblenden",
     "hidesAutomatically": "Wird automatisch ausgeblendet",
+    "initialFunding": "Startguthaben",
     "initialFundingHelp": "Mindestens 3 $. Wird zusammen mit einer Ausstellungsgebühr und einer Aufladegebühr von Ihrem USD-Wallet abgebucht.",
     "initialFundingLabel": "Anfangsguthaben (USD)",
     "manage": "Verwalten →",
     "noTransactions": "Noch keine Transaktionen.",
     "program": "Programm",
+    "refreshBalance": "Guthaben aktualisieren",
     "requestCard": "Karte beantragen",
     "requestDialogTitle": "Eine virtuelle Karte beantragen",
     "requesting": "Wird beantragt…",
+    "revealDetails": "Kartennummer und CVV anzeigen",
     "spentThisMonth": "Diesen Monat ausgegeben",
     "subtitle": "Virtuelle Visa-Karten, verknüpft mit Ihrem USD-Wallet",
     "terminateCard": "Karte kündigen",
@@ -157,6 +164,7 @@
       "withdrawalSubmittedDescription": "Vor Gutschrift des Nettobetrags auf Ihrem Wallet wird eine Gebühr abgezogen."
     },
     "topUp": "Aufladen",
+    "totalDebit": "Gesamtbetrag vom Wallet abgebucht",
     "transactionFallback": "Transaktion",
     "transactions": "Transaktionen",
     "unfreezeCard": "Kartensperre aufheben",
@@ -244,6 +252,23 @@
       "recentActivity": "Letzte Aktivitäten",
       "status": "Status",
       "wallets": "Wallets"
+    }
+  },
+  "demo": {
+    "landing": {
+      "businessNameLabel": "Firmenname",
+      "businessNamePlaceholder": "Acme Inc.",
+      "close": "Schließen",
+      "cta": "Demo per E-Mail senden",
+      "description": "Erstelle eine Live-Demoumgebung mit Beispieldaten. Wir senden dir den Link per E-Mail – sie ist vollständig isoliert und läuft nach 6 Stunden automatisch ab.",
+      "done": "Fertig",
+      "emailLabel": "Geschäftliche E-Mail",
+      "error": "Die Demo konnte gerade nicht gestartet werden. Bitte versuche es erneut.",
+      "generating": "Deine Demo wird eingerichtet…",
+      "modalFine": "Nur Testdaten – keine Karte erforderlich.",
+      "sentDescription": "Wir haben deinen Demo-Link und die Zugangsdaten für das Admin-Panel an {{email}} gesendet. Sie sind gleich einsatzbereit.",
+      "sentTitle": "Sieh in deinem Posteingang nach",
+      "title": "Plattform testen"
     }
   },
   "deposit": {
@@ -849,6 +874,7 @@
     "support": "Support",
     "team": "Team",
     "transactions": "Transaktionen",
+    "transfer": "Überweisen",
     "virtualAccounts": "Virtuelle Konten",
     "wallets": "Wallets",
     "whiteLabel": "White Label"
@@ -1194,6 +1220,7 @@
     "aurora": {
       "viewProfile": "Profil ansehen"
     },
+    "openMenu": "Menü öffnen",
     "prime": {
       "notifications": "Benachrichtigungen",
       "switchToDarkMode": "Zum Dunkelmodus wechseln",
@@ -1221,6 +1248,90 @@
     "title": "Transaktionsverlauf",
     "to": "Bis",
     "type": "Typ"
+  },
+  "transfer": {
+    "amount": "Betrag",
+    "available": "Verfügbar: {{amount}}",
+    "back": "Zurück",
+    "change": "Ändern",
+    "completeVerification": "Verifizierung abschließen",
+    "confirmSend": "{{amount}} senden",
+    "continue": "Weiter",
+    "done": {
+      "fee": "Gebühr {{fee}}",
+      "reference": "Ref. {{id}}",
+      "sendAnother": "Weitere senden",
+      "sentTo": "an {{name}} gesendet",
+      "viewHistory": "Verlauf anzeigen"
+    },
+    "fee": "Gebühr",
+    "find": "Suchen",
+    "findingRecipient": "Empfänger wird gesucht…",
+    "free": "Kostenlos",
+    "fromWallet": "Vom Wallet",
+    "instantNotice": "Überweisungen kommen sofort an und können nicht rückgängig gemacht werden. Stelle sicher, dass es die richtige Person ist.",
+    "insufficient": "Unzureichendes Guthaben",
+    "kycRequired": "Überweisungen sind verfügbar, sobald deine Identität verifiziert ist.",
+    "method": {
+      "email": "E-Mail",
+      "emailHelp": "Die E-Mail-Adresse, mit der sich die Person registriert hat.",
+      "findBy": "Suchen nach {{method}}",
+      "id": "Kunden-ID",
+      "idHelp": "Die ID auf dem Tab „Empfangen“ der Person.",
+      "phone": "Telefon",
+      "phoneHelp": "Mindestens die letzten 8 Ziffern der Telefonnummer.",
+      "qr": "QR scannen",
+      "qrTitle": "Scanne den QR-Code des Empfängers"
+    },
+    "note": "Notiz",
+    "notePlaceholder": "Wofür ist das?",
+    "optional": "optional",
+    "receive": {
+      "alsoFindable": "Andere finden dich auch über deine E-Mail oder deine Telefonnummer mit der Endung {{hint}}.",
+      "alsoFindableEmail": "Andere finden dich auch über deine E-Mail-Adresse.",
+      "copyId": "Kunden-ID kopieren",
+      "copyLink": "Link kopieren",
+      "idLabel": "Kunden-ID",
+      "linkLabel": "Zahlungslink",
+      "scanToPay": "Scannen, um mir Geld zu senden",
+      "share": "Teilen",
+      "shareTitle": "Sende mir Geld",
+      "yourId": "Deine Kunden-ID"
+    },
+    "recent": {
+      "empty": "Noch keine Überweisungen.",
+      "received": "Empfangen",
+      "sent": "Gesendet",
+      "subtitle": "Gesendetes und empfangenes Geld",
+      "title": "Letzte Überweisungen"
+    },
+    "recentRecipients": "Zuletzt",
+    "scan": {
+      "hint": "Richte deine Kamera auf den Empfangs-QR-Code des Empfängers.",
+      "imageUnreadable": "Dieses Bild konnte nicht gelesen werden.",
+      "noCamera": "Kamera nicht verfügbar. Erlaube den Kamerazugriff oder lade stattdessen ein Foto des QR-Codes hoch.",
+      "noCodeInImage": "In diesem Bild wurde kein QR-Code gefunden.",
+      "upload": "QR-Bild hochladen"
+    },
+    "selectWallet": "Auswählen",
+    "sendTo": "An {{name}} senden",
+    "subtitle": "Sende sofort Geld an einen anderen Kunden oder teile deinen Code, um bezahlt zu werden.",
+    "tabs": {
+      "receive": "Empfangen",
+      "send": "Senden"
+    },
+    "theyReceive": "Empfänger erhält",
+    "title": "Überweisen",
+    "toast": {
+      "copied": "{{label}} kopiert",
+      "copyFailed": "Kopieren fehlgeschlagen",
+      "lookupFailed": "Empfänger nicht gefunden",
+      "notFound": "Kein Kunde gefunden",
+      "notFoundHelp": "Prüfe die Angaben und versuche es erneut.",
+      "sendFailed": "Überweisung fehlgeschlagen"
+    },
+    "total": "Gesamt",
+    "totalDebit": "Abgebuchter Gesamtbetrag"
   },
   "verifyEmail": {
     "backToLogin": "Zurück zur Anmeldung",

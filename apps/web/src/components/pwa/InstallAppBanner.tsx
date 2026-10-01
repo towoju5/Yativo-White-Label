@@ -43,7 +43,7 @@ export function InstallAppBanner() {
       <Button size="sm" variant="outline" className="shrink-0" onClick={install}>
         {t("pwa.banner.cta", "Install")}
       </Button>
-      <button type="button" onClick={dismiss} aria-label={t("pwa.banner.dismiss", "Dismiss")} className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted">
+      <button type="button" onClick={dismiss} aria-label={t("pwa.banner.dismiss", "Dismiss")} title={t("pwa.banner.dismiss", "Dismiss")} className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted">
         <X className="h-4 w-4" />
       </button>
     </div>

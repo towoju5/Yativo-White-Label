@@ -54,7 +54,7 @@ export function AuroraTopbar({ sections, productName, userLabel, onLogout, profi
           </NavLink>
         )}
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="rounded-lg p-2 hover:bg-muted">
+          <SheetTrigger className="rounded-lg p-2 hover:bg-muted" aria-label={t("topbar.openMenu", "Open menu")} title={t("topbar.openMenu", "Open menu")}>
             <Menu className="h-5 w-5" />
           </SheetTrigger>
           <SheetContent side="left" className="w-72 space-y-4 overflow-y-auto p-4">

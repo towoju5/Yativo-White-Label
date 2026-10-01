@@ -127,7 +127,7 @@ export default function VirtualAccountsPage() {
                                   <dd className="flex items-center gap-2 font-mono">
                                       {value}
                                       <button onClick={()=> copy(value)} className="text-muted-foreground
-                                          hover:text-foreground" aria-label={t("virtualAccounts.copyField", "Copy {{field}}", { field: key })}>
+                                          hover:text-foreground" aria-label={t("virtualAccounts.copyField", "Copy {{field}}", { field: key })} title={t("virtualAccounts.copyField", "Copy {{field}}", { field: key })}>
                                           <Copy className="h-3.5 w-3.5" />
                                       </button>
                                   </dd>
