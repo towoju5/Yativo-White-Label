@@ -18,22 +18,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ApiError, publicApi } from "@/lib/api-client";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { takePostAuthRedirect } from "@/lib/postAuthRedirect";
+import { useDemoConfig } from "@/lib/demoConfig";
 
 export default function PortalLoginPage() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading: authLoading, login, loginWithPasskey, verifyTwoFactor, verifyEmailStepUp } = useCustomerAuth();
   const { data: branding } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding, staleTime: Infinity });
   const { data: authConfig } = useQuery({ queryKey: ["portal", "auth-config"], queryFn: () => publicApi.get<PortalAuthConfig>("/portal/auth/config"), staleTime: Infinity });
-  // Silently no-ops (empty result, no error surfaced) when DEMO_ENABLED is off — /demo/config
-  // doesn't exist as a route at all in that case, so this 404s and React Query just leaves
-  // `demoConfig` undefined, which the render below treats the same as "disabled".
-  const { data: demoConfig } = useQuery({
-    queryKey: ["demo", "config"],
-    queryFn: () => publicApi.get<{ publicSignupEnabled: boolean }>("/demo/config"),
-    staleTime: Infinity,
-    retry: false,
-    throwOnError: false,
-  });
+  const { data: demoConfig } = useDemoConfig();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);

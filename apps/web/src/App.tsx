@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { fetchBranding, applyBrandingToDocument } from "@/theme/branding";
 import { applyPwaManifest, registerServiceWorker } from "@/theme/pwa";
-import { setStaffLoginPath, publicApi } from "@/lib/api-client";
+import { setStaffLoginPath } from "@/lib/api-client";
+import { useDemoConfig } from "@/lib/demoConfig";
 import { TemplateProvider } from "@/templates/TemplateProvider";
 import { StaffAuthProvider } from "@/hooks/useStaffAuth";
 import { CustomerAuthProvider } from "@/hooks/useCustomerAuth";
@@ -24,15 +25,7 @@ function SplashScreen() {
 
 export default function App() {
   const { data: branding, isLoading } = useQuery({ queryKey: ["branding"], queryFn: fetchBranding });
-  // 404s (empty result, no thrown error) when DEMO_ENABLED is off — that route doesn't exist at
-  // all in that case, so `demoConfig` just stays undefined and every check below treats it as
-  // "no demo landing" the same as an explicit false.
-  const { data: demoConfig, isLoading: demoConfigLoading } = useQuery({
-    queryKey: ["demo", "config"],
-    queryFn: () => publicApi.get<{ publicSignupEnabled: boolean }>("/demo/config"),
-    retry: false,
-    throwOnError: false,
-  });
+  const { data: demoConfig, isLoading: demoConfigLoading } = useDemoConfig();
   useRealtimeWalletBridge();
   useNavLabelOverrides();
 
@@ -54,9 +47,9 @@ export default function App() {
   const demoLandingActive = demoConfig?.publicSignupEnabled ?? false;
   const router = useMemo(() => createRouter(adminLoginPath, demoLandingActive), [adminLoginPath, demoLandingActive]);
 
-  // Waits for /demo/config too (retry: false, so a 404 when demo mode is off resolves on the first
-  // response) — otherwise "/" renders the login page first and only swaps to the landing page once
-  // the config arrives, briefly mounting LoginPage (and its own effects) for every visitor.
+  // Waits for /demo/config too, so "/" doesn't flash the login page before swapping to the landing
+  // page. Safe because useDemoConfig always resolves to data (a 404 = demo off) and never refetches
+  // — see lib/demoConfig.ts for the reload loop this gate caused when a 404 was left as an error.
   if (isLoading || demoConfigLoading) return <SplashScreen />;
 
   const templateId = branding?.templateId ?? "nova";
