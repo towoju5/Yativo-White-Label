@@ -18,7 +18,7 @@ import {
 import { ArrowLeft, ArrowRight, Banknote, Check, CheckCircle2, Landmark, Loader2, RefreshCw, User, Users } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { cn, majorToMinorString } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,7 +59,8 @@ export default function SendMoneyPage() {
 
   // Shared amount/quote/payout state
   const [activeBeneficiary, setActiveBeneficiary] = useState<{ id: string; name: string; currency?: string } | null>(null);
-  const [debitCurrency, setDebitCurrency] = useState("USD");
+  // Picked automatically once wallets load — see the effect below eligibleWallets.
+  const [debitCurrency, setDebitCurrency] = useState("");
   const [sendAmount, setSendAmount] = useState("");
   const [amountError, setAmountError] = useState<string | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -129,8 +130,9 @@ export default function SendMoneyPage() {
   });
 
   const quoteMutation = useMutation({
-    mutationFn: () =>
-      portalApi.post<Quote>("/portal/quotes", { beneficiaryId: activeBeneficiary!.id, debitCurrency, sendAmount }),
+    // `amount` overrides the typed amount — used by "reduce to fit my balance" on the review step.
+    mutationFn: (amount?: string) =>
+      portalApi.post<Quote>("/portal/quotes", { beneficiaryId: activeBeneficiary!.id, debitCurrency, sendAmount: amount ?? sendAmount }),
     onSuccess: (q) => setQuote(q),
     onError: (e) =>
       toast({
@@ -180,15 +182,19 @@ export default function SendMoneyPage() {
   // before this was tracked, if its country isn't known).
   const eligibleWallets = gatewayBaseCurrencies.length > 0 ? wallets.filter((w) => gatewayBaseCurrencies.includes(w.currencyCode)) : wallets;
 
-  // Safety net for the saved-beneficiary path, where the gateway's supported currencies only
-  // become known asynchronously (after activeBeneficiary is already set) — the explicit reset in
-  // the "new recipient" method picker's onClick above covers that flow synchronously instead.
+  // Always debit from a wallet the customer actually holds and this gateway accepts — defaulting
+  // to the one with the most available. A fixed "USD" default used to leave customers whose money
+  // sat in another currency debiting an empty (or non-existent) USD wallet. Also re-runs once a
+  // saved beneficiary's supported currencies arrive asynchronously, replacing a now-ineligible pick.
+  const eligibleCodes = eligibleWallets.map((w) => w.currencyCode).join(",");
   useEffect(() => {
-    if (debitCurrency && gatewayBaseCurrencies.length > 0 && !gatewayBaseCurrencies.includes(debitCurrency)) {
-      setDebitCurrency("");
-    }
+    if (eligibleWallets.some((w) => w.currencyCode === debitCurrency)) return;
+    const best = [...eligibleWallets].sort((a, b) => (BigInt(b.availableMinor) > BigInt(a.availableMinor) ? 1 : -1))[0];
+    setDebitCurrency(best?.currencyCode ?? "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gatewayBaseCurrencies.join(",")]);
+  }, [eligibleCodes, debitCurrency]);
+  const debitWallet = eligibleWallets.find((w) => w.currencyCode === debitCurrency) ?? null;
+  const toMajor = (minor: string | bigint, decimals: number) => formatMinorAmount(minor, decimals).replace(/,/g, "");
 
   const steps = useExisting ? SAVED_STEPS : NEW_STEPS;
   const amountStepIndex = steps.length - 2;
@@ -203,7 +209,7 @@ export default function SendMoneyPage() {
     setFieldErrors({});
     setSelectedBeneficiaryId("");
     setActiveBeneficiary(null);
-    setDebitCurrency("USD");
+    setDebitCurrency("");
     setSendAmount("");
     setAmountError(null);
     setQuote(null);
@@ -245,6 +251,20 @@ export default function SendMoneyPage() {
     const n = Number(sendAmount);
     if (!sendAmount || Number.isNaN(n) || n <= 0) {
       setAmountError(t("send.errors.enterAmount", "Enter an amount"));
+      return;
+    }
+    if (!debitWallet) {
+      setAmountError(t("send.errors.pickWallet", "Pick a wallet to send from"));
+      return;
+    }
+    const minor = majorToMinorString(sendAmount, debitWallet.decimals);
+    if (minor && BigInt(minor) > BigInt(debitWallet.availableMinor)) {
+      setAmountError(
+        t("send.errors.overBalance", "That's more than your available {{currency}} balance ({{amount}}).", {
+          currency: debitWallet.currencyCode,
+          amount: formatMinorAmount(debitWallet.availableMinor, debitWallet.decimals),
+        }),
+      );
       return;
     }
     quoteMutation.mutate(undefined, { onSuccess: () => setStep((s) => s + 1) });
@@ -293,7 +313,24 @@ export default function SendMoneyPage() {
     }
   };
 
-  const reQuote = () => quoteMutation.mutate();
+  const reQuote = () => quoteMutation.mutate(undefined);
+
+  // The total (Yativo's fee-inclusive debit + the platform fee) is only known once quoted, so a
+  // typed amount that fits the balance can still come out over it once fees are added.
+  const quoteExceedsBalance = !!(quote && debitWallet && quote.debitCurrency === debitWallet.currencyCode && BigInt(quote.totalDebitMinor) > BigInt(debitWallet.availableMinor));
+
+  // Fees scale roughly with the amount, so shrink the typed amount by the overshoot ratio and
+  // re-quote. A fixed fee can leave it a hair over — the check above simply offers this again.
+  const fitToBalance = () => {
+    if (!quote || !debitWallet) return;
+    const typed = majorToMinorString(sendAmount, debitWallet.decimals);
+    if (!typed) return;
+    const fitted = (BigInt(typed) * BigInt(debitWallet.availableMinor)) / BigInt(quote.totalDebitMinor) - 1n;
+    if (fitted <= 0n) return;
+    const amount = toMajor(fitted, debitWallet.decimals);
+    setSendAmount(amount);
+    quoteMutation.mutate(amount);
+  };
 
   const confirmPayout = () => {
     if (!quote || quoteExpired || !activeBeneficiary) return;
@@ -586,9 +623,9 @@ export default function SendMoneyPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(eligibleWallets.length > 0 ? eligibleWallets : wallets.length === 0 ? [{ currencyCode: "USD" }] : []).map((w) => (
+                    {eligibleWallets.map((w) => (
                       <SelectItem key={w.currencyCode} value={w.currencyCode}>
-                        {w.currencyCode}
+                        {w.currencyCode} · {formatMinorAmount(w.availableMinor, w.decimals)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -616,6 +653,26 @@ export default function SendMoneyPage() {
                   }}
                 />
                 {amountError && <p className="text-xs text-destructive">{amountError}</p>}
+                {debitWallet && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>
+                      {t("send.amountStep.available", "Available: {{amount}} {{currency}}", {
+                        amount: formatMinorAmount(debitWallet.availableMinor, debitWallet.decimals),
+                        currency: debitWallet.currencyCode,
+                      })}
+                    </span>
+                    <button
+                      type="button"
+                      className="font-medium text-primary hover:underline"
+                      onClick={() => {
+                        setSendAmount(toMajor(debitWallet.availableMinor, debitWallet.decimals));
+                        setAmountError(null);
+                      }}
+                    >
+                      {t("send.amountStep.max", "Max")}
+                    </button>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   {activeBeneficiary?.currency
                     ? t("send.amountStep.willReceiveWithCurrency", "We'll show exactly how much {{recipient}} receives in {{currency}} before you confirm.", {
@@ -675,6 +732,19 @@ export default function SendMoneyPage() {
                   </dd>
                 </div>
               </dl>
+              {quoteExceedsBalance && debitWallet && (
+                <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">
+                  <p className="text-destructive">
+                    {t("send.review.overBalance", "With fees, this comes to more than your available balance of {{amount}} {{currency}}.", {
+                      amount: formatMinorAmount(debitWallet.availableMinor, debitWallet.decimals),
+                      currency: debitWallet.currencyCode,
+                    })}
+                  </p>
+                  <Button type="button" size="sm" variant="outline" onClick={fitToBalance} disabled={quoteMutation.isPending}>
+                    {quoteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("send.review.fitToBalance", "Reduce amount to fit my balance")}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
@@ -695,7 +765,7 @@ export default function SendMoneyPage() {
                 )}
               </Button>
             ) : (
-              <Button onClick={confirmPayout} disabled={payoutMutation.isPending}>
+              <Button onClick={confirmPayout} disabled={payoutMutation.isPending || quoteExceedsBalance}>
                 {payoutMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("send.buttons.confirmAndSend", "Confirm & send")}
               </Button>
             )

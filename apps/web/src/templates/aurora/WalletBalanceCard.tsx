@@ -26,7 +26,7 @@ export function AuroraWalletBalanceCard({ currencyCode, decimals, symbol, availa
         <p className="truncate font-heading text-lg font-bold tracking-tight">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
         {BigInt(pendingMinor || "0") !== 0n && (
           <p className="mt-0.5 text-xs text-warning">
-            {t("walletBalanceCard.pending", "+{{amount}} pending", { amount: formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode) })}
+            {t("walletBalanceCard.onHold", "{{amount}} on hold for withdrawals", { amount: formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode) })}
           </p>
         )}
       </div>

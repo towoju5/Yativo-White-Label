@@ -27,7 +27,7 @@ export function PrimeWalletBalanceCard({ currencyCode, decimals, symbol, availab
         <p className="font-mono text-sm font-semibold tabular-nums">{formatCurrencyAmount(availableMinor, decimals, symbol, currencyCode)}</p>
         {BigInt(pendingMinor || "0") !== 0n && (
           <p className="text-xs text-warning">
-            {t("walletBalanceCard.pending", "+{{amount}} pending", { amount: formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode) })}
+            {t("walletBalanceCard.onHold", "{{amount}} on hold for withdrawals", { amount: formatCurrencyAmount(pendingMinor, decimals, symbol, currencyCode) })}
           </p>
         )}
       </div>

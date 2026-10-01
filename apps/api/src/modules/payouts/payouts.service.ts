@@ -2,12 +2,15 @@ import { randomUUID } from "node:crypto";
 import type { Payout, PrismaClient, LedgerExternalSource } from "@prisma/client";
 import type { CreatePayoutInput, FriendlyTransactionStatus } from "@white-label/shared-types";
 import { env } from "../../config/env.js";
+import { YativoApiError } from "@white-label/yativo-sdk";
 import { yativoClient } from "../../lib/yativoClient.js";
+import logger from "../../lib/logger.js";
 import { enqueuePayoutStatusPoll } from "../../jobs/payoutPollQueue.js";
 import { ensureYativoCustomer } from "../../lib/ensureYativoCustomer.js";
 import { NotFoundError, InsufficientFundsError, AppError } from "../../lib/errors.js";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { settlePendingTransaction } from "../ledger/settlePendingTransaction.js";
+import { reverseTransaction } from "../ledger/reverseTransaction.js";
 import { deriveFriendlyStatuses } from "../ledger/friendlyStatus.js";
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
@@ -216,20 +219,38 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
     include: { transaction: true },
   });
 
-  const yativoCustomerId = await ensureYativoCustomer(prisma, customer);
-  const yativoResult = await yativoClient.fiat.payouts.create({
-    idempotencyKey: pendingTx.id,
-    // Sent unconditionally — only avenia/tazapays gateways require it, but it's harmless for
-    // every other gateway and we already have it in hand for every payout regardless.
-    yativoCustomerId,
-    debitWallet: input.currencyCode,
-    amount: Number(amountMinor) / 10 ** currency.decimals,
-    // payment_method_id and beneficiary_details_id must be the *same* id — see the doc comment
-    // on CreateFiatPayoutInput.beneficiaryPaymentMethodId for why sending mismatched values here
-    // is the most common source of Yativo payout bugs.
-    beneficiaryPaymentMethodId: beneficiary.yativoBeneficiaryId,
-    quoteId: input.quoteId,
-  });
+  // The hold above is only ever released by the payout's webhook or status poll — both of which
+  // need a yativoPayoutId. If submission fails, nothing would ever release it and the customer's
+  // money would sit "pending" indefinitely, so a definite failure releases it here. An ambiguous
+  // one (timeout, network error, 5xx, an unparseable 2xx) keeps the hold: Yativo may have
+  // accepted the payout, and releasing then would pay out money that was never debited.
+  let submitted = false;
+  let yativoResult: Awaited<ReturnType<typeof yativoClient.fiat.payouts.create>>;
+  try {
+    const yativoCustomerId = await ensureYativoCustomer(prisma, customer);
+    submitted = true;
+    yativoResult = await yativoClient.fiat.payouts.create({
+      idempotencyKey: pendingTx.id,
+      // Sent unconditionally — only avenia/tazapays gateways require it, but it's harmless for
+      // every other gateway and we already have it in hand for every payout regardless.
+      yativoCustomerId,
+      debitWallet: input.currencyCode,
+      amount: Number(amountMinor) / 10 ** currency.decimals,
+      // payment_method_id and beneficiary_details_id must be the *same* id — see the doc comment
+      // on CreateFiatPayoutInput.beneficiaryPaymentMethodId for why sending mismatched values here
+      // is the most common source of Yativo payout bugs.
+      beneficiaryPaymentMethodId: beneficiary.yativoBeneficiaryId,
+      quoteId: input.quoteId,
+    });
+  } catch (err) {
+    const rejected = err instanceof YativoApiError && err.upstreamStatus >= 400 && err.upstreamStatus < 500;
+    if (!submitted || rejected) {
+      await reverseTransaction(prisma, pendingTx.id, `Payout submission failed: ${err instanceof Error ? err.message : String(err)}`.slice(0, 500));
+    } else {
+      logger.error({ err, payoutId: payout.id }, "payout submission outcome unknown — hold kept; check Yativo before releasing it from Transactions");
+    }
+    throw err;
+  }
 
   await prisma.payout.update({ where: { id: payout.id }, data: { yativoPayoutId: yativoResult.yativoPayoutId } });
 

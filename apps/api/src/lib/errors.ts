@@ -20,8 +20,11 @@ export class UnbalancedTransactionError extends AppError {
 }
 
 export class InsufficientFundsError extends AppError {
+  accountId: string;
   constructor(accountId: string) {
-    super(`Account ${accountId} does not have sufficient available balance for this transaction`, 409, "INSUFFICIENT_FUNDS");
+    // Customer-facing, so no internal account id in the message — kept on the error for server-side logs only.
+    super("Your available balance isn't enough to cover this amount plus fees.", 409, "INSUFFICIENT_FUNDS");
+    this.accountId = accountId;
   }
 }
 

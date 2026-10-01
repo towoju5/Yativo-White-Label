@@ -17,7 +17,8 @@
     "bootstrap-platform-settings": "tsx scripts/bootstrapPlatformSettings.ts",
     "backfill-ledger-entry-balances": "tsx scripts/backfillLedgerEntryBalances.ts",
     "correct-deposit-credits": "tsx scripts/correctDepositCredits.ts",
-    "cleanup-invalid-reconciliation-reports": "tsx scripts/cleanupInvalidReconciliationReports.ts"
+    "cleanup-invalid-reconciliation-reports": "tsx scripts/cleanupInvalidReconciliationReports.ts",
+    "list-stuck-payout-holds": "tsx scripts/listStuckPayoutHolds.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -936,7 +936,9 @@
       "promptTo": "Amount to send to {{name}}",
       "recipientFallback": "the recipient",
       "willReceive": "We'll show exactly how much {{recipient}} receives before you confirm.",
-      "willReceiveWithCurrency": "We'll show exactly how much {{recipient}} receives in {{currency}} before you confirm."
+      "willReceiveWithCurrency": "We'll show exactly how much {{recipient}} receives in {{currency}} before you confirm.",
+      "available": "Available: {{amount}} {{currency}}",
+      "max": "Max"
     },
     "buttons": {
       "back": "Back",
@@ -949,7 +951,9 @@
       "enterAmount": "Enter an amount",
       "fieldRequired": "{{field}} is required",
       "maxLength": "At most {{max}} characters",
-      "minLength": "At least {{min}} characters"
+      "minLength": "At least {{min}} characters",
+      "pickWallet": "Pick a wallet to send from",
+      "overBalance": "That's more than your available {{currency}} balance ({{amount}})."
     },
     "result": {
       "payoutId": "Payout ID: {{id}}",
@@ -967,7 +971,9 @@
       "rateLabel": "Rate",
       "recipientGetsLabel": "Recipient gets",
       "toLabel": "To",
-      "totalChargedLabel": "Total charged"
+      "totalChargedLabel": "Total charged",
+      "overBalance": "With fees, this comes to more than your available balance of {{amount}} {{currency}}.",
+      "fitToBalance": "Reduce amount to fit my balance"
     },
     "savedStep0": {
       "beneficiaryPlaceholder": "Select a beneficiary",
@@ -1286,7 +1292,8 @@
   },
   "walletBalanceCard": {
     "pending": "+{{amount}} pending",
-    "wallet": "Wallet"
+    "wallet": "Wallet",
+    "onHold": "{{amount}} on hold for withdrawals"
   },
   "walletDetail": {
     "allWallets": "All wallets",
