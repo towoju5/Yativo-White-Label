@@ -35,10 +35,16 @@ function getTransporter(): Transporter | null {
   if (transporter) return transporter;
   if (smtpConfig.mode === "smtp" && smtpConfig.host) {
     logger.info({ mode: "smtp", host: smtpConfig.host, port: smtpConfig.port, secure: smtpConfig.secure, user: smtpConfig.user, from: smtpConfig.fromAddress }, "email.transport");
+    // A local relay (Postfix on 127.0.0.1:25 — see scripts/setup-postfix.sh) advertises STARTTLS
+    // with its self-signed snakeoil cert, which nodemailer would upgrade to and then reject. The
+    // hop never leaves the machine, so TLS adds nothing there; Postfix itself still uses TLS for
+    // the real delivery to the recipient's server.
+    const loopback = ["127.0.0.1", "localhost", "::1"].includes(smtpConfig.host.trim().toLowerCase());
     transporter = nodemailer.createTransport({
       host: smtpConfig.host,
       port: smtpConfig.port,
       secure: smtpConfig.secure,
+      ignoreTLS: loopback && !smtpConfig.secure,
       auth: smtpConfig.user ? { user: smtpConfig.user, pass: smtpConfig.password } : undefined,
     });
     activeMode = "smtp";

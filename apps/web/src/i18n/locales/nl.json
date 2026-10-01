@@ -1254,7 +1254,6 @@
     "available": "Beschikbaar: {{amount}}",
     "back": "Terug",
     "change": "Wijzigen",
-    "completeVerification": "Verificatie voltooien",
     "confirmSend": "{{amount}} versturen",
     "continue": "Doorgaan",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "Van wallet",
     "instantNotice": "Overboekingen komen direct aan en kunnen niet worden teruggedraaid. Controleer of het de juiste persoon is.",
     "insufficient": "Onvoldoende saldo",
-    "kycRequired": "Overboekingen zijn beschikbaar zodra je identiteit is geverifieerd.",
     "method": {
       "email": "E-mail",
       "emailHelp": "Het e-mailadres waarmee diegene zich heeft aangemeld.",

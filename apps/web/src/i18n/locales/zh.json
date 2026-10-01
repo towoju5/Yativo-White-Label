@@ -1254,7 +1254,6 @@
     "available": "可用：{{amount}}",
     "back": "返回",
     "change": "更改",
-    "completeVerification": "完成验证",
     "confirmSend": "转账 {{amount}}",
     "continue": "继续",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "付款钱包",
     "instantNotice": "转账即时到账且无法撤回，请确认收款人无误。",
     "insufficient": "余额不足",
-    "kycRequired": "完成身份验证后即可使用转账功能。",
     "method": {
       "email": "邮箱",
       "emailHelp": "对方注册时使用的邮箱地址。",

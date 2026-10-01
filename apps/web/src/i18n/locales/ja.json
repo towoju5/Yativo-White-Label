@@ -1254,7 +1254,6 @@
     "available": "利用可能額: {{amount}}",
     "back": "戻る",
     "change": "変更",
-    "completeVerification": "本人確認を完了する",
     "confirmSend": "{{amount}} を送金",
     "continue": "続ける",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "送金元ウォレット",
     "instantNotice": "送金は即時に反映され、取り消すことはできません。相手に間違いがないかご確認ください。",
     "insufficient": "残高不足",
-    "kycRequired": "本人確認が完了すると送金をご利用いただけます。",
     "method": {
       "email": "メール",
       "emailHelp": "相手が登録したメールアドレス。",

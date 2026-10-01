@@ -1254,7 +1254,6 @@
     "available": "Wetin dey: {{amount}}",
     "back": "Back",
     "change": "Change",
-    "completeVerification": "Finish verification",
     "confirmSend": "Send {{amount}}",
     "continue": "Continue",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "From wallet",
     "instantNotice": "Transfer dey land sharp-sharp and you no fit reverse am. Make sure na the correct person.",
     "insufficient": "Money no reach",
-    "kycRequired": "You fit transfer once dem don verify who you be.",
     "method": {
       "email": "Email",
       "emailHelp": "The email wey dem use sign up.",

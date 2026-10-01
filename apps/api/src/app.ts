@@ -28,6 +28,7 @@ import { transactionsRoutes } from "./modules/transactions/transactions.routes.j
 import { beneficiariesRoutes } from "./modules/beneficiaries/beneficiaries.routes.js";
 import { quotesRoutes } from "./modules/quotes/quotes.routes.js";
 import { portalPayoutsRoutes } from "./modules/payouts/payouts.routes.js";
+import { portalTransfersRoutes } from "./modules/transfers/transfers.routes.js";
 import { adminPayoutsRoutes } from "./modules/payouts/adminPayouts.routes.js";
 import { depositsRoutes } from "./modules/deposits/deposits.routes.js";
 import { virtualAccountsRoutes } from "./modules/virtualAccounts/virtualAccounts.routes.js";
@@ -186,6 +187,7 @@ export async function buildApp() {
   await app.register(beneficiariesRoutes);
   await app.register(quotesRoutes);
   await app.register(portalPayoutsRoutes);
+  await app.register(portalTransfersRoutes);
   await app.register(adminPayoutsRoutes);
   await app.register(depositsRoutes);
   await app.register(virtualAccountsRoutes);

@@ -42,16 +42,17 @@ export function normalizePublicId(raw: string): string {
   return value.replace(/[\s-]/g, "").toUpperCase();
 }
 
+/**
+ * Deliberately no identity/KYC check: a customer's identity approval is the Yativo endorsement
+ * (see endorsementEligibility.ts), which gates Yativo-backed services only. An internal transfer
+ * never touches Yativo, and the platform has no approval of its own — so only a frozen account
+ * (an explicit admin action) blocks it.
+ */
 function assertCanTransact(c: Customer, who: "sender" | "recipient") {
   if (c.status !== "ACTIVE") {
     throw who === "sender"
       ? new AppError("Your account is frozen, so transfers are disabled. Contact support.", 403, "ACCOUNT_FROZEN")
       : new AppError("This account can't receive transfers right now.", 409, "RECIPIENT_UNAVAILABLE");
-  }
-  if (c.kycStatus !== "APPROVED") {
-    throw who === "sender"
-      ? new AppError("Complete identity verification before sending money.", 403, "KYC_REQUIRED")
-      : new AppError("This account hasn't finished identity verification yet, so it can't receive transfers.", 409, "RECIPIENT_NOT_VERIFIED");
   }
 }
 
@@ -237,14 +238,14 @@ export async function listTransfers(prisma: PrismaClient, customerId: string, li
 export async function listRecentRecipients(prisma: PrismaClient, customerId: string, limit = 8) {
   const rows = await prisma.internalTransfer.findMany({
     where: { senderCustomerId: customerId },
-    include: { recipient: { select: { ...PARTY_SELECT, status: true, kycStatus: true } } },
+    include: { recipient: { select: { ...PARTY_SELECT, status: true } } },
     orderBy: { createdAt: "desc" },
     take: 50,
   });
   const seen = new Set<string>();
   const out: ReturnType<typeof toRecipientDto>[] = [];
   for (const r of rows) {
-    if (seen.has(r.recipientCustomerId) || r.recipient.status !== "ACTIVE" || r.recipient.kycStatus !== "APPROVED") continue;
+    if (seen.has(r.recipientCustomerId) || r.recipient.status !== "ACTIVE") continue;
     seen.add(r.recipientCustomerId);
     out.push(toRecipientDto(r.recipient));
     if (out.length >= limit) break;

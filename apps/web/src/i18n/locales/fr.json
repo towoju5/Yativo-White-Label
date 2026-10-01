@@ -1254,7 +1254,6 @@
     "available": "Disponible : {{amount}}",
     "back": "Retour",
     "change": "Modifier",
-    "completeVerification": "Terminer la vérification",
     "confirmSend": "Envoyer {{amount}}",
     "continue": "Continuer",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "Depuis le portefeuille",
     "instantNotice": "Les virements arrivent instantanément et ne peuvent pas être annulés. Vérifiez qu'il s'agit de la bonne personne.",
     "insufficient": "Solde insuffisant",
-    "kycRequired": "Les virements seront disponibles une fois votre identité vérifiée.",
     "method": {
       "email": "E-mail",
       "emailHelp": "L'adresse e-mail utilisée lors de son inscription.",

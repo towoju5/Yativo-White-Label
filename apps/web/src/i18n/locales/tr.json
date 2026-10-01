@@ -1254,7 +1254,6 @@
     "available": "Kullanılabilir: {{amount}}",
     "back": "Geri",
     "change": "Değiştir",
-    "completeVerification": "Doğrulamayı tamamla",
     "confirmSend": "{{amount}} gönder",
     "continue": "Devam",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "Gönderen cüzdan",
     "instantNotice": "Transferler anında ulaşır ve geri alınamaz. Doğru kişi olduğundan emin olun.",
     "insufficient": "Yetersiz bakiye",
-    "kycRequired": "Kimliğiniz doğrulandıktan sonra transfer yapabilirsiniz.",
     "method": {
       "email": "E-posta",
       "emailHelp": "Kaydolurken kullandığı e-posta adresi.",

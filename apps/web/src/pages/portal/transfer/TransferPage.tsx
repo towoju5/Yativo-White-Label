@@ -27,10 +27,8 @@ import {
   ScanLine,
   Send,
   Share2,
-  ShieldAlert,
 } from "lucide-react";
 import { portalApi, ApiError } from "@/lib/api-client";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -87,11 +85,9 @@ function RecipientCard({ recipient, action }: { recipient: TransferRecipient; ac
 
 export default function TransferPage() {
   const { t } = useTranslation();
-  const { user } = useCustomerAuth();
   const [params, setParams] = useSearchParams();
   const deepLinkId = params.get("to");
   const [tab, setTab] = useState(params.get("tab") === "receive" ? "receive" : "send");
-  const kycApproved = user?.kycStatus === "APPROVED";
 
   return (
     <div className="space-y-6">
@@ -100,17 +96,6 @@ export default function TransferPage() {
         <p className="mt-0.5 text-sm text-muted-foreground">{t("transfer.subtitle", "Send money instantly to another customer, or share your code to get paid.")}</p>
       </div>
 
-      {!kycApproved && (
-        <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
-          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-          <p>
-            {t("transfer.kycRequired", "Transfers are available once your identity is verified.")}{" "}
-            <Link to="/portal/profile" className="font-medium text-primary hover:underline">
-              {t("transfer.completeVerification", "Complete verification")}
-            </Link>
-          </p>
-        </div>
-      )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
         <Tabs
@@ -132,7 +117,7 @@ export default function TransferPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="send" className="mt-4">
-            <SendFlow disabled={!kycApproved} deepLinkId={deepLinkId} />
+            <SendFlow deepLinkId={deepLinkId} />
           </TabsContent>
           <TabsContent value="receive" className="mt-4">
             <ReceivePanel />
@@ -145,7 +130,7 @@ export default function TransferPage() {
   );
 }
 
-function SendFlow({ disabled, deepLinkId }: { disabled: boolean; deepLinkId: string | null }) {
+function SendFlow({ deepLinkId }: { deepLinkId: string | null }) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -173,7 +158,6 @@ function SendFlow({ disabled, deepLinkId }: { disabled: boolean; deepLinkId: str
   const recentQuery = useQuery({
     queryKey: ["portal", "transfers", "recent-recipients"],
     queryFn: () => portalApi.get<TransferRecipient[]>("/portal/transfers/recent-recipients"),
-    enabled: !disabled,
   });
   const wallets = walletsQuery.data ?? [];
   const wallet = wallets.find((w) => w.currencyCode === currencyCode) ?? null;
@@ -200,9 +184,9 @@ function SendFlow({ disabled, deepLinkId }: { disabled: boolean; deepLinkId: str
 
   // A shared receive link (/portal/transfer?to=ID) — look the recipient up straight away.
   useEffect(() => {
-    if (deepLinkId && !disabled) lookupMutation.mutate({ method: "QR", value: deepLinkId });
+    if (deepLinkId) lookupMutation.mutate({ method: "QR", value: deepLinkId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deepLinkId, disabled]);
+  }, [deepLinkId]);
 
   const amountMinor = wallet ? majorToMinorString(amount, wallet.decimals) : null;
   const insufficient = !!(wallet && amountMinor && BigInt(amountMinor) > BigInt(wallet.availableMinor));
@@ -288,7 +272,6 @@ function SendFlow({ disabled, deepLinkId }: { disabled: boolean; deepLinkId: str
                     setMethod(m.key);
                     setQuery("");
                   }}
-                  disabled={disabled}
                   className={cn(
                     "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-xs font-medium transition-colors disabled:opacity-50",
                     method === m.key ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -301,7 +284,7 @@ function SendFlow({ disabled, deepLinkId }: { disabled: boolean; deepLinkId: str
             </div>
 
             {method === "QR" ? (
-              disabled ? null : lookupMutation.isPending ? (
+              lookupMutation.isPending ? (
                 <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" /> {t("transfer.findingRecipient", "Finding recipient…")}
                 </div>
@@ -327,10 +310,9 @@ function SendFlow({ disabled, deepLinkId }: { disabled: boolean; deepLinkId: str
                     inputMode={method === "PHONE" ? "tel" : undefined}
                     autoCapitalize={method === "ID" ? "characters" : "off"}
                     autoComplete="off"
-                    disabled={disabled}
                     className={method === "ID" ? "font-mono uppercase tracking-wider" : undefined}
                   />
-                  <Button type="submit" disabled={disabled || !query.trim()} loading={lookupMutation.isPending}>
+                  <Button type="submit" disabled={!query.trim()} loading={lookupMutation.isPending}>
                     {t("transfer.find", "Find")}
                   </Button>
                 </div>
@@ -338,7 +320,7 @@ function SendFlow({ disabled, deepLinkId }: { disabled: boolean; deepLinkId: str
               </form>
             )}
 
-            {!disabled && (recentQuery.data?.length ?? 0) > 0 && (
+            {(recentQuery.data?.length ?? 0) > 0 && (
               <div className="space-y-2">
                 <Separator />
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("transfer.recentRecipients", "Recent")}</p>

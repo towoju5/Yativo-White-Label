@@ -1254,7 +1254,6 @@
     "available": "Disponibile: {{amount}}",
     "back": "Indietro",
     "change": "Cambia",
-    "completeVerification": "Completa la verifica",
     "confirmSend": "Invia {{amount}}",
     "continue": "Continua",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "Dal portafoglio",
     "instantNotice": "I trasferimenti arrivano all'istante e non possono essere annullati. Assicurati che sia la persona giusta.",
     "insufficient": "Saldo insufficiente",
-    "kycRequired": "I trasferimenti saranno disponibili dopo la verifica della tua identità.",
     "method": {
       "email": "Email",
       "emailHelp": "L'indirizzo email con cui si è registrato.",

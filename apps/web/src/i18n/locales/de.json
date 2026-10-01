@@ -1254,7 +1254,6 @@
     "available": "Verfügbar: {{amount}}",
     "back": "Zurück",
     "change": "Ändern",
-    "completeVerification": "Verifizierung abschließen",
     "confirmSend": "{{amount}} senden",
     "continue": "Weiter",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "Vom Wallet",
     "instantNotice": "Überweisungen kommen sofort an und können nicht rückgängig gemacht werden. Stelle sicher, dass es die richtige Person ist.",
     "insufficient": "Unzureichendes Guthaben",
-    "kycRequired": "Überweisungen sind verfügbar, sobald deine Identität verifiziert ist.",
     "method": {
       "email": "E-Mail",
       "emailHelp": "Die E-Mail-Adresse, mit der sich die Person registriert hat.",

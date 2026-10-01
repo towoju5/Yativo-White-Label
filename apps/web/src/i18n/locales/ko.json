@@ -1254,7 +1254,6 @@
     "available": "사용 가능: {{amount}}",
     "back": "뒤로",
     "change": "변경",
-    "completeVerification": "인증 완료하기",
     "confirmSend": "{{amount}} 보내기",
     "continue": "계속",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "출금 지갑",
     "instantNotice": "송금은 즉시 도착하며 취소할 수 없습니다. 받는 사람이 맞는지 확인하세요.",
     "insufficient": "잔액 부족",
-    "kycRequired": "본인 인증이 완료되면 송금을 이용할 수 있습니다.",
     "method": {
       "email": "이메일",
       "emailHelp": "상대방이 가입할 때 사용한 이메일 주소입니다.",

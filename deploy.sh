@@ -35,6 +35,10 @@
 #   --cpu-quota=X       Optional systemd CPUQuota for the API service (e.g. "50%") — caps
 #                        how much CPU this instance can take from others on the same VPS.
 #   --memory-max=X      Optional systemd MemoryMax for the API service (e.g. "512M").
+#   --with-postfix=DOMAIN  Also install Postfix (send-only, loopback-only, DKIM-signed) and point
+#                        the API's email at it — see scripts/setup-postfix.sh, which prints the
+#                        DNS records (SPF/DKIM/DMARC/PTR) to add. Optional companions:
+#                        --mail-from=no-reply@DOMAIN, --mail-hostname=mail.DOMAIN
 #
 # Safe to re-run: every step below either skips work that's already done, or is naturally
 # idempotent (systemd restart, nginx reload, docker compose up -d, prisma migrate deploy).
@@ -80,6 +84,9 @@ DB_PORT_ARG=""
 REDIS_PORT_ARG=""
 CPU_QUOTA=""
 MEMORY_MAX=""
+POSTFIX_DOMAIN=""
+MAIL_FROM=""
+MAIL_HOSTNAME=""
 POSITIONAL=()
 for arg in "$@"; do
   case "$arg" in
@@ -92,6 +99,9 @@ for arg in "$@"; do
     --redis-port=*) REDIS_PORT_ARG="${arg#*=}" ;;
     --cpu-quota=*) CPU_QUOTA="${arg#*=}" ;;
     --memory-max=*) MEMORY_MAX="${arg#*=}" ;;
+    --with-postfix=*) POSTFIX_DOMAIN="${arg#*=}" ;;
+    --mail-from=*) MAIL_FROM="${arg#*=}" ;;
+    --mail-hostname=*) MAIL_HOSTNAME="${arg#*=}" ;;
     -h|--help) grep '^#' "$0" | sed 's/^#//'; exit 0 ;;
     *) POSITIONAL+=("$arg") ;;
   esac
@@ -442,6 +452,15 @@ else
   ok "apps/web/.env.production already exists — leaving it untouched."
 fi
 
+# Before the API (re)starts below, so the service comes up already pointed at Postfix.
+if [ -n "$POSTFIX_DOMAIN" ]; then
+  log "Setting up Postfix for ${POSTFIX_DOMAIN}…"
+  POSTFIX_ARGS=("$POSTFIX_DOMAIN" "--api-env=${REPO_ROOT}/apps/api/.env")
+  [ -n "$MAIL_FROM" ] && POSTFIX_ARGS+=("--from=${MAIL_FROM}")
+  [ -n "$MAIL_HOSTNAME" ] && POSTFIX_ARGS+=("--hostname=${MAIL_HOSTNAME}")
+  "${REPO_ROOT}/scripts/setup-postfix.sh" "${POSTFIX_ARGS[@]}"
+fi
+
 # ── 7. Install, migrate, build ──────────────────────────────────────────────
 
 log "Installing dependencies (pnpm install)…"
@@ -541,6 +560,21 @@ server {
     server_name ${API_DOMAIN};
 
     client_max_body_size 30m; # matches the API's own Fastify bodyLimit (KYC uploads)
+
+    # Realtime WebSocket — needs the Upgrade/Connection headers forwarded, otherwise the handshake
+    # reaches Fastify as a plain GET and the websocket-only /ws route answers 404. Long read timeout
+    # so idle-but-open connections aren't cut at 60s.
+    location /ws {
+        proxy_pass http://127.0.0.1:${API_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 3600s;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:${API_PORT};

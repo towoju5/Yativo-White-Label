@@ -1254,7 +1254,6 @@
     "available": "المتاح: {{amount}}",
     "back": "رجوع",
     "change": "تغيير",
-    "completeVerification": "إكمال التحقق",
     "confirmSend": "إرسال {{amount}}",
     "continue": "متابعة",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "من المحفظة",
     "instantNotice": "تصل التحويلات فورًا ولا يمكن التراجع عنها. تأكّد من أنه الشخص الصحيح.",
     "insufficient": "الرصيد غير كافٍ",
-    "kycRequired": "تتوفر التحويلات بعد التحقق من هويتك.",
     "method": {
       "email": "البريد الإلكتروني",
       "emailHelp": "عنوان البريد الإلكتروني الذي سجّل به.",

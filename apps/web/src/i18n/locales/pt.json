@@ -1254,7 +1254,6 @@
     "available": "Disponível: {{amount}}",
     "back": "Voltar",
     "change": "Alterar",
-    "completeVerification": "Concluir verificação",
     "confirmSend": "Enviar {{amount}}",
     "continue": "Continuar",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "Da carteira",
     "instantNotice": "As transferências chegam na hora e não podem ser revertidas. Confirme se é a pessoa certa.",
     "insufficient": "Saldo insuficiente",
-    "kycRequired": "As transferências ficam disponíveis assim que sua identidade for verificada.",
     "method": {
       "email": "E-mail",
       "emailHelp": "O e-mail que a pessoa usou no cadastro.",

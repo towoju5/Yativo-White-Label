@@ -1254,7 +1254,6 @@
     "available": "Dostępne: {{amount}}",
     "back": "Wstecz",
     "change": "Zmień",
-    "completeVerification": "Dokończ weryfikację",
     "confirmSend": "Wyślij {{amount}}",
     "continue": "Dalej",
     "done": {
@@ -1271,7 +1270,6 @@
     "fromWallet": "Z portfela",
     "instantNotice": "Przelewy docierają natychmiast i nie można ich cofnąć. Upewnij się, że to właściwa osoba.",
     "insufficient": "Niewystarczające saldo",
-    "kycRequired": "Przelewy będą dostępne po weryfikacji Twojej tożsamości.",
     "method": {
       "email": "E-mail",
       "emailHelp": "Adres e-mail podany przy rejestracji.",

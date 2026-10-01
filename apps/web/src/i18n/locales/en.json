@@ -1343,8 +1343,6 @@
     },
     "title": "Transfer",
     "subtitle": "Send money instantly to another customer, or share your code to get paid.",
-    "kycRequired": "Transfers are available once your identity is verified.",
-    "completeVerification": "Complete verification",
     "tabs": {
       "send": "Send",
       "receive": "Receive"

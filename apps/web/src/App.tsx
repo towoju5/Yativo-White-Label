@@ -27,7 +27,7 @@ export default function App() {
   // 404s (empty result, no thrown error) when DEMO_ENABLED is off — that route doesn't exist at
   // all in that case, so `demoConfig` just stays undefined and every check below treats it as
   // "no demo landing" the same as an explicit false.
-  const { data: demoConfig } = useQuery({
+  const { data: demoConfig, isLoading: demoConfigLoading } = useQuery({
     queryKey: ["demo", "config"],
     queryFn: () => publicApi.get<{ publicSignupEnabled: boolean }>("/demo/config"),
     retry: false,
@@ -54,7 +54,10 @@ export default function App() {
   const demoLandingActive = demoConfig?.publicSignupEnabled ?? false;
   const router = useMemo(() => createRouter(adminLoginPath, demoLandingActive), [adminLoginPath, demoLandingActive]);
 
-  if (isLoading) return <SplashScreen />;
+  // Waits for /demo/config too (retry: false, so a 404 when demo mode is off resolves on the first
+  // response) — otherwise "/" renders the login page first and only swaps to the landing page once
+  // the config arrives, briefly mounting LoginPage (and its own effects) for every visitor.
+  if (isLoading || demoConfigLoading) return <SplashScreen />;
 
   const templateId = branding?.templateId ?? "nova";
 
