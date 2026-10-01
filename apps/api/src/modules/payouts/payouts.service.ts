@@ -15,6 +15,7 @@ import { deriveFriendlyStatuses } from "../ledger/friendlyStatus.js";
 import { getAvailableBalance } from "../ledger/balances.js";
 import { ensurePlatformAccount } from "../ledger/accounts.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
+import { getFxMarginBps, paySideMargin } from "../pricing/fxMargin.js";
 import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.service.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { formatMinorAmount } from "../../lib/formatMoney.js";
@@ -143,7 +144,7 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   // used below is always derived from *this* beneficiary — the same way /portal/quotes derives
   // its method_id — so as long as the client quotes and pays out against the same beneficiaryId,
   // Yativo's "payout method must match quote_id's method" requirement is satisfied by construction.
-  const { gatewayId } = getBeneficiaryGatewayInfo(beneficiary);
+  const { gatewayId, currency: payoutCurrency } = getBeneficiaryGatewayInfo(beneficiary);
 
   const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId } });
 
@@ -168,7 +169,12 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
   // rather than recomputing it later, so it can't drift and isn't charged as a second, unchecked
   // debit after the fact. Same base (amountMinor, Yativo's fee-inclusive debit total) that
   // /portal/quotes previewed to the customer as platformFeeMinor.
-  const platformFeeMinor = await getEffectiveFee(prisma, "PAYOUT", customerId, amountMinor);
+  const serviceFeeMinor = await getEffectiveFee(prisma, "PAYOUT", customerId, amountMinor);
+  // The exchange-rate float on a cross-currency payout — same figure /portal/quotes previewed.
+  // Folded into platformFeeMinor so the hold, settlement and reversal below carry it unchanged
+  // (it lands in PLATFORM_FEE_REVENUE with the fee); fxMarginMinor keeps its share for reporting.
+  const fxMarginMinor = payoutCurrency === input.currencyCode ? 0n : paySideMargin(amountMinor, await getFxMarginBps(prisma));
+  const platformFeeMinor = serviceFeeMinor + fxMarginMinor;
   const totalMinor = amountMinor + platformFeeMinor;
 
   // Velocity limit — opt-in per currency (platform default, or a per-customer override); a
@@ -214,6 +220,7 @@ export async function createPortalPayout(prisma: PrismaClient, customerId: strin
       currencyCode: input.currencyCode,
       amountMinor,
       platformFeeMinor,
+      fxMarginMinor,
       transactionId: pendingTx.id,
     },
     include: { transaction: true },

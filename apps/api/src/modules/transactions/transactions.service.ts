@@ -285,6 +285,7 @@ export async function getTransactionDetailForAdmin(prisma: PrismaClient, transac
           yativoPayoutId: tx.payout.yativoPayoutId,
           amountMinor: tx.payout.amountMinor.toString(),
           platformFeeMinor: tx.payout.platformFeeMinor.toString(),
+          fxMarginMinor: tx.payout.fxMarginMinor.toString(),
           currencyCode: tx.payout.currencyCode,
         }
       : null,
@@ -294,6 +295,7 @@ export async function getTransactionDetailForAdmin(prisma: PrismaClient, transac
           grossAmountMinor: tx.deposit.grossAmountMinor?.toString() ?? null,
           yativoFeeMinor: tx.deposit.yativoFeeMinor?.toString() ?? null,
           platformFeeMinor: tx.deposit.platformFeeMinor.toString(),
+          fxMarginMinor: tx.deposit.fxMarginMinor.toString(),
           currencyCode: tx.deposit.currencyCode,
           exchangeRate: tx.deposit.exchangeRate,
           localCurrency: tx.deposit.localCurrency,

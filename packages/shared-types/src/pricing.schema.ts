@@ -72,3 +72,10 @@ export const upsertPricingOverrideSchema = z.object({
   percentageBps: percentageBpsSchema,
 });
 export type UpsertPricingOverrideInput = z.infer<typeof upsertPricingOverrideSchema>;
+
+/** The exchange-rate float (FX margin) applied to every conversion — see fxMargin.ts in the API. */
+export const fxMarginSchema = z.object({
+  /** Basis points: 100 = 1%. 0 means conversions happen at the market rate. */
+  fxMarginBps: z.number().int().min(0).max(2000),
+});
+export type FxMargin = z.infer<typeof fxMarginSchema>;

@@ -708,7 +708,8 @@ export default function SendMoneyPage() {
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{t("send.review.payoutAmountLabel", "Payout amount")}</dt>
                   <dd className="font-mono font-medium">
-                    {formatMinorAmount(quote.debitAmountMinor, quote.debitDecimals)} {quote.debitCurrency}
+                    {/* The exchange-rate float is part of the conversion (the rate above is already floated), so it's shown inside this figure, not as a fee. */}
+                    {formatMinorAmount(BigInt(quote.debitAmountMinor) + BigInt(quote.fxMarginMinor), quote.debitDecimals)} {quote.debitCurrency}
                   </dd>
                 </div>
                 {Number(quote.platformFeeMinor) > 0 && (

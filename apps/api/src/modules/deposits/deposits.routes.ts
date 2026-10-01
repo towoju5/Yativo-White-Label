@@ -16,6 +16,7 @@ import { parseYativoFeeString } from "../../lib/parseYativoFeeString.js";
 import { majorToMinor } from "../../lib/money.js";
 import { sendNotificationEmail } from "../notifications/notifications.service.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
+import { floatRate, floatRateString, getFxMarginBps, receiveSideMargin } from "../pricing/fxMargin.js";
 import { filterEnabledGateways } from "../../lib/paymentGatewayOverrides.js";
 import {
   loadEndorsementEligibilityResolver,
@@ -110,6 +111,7 @@ export async function depositsRoutes(app: FastifyInstance) {
       let platformFee: string | null = null;
       let platformFeeLocal: string | null = null;
       let netReceiveAmount: string | null = null;
+      const fxMarginBps = request.body.localCurrency === request.body.walletCurrencyCode ? 0 : await getFxMarginBps(app.prisma);
       if (walletCurrency) {
         const creditedAmountMinor = majorToMinor(yativoQuote.creditedAmount, walletCurrency.decimals);
 
@@ -125,7 +127,10 @@ export async function depositsRoutes(app: FastifyInstance) {
         // exact same base + upstream-fee convention /portal/deposit/initiate already uses, so the
         // number shown here at quote time never drifts from what actually settles.
         const platformFeeMinor = await getEffectiveFee(app.prisma, "PAYIN", customer.id, creditedAmountMinor, yativoFeeMinor);
-        const netReceiveAmountMinor = creditedAmountMinor - platformFeeMinor;
+        // The exchange-rate float — kept out of `platformFee` (it's part of the rate, which is
+        // shown floated below) but taken from what lands, exactly as /portal/deposit/initiate does.
+        const fxMarginMinor = receiveSideMargin(creditedAmountMinor, fxMarginBps);
+        const netReceiveAmountMinor = creditedAmountMinor - platformFeeMinor - fxMarginMinor;
 
         const feeMajorInWallet = Number(platformFeeMinor) / 10 ** walletCurrency.decimals;
         platformFee = feeMajorInWallet.toFixed(walletCurrency.decimals);
@@ -141,7 +146,8 @@ export async function depositsRoutes(app: FastifyInstance) {
         quoteId: yativoQuote.quoteId,
         walletCurrencyCode: request.body.walletCurrencyCode,
         localCurrency: request.body.localCurrency,
-        rate: yativoQuote.exchangeRate,
+        // "local per 1 wallet unit" — the customer pays in local, so floating means more local per unit.
+        rate: floatRate(yativoQuote.exchangeRate, fxMarginBps, "pay"),
         localAmount: request.body.amount,
         yativoFee: yativoQuote.totalFees,
         creditedAmount: yativoQuote.creditedAmount,
@@ -200,6 +206,9 @@ export async function depositsRoutes(app: FastifyInstance) {
       let platformFee: string | null = null;
       let platformFeeLocal: string | null = null;
       let netReceiveAmount: string | null = null;
+      // The exchange-rate float applies only when the customer pays in a different currency than the wallet credited.
+      const localCurrency = result.localCurrency ?? chosenMethod.currency;
+      const fxMarginBps = localCurrency === request.body.walletCurrencyCode ? 0 : await getFxMarginBps(app.prisma);
       if (result.depositId) {
         const walletCurrency = await app.prisma.currency.findUnique({ where: { code: request.body.walletCurrencyCode } });
 
@@ -212,6 +221,7 @@ export async function depositsRoutes(app: FastifyInstance) {
 
         let pendingTransactionId: string | null = null;
         let platformFeeMinor = 0n;
+        let fxMarginMinor = 0n;
         if (walletCurrency && result.receiveAmount) {
           const receiveAmountMinor = majorToMinor(result.receiveAmount, walletCurrency.decimals);
 
@@ -219,7 +229,12 @@ export async function depositsRoutes(app: FastifyInstance) {
           // comment for the same rationale on the payout side) — so the wallet is credited the
           // correct net amount from this very first PENDING hold, and deposit.handler.ts settles
           // using this exact figure rather than a second, disconnected debit later.
-          platformFeeMinor = await getEffectiveFee(app.prisma, "PAYIN", customer.id, receiveAmountMinor, yativoFeeMinor ?? 0n);
+          const serviceFeeMinor = await getEffectiveFee(app.prisma, "PAYIN", customer.id, receiveAmountMinor, yativoFeeMinor ?? 0n);
+          // The exchange-rate float, folded into platformFeeMinor so the PENDING hold below, the
+          // Deposit row and deposit.handler.ts's settlement all carry it unchanged into
+          // PLATFORM_FEE_REVENUE. Shown to the customer inside the rate, not as part of the fee.
+          fxMarginMinor = receiveSideMargin(receiveAmountMinor, fxMarginBps);
+          platformFeeMinor = serviceFeeMinor + fxMarginMinor;
           const netReceiveAmountMinor = receiveAmountMinor - platformFeeMinor;
 
           // Posted as PENDING so this deposit shows up in the customer's transaction history
@@ -257,7 +272,7 @@ export async function depositsRoutes(app: FastifyInstance) {
           });
           pendingTransactionId = pendingTx.id;
 
-          const feeMajorInWallet = Number(platformFeeMinor) / 10 ** walletCurrency.decimals;
+          const feeMajorInWallet = Number(serviceFeeMinor) / 10 ** walletCurrency.decimals;
           platformFee = feeMajorInWallet.toFixed(walletCurrency.decimals);
           // Also shown in the deposit's local/method currency (what the customer is actually
           // paying with) alongside the wallet-currency figure above — same `rate` Yativo quoted
@@ -277,6 +292,7 @@ export async function depositsRoutes(app: FastifyInstance) {
             yativoIdempotencyKey: idempotencyKey,
             yativoFeeMinor,
             platformFeeMinor,
+            fxMarginMinor,
             grossAmountMinor: result.receiveAmount && walletCurrency ? majorToMinor(result.receiveAmount, walletCurrency.decimals) : null,
             exchangeRate: result.exchangeRate,
             localCurrency: result.localCurrency,
@@ -294,7 +310,7 @@ export async function depositsRoutes(app: FastifyInstance) {
         currency: request.body.walletCurrencyCode,
       });
 
-      return reply.send({ ...result, platformFee, platformFeeLocal, netReceiveAmount });
+      return reply.send({ ...result, exchangeRate: floatRateString(result.exchangeRate, fxMarginBps), platformFee, platformFeeLocal, netReceiveAmount });
     },
   );
 }

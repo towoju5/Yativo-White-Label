@@ -134,6 +134,10 @@ model PlatformSettings {
   currencySyncFrequency    CurrencySyncFrequency @default(DAILY)
   // Null until the first sync (manual or scheduled) actually runs.
   lastCurrencySyncAt       DateTime?
+  /// The exchange-rate float (FX margin), in basis points (100 = 1%): every conversion the platform
+  /// makes for a customer — payouts, gateway deposits, swaps — gives them this much less than the
+  /// market rate, and the difference is booked as platform fee revenue. 0 = convert at market.
+  fxMarginBps              Int                   @default(0)
   updatedAt                DateTime              @updatedAt
 
   @@map("platform_settings")
@@ -1004,6 +1008,8 @@ model Payout {
   /// settlement — see settlePayoutCompleted) so it can never drift from what the customer was
   /// quoted, and held from the wallet alongside amountMinor rather than as a surprise extra debit.
   platformFeeMinor BigInt            @default(0)
+  /// The exchange-rate float's share of platformFeeMinor (already included in it), for reporting. 0 for a same-currency payout.
+  fxMarginMinor    BigInt            @default(0)
   transactionId    String            @unique
   transaction      LedgerTransaction @relation(fields: [transactionId], references: [id])
   yativoPayoutId   String?
@@ -1335,6 +1341,8 @@ model Deposit {
   /// amount from the very first PENDING hold, not a gross figure later corrected by a second,
   /// disconnected debit.
   platformFeeMinor     BigInt             @default(0)
+  /// The exchange-rate float's share of platformFeeMinor (already included in it), for reporting. 0 for a same-currency deposit.
+  fxMarginMinor        BigInt             @default(0)
   /// The gross wallet-currency amount Yativo quoted (before this platform's own fee, but net of
   /// Yativo's own) — grossAmountMinor - platformFeeMinor is what actually lands in the wallet.
   /// Persisted so the receipt can show "Amount / Fee / Net" even after settlement.
@@ -1392,6 +1400,8 @@ model CurrencySwap {
   fromAmountMinor  BigInt
   feeMinor         BigInt   @default(0)
   toAmountMinor    BigInt
+  /// What the exchange-rate float kept, in the TARGET currency — market conversion minus toAmountMinor. Booked to PLATFORM_FEE_REVENUE.
+  fxMarginMinor    BigInt   @default(0)
   /// 1 fromCurrency = rate toCurrency, as quoted to the customer (decimal string).
   rate             String
   /// When Yativo last refreshed the market rate this was priced from.

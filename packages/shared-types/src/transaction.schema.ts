@@ -180,8 +180,12 @@ export const adminTransactionDetailDepositSchema = z.object({
   yativoDepositId: z.string(),
   grossAmountMinor: minorAmountSchema.nullable(),
   yativoFeeMinor: minorAmountSchema.nullable(),
+  /** Includes fxMarginMinor. */
   platformFeeMinor: minorAmountSchema,
+  /** The exchange-rate float's share of platformFeeMinor. */
+  fxMarginMinor: minorAmountSchema,
   currencyCode: currencyCodeSchema,
+  /** Yativo's own rate, before the platform's float. */
   exchangeRate: z.string().nullable(),
   localCurrency: z.string().nullable(),
   localAmount: z.string().nullable(),
@@ -194,7 +198,10 @@ export const adminTransactionDetailPayoutSchema = z.object({
   beneficiaryDetails: z.record(z.unknown()),
   yativoPayoutId: z.string().nullable(),
   amountMinor: minorAmountSchema,
+  /** Includes fxMarginMinor. */
   platformFeeMinor: minorAmountSchema,
+  /** The exchange-rate float's share of platformFeeMinor. */
+  fxMarginMinor: minorAmountSchema,
   currencyCode: currencyCodeSchema,
 });
 export type AdminTransactionDetailPayout = z.infer<typeof adminTransactionDetailPayoutSchema>;

@@ -114,6 +114,7 @@ export const quoteSchema = z.object({
   debitDecimals: z.number().int(),
   payoutDecimals: z.number().int(),
   methodId: z.string(),
+  /** 1 debitCurrency = rate payoutCurrency, as the customer gets it — Yativo's rate with the platform's exchange-rate float applied. */
   rate: z.string(),
   /** What the sender pays and the recipient receives, in each currency's minor units. */
   debitAmountMinor: minorAmountSchema,
@@ -125,7 +126,13 @@ export const quoteSchema = z.object({
    * fee-inclusive debit total and never includes this platform fee.
    */
   platformFeeMinor: minorAmountSchema,
-  /** debitAmountMinor + platformFeeMinor — the true total that will be debited from the customer's wallet. */
+  /**
+   * The exchange-rate float on this conversion (Settings → Pricing), in `debitCurrency` minor
+   * units — "0" when debit and payout currency are the same. Part of the conversion cost, so it's
+   * shown inside the amount being converted rather than as a fee; `rate` is already floated.
+   */
+  fxMarginMinor: minorAmountSchema,
+  /** debitAmountMinor + fxMarginMinor + platformFeeMinor — the true total that will be debited from the customer's wallet. */
   totalDebitMinor: minorAmountSchema,
   /** Quotes expire ~5 minutes after issuance — re-quote past this. */
   expiresAt: z.string(),

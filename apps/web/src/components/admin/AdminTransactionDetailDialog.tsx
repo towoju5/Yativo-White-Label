@@ -87,7 +87,10 @@ export function AdminTransactionDetailDialog({ transactionId, onClose }: { trans
                     <Row label="Yativo fee (estimated)" value={`${formatMinorAmount(data.deposit.yativoFeeMinor, 2)} ${data.deposit.currencyCode}`} />
                   )}
                   <Row label="Platform fee" value={`${formatMinorAmount(data.deposit.platformFeeMinor, 2)} ${data.deposit.currencyCode}`} />
-                  {data.deposit.exchangeRate && <Row label="Exchange rate" value={data.deposit.exchangeRate} />}
+                  {data.deposit.fxMarginMinor !== "0" && (
+                    <Row label="…of which exchange rate float" value={`${formatMinorAmount(data.deposit.fxMarginMinor, 2)} ${data.deposit.currencyCode}`} />
+                  )}
+                  {data.deposit.exchangeRate && <Row label="Exchange rate (Yativo, before float)" value={data.deposit.exchangeRate} />}
                   {data.deposit.localAmount && data.deposit.localCurrency && (
                     <Row label="Local amount paid" value={`${data.deposit.localAmount} ${data.deposit.localCurrency}`} />
                   )}
@@ -103,6 +106,9 @@ export function AdminTransactionDetailDialog({ transactionId, onClose }: { trans
                   {data.payout.yativoPayoutId && <Row label="Yativo payout ID" value={data.payout.yativoPayoutId} />}
                   <Row label="Amount submitted to Yativo" value={`${formatMinorAmount(data.payout.amountMinor, 2)} ${data.payout.currencyCode}`} />
                   <Row label="Platform fee" value={`${formatMinorAmount(data.payout.platformFeeMinor, 2)} ${data.payout.currencyCode}`} />
+                  {data.payout.fxMarginMinor !== "0" && (
+                    <Row label="…of which exchange rate float" value={`${formatMinorAmount(data.payout.fxMarginMinor, 2)} ${data.payout.currencyCode}`} />
+                  )}
                 </dl>
               </div>
             )}

@@ -9,8 +9,10 @@ import {
   type FeeType,
   type PricingMode,
   type UpdatePricingDefaultInput,
+  type FxMargin,
 } from "@white-label/shared-types";
-import { AlertTriangle, DollarSign, Info, Pencil } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, DollarSign, Info, Pencil } from "lucide-react";
+import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { staffApi, ApiError } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -71,6 +73,95 @@ export function formatFeeSummary(rule: { feeType: FeeType; fixedAmountMinor: str
   return `${fixed} + ${pct}`;
 }
 
+/** "1.5" → 150 basis points; null when it isn't a valid percentage between 0 and 20. */
+function percentToBps(value: string): number | null {
+  if (!/^\d+(\.\d{0,2})?$/.test(value.trim())) return null;
+  const bps = Math.round(Number(value) * 100);
+  return bps >= 0 && bps <= 2000 ? bps : null;
+}
+
+function FxMarginCard() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { user } = useStaffAuth();
+  const canEdit = user?.role === "OWNER" || user?.role === "ADMIN";
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "pricing", "fx-margin"],
+    queryFn: () => staffApi.get<FxMargin>("/admin/pricing/fx-margin"),
+  });
+  const saveMutation = useMutation({
+    mutationFn: (fxMarginBps: number) => staffApi.put<FxMargin>("/admin/pricing/fx-margin", { fxMarginBps }),
+    onSuccess: (saved) => {
+      toast({ title: saved.fxMarginBps === 0 ? "Exchange rate float removed" : `Exchange rate float set to ${(saved.fxMarginBps / 100).toFixed(2)}%` });
+      queryClient.setQueryData(["admin", "pricing", "fx-margin"], saved);
+      setDraft(null);
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't update the float", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const current = data ? (data.fxMarginBps / 100).toFixed(2) : "";
+  const value = draft ?? current;
+  const bps = percentToBps(value);
+  const changed = bps !== null && bps !== data?.fxMarginBps;
+  const example = bps !== null ? (100 * (1 - bps / 10000)).toFixed(2) : null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <ArrowLeftRight className="h-4 w-4 text-primary" />
+          <CardTitle className="text-base">Exchange rate float</CardTitle>
+        </div>
+        <CardDescription>
+          A margin on the exchange rate for every conversion the platform makes for a customer: cross-currency withdrawals, deposits paid in another
+          currency, and balance swaps. Customers see the floated rate; the difference is booked as platform fee revenue. Same-currency transactions are
+          never affected.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-10 w-64" />
+        ) : (
+          <form
+            className="flex flex-wrap items-end gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (bps !== null && changed) saveMutation.mutate(bps);
+            }}
+          >
+            <div className="space-y-1.5">
+              <Label htmlFor="fx-margin">Float</Label>
+              <div className="relative w-32">
+                <Input
+                  id="fx-margin"
+                  inputMode="decimal"
+                  value={value}
+                  onChange={(e) => setDraft(e.target.value.replace(/[^\d.]/g, ""))}
+                  disabled={!canEdit}
+                  className="pr-7 font-mono"
+                />
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+              </div>
+            </div>
+            <Button type="submit" disabled={!canEdit || !changed || saveMutation.isPending} title={canEdit ? undefined : "Only owners and admins can change pricing"}>
+              {saveMutation.isPending ? "Saving…" : "Save"}
+            </Button>
+            <p className={bps === null ? "basis-full text-xs text-destructive" : "basis-full text-xs text-muted-foreground"}>
+              {bps === null
+                ? "Enter a percentage between 0 and 20, with up to two decimals."
+                : bps === 0
+                  ? "Conversions happen at the market rate."
+                  : `A conversion worth 100.00 at the market rate gives the customer ${example}.`}
+            </p>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function PricingSettingsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -98,6 +189,8 @@ export default function PricingSettingsPage() {
         <h1 className="font-heading text-2xl font-semibold tracking-tight">Pricing</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">Platform-wide default fees for each service — override per customer from their detail page.</p>
       </div>
+
+      <FxMarginCard />
 
       <Card>
         <CardHeader>

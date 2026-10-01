@@ -1,4 +1,5 @@
 import type { PrismaClient, Account, AccountType } from "@prisma/client";
+import { floatRateString, impliedBps } from "../pricing/fxMargin.js";
 import { randomUUID } from "node:crypto";
 import { postTransaction } from "../ledger/postTransaction.js";
 import { ensurePlatformAccount, ensureCustomerWalletAccount } from "../ledger/accounts.js";
@@ -200,18 +201,21 @@ export async function getTransactionDetailForCustomer(prisma: PrismaClient, cust
           id: tx.payout.id,
           beneficiaryName: tx.payout.beneficiary.name,
           beneficiaryDetails: tx.payout.beneficiary.details as Record<string, unknown>,
-          amountMinor: tx.payout.amountMinor.toString(),
+          // The exchange-rate float is shown inside the converted amount and kept out of the fee —
+          // exactly how the quote presented it — so the receipt matches what the customer agreed to.
+          amountMinor: (tx.payout.amountMinor + tx.payout.fxMarginMinor).toString(),
           currencyCode: tx.payout.currencyCode,
-          platformFeeMinor: tx.payout.platformFeeMinor.toString(),
+          platformFeeMinor: (tx.payout.platformFeeMinor - tx.payout.fxMarginMinor).toString(),
         }
       : null,
     deposit: tx.deposit
       ? {
           // Combined here, server-side, so the split between the provider's own cut and this
           // platform's markup never even reaches the response — the customer sees one fee number.
-          totalFeeMinor: ((tx.deposit.yativoFeeMinor ?? 0n) + tx.deposit.platformFeeMinor).toString(),
+          // The exchange-rate float is excluded here and shown inside the rate instead, as quoted.
+          totalFeeMinor: ((tx.deposit.yativoFeeMinor ?? 0n) + tx.deposit.platformFeeMinor - tx.deposit.fxMarginMinor).toString(),
           currencyCode: tx.deposit.currencyCode,
-          exchangeRate: tx.deposit.exchangeRate,
+          exchangeRate: floatRateString(tx.deposit.exchangeRate, impliedBps(tx.deposit.fxMarginMinor, tx.deposit.grossAmountMinor)),
           localCurrency: tx.deposit.localCurrency,
           localAmount: tx.deposit.localAmount,
         }

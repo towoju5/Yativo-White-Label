@@ -7,6 +7,7 @@ import { AppError, NotFoundError } from "../../lib/errors.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { getBeneficiaryGatewayInfo } from "../beneficiaries/beneficiaries.service.js";
 import { getEffectiveFee } from "../pricing/pricing.service.js";
+import { floatRate, getFxMarginBps, paySideMargin } from "../pricing/fxMargin.js";
 
 /**
  * Yativo's real quote endpoint (POST /exchange-rate — see fiat/quotes.ts). Cross-currency:
@@ -73,6 +74,11 @@ export async function quotesRoutes(app: FastifyInstance) {
       // upstream figure to pass for MARKUP mode here — matches every settlePayoutCompleted call site.
       const platformFeeMinor = await getEffectiveFee(app.prisma, "PAYOUT", customerId, BigInt(debitAmountMinor));
 
+      // The exchange-rate float — only on a real conversion. Recomputed identically by
+      // createPortalPayout from the same debit figure, so what's previewed here is what's charged.
+      const fxMarginBps = debitCurrency === payoutCurrency ? 0 : await getFxMarginBps(app.prisma);
+      const fxMarginMinor = paySideMargin(BigInt(debitAmountMinor), fxMarginBps);
+
       return reply.send({
         quoteId: yativoQuote.quoteId,
         debitCurrency,
@@ -80,11 +86,12 @@ export async function quotesRoutes(app: FastifyInstance) {
         debitDecimals: debitCurrencyRow.decimals,
         payoutDecimals,
         methodId: String(gatewayId),
-        rate: yativoQuote.rate,
+        rate: floatRate(yativoQuote.rate, fxMarginBps, "receive"),
         debitAmountMinor,
         receiveAmountMinor: toMinor(yativoQuote.customerReceiveAmount, payoutDecimals),
         platformFeeMinor: platformFeeMinor.toString(),
-        totalDebitMinor: (BigInt(debitAmountMinor) + platformFeeMinor).toString(),
+        fxMarginMinor: fxMarginMinor.toString(),
+        totalDebitMinor: (BigInt(debitAmountMinor) + fxMarginMinor + platformFeeMinor).toString(),
         expiresAt: yativoQuote.expiresAt,
       });
     },
