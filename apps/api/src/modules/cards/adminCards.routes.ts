@@ -14,6 +14,7 @@ import {
 import { requireStaffAuth, requirePermission } from "../../middleware/requireStaffAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { issueCard, freezeCard, unfreezeCard, terminateCard, revealCard, listCardTransactions, listAdminCards, getCardDetail } from "./cards.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 export async function adminCardsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -33,7 +34,7 @@ export async function adminCardsRoutes(app: FastifyInstance) {
 
   server.post(
     "/admin/cards/issue",
-    { preHandler: [requireStaffAuth, requirePermission("cards.manage")], schema: { body: issueCardSchema, response: { 200: cardSchema, 404: errorResponseSchema } } },
+    { preHandler: [requireStaffAuth, requirePermission("cards.manage"), requireStepUp("Issue a virtual card")], schema: { body: issueCardSchema, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
       const card = await issueCard(app.prisma, request.body.customerId, BigInt(request.body.amountMinor));
       return reply.send(card);
@@ -52,7 +53,7 @@ export async function adminCardsRoutes(app: FastifyInstance) {
   // POST, not GET — see the portal route's doc comment: full PAN + CVV in plaintext.
   server.post(
     "/admin/cards/:id/reveal",
-    { preHandler: [requireStaffAuth, requirePermission("cards.manage")], schema: { params: idParam, response: { 200: cardRevealSchema, 404: errorResponseSchema } } },
+    { preHandler: [requireStaffAuth, requirePermission("cards.manage"), requireStepUp("Reveal a virtual card number")], schema: { params: idParam, response: { 200: cardRevealSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
       const reveal = await revealCard(app.prisma, request.params.id);
       return reply.send(reveal);
@@ -70,7 +71,7 @@ export async function adminCardsRoutes(app: FastifyInstance) {
 
   server.post(
     "/admin/cards/:id/freeze",
-    { preHandler: [requireStaffAuth, requirePermission("cards.manage")], schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
+    { preHandler: [requireStaffAuth, requirePermission("cards.manage"), requireStepUp("Freeze a virtual card")], schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
       const card = await freezeCard(app.prisma, request.params.id);
       return reply.send(card);
@@ -79,7 +80,7 @@ export async function adminCardsRoutes(app: FastifyInstance) {
 
   server.post(
     "/admin/cards/:id/unfreeze",
-    { preHandler: [requireStaffAuth, requirePermission("cards.manage")], schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
+    { preHandler: [requireStaffAuth, requirePermission("cards.manage"), requireStepUp("Unfreeze a virtual card")], schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
       const card = await unfreezeCard(app.prisma, request.params.id);
       return reply.send(card);
@@ -88,7 +89,7 @@ export async function adminCardsRoutes(app: FastifyInstance) {
 
   server.post(
     "/admin/cards/:id/terminate",
-    { preHandler: [requireStaffAuth, requirePermission("cards.manage")], schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
+    { preHandler: [requireStaffAuth, requirePermission("cards.manage"), requireStepUp("Terminate a virtual card")], schema: { params: idParam, response: { 200: cardSchema, 404: errorResponseSchema } } },
     async (request, reply) => {
       const card = await terminateCard(app.prisma, request.params.id);
       return reply.send(card);

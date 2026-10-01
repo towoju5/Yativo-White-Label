@@ -535,6 +535,16 @@ const EMAIL_DEFAULTS: Record<EmailNotificationType, { subject: string; bodyHtml:
       extra: "If this wasn't you, <strong>contact another owner or admin immediately</strong> to secure the account.",
     }),
   },
+  STAFF_ACTION_VERIFICATION_CODE: {
+    subject: "{{code}} is your {{productName}} admin action code",
+    bodyHtml: buildEmailTemplate({
+      icon: "🛡️",
+      heading: "Confirm this admin action",
+      intro: "Someone signed in to your admin account is about to perform a sensitive action: <strong>{{action}}</strong>. Enter this code to confirm it:",
+      code: "{{code}}",
+      extra: "This code expires in <strong>10 minutes</strong> and works once. If this wasn't you, <strong>contact another owner or admin immediately</strong>.",
+    }),
+  },
 };
 
 function settingsToDto(s: { disabledTypes: EmailNotificationType[]; updatedAt: Date }) {

@@ -18,6 +18,9 @@ export const customerSchema = z.object({
   source: z.enum(CUSTOMER_SOURCES),
   /** True only for an IMPORTED account that hasn't chosen its own password yet — see POST /portal/auth/setup-password. */
   requiresPasswordSetup: z.boolean(),
+  /** Set while the customer is soft-deleted (see POST /admin/customers/:id/delete) — they can't sign in, receive transfers, or appear in default lists until restored. Admin responses only. */
+  deletedAt: z.string().nullable().optional(),
+  deletionReason: z.string().nullable().optional(),
   // Every field above describes the BUSINESS account being operated on. These describe the
   // authenticated principal itself, and are present only when it's an invited team member rather
   // than the account owner — see resolveEffectiveCustomerId()/isPortalOwnerLevel() in the API.

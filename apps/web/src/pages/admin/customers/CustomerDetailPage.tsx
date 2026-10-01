@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Customer, StatementLine, WalletBalance, CustomerEndorsement, Beneficiary, CustomerPricingRule, UpsertPricingOverrideInput, CustomerLimitDto } from "@white-label/shared-types";
 import { formatCurrencyAmount } from "@white-label/shared-types";
-import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon, DollarSign, RotateCcw, Pencil, Gauge, Trash2 } from "lucide-react";
+import { ArrowLeft, RefreshCw, ShieldCheck, ShieldX, Snowflake, Sun, Wallet as WalletIcon, DollarSign, RotateCcw, Pencil, Gauge, Trash2, ArrowRightLeft, UserX } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
@@ -38,11 +38,14 @@ export default function CustomerDetailPage() {
   const canAdjust = user?.role === "OWNER" || user?.role === "ADMIN";
   const canWrite = useStaffPermission("customers.write");
   const canReviewKyc = useStaffPermission("kyc.review");
+  const canDelete = useStaffPermission("customers.delete");
   useWatchCustomerWallet(customerId);
 
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [adjustOpen, setAdjustOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
   const [activeWalletId, setActiveWalletId] = useState<string | undefined>();
 
   const detailQuery = useQuery({
@@ -143,6 +146,26 @@ export default function CustomerDetailPage() {
     onError: (e) => toast({ variant: "destructive", title: "Action failed", description: e instanceof ApiError ? e.message : undefined }),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (reason: string) => staffApi.post(`/admin/customers/${customerId}/delete`, { reason }),
+    onSuccess: () => {
+      toast({ title: "Customer deleted", description: "They're signed out and can't sign in until restored." });
+      setDeleteOpen(false);
+      setDeleteReason("");
+      queryClient.invalidateQueries({ queryKey: ["admin", "customers"] });
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't delete customer", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: () => staffApi.post(`/admin/customers/${customerId}/restore`),
+    onSuccess: () => {
+      toast({ title: "Customer restored", description: "They can sign in again." });
+      queryClient.invalidateQueries({ queryKey: ["admin", "customers"] });
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't restore customer", description: e instanceof ApiError ? e.message : undefined }),
+  });
+
   const resubmitYativoMutation = useMutation({
     mutationFn: () => staffApi.post(`/admin/customers/${customerId}/yativo/resubmit`),
     onSuccess: () => {
@@ -184,12 +207,32 @@ export default function CustomerDetailPage() {
   }
 
   const customer = detailQuery.data;
+  const isDeleted = !!customer.deletedAt;
 
   return (
     <div className="space-y-6">
       <Link to="/admin/customers" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-3.5 w-3.5" /> All customers
       </Link>
+
+      {isDeleted && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+          <div className="flex items-start gap-2">
+            <UserX className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+            <div>
+              <p className="font-medium">Deleted on {new Date(customer.deletedAt!).toLocaleString()}</p>
+              <p className="text-muted-foreground">
+                {customer.deletionReason ? `Reason: ${customer.deletionReason}. ` : ""}This customer can't sign in or receive transfers. Their records are kept and can be restored.
+              </p>
+            </div>
+          </div>
+          {canDelete && (
+            <Button size="sm" variant="outline" onClick={() => restoreMutation.mutate()} disabled={restoreMutation.isPending}>
+              <RotateCcw className="h-4 w-4" /> Restore customer
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -199,9 +242,15 @@ export default function CustomerDetailPage() {
             <EndorsementProgressBadge customer={customer} prefix="Endorsements: " />
             <Badge variant={customer.status === "ACTIVE" ? "success" : "destructive"}>{customer.status}</Badge>
             <Badge variant="outline">{customer.type}</Badge>
+            {isDeleted && <Badge variant="destructive">DELETED</Badge>}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" asChild>
+            <Link to={`/admin/transfers?customerId=${customer.id}`}>
+              <ArrowRightLeft className="h-4 w-4" /> Transfers
+            </Link>
+          </Button>
           {customer.kycStatus === "PENDING" && canReviewKyc && (
             <>
               <Button size="sm" onClick={() => approveMutation.mutate()} disabled={approveMutation.isPending}>
@@ -251,6 +300,46 @@ export default function CustomerDetailPage() {
                 </>
               )}
             </Button>
+          )}
+          {canDelete && !isDeleted && (
+            <Dialog
+              open={deleteOpen}
+              onOpenChange={(open) => {
+                setDeleteOpen(open);
+                if (!open) setDeleteReason("");
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                  <Trash2 className="h-4 w-4" /> Delete
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete {customer.fullName ?? customer.businessName ?? customer.email}?</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 text-sm">
+                  <p className="text-muted-foreground">
+                    This is a soft delete: the customer is signed out everywhere, can't sign in or receive transfers, and moves to the{" "}
+                    <span className="font-medium text-foreground">Deleted customers</span> list. Wallets, transactions and KYC records are kept, and you can restore
+                    them at any time.
+                  </p>
+                  <p className="text-muted-foreground">Customers with a remaining balance or open cards can't be deleted until those are settled.</p>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="deleteReason">Reason</Label>
+                    <Textarea id="deleteReason" placeholder="e.g. Customer requested account closure" value={deleteReason} onChange={(e) => setDeleteReason(e.target.value)} />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" disabled={deleteReason.trim().length < 3 || deleteMutation.isPending} onClick={() => deleteMutation.mutate(deleteReason.trim())}>
+                    {deleteMutation.isPending ? "Deleting…" : "Delete customer"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
@@ -429,13 +518,14 @@ export default function CustomerDetailPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">{PRICING_MODE_LABELS[rule.pricingMode]}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" aria-label={`Edit ${SERVICE_LABELS[rule.service]} pricing`} onClick={() => setEditingPricing(rule)}>
+                      <Button variant="ghost" size="icon" title={`Edit ${SERVICE_LABELS[rule.service]} pricing`} aria-label={`Edit ${SERVICE_LABELS[rule.service]} pricing`} onClick={() => setEditingPricing(rule)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       {rule.source === "OVERRIDE" && (
                         <Button
                           variant="ghost"
                           size="icon"
+                          title={`Reset ${SERVICE_LABELS[rule.service]} pricing to default`}
                           aria-label={`Reset ${SERVICE_LABELS[rule.service]} pricing to default`}
                           onClick={() => resetPricingMutation.mutate(rule.service)}
                           disabled={resetPricingMutation.isPending}
@@ -572,6 +662,8 @@ function CustomerLimitsCard({ customerId, wallets }: { customerId: string; walle
                           <Button
                             variant="ghost"
                             size="icon"
+                            title="Remove limit override"
+                            aria-label="Remove limit override"
                             onClick={() => saveMutation.mutate({ currencyCode: l.currencyCode, dailyLimitMinor: null, monthlyLimitMinor: null })}
                             disabled={saveMutation.isPending}
                           >

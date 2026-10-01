@@ -26,6 +26,7 @@ import {
   listBusinessSpendCardTransactions,
   listAdminBusinessSpendCards,
 } from "./businessSpendCards.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 export async function adminBusinessSpendCardsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -43,7 +44,7 @@ export async function adminBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.post(
     "/admin/business-spend-cards",
     {
-      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage")],
+      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage"), requireStepUp("Issue a business spend card")],
       schema: { body: issueBusinessSpendCardSchema, response: { 200: businessSpendCardSchema, 403: errorResponseSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -55,7 +56,7 @@ export async function adminBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.post(
     "/admin/business-spend-cards/:id/wallet",
     {
-      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage")],
+      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage"), requireStepUp("Fund a business spend card")],
       schema: { params: idParam, body: businessSpendCardWalletActionSchema, response: { 200: businessSpendCardWalletActionResultSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -71,7 +72,7 @@ export async function adminBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.post(
     "/admin/business-spend-cards/:id/status",
     {
-      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage")],
+      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage"), requireStepUp("Change a business spend card's status")],
       schema: { params: idParam, body: businessSpendCardStatusActionSchema, response: { 200: businessSpendCardSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -83,7 +84,7 @@ export async function adminBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.post(
     "/admin/business-spend-cards/:id/pin",
     {
-      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage")],
+      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage"), requireStepUp("Change a business spend card PIN")],
       schema: { params: idParam, body: businessSpendCardPinSchema, response: { 200: businessSpendCardSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -95,7 +96,7 @@ export async function adminBusinessSpendCardsRoutes(app: FastifyInstance) {
   server.put(
     "/admin/business-spend-cards/:id/limits",
     {
-      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage")],
+      preHandler: [requireStaffAuth, requirePermission("businessSpendCards.manage"), requireStepUp("Change business spend card limits")],
       schema: { params: idParam, body: businessSpendCardLimitsSchema, response: { 200: z.object({ card: businessSpendCardSchema, limits: z.array(z.record(z.unknown())) }), 404: errorResponseSchema } },
     },
     async (request, reply) => {

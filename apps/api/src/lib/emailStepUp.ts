@@ -3,6 +3,9 @@ import { randomInt, createHash } from "node:crypto";
 
 const TTL_SECONDS = 10 * 60;
 
+/** `staff-action` is the per-action admin confirmation (see middleware/requireStepUp.ts) — kept apart from `staff` so it can never redeem a pending login challenge or vice versa. */
+export type EmailStepUpKind = "portal" | "staff" | "staff-action";
+
 function key(kind: string, principalId: string): string {
   return `stepup-email:${kind}:${principalId}`;
 }
@@ -12,14 +15,14 @@ function hashCode(code: string): string {
 }
 
 /** A short-lived numeric code for a new-location login challenge — same hash-not-raw-value posture as every other credential in this codebase, just in Redis (10 min TTL) instead of a DB column, mirroring the pending-TOTP-secret pattern in twoFactor.service.ts. `kind` namespaces customer vs. staff challenges under the same Redis key scheme. */
-export async function issueEmailStepUpCode(redis: Redis, kind: "portal" | "staff", principalId: string): Promise<string> {
+export async function issueEmailStepUpCode(redis: Redis, kind: EmailStepUpKind, principalId: string): Promise<string> {
   const code = randomInt(100000, 1000000).toString();
   await redis.set(key(kind, principalId), hashCode(code), "EX", TTL_SECONDS);
   return code;
 }
 
 /** Single-use: deletes the stored hash on a correct match so the same code can't be replayed. */
-export async function verifyEmailStepUpCode(redis: Redis, kind: "portal" | "staff", principalId: string, code: string): Promise<boolean> {
+export async function verifyEmailStepUpCode(redis: Redis, kind: EmailStepUpKind, principalId: string, code: string): Promise<boolean> {
   const stored = await redis.get(key(kind, principalId));
   if (!stored) return false;
   const ok = stored === hashCode(code.trim());

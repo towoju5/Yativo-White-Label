@@ -157,7 +157,7 @@ export default function LimitsSettingsPage() {
                               />
                             </TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="icon" onClick={() => removeMutation.mutate(l.currencyCode)} disabled={removeMutation.isPending}>
+                              <Button variant="ghost" size="icon" title="Remove limit" aria-label="Remove limit" onClick={() => removeMutation.mutate(l.currencyCode)} disabled={removeMutation.isPending}>
                                 <Trash2 className="h-4 w-4 text-muted-foreground" />
                               </Button>
                             </TableCell>

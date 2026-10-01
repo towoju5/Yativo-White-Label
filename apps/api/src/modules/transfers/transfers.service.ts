@@ -50,7 +50,7 @@ export function normalizePublicId(raw: string): string {
  * (an explicit admin action) blocks it.
  */
 function assertCanTransact(c: Customer, who: "sender" | "recipient") {
-  if (c.status !== "ACTIVE") {
+  if (c.status !== "ACTIVE" || c.deletedAt) {
     throw who === "sender"
       ? new AppError("Your account is frozen, so transfers are disabled. Contact support.", 403, "ACCOUNT_FROZEN")
       : new AppError("This account can't receive transfers right now.", 409, "RECIPIENT_UNAVAILABLE");
@@ -239,17 +239,84 @@ export async function listTransfers(prisma: PrismaClient, customerId: string, li
 export async function listRecentRecipients(prisma: PrismaClient, customerId: string, limit = 8) {
   const rows = await prisma.internalTransfer.findMany({
     where: { senderCustomerId: customerId },
-    include: { recipient: { select: { ...PARTY_SELECT, status: true } } },
+    include: { recipient: { select: { ...PARTY_SELECT, status: true, deletedAt: true } } },
     orderBy: { createdAt: "desc" },
     take: 50,
   });
   const seen = new Set<string>();
   const out: ReturnType<typeof toRecipientDto>[] = [];
   for (const r of rows) {
-    if (seen.has(r.recipientCustomerId) || r.recipient.status !== "ACTIVE") continue;
+    if (seen.has(r.recipientCustomerId) || r.recipient.status !== "ACTIVE" || r.recipient.deletedAt) continue;
     seen.add(r.recipientCustomerId);
     out.push(toRecipientDto(r.recipient));
     if (out.length >= limit) break;
   }
   return out;
+}
+
+// ── Admin ────────────────────────────────────────────────────────────────────
+
+const ADMIN_PARTY_SELECT = { id: true, publicId: true, fullName: true, businessName: true, email: true, type: true } as const;
+const ADMIN_TRANSFER_INCLUDE = { sender: { select: ADMIN_PARTY_SELECT }, recipient: { select: ADMIN_PARTY_SELECT } } as const;
+type AdminTransferRow = Prisma.InternalTransferGetPayload<{ include: typeof ADMIN_TRANSFER_INCLUDE }>;
+
+function adminPartyToDto(c: AdminTransferRow["sender"]) {
+  return { customerId: c.id, publicId: c.publicId, name: c.fullName ?? c.businessName ?? null, email: c.email, type: c.type };
+}
+
+async function adminTransfersToDto(prisma: PrismaClient, rows: AdminTransferRow[]) {
+  const txs = await prisma.ledgerTransaction.findMany({ where: { id: { in: rows.map((r) => r.transactionId) } }, select: { id: true, status: true } });
+  const statusById = new Map(txs.map((t) => [t.id, t.status]));
+  return rows.map((t) => ({
+    id: t.id,
+    sender: adminPartyToDto(t.sender),
+    recipient: adminPartyToDto(t.recipient),
+    currencyCode: t.currencyCode,
+    amountMinor: t.amountMinor.toString(),
+    feeMinor: t.feeMinor.toString(),
+    totalDebitMinor: (t.amountMinor + t.feeMinor).toString(),
+    note: t.note,
+    lookupMethod: t.lookupMethod,
+    transactionId: t.transactionId,
+    ledgerStatus: statusById.get(t.transactionId) ?? "POSTED",
+    createdAt: t.createdAt.toISOString(),
+  }));
+}
+
+export async function listAdminTransfers(
+  prisma: PrismaClient,
+  filters: { search?: string; customerId?: string; currencyCode?: string; dateFrom?: Date; dateTo?: Date },
+  page: number,
+  pageSize: number,
+) {
+  const q = filters.search?.trim();
+  const partyMatch = (value: string): Prisma.CustomerWhereInput => ({
+    OR: [
+      { fullName: { contains: value, mode: "insensitive" } },
+      { businessName: { contains: value, mode: "insensitive" } },
+      { email: { contains: value, mode: "insensitive" } },
+      { publicId: { equals: value.replace(/[\s-]/g, "").toUpperCase() } },
+    ],
+  });
+  const where: Prisma.InternalTransferWhereInput = {
+    AND: [
+      filters.customerId ? { OR: [{ senderCustomerId: filters.customerId }, { recipientCustomerId: filters.customerId }] } : {},
+      filters.currencyCode ? { currencyCode: filters.currencyCode } : {},
+      filters.dateFrom || filters.dateTo
+        ? { createdAt: { ...(filters.dateFrom ? { gte: filters.dateFrom } : {}), ...(filters.dateTo ? { lte: filters.dateTo } : {}) } }
+        : {},
+      q ? { OR: [{ sender: partyMatch(q) }, { recipient: partyMatch(q) }, { id: q }, { transactionId: q }] } : {},
+    ],
+  };
+  const [total, rows] = await Promise.all([
+    prisma.internalTransfer.count({ where }),
+    prisma.internalTransfer.findMany({ where, include: ADMIN_TRANSFER_INCLUDE, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+  ]);
+  return { items: await adminTransfersToDto(prisma, rows), total, page, pageSize };
+}
+
+export async function getAdminTransfer(prisma: PrismaClient, id: string) {
+  const row = await prisma.internalTransfer.findUnique({ where: { id }, include: ADMIN_TRANSFER_INCLUDE });
+  if (!row) throw new NotFoundError("Transfer");
+  return (await adminTransfersToDto(prisma, [row]))[0]!;
 }

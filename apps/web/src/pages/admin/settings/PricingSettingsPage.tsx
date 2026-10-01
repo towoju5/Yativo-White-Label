@@ -202,7 +202,7 @@ export default function PricingSettingsPage() {
                       <Badge variant={rule.pricingMode === "MARKUP" ? "warning" : "secondary"}>{PRICING_MODE_LABELS[rule.pricingMode]}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" aria-label={`Edit ${SERVICE_LABELS[rule.service]} pricing`} onClick={() => setEditing(rule)}>
+                      <Button variant="ghost" size="icon" title={`Edit ${SERVICE_LABELS[rule.service]} pricing`} aria-label={`Edit ${SERVICE_LABELS[rule.service]} pricing`} onClick={() => setEditing(rule)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                     </TableCell>

@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import type { Customer, CustomerImportRun } from "@white-label/shared-types";
-import { ChevronLeft, ChevronRight, Search, Download, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Download, Loader2, RotateCcw } from "lucide-react";
 import { staffApi, ApiError } from "@/lib/api-client";
 import type { Paginated } from "@/lib/types";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useStaffPermission } from "@/hooks/useStaffPermission";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,19 +69,33 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [kycStatus, setKycStatus] = useState<string>("ALL");
   const [status, setStatus] = useState<string>("ALL");
+  const [view, setView] = useState<"current" | "deleted">("current");
   const [page, setPage] = useState(1);
+  const showingDeleted = view === "deleted";
 
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const canDelete = useStaffPermission("customers.delete");
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["admin", "customers", { search, kycStatus, status, page }],
+    queryKey: ["admin", "customers", { search, kycStatus, status, view, page }],
     queryFn: () =>
       staffApi.get<Paginated<Customer>>("/admin/customers", {
         search: search || undefined,
         kycStatus: kycStatus === "ALL" ? undefined : kycStatus,
         status: status === "ALL" ? undefined : status,
+        deleted: showingDeleted ? "true" : undefined,
         page,
         pageSize: PAGE_SIZE,
       }),
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: (id: string) => staffApi.post<Customer>(`/admin/customers/${id}/restore`),
+    onSuccess: (c) => {
+      toast({ title: "Customer restored", description: `${c.fullName ?? c.businessName ?? c.email} can sign in again.` });
+      queryClient.invalidateQueries({ queryKey: ["admin", "customers"] });
+    },
+    onError: (e) => toast({ variant: "destructive", title: "Couldn't restore customer", description: e instanceof ApiError ? e.message : undefined }),
   });
   useEffect(() => {
     if (isError) {
@@ -147,6 +162,21 @@ export default function CustomersPage() {
             <SelectItem value="FROZEN">Frozen</SelectItem>
           </SelectContent>
         </Select>
+        <Select
+          value={view}
+          onValueChange={(v) => {
+            setView(v as "current" | "deleted");
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="View" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="current">Current customers</SelectItem>
+            <SelectItem value="deleted">Deleted customers</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
@@ -163,7 +193,7 @@ export default function CustomersPage() {
           </Button>
         </div>
       ) : !data || data.items.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">No customers match these filters</div>
+        <div className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">{showingDeleted ? "No deleted customers match these filters" : "No customers match these filters"}</div>
       ) : (
         <>
           <Table>
@@ -174,7 +204,8 @@ export default function CustomersPage() {
                 <TableHead>Type</TableHead>
                 <TableHead>KYC</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Joined</TableHead>
+                <TableHead>{showingDeleted ? "Deleted" : "Joined"}</TableHead>
+                {showingDeleted && canDelete && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -196,19 +227,47 @@ export default function CustomersPage() {
                   <TableCell>
                     <Badge variant={c.status === "ACTIVE" ? "success" : "destructive"}>{c.status}</Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                  {showingDeleted ? (
+                    <TableCell className="text-muted-foreground">
+                      <div>{c.deletedAt ? new Date(c.deletedAt).toLocaleDateString() : "—"}</div>
+                      {c.deletionReason && (
+                        <div className="max-w-56 truncate text-xs" title={c.deletionReason}>
+                          {c.deletionReason}
+                        </div>
+                      )}
+                    </TableCell>
+                  ) : (
+                    <TableCell className="text-muted-foreground">{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                  )}
+                  {showingDeleted && canDelete && (
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Restore this customer"
+                        disabled={restoreMutation.isPending}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          restoreMutation.mutate(c.id);
+                        }}
+                      >
+                        {restoreMutation.isPending && restoreMutation.variables === c.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                        Restore
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            <Button variant="outline" size="icon" title="Previous page" aria-label="Previous page" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-xs text-muted-foreground">
               Page {page} / {totalPages}
             </span>
-            <Button variant="outline" size="icon" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <Button variant="outline" size="icon" title="Next page" aria-label="Next page" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

@@ -46,6 +46,7 @@ import { requireStaffAuth, requirePermission } from "../../middleware/requireSta
 import { env } from "../../config/env.js";
 import { parseTtlToMs } from "../../lib/refreshTokens.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 const REFRESH_COOKIE = "admin_refresh_token";
 
@@ -229,7 +230,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.post(
     "/staff/invite",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Invite a staff member")],
       schema: { body: inviteStaffSchema, response: { 200: z.object({ user: staffUserSchema }) } },
     },
     async (request, reply) => {
@@ -272,7 +273,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.patch(
     "/admin/staff/:id",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Change a staff member's role")],
       schema: { params: idParam, body: updateStaffSchema, response: { 200: staffUserSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -284,7 +285,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.post(
     "/admin/staff/:id/deactivate",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Deactivate a staff member")],
       schema: { params: idParam, response: { 200: staffUserSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -296,7 +297,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.post(
     "/admin/staff/:id/reactivate",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Reactivate a staff member")],
       schema: { params: idParam, response: { 200: staffUserSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -308,7 +309,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.post(
     "/admin/staff/:id/reset-password",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Reset a staff member's password")],
       schema: { params: idParam, response: { 200: resetStaffPasswordResultSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -320,7 +321,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.delete(
     "/admin/staff/:id",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Remove a staff member")],
       schema: { params: idParam, response: { 204: z.void(), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -343,7 +344,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.post(
     "/admin/roles",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Create a role")],
       schema: { body: createRoleSchema, response: { 200: roleSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -355,7 +356,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.patch(
     "/admin/roles/:id",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Edit a role's permissions")],
       schema: { params: idParam, body: updateRoleSchema, response: { 200: roleSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -367,7 +368,7 @@ export async function authRoutes(app: FastifyInstance) {
   server.delete(
     "/admin/roles/:id",
     {
-      preHandler: [requireStaffAuth, requirePermission("team.manage")],
+      preHandler: [requireStaffAuth, requirePermission("team.manage"), requireStepUp("Delete a role")],
       schema: { params: idParam, response: { 204: z.void(), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {

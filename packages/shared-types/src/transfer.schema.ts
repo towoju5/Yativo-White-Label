@@ -62,3 +62,46 @@ export const transferProfileSchema = z.object({
   phoneHint: z.string().nullable(),
 });
 export type TransferProfile = z.infer<typeof transferProfileSchema>;
+
+// ── Admin ────────────────────────────────────────────────────────────────────
+
+/** Staff see both parties in full — unlike the customer-facing DTO, which only shows a masked name. */
+export const adminTransferPartySchema = z.object({
+  customerId: z.string(),
+  publicId: z.string(),
+  name: z.string().nullable(),
+  email: z.string(),
+  type: z.enum(["INDIVIDUAL", "BUSINESS"]),
+});
+export type AdminTransferParty = z.infer<typeof adminTransferPartySchema>;
+
+export const adminTransferSchema = z.object({
+  id: z.string(),
+  sender: adminTransferPartySchema,
+  recipient: adminTransferPartySchema,
+  currencyCode: z.string(),
+  amountMinor: minorAmountSchema,
+  feeMinor: minorAmountSchema,
+  /** amount + fee — what left the sender's wallet. */
+  totalDebitMinor: minorAmountSchema,
+  note: z.string().nullable(),
+  lookupMethod: z.string(),
+  transactionId: z.string(),
+  /** The ledger transaction's status — POSTED normally; REVERSED if staff reversed it from Transactions. */
+  ledgerStatus: z.enum(["PENDING", "POSTED", "REVERSED"]),
+  createdAt: z.string(),
+});
+export type AdminTransfer = z.infer<typeof adminTransferSchema>;
+
+export const adminTransferListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(25),
+  /** Name, email or customer ID (publicId) of either party, or the transfer/transaction id. */
+  search: z.string().trim().max(200).optional(),
+  /** Internal customer id — matches transfers where they're the sender OR the recipient. */
+  customerId: z.string().optional(),
+  currencyCode: currencyCodeSchema.optional(),
+  dateFrom: z.coerce.date().optional(),
+  dateTo: z.coerce.date().optional(),
+});
+export type AdminTransferListQuery = z.infer<typeof adminTransferListQuerySchema>;

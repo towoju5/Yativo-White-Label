@@ -140,7 +140,7 @@ export default function IntegrationsSettingsPage() {
             <Label htmlFor="webhookUrl">Webhook URL</Label>
             <div className="flex gap-2">
               <Input id="webhookUrl" readOnly value={config.yativo.webhookUrl} className="font-mono text-sm" />
-              <Button type="button" variant="outline" size="icon" aria-label="Copy webhook URL" onClick={copyWebhookUrl}>
+              <Button type="button" variant="outline" size="icon" title="Copy webhook URL" aria-label="Copy webhook URL" onClick={copyWebhookUrl}>
                 <Copy className="h-4 w-4" />
               </Button>
             </div>

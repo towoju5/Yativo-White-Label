@@ -13,6 +13,7 @@ import { useNavLabelOverrides } from "@/hooks/useNavLabelOverrides";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { GlobalLoadingBar } from "@/components/GlobalLoadingBar";
+import { StepUpDialogHost } from "@/components/StepUpDialogHost";
 import { createRouter } from "@/router";
 
 function SplashScreen() {
@@ -62,6 +63,7 @@ export default function App() {
             <GlobalLoadingBar />
             <RouterProvider router={router} />
             <Toaster />
+            <StepUpDialogHost />
           </CustomerAuthProvider>
         </StaffAuthProvider>
       </TooltipProvider>

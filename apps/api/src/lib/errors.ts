@@ -1,12 +1,15 @@
 export class AppError extends Error {
   statusCode: number;
   code: string;
+  /** Extra machine-readable fields merged into the error response body alongside message/code. */
+  extra?: Record<string, unknown>;
 
-  constructor(message: string, statusCode = 400, code = "APP_ERROR") {
+  constructor(message: string, statusCode = 400, code = "APP_ERROR", extra?: Record<string, unknown>) {
     super(message);
     this.name = "AppError";
     this.statusCode = statusCode;
     this.code = code;
+    this.extra = extra;
   }
 }
 

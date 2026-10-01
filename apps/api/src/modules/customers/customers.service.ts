@@ -25,6 +25,8 @@ export const CUSTOMER_DTO_SELECT = {
   createdAt: true,
   source: true,
   requiresPasswordSetup: true,
+  deletedAt: true,
+  deletionReason: true,
 } as const;
 
 export function customerToDto(customer: {
@@ -41,6 +43,8 @@ export function customerToDto(customer: {
   createdAt: Date;
   source: "SIGNUP" | "IMPORTED";
   requiresPasswordSetup: boolean;
+  deletedAt?: Date | null;
+  deletionReason?: string | null;
 }) {
   return {
     id: customer.id,
@@ -56,16 +60,20 @@ export function customerToDto(customer: {
     createdAt: customer.createdAt.toISOString(),
     source: customer.source,
     requiresPasswordSetup: customer.requiresPasswordSetup,
+    deletedAt: customer.deletedAt?.toISOString() ?? null,
+    deletionReason: customer.deletionReason ?? null,
   };
 }
 
 export async function listCustomers(
   prisma: PrismaClient,
-  filters: { search?: string; kycStatus?: KycStatus; status?: CustomerStatus },
+  filters: { search?: string; kycStatus?: KycStatus; status?: CustomerStatus; deleted?: boolean },
   page: number,
   pageSize: number,
 ) {
   const where = {
+    // Soft-deleted customers live in their own "Deleted" view rather than mixed into the default list.
+    deletedAt: filters.deleted ? { not: null } : null,
     ...(filters.kycStatus ? { kycStatus: filters.kycStatus } : {}),
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.search
@@ -241,6 +249,54 @@ export async function freezeCustomer(prisma: PrismaClient, actorId: string, cust
   if (!customer) throw new NotFoundError("Customer");
   const updated = await prisma.customer.update({ where: { id: customerId }, data: { status: "FROZEN" } });
   await logAdminAction(prisma, actorId, "customer.frozen", customerId);
+  return updated;
+}
+
+/**
+ * Soft delete — nothing is removed: wallets, ledger history, cards and KYC records stay exactly as
+ * they are so restoreCustomer() is lossless. Refused while the customer still holds money or an
+ * open card, since a deleted customer can't sign in to reach either.
+ */
+export async function deleteCustomer(prisma: PrismaClient, actorId: string, customerId: string, reason: string) {
+  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+  if (!customer) throw new NotFoundError("Customer");
+  if (customer.deletedAt) throw new AppError("This customer is already deleted.", 409, "ALREADY_DELETED");
+
+  const [wallets, openCards, openSpendCards] = await Promise.all([
+    listCustomerWallets(prisma, customerId),
+    prisma.card.count({ where: { customerId, status: { not: "CLOSED" } } }),
+    prisma.businessSpendCard.count({ where: { customerId, status: { not: "TERMINATED" } } }),
+  ]);
+  const funded = wallets.filter((w) => BigInt(w.availableMinor) !== 0n || BigInt(w.pendingMinor) !== 0n);
+  if (funded.length > 0) {
+    throw new AppError(
+      `This customer still has a balance in ${funded.map((w) => w.currencyCode).join(", ")}. Move or settle the funds before deleting.`,
+      409,
+      "CUSTOMER_HAS_BALANCE",
+    );
+  }
+  if (openCards + openSpendCards > 0) {
+    throw new AppError("This customer still has open cards. Terminate them before deleting.", 409, "CUSTOMER_HAS_OPEN_CARDS");
+  }
+
+  const [updated] = await prisma.$transaction([
+    prisma.customer.update({
+      where: { id: customerId },
+      data: { deletedAt: new Date(), deletedById: actorId, deletionReason: reason, magicLinkTokenHash: null, magicLinkExpiresAt: null, kycContinueTokenHash: null, kycContinueExpiresAt: null },
+    }),
+    // Ends every signed-in session — the access token can't be refreshed once its refresh token is revoked.
+    prisma.customerRefreshToken.updateMany({ where: { customerId, revokedAt: null }, data: { revokedAt: new Date() } }),
+  ]);
+  await logAdminAction(prisma, actorId, "customer.deleted", customerId, { reason });
+  return updated;
+}
+
+export async function restoreCustomer(prisma: PrismaClient, actorId: string, customerId: string) {
+  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+  if (!customer) throw new NotFoundError("Customer");
+  if (!customer.deletedAt) throw new AppError("This customer isn't deleted.", 409, "NOT_DELETED");
+  const updated = await prisma.customer.update({ where: { id: customerId }, data: { deletedAt: null, deletedById: null, deletionReason: null } });
+  await logAdminAction(prisma, actorId, "customer.restored", customerId, { previousReason: customer.deletionReason });
   return updated;
 }
 

@@ -5,6 +5,7 @@ import { pricingServiceSchema, pricingRuleSchema, updatePricingDefaultSchema, cu
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { listPricingDefaults, updatePricingDefault, listCustomerPricing, upsertPricingOverride, deletePricingOverride } from "./pricing.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 export async function pricingRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -23,7 +24,7 @@ export async function pricingRoutes(app: FastifyInstance) {
   server.patch(
     "/admin/pricing/:service",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Change platform pricing")],
       schema: { params: serviceParam, body: updatePricingDefaultSchema, response: { 200: pricingRuleSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -44,7 +45,7 @@ export async function pricingRoutes(app: FastifyInstance) {
   server.put(
     "/admin/customers/:customerId/pricing/:service",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Change a customer's pricing")],
       schema: { params: customerServiceParams, body: upsertPricingOverrideSchema, response: { 200: customerPricingRuleSchema } },
     },
     async (request, reply) => {
@@ -56,7 +57,7 @@ export async function pricingRoutes(app: FastifyInstance) {
   server.delete(
     "/admin/customers/:customerId/pricing/:service",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Reset a customer's pricing")],
       schema: { params: customerServiceParams, response: { 200: customerPricingRuleSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {

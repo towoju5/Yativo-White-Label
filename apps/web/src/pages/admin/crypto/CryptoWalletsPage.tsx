@@ -181,7 +181,7 @@ export default function CryptoWalletsPage() {
                     <TableCell className="text-muted-foreground">{new Date(w.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
                       {canManage && (
-                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(w.id)} disabled={deleteMutation.isPending}>
+                        <Button variant="ghost" size="icon" title="Delete wallet" aria-label="Delete wallet" onClick={() => deleteMutation.mutate(w.id)} disabled={deleteMutation.isPending}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       )}

@@ -420,6 +420,12 @@ model Customer {
   /// issuer requires that exactly once before their first card, and the guide doesn't document it
   /// as safely repeatable, so this avoids calling it again on every card issuance.
   cardsActivatedAt           DateTime?
+  /// Soft delete — set by POST /admin/customers/:id/delete, cleared by .../restore. While set the
+  /// customer can't sign in or receive transfers and is hidden from the default admin list; every
+  /// ledger row, card and wallet is kept untouched so a restore is lossless.
+  deletedAt                  DateTime?
+  deletedById                String?
+  deletionReason             String?
   /// Base32 TOTP secret — only set once 2FA setup is confirmed (see /portal/2fa/enable). The
   /// pending, unconfirmed secret from /portal/2fa/setup lives in Redis, not here, until confirmed.
   twoFactorEnabled           Boolean        @default(false)
@@ -446,7 +452,7 @@ model Customer {
   refreshTokens      CustomerRefreshToken[]
   payouts            Payout[]
   passkeys           CustomerPasskey[]
-  teamMembers        CustomerTeamMember[]   @relation("TeamMembers")
+  teamMembers        CustomerTeamMember[]     @relation("TeamMembers")
   pricingOverrides   PricingOverride[]
   deposits           Deposit[]
   virtualAccounts    VirtualAccount[]
@@ -459,9 +465,10 @@ model Customer {
   limits             CustomerLimits[]
   kycDraftFiles      KycDraftFile[]
   kycSubmissions     EncryptedKycSubmission[]
-  transfersSent      InternalTransfer[]     @relation("TransfersSent")
-  transfersReceived  InternalTransfer[]     @relation("TransfersReceived")
+  transfersSent      InternalTransfer[]       @relation("TransfersSent")
+  transfersReceived  InternalTransfer[]       @relation("TransfersReceived")
 
+  @@index([deletedAt])
   @@map("customers")
 }
 
@@ -821,24 +828,24 @@ enum DemoSessionStatus {
 /// modules/demo/demoDatabase.service.ts). Only a SHA-256 hash of the one-time access token is
 /// stored here — the raw token is returned once at creation and never persisted or logged again.
 model DemoSession {
-  id                   String            @id @default(cuid())
-  uuid                 String            @unique @default(uuid())
-  tokenHash            String            @unique
+  id                    String            @id @default(cuid())
+  uuid                  String            @unique @default(uuid())
+  tokenHash             String            @unique
   /// Internally generated only — `demo_<32 hex chars>` — never accepted from a client request.
-  databaseName         String            @unique
-  status               DemoSessionStatus @default(ACTIVE)
-  createdAt            DateTime          @default(now())
-  expiresAt            DateTime
-  lastAccessedAt       DateTime?
-  destroyedAt          DateTime?
+  databaseName          String            @unique
+  status                DemoSessionStatus @default(ACTIVE)
+  createdAt             DateTime          @default(now())
+  expiresAt             DateTime
+  lastAccessedAt        DateTime?
+  destroyedAt           DateTime?
   /// Null when the session was self-served by an anonymous visitor via the public demo landing
   /// page (DEMO_PUBLIC_SIGNUP_ENABLED) rather than created by a staff member.
-  createdByStaffUserId String?
-  createdByStaffUser   StaffUser?        @relation(fields: [createdByStaffUserId], references: [id])
+  createdByStaffUserId  String?
+  createdByStaffUser    StaffUser?        @relation(fields: [createdByStaffUserId], references: [id])
   /// Id of the find-or-create demo user inside the isolated demo database — not a production FK.
-  demoUserId           String?
+  demoUserId            String?
   /// Populated when cleanup fails, so the cron/manual-revoke path can retry and observers can see why.
-  errorMessage         String?
+  errorMessage          String?
   /// Self-service request details (public landing page form) — recorded for audit/support even
   /// though the credentials themselves are only ever delivered by email, never returned over HTTP.
   requestedBusinessName String?
@@ -1182,6 +1189,7 @@ enum EmailNotificationType {
   STAFF_LOGIN_VERIFICATION_CODE
   STAFF_TWO_FACTOR_ENABLED
   STAFF_TWO_FACTOR_DISABLED
+  STAFF_ACTION_VERIFICATION_CODE
 }
 
 /// Singleton (id=1) — which transactional emails customers receive. Default is everything enabled;
@@ -1339,19 +1347,19 @@ model Deposit {
 /// own ledger (one POSTED TRANSFER transaction), never touching Yativo. Kept as its own row (not
 /// just ledger metadata) so velocity limits and "recent recipients" can query it directly.
 model InternalTransfer {
-  id                  String            @id
+  id                  String   @id
   senderCustomerId    String
-  sender              Customer          @relation("TransfersSent", fields: [senderCustomerId], references: [id])
+  sender              Customer @relation("TransfersSent", fields: [senderCustomerId], references: [id])
   recipientCustomerId String
-  recipient           Customer          @relation("TransfersReceived", fields: [recipientCustomerId], references: [id])
-  currencyCode        String            @db.Char(3)
+  recipient           Customer @relation("TransfersReceived", fields: [recipientCustomerId], references: [id])
+  currencyCode        String   @db.Char(3)
   amountMinor         BigInt
-  feeMinor            BigInt            @default(0)
+  feeMinor            BigInt   @default(0)
   note                String?
   /// How the sender found the recipient — EMAIL / PHONE / ID / QR. Analytics/support only.
   lookupMethod        String
-  transactionId       String            @unique
-  createdAt           DateTime          @default(now())
+  transactionId       String   @unique
+  createdAt           DateTime @default(now())
 
   @@index([senderCustomerId, createdAt])
   @@index([recipientCustomerId, createdAt])

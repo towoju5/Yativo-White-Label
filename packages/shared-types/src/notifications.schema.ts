@@ -36,6 +36,7 @@ export const EMAIL_NOTIFICATION_TYPES = [
   "STAFF_LOGIN_VERIFICATION_CODE",
   "STAFF_TWO_FACTOR_ENABLED",
   "STAFF_TWO_FACTOR_DISABLED",
+  "STAFF_ACTION_VERIFICATION_CODE",
 ] as const;
 
 export const emailNotificationTypeSchema = z.enum(EMAIL_NOTIFICATION_TYPES);
@@ -56,6 +57,7 @@ export const AUTH_EMAIL_TYPES = [
   "STAFF_LOGIN_VERIFICATION_CODE",
   "STAFF_TWO_FACTOR_ENABLED",
   "STAFF_TWO_FACTOR_DISABLED",
+  "STAFF_ACTION_VERIFICATION_CODE",
 ] as const satisfies readonly EmailNotificationType[];
 export type AuthEmailType = (typeof AUTH_EMAIL_TYPES)[number];
 
@@ -105,6 +107,7 @@ export const EMAIL_NOTIFICATION_CATALOG: { type: EmailNotificationType; label: s
   { type: "STAFF_LOGIN_VERIFICATION_CODE", label: "Admin new-location sign-in code", description: "One-time code sent when a staff member signs in from a location they haven't used before.", group: "Admin sign-in", variables: ["code"], alwaysOn: true },
   { type: "STAFF_TWO_FACTOR_ENABLED", label: "Admin 2FA enabled", description: "Security notice sent when a staff member turns on two-factor authentication.", group: "Admin sign-in", variables: [], alwaysOn: true },
   { type: "STAFF_TWO_FACTOR_DISABLED", label: "Admin 2FA disabled", description: "Security notice sent when a staff member turns off two-factor authentication.", group: "Admin sign-in", variables: [], alwaysOn: true },
+  { type: "STAFF_ACTION_VERIFICATION_CODE", label: "Admin action verification code", description: "One-time code sent to confirm a sensitive admin action (e.g. a reversal) for staff without an authenticator app.", group: "Admin sign-in", variables: ["code", "action"], alwaysOn: true },
 ];
 
 export const notificationSettingsSchema = z.object({

@@ -242,7 +242,7 @@ export default function TeamPage() {
                       {!isSelf && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label="Staff actions">
+                            <Button variant="ghost" size="icon" title="Staff actions" aria-label="Staff actions">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -297,7 +297,7 @@ export default function TeamPage() {
           </DialogHeader>
           <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-3 font-mono text-sm">
             {passwordResult?.tempPassword}
-            <button onClick={() => passwordResult && copy(passwordResult.tempPassword)} className="text-muted-foreground hover:text-foreground">
+            <button onClick={() => passwordResult && copy(passwordResult.tempPassword)} title="Copy temporary password" aria-label="Copy temporary password" className="text-muted-foreground hover:text-foreground">
               <Copy className="h-4 w-4" />
             </button>
           </div>

@@ -6,6 +6,7 @@ import { decryptCredential, encryptCredential } from "../../lib/credentialEncryp
 import { applyIntegrationSettings, syncWebhookSecretIfRotated, type IntegrationSettings } from "../../lib/integrationRuntimeConfig.js";
 import { env } from "../../config/env.js";
 import { isDemoRequest } from "../demo/demoContext.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 const SETTINGS_KEY = "platform-integrations";
 
@@ -90,7 +91,7 @@ export async function platformIntegrationsRoutes(app: FastifyInstance) {
 
   server.put(
     "/admin/settings/integrations",
-    { preHandler: [requireStaffAuth, requirePermission("api_keys.manage")], schema: { body: settingsSchema } },
+    { preHandler: [requireStaffAuth, requirePermission("api_keys.manage"), requireStepUp("Change integration credentials")], schema: { body: settingsSchema } },
     async (request, reply) => {
       const prior = await db.secureSetting.findUnique({ where: { key: SETTINGS_KEY } });
       const old = prior ? settingsSchema.parse(JSON.parse(decryptCredential(prior.encryptedValue))) : envDefaults;
@@ -131,7 +132,7 @@ export async function platformIntegrationsRoutes(app: FastifyInstance) {
   server.post(
     "/admin/settings/integrations/sync-webhook-secret",
     {
-      preHandler: [requireStaffAuth, requirePermission("api_keys.manage")],
+      preHandler: [requireStaffAuth, requirePermission("api_keys.manage"), requireStepUp("Rotate the webhook secret")],
       schema: { response: { 200: z.object({ rotated: z.boolean() }) } },
     },
     async (_request, reply) => {

@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { requirePermission, requireStaffAuth } from "../../middleware/requireStaffAuth.js";
 import { decryptCredential, encryptCredential } from "../../lib/credentialEncryption.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 const SETTINGS_KEY = "authentication-integrations";
 const settingsSchema = z.object({
@@ -37,7 +38,7 @@ export async function integrationsRoutes(app: FastifyInstance) {
     return reply.send(safe(settingsSchema.parse(JSON.parse(decryptCredential(record.encryptedValue)))));
   });
 
-  server.put("/admin/settings/authentication", { preHandler: [requireStaffAuth, requirePermission("api_keys.manage")], schema: { body: settingsSchema } }, async (request, reply) => {
+  server.put("/admin/settings/authentication", { preHandler: [requireStaffAuth, requirePermission("api_keys.manage"), requireStepUp("Change admin authentication settings")], schema: { body: settingsSchema } }, async (request, reply) => {
     const prior = await db.secureSetting.findUnique({ where: { key: SETTINGS_KEY } });
     const old = prior ? settingsSchema.parse(JSON.parse(decryptCredential(prior.encryptedValue))) : empty;
     // Omitted secret fields preserve their prior encrypted values; the UI never receives them.

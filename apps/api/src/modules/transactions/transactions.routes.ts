@@ -24,6 +24,7 @@ import {
   getTransactionDetailForAdmin,
 } from "./transactions.service.js";
 import { getTransactionDetailForCustomer } from "../wallets/wallets.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 const adjustBodySchema = z.object({ reason: z.string().min(1, "A reason is required") });
 
@@ -100,7 +101,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
   server.post(
     "/admin/transactions/:id/settle",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Settle a transaction")],
       schema: { params: z.object({ id: z.string() }), body: adjustBodySchema, response: { 200: z.object({ id: z.string(), status: z.string() }), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -112,7 +113,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
   server.post(
     "/admin/transactions/:id/reverse",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Reverse a transaction")],
       schema: { params: z.object({ id: z.string() }), body: adjustBodySchema, response: { 200: z.object({ id: z.string(), status: z.string() }), 404: errorResponseSchema, 409: errorResponseSchema } },
     },
     async (request, reply) => {

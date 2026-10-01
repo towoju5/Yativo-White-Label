@@ -196,7 +196,7 @@ const MAGIC_LINK_TTL_MS = 15 * 60 * 1000; // 15 minutes — short-lived since re
 export async function requestMagicLink(prisma: PrismaClient, email: string): Promise<void> {
   const customer = await prisma.customer.findUnique({ where: { email } });
   if (!customer) return;
-  if (customer.status === "FROZEN") return;
+  if (customer.status === "FROZEN" || customer.deletedAt) return;
 
   const { token, tokenHash } = generateRefreshToken();
   await prisma.customer.update({
@@ -216,6 +216,7 @@ export async function verifyMagicLink(prisma: PrismaClient, token: string, meta:
     throw new UnauthorizedError("This sign-in link is invalid or has expired");
   }
   if (customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
+  if (customer.deletedAt) throw new UnauthorizedError("This account has been closed — contact support");
 
   await prisma.customer.update({ where: { id: customer.id }, data: { magicLinkTokenHash: null, magicLinkExpiresAt: null, lastLoginAt: new Date() } });
   await Promise.all([tryEnsureYativoCustomer(prisma, customer), tryProvisionDefaultWallets(prisma, customer.id)]);
@@ -250,6 +251,7 @@ export async function verifyKycContinueLink(prisma: PrismaClient, token: string,
     throw new UnauthorizedError("This link is invalid or has expired — go back to the original device and generate a new one");
   }
   if (customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
+  if (customer.deletedAt) throw new UnauthorizedError("This account has been closed — contact support");
 
   await prisma.customer.update({ where: { id: customer.id }, data: { kycContinueTokenHash: null, kycContinueExpiresAt: null } });
   await Promise.all([tryEnsureYativoCustomer(prisma, customer), tryProvisionDefaultWallets(prisma, customer.id)]);
@@ -279,6 +281,7 @@ export async function loginCustomer(prisma: PrismaClient, redis: Redis, email: s
     throw new UnauthorizedError("Invalid email or password");
   }
   if (customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
+  if (customer.deletedAt) throw new UnauthorizedError("This account has been closed — contact support");
 
   const settings = await getPlatformSettings(prisma);
   if (settings.requireEmailVerification && !customer.emailVerifiedAt) throw new EmailNotVerifiedError();
@@ -491,6 +494,7 @@ export async function verifyCustomerPasskeyLogin(prisma: PrismaClient, redis: Re
   const passkey = await prisma.customerPasskey.findUnique({ where: { credentialId: response.id }, include: { customer: true } });
   if (!passkey) throw new UnauthorizedError("This passkey isn't registered");
   if (passkey.customer.status === "FROZEN") throw new UnauthorizedError("This account has been frozen — contact support");
+  if (passkey.customer.deletedAt) throw new UnauthorizedError("This account has been closed — contact support");
 
   const verification = await verifyAuthenticationResponse({
     response,

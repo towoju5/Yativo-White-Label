@@ -12,6 +12,9 @@ export const customerDetailSchema = customerSchema.extend({
 });
 export type CustomerDetail = z.infer<typeof customerDetailSchema>;
 
+export const deleteCustomerSchema = z.object({ reason: z.string().trim().min(3, "Give a reason (at least 3 characters)").max(500) });
+export type DeleteCustomerInput = z.infer<typeof deleteCustomerSchema>;
+
 export const rejectKycSchema = z.object({
   reason: z.string().min(1),
 });

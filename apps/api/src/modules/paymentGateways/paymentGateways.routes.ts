@@ -5,6 +5,7 @@ import { adminPaymentGatewaySchema, updateGatewayEnabledSchema, depositCountrySc
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
 import { yativoClient } from "../../lib/yativoClient.js";
 import { listDisabledGatewayIds, setGatewayEnabled } from "../../lib/paymentGatewayOverrides.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 /**
  * Admin control over which payment rails customers can use, independent of whatever Yativo
@@ -79,7 +80,7 @@ export async function paymentGatewaysRoutes(app: FastifyInstance) {
   server.patch(
     "/admin/settings/payment-gateways/:kind/:gatewayId",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Change payment gateway settings")],
       schema: {
         params: z.object({ kind: z.enum(["PAYIN", "PAYOUT"]), gatewayId: z.string() }),
         body: updateGatewayEnabledSchema,

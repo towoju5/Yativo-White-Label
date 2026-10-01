@@ -8,6 +8,8 @@
  * request never triggers the other audience's refresh flow.
  */
 
+import { isStepUpPayload, requestStepUpCode } from "@/lib/stepUp";
+
 export type AuthAudience = "staff" | "portal" | "none";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
@@ -112,6 +114,8 @@ export interface ApiFetchOptions {
   query?: Record<string, string | number | boolean | undefined | null>;
   /** internal: prevents infinite refresh-retry loops */
   _retried?: boolean;
+  /** internal: the step-up code collected after a 428 (see lib/stepUp.ts) */
+  _stepUpCode?: string;
 }
 
 function buildUrl(path: string, query?: ApiFetchOptions["query"]) {
@@ -125,7 +129,7 @@ function buildUrl(path: string, query?: ApiFetchOptions["query"]) {
 }
 
 export async function apiFetch<T = unknown>(path: string, options: ApiFetchOptions = {}): Promise<T> {
-  const { method = "GET", body, auth = "none", query, _retried } = options;
+  const { method = "GET", body, auth = "none", query, _retried, _stepUpCode } = options;
 
   const isFormData = body instanceof FormData;
   const headers: Record<string, string> = {};
@@ -137,6 +141,7 @@ export async function apiFetch<T = unknown>(path: string, options: ApiFetchOptio
     const token = storeFor(auth).get();
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
+  if (_stepUpCode) headers["X-Step-Up-Code"] = _stepUpCode;
 
   const res = await fetch(buildUrl(path, query), {
     method,
@@ -158,6 +163,17 @@ export async function apiFetch<T = unknown>(path: string, options: ApiFetchOptio
 
   const contentType = res.headers.get("content-type") ?? "";
   const payload = contentType.includes("application/json") ? await res.json().catch(() => null) : null;
+
+  // Sensitive admin action — ask for a fresh 2FA/email code and retry. A rejected code comes back
+  // as another 428, which re-prompts with the error until the user gets it right or cancels.
+  if (res.status === 428 && auth === "staff" && isStepUpPayload(payload)) {
+    const code = await requestStepUpCode({
+      ...payload.stepUp,
+      error: payload.code === "STEP_UP_INVALID" ? payload.message : undefined,
+    });
+    if (code) return apiFetch<T>(path, { ...options, _stepUpCode: code });
+    throw new ApiError("Verification cancelled — the action was not performed.", 428, payload);
+  }
 
   if (!res.ok) {
     const message =

@@ -106,7 +106,7 @@ export default function PageEditorPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin/pages")}>
+          <Button variant="ghost" size="icon" title="Back to pages" aria-label="Back to pages" onClick={() => navigate("/admin/pages")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>

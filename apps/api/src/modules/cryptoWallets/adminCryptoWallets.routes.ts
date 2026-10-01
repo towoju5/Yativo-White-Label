@@ -11,6 +11,7 @@ import {
 import { requireStaffAuth, requirePermission } from "../../middleware/requireStaffAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { listCryptoWallets, createCryptoWallet, deleteCryptoWallet, listCryptoDeposits, listSupportedCryptoCurrencies } from "./cryptoWallets.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 export async function adminCryptoWalletsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -35,7 +36,7 @@ export async function adminCryptoWalletsRoutes(app: FastifyInstance) {
 
   server.post(
     "/admin/crypto/wallets",
-    { preHandler: [requireStaffAuth, requirePermission("crypto.manage")], schema: { body: createCryptoWalletSchema, response: { 200: cryptoWalletSchema } } },
+    { preHandler: [requireStaffAuth, requirePermission("crypto.manage"), requireStepUp("Create a crypto wallet")], schema: { body: createCryptoWalletSchema, response: { 200: cryptoWalletSchema } } },
     async (request, reply) => {
       const wallet = await createCryptoWallet(request.body.currency, request.body.customerId);
       return reply.send(wallet);
@@ -45,7 +46,7 @@ export async function adminCryptoWalletsRoutes(app: FastifyInstance) {
   server.delete(
     "/admin/crypto/wallets/:id",
     {
-      preHandler: [requireStaffAuth, requirePermission("crypto.manage")],
+      preHandler: [requireStaffAuth, requirePermission("crypto.manage"), requireStepUp("Delete a crypto wallet")],
       schema: { params: z.object({ id: z.string() }), response: { 204: z.void(), 404: errorResponseSchema } },
     },
     async (request, reply) => {

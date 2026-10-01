@@ -6,6 +6,7 @@ import { requireCustomerAuth } from "../../middleware/requireCustomerAuth.js";
 import { requireStaffAuth, requireRole } from "../../middleware/requireStaffAuth.js";
 import { resolveEffectiveCustomerId } from "../../lib/portalPrincipal.js";
 import { listCustomerLimits, listPlatformLimitDefaults, setPlatformLimitDefault, setCustomerLimit } from "./limits.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 export async function limitsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -28,7 +29,7 @@ export async function limitsRoutes(app: FastifyInstance) {
   server.put(
     "/admin/settings/limits/:currencyCode",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Change platform transaction limits")],
       schema: { params: z.object({ currencyCode: z.string() }), body: updatePlatformLimitDefaultSchema, response: { 200: platformLimitDefaultSchema } },
     },
     async (request, reply) => {
@@ -46,7 +47,7 @@ export async function limitsRoutes(app: FastifyInstance) {
   server.put(
     "/admin/customers/:customerId/limits",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Change a customer's transaction limits")],
       schema: { params: z.object({ customerId: z.string() }), body: updateCustomerLimitSchema, response: { 200: z.array(customerLimitSchema) } },
     },
     async (request, reply) => {

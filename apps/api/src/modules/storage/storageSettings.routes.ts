@@ -4,6 +4,7 @@ import { DEFAULT_STORAGE_SETTINGS, storageSettingsSchema, type StorageSettings }
 import { requirePermission, requireStaffAuth } from "../../middleware/requireStaffAuth.js";
 import { decryptCredential, encryptCredential } from "../../lib/credentialEncryption.js";
 import { applyStorageSettings, STORAGE_SETTINGS_KEY } from "../../lib/storage/storageRuntimeConfig.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 /** Masks every secret field with a `<field>Configured: boolean` instead of returning it — same
  * pattern as platformIntegrations.routes.ts's safe(). The UI never receives a real secret back. */
@@ -37,7 +38,7 @@ export async function storageSettingsRoutes(app: FastifyInstance) {
 
   server.put(
     "/admin/settings/storage",
-    { preHandler: [requireStaffAuth, requirePermission("storage.manage")], schema: { body: storageSettingsSchema } },
+    { preHandler: [requireStaffAuth, requirePermission("storage.manage"), requireStepUp("Change storage settings")], schema: { body: storageSettingsSchema } },
     async (request, reply) => {
       const prior = await db.secureSetting.findUnique({ where: { key: STORAGE_SETTINGS_KEY } });
       const old: StorageSettings = prior ? storageSettingsSchema.parse(JSON.parse(decryptCredential(prior.encryptedValue))) : DEFAULT_STORAGE_SETTINGS;

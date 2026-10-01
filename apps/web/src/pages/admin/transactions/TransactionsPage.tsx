@@ -188,13 +188,13 @@ export default function TransactionsPage() {
             </TableBody>
           </Table>
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            <Button variant="outline" size="icon" title="Previous page" aria-label="Previous page" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-xs text-muted-foreground">
               Page {page} / {totalPages}
             </span>
-            <Button variant="outline" size="icon" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <Button variant="outline" size="icon" title="Next page" aria-label="Next page" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

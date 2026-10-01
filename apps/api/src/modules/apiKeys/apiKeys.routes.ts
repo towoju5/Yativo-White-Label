@@ -5,6 +5,7 @@ import { apiKeySchema, createApiKeySchema, createApiKeyResultSchema } from "@whi
 import { requireStaffAuth, requirePermission } from "../../middleware/requireStaffAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
 import { listApiKeys, createApiKey, revokeApiKey } from "./apiKeys.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 export async function apiKeysRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -20,7 +21,7 @@ export async function apiKeysRoutes(app: FastifyInstance) {
 
   server.post(
     "/admin/api-keys",
-    { preHandler: [requireStaffAuth, requirePermission("api_keys.manage")], schema: { body: createApiKeySchema, response: { 200: createApiKeyResultSchema } } },
+    { preHandler: [requireStaffAuth, requirePermission("api_keys.manage"), requireStepUp("Create an API key")], schema: { body: createApiKeySchema, response: { 200: createApiKeyResultSchema } } },
     async (request, reply) => {
       const key = await createApiKey(app.prisma, request.staffUser!.sub, request.body.name);
       return reply.send(key);
@@ -30,7 +31,7 @@ export async function apiKeysRoutes(app: FastifyInstance) {
   server.delete(
     "/admin/api-keys/:id",
     {
-      preHandler: [requireStaffAuth, requirePermission("api_keys.manage")],
+      preHandler: [requireStaffAuth, requirePermission("api_keys.manage"), requireStepUp("Revoke an API key")],
       schema: { params: z.object({ id: z.string() }), response: { 204: z.void(), 404: errorResponseSchema } },
     },
     async (request, reply) => {

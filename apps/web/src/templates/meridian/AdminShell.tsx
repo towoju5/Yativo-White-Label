@@ -30,6 +30,7 @@ import {
   History,
   TrendingUp,
   Type,
+  ArrowRightLeft,
 } from "lucide-react";
 import { useStaffAuth } from "@/hooks/useStaffAuth";
 import { MeridianSidebar, type NavSection } from "./Sidebar";
@@ -47,6 +48,7 @@ const sections: NavSection[] = [
       { to: "/admin/endorsements", label: "Endorsements", icon: BadgeCheck },
       { to: "/admin/transactions", label: "Ledger", icon: ArrowLeftRight },
       { to: "/admin/payouts", label: "Payouts", icon: Send },
+      { to: "/admin/transfers", label: "Internal transfers", icon: ArrowRightLeft },
       { to: "/admin/profit", label: "Platform profit", icon: TrendingUp },
       { to: "/admin/cards", label: "Virtual Cards", icon: CreditCard },
       // Business Cards hidden for now — Yativo's updated flow differs; page/API code kept intact for re-enabling.

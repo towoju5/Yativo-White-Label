@@ -98,10 +98,10 @@ export default function RolesPage() {
                   </div>
                   {canManage && (
                     <div className="flex shrink-0 gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => setEditing(role)} aria-label="Edit role">
+                      <Button variant="ghost" size="icon" onClick={() => setEditing(role)} title="Edit role" aria-label="Edit role">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setDeleting(role)} aria-label="Delete role">
+                      <Button variant="ghost" size="icon" onClick={() => setDeleting(role)} title="Delete role" aria-label="Delete role">
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                     </div>

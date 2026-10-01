@@ -27,6 +27,7 @@ import {
   setCurrencyEnabled,
 } from "./platformSettings.service.js";
 import { logAdminAction } from "../../lib/adminAuditLog.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 export async function platformSettingsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -91,7 +92,7 @@ export async function platformSettingsRoutes(app: FastifyInstance) {
   server.patch(
     "/admin/settings/new-location-login-check",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Change the new-location login check")],
       schema: { body: updateNewLocationLoginCheckSchema, response: { 200: walletCurrencySettingsSchema.shape.settings } },
     },
     async (request, reply) => {
@@ -104,7 +105,7 @@ export async function platformSettingsRoutes(app: FastifyInstance) {
   server.patch(
     "/admin/settings/customer-login-method",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Change the customer login method")],
       schema: { body: updateCustomerLoginMethodSchema, response: { 200: walletCurrencySettingsSchema.shape.settings } },
     },
     async (request, reply) => {

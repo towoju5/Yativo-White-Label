@@ -52,6 +52,7 @@ import CustomerDetailPage from "@/pages/admin/customers/CustomerDetailPage";
 import EndorsementsPage from "@/pages/admin/customers/EndorsementsPage";
 import TransactionsPage from "@/pages/admin/transactions/TransactionsPage";
 import AdminPayoutsPage from "@/pages/admin/payouts/PayoutsPage";
+import AdminTransfersPage from "@/pages/admin/transfers/TransfersPage";
 import AdminCardsPage from "@/pages/admin/cards/CardsPage";
 // Business Cards hidden for now — Yativo's updated flow differs; page/API code kept intact for re-enabling.
 // import AdminBusinessSpendCardsPage from "@/pages/admin/businessSpendCards/CardsPage";
@@ -186,6 +187,7 @@ export function createRouter(adminLoginPath: string, demoLandingActive = false) 
               { path: "endorsements", element: <EndorsementsPage /> },
               { path: "transactions", element: <TransactionsPage /> },
               { path: "payouts", element: <AdminPayoutsPage /> },
+              { path: "transfers", element: <AdminTransfersPage /> },
               { path: "cards", element: <AdminCardsPage /> },
               // { path: "business-spend-cards", element: <AdminBusinessSpendCardsPage /> },
               { path: "team", element: <TeamPage /> },

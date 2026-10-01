@@ -77,7 +77,7 @@ export default function AuditLogPage() {
                   <TableCell className="font-mono text-xs">{entry.action}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{entry.target}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => setSelected(entry)} disabled={!entry.metadata}>
+                    <Button variant="ghost" size="icon" title={entry.metadata ? "View details" : "No details recorded"} aria-label="View details" onClick={() => setSelected(entry)} disabled={!entry.metadata}>
                       <Eye className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -86,13 +86,13 @@ export default function AuditLogPage() {
             </TableBody>
           </Table>
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            <Button variant="outline" size="icon" title="Previous page" aria-label="Previous page" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-xs text-muted-foreground">
               Page {page} / {totalPages}
             </span>
-            <Button variant="outline" size="icon" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <Button variant="outline" size="icon" title="Next page" aria-label="Next page" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

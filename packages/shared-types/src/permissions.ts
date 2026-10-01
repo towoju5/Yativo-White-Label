@@ -13,6 +13,7 @@ import { z } from "zod";
 export const STAFF_PERMISSIONS = [
   "customers.write",
   "customers.import",
+  "customers.delete",
   "kyc.review",
   "endorsements.manage",
   "cards.manage",
@@ -31,6 +32,7 @@ export type StaffPermission = z.infer<typeof staffPermissionSchema>;
 export const PERMISSION_CATALOG: { key: StaffPermission; label: string; group: string; description: string }[] = [
   { key: "customers.write", label: "Freeze / unfreeze customers", group: "Customers", description: "Freeze or unfreeze a customer's account." },
   { key: "customers.import", label: "Import customers from Yativo", group: "Customers", description: "Trigger a sync that backfills local accounts for pre-existing Yativo customers." },
+  { key: "customers.delete", label: "Delete / restore customers", group: "Customers", description: "Soft-delete a customer (blocks sign-in and hides them from lists) or restore a deleted one." },
   { key: "kyc.review", label: "Review KYC", group: "Customers", description: "Approve or reject a customer's KYC submission." },
   { key: "endorsements.manage", label: "Manage endorsements", group: "Customers", description: "Regenerate a customer's hosted verification links." },
   { key: "cards.manage", label: "Manage virtual cards", group: "Payments", description: "Issue, freeze, unfreeze, or terminate virtual cards." },
@@ -43,5 +45,5 @@ export const PERMISSION_CATALOG: { key: StaffPermission; label: string; group: s
   { key: "storage.manage", label: "Manage asset storage", group: "Platform", description: "Choose and configure the storage backend used for uploaded assets (local disk, S3, Bunny, etc.)." },
 ];
 
-/** What an unassigned STAFF-tier account can do today — every permission except team.manage and storage.manage, which are new and were never something plain staff could do. */
-export const DEFAULT_STAFF_PERMISSIONS: StaffPermission[] = STAFF_PERMISSIONS.filter((p) => p !== "team.manage" && p !== "storage.manage");
+/** What an unassigned STAFF-tier account can do today — every permission except team.manage, storage.manage and customers.delete, which are new and were never something plain staff could do. */
+export const DEFAULT_STAFF_PERMISSIONS: StaffPermission[] = STAFF_PERMISSIONS.filter((p) => p !== "team.manage" && p !== "storage.manage" && p !== "customers.delete");

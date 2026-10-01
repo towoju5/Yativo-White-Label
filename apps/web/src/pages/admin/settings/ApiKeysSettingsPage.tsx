@@ -84,7 +84,7 @@ export default function ApiKeysSettingsPage() {
                 </p>
                 <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 p-3 font-mono text-xs">
                   <span className="truncate">{created.plaintextKey}</span>
-                  <button onClick={() => copy(created.plaintextKey)} className="shrink-0 text-muted-foreground hover:text-foreground">
+                  <button onClick={() => copy(created.plaintextKey)} title="Copy API key" aria-label="Copy API key" className="shrink-0 text-muted-foreground hover:text-foreground">
                     <Copy className="h-4 w-4" />
                   </button>
                 </div>
@@ -144,7 +144,7 @@ export default function ApiKeysSettingsPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   {!k.revokedAt && canManage && (
-                    <Button variant="ghost" size="icon" onClick={() => revokeMutation.mutate(k.id)} disabled={revokeMutation.isPending}>
+                    <Button variant="ghost" size="icon" title="Revoke API key" aria-label="Revoke API key" onClick={() => revokeMutation.mutate(k.id)} disabled={revokeMutation.isPending}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   )}

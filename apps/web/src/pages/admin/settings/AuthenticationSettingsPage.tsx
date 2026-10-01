@@ -294,7 +294,7 @@ function TwoFactorSection() {
                 <Label>Can't scan? Enter this key manually</Label>
                 <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/50 p-3 font-mono text-xs">
                   <span className="truncate">{setupResult.secret}</span>
-                  <button onClick={() => copy(setupResult.secret)} className="shrink-0 text-muted-foreground hover:text-foreground">
+                  <button onClick={() => copy(setupResult.secret)} title="Copy secret" aria-label="Copy secret" className="shrink-0 text-muted-foreground hover:text-foreground">
                     <Copy className="h-4 w-4" />
                   </button>
                 </div>

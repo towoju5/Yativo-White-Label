@@ -29,6 +29,7 @@ import { beneficiariesRoutes } from "./modules/beneficiaries/beneficiaries.route
 import { quotesRoutes } from "./modules/quotes/quotes.routes.js";
 import { portalPayoutsRoutes } from "./modules/payouts/payouts.routes.js";
 import { portalTransfersRoutes } from "./modules/transfers/transfers.routes.js";
+import { adminTransfersRoutes } from "./modules/transfers/adminTransfers.routes.js";
 import { adminPayoutsRoutes } from "./modules/payouts/adminPayouts.routes.js";
 import { depositsRoutes } from "./modules/deposits/deposits.routes.js";
 import { virtualAccountsRoutes } from "./modules/virtualAccounts/virtualAccounts.routes.js";
@@ -50,6 +51,7 @@ import { paymentGatewaysRoutes } from "./modules/paymentGateways/paymentGateways
 import { pricingRoutes } from "./modules/pricing/pricing.routes.js";
 import { twoFactorRoutes } from "./modules/twoFactor/twoFactor.routes.js";
 import { staffTwoFactorRoutes } from "./modules/twoFactor/staffTwoFactor.routes.js";
+import { staffStepUpRoutes } from "./modules/twoFactor/staffStepUp.routes.js";
 import { pagesRoutes } from "./modules/pages/pages.routes.js";
 import { webhookRoutes } from "./webhooks/yativo.routes.js";
 import { adminWebhooksRoutes } from "./webhooks/adminWebhooks.routes.js";
@@ -118,7 +120,7 @@ export async function buildApp() {
 
   app.setErrorHandler((error: FastifyError | AppError | YativoApiError, _request, reply) => {
     if (error instanceof AppError) {
-      return reply.code(error.statusCode).send({ message: error.message, code: error.code });
+      return reply.code(error.statusCode).send({ ...error.extra, message: error.message, code: error.code });
     }
     if (error instanceof YativoApiError) {
       // Always log the full upstream body server-side — that's the actual reason, and it never
@@ -188,6 +190,7 @@ export async function buildApp() {
   await app.register(quotesRoutes);
   await app.register(portalPayoutsRoutes);
   await app.register(portalTransfersRoutes);
+  await app.register(adminTransfersRoutes);
   await app.register(adminPayoutsRoutes);
   await app.register(depositsRoutes);
   await app.register(virtualAccountsRoutes);
@@ -209,6 +212,7 @@ export async function buildApp() {
   await app.register(pricingRoutes);
   await app.register(twoFactorRoutes);
   await app.register(staffTwoFactorRoutes);
+  await app.register(staffStepUpRoutes);
   await app.register(pagesRoutes);
   await app.register(webhookRoutes);
   await app.register(adminWebhooksRoutes);

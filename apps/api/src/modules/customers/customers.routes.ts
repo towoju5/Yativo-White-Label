@@ -15,6 +15,7 @@ import {
   customerImportRunSchema,
   KYC_STATUSES,
   CUSTOMER_STATUSES,
+  deleteCustomerSchema,
 } from "@white-label/shared-types";
 import { requireStaffAuth, requireRole, requirePermission } from "../../middleware/requireStaffAuth.js";
 import { errorResponseSchema } from "../../lib/httpSchemas.js";
@@ -28,12 +29,15 @@ import {
   rejectKyc,
   freezeCustomer,
   unfreezeCustomer,
+  deleteCustomer,
+  restoreCustomer,
   resubmitCustomerToYativo,
   customerToDto,
 } from "./customers.service.js";
 import { triggerCustomerImport, listCustomerImportRuns, customerImportRunToDto } from "./customerImport.service.js";
 import { getWalletForCustomer, getWalletStatement, adjustWallet } from "../wallets/wallets.service.js";
 import { listBeneficiaries, getBeneficiary } from "../beneficiaries/beneficiaries.service.js";
+import { requireStepUp } from "../../middleware/requireStepUp.js";
 
 function ledgerTxToDto(tx: {
   id: string;
@@ -62,6 +66,8 @@ const listQuerySchema = paginationQuerySchema.extend({
   search: z.string().optional(),
   kycStatus: z.enum(KYC_STATUSES).optional(),
   status: z.enum(CUSTOMER_STATUSES).optional(),
+  /** true lists ONLY soft-deleted customers; omitted/false lists only live ones. */
+  deleted: z.enum(["true", "false"]).optional().transform((v) => v === "true"),
 });
 
 export async function customersRoutes(app: FastifyInstance) {
@@ -74,8 +80,8 @@ export async function customersRoutes(app: FastifyInstance) {
       schema: { querystring: listQuerySchema, response: { 200: paginatedResponseSchema(customerSchema) } },
     },
     async (request, reply) => {
-      const { page, pageSize, search, kycStatus, status } = request.query;
-      const result = await listCustomers(app.prisma, { search, kycStatus, status }, page, pageSize);
+      const { page, pageSize, search, kycStatus, status, deleted } = request.query;
+      const result = await listCustomers(app.prisma, { search, kycStatus, status, deleted }, page, pageSize);
       return reply.send(result);
     },
   );
@@ -162,7 +168,7 @@ export async function customersRoutes(app: FastifyInstance) {
   server.post(
     "/admin/customers/:id/kyc/approve",
     {
-      preHandler: [requireStaffAuth, requirePermission("kyc.review")],
+      preHandler: [requireStaffAuth, requirePermission("kyc.review"), requireStepUp("Approve customer verification")],
       schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -174,7 +180,7 @@ export async function customersRoutes(app: FastifyInstance) {
   server.post(
     "/admin/customers/:id/kyc/reject",
     {
-      preHandler: [requireStaffAuth, requirePermission("kyc.review")],
+      preHandler: [requireStaffAuth, requirePermission("kyc.review"), requireStepUp("Reject customer verification")],
       schema: {
         params: z.object({ id: z.string() }),
         body: rejectKycSchema,
@@ -190,7 +196,7 @@ export async function customersRoutes(app: FastifyInstance) {
   server.post(
     "/admin/customers/:id/freeze",
     {
-      preHandler: [requireStaffAuth, requirePermission("customers.write")],
+      preHandler: [requireStaffAuth, requirePermission("customers.write"), requireStepUp("Freeze a customer")],
       schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
@@ -202,11 +208,35 @@ export async function customersRoutes(app: FastifyInstance) {
   server.post(
     "/admin/customers/:id/unfreeze",
     {
-      preHandler: [requireStaffAuth, requirePermission("customers.write")],
+      preHandler: [requireStaffAuth, requirePermission("customers.write"), requireStepUp("Unfreeze a customer")],
       schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema } },
     },
     async (request, reply) => {
       const customer = await unfreezeCustomer(app.prisma, request.staffUser!.sub, request.params.id);
+      return reply.send(customerToDto(customer));
+    },
+  );
+
+  server.post(
+    "/admin/customers/:id/delete",
+    {
+      preHandler: [requireStaffAuth, requirePermission("customers.delete"), requireStepUp("Delete a customer")],
+      schema: { params: z.object({ id: z.string() }), body: deleteCustomerSchema, response: { 200: customerSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      const customer = await deleteCustomer(app.prisma, request.staffUser!.sub, request.params.id, request.body.reason);
+      return reply.send(customerToDto(customer));
+    },
+  );
+
+  server.post(
+    "/admin/customers/:id/restore",
+    {
+      preHandler: [requireStaffAuth, requirePermission("customers.delete"), requireStepUp("Restore a deleted customer")],
+      schema: { params: z.object({ id: z.string() }), response: { 200: customerSchema, 404: errorResponseSchema, 409: errorResponseSchema } },
+    },
+    async (request, reply) => {
+      const customer = await restoreCustomer(app.prisma, request.staffUser!.sub, request.params.id);
       return reply.send(customerToDto(customer));
     },
   );
@@ -243,7 +273,7 @@ export async function customersRoutes(app: FastifyInstance) {
   server.post(
     "/admin/customers/:id/wallets/:walletId/adjust",
     {
-      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN")],
+      preHandler: [requireStaffAuth, requireRole("OWNER", "ADMIN"), requireStepUp("Adjust a customer wallet balance")],
       schema: {
         params: z.object({ id: z.string(), walletId: z.string() }),
         body: adjustWalletSchema,
